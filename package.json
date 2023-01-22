@@ -1,32 +1,38 @@
 {
   "name": "@docker/actions-toolkit",
   "description": "Toolkit for Docker (GitHub) Actions",
-  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "lint": "eslint src/**/*.ts __tests__/**/*.ts",
     "format": "eslint --fix src/**/*.ts __tests__/**/*.ts",
-    "test": "jest --coverage",
-    "copy": "cpy package.json README.md src"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/docker/actions-toolkit.git"
   },
   "keywords": [
+    "github",
     "actions",
     "docker",
     "build",
-    "push"
+    "buildx",
+    "buildkit"
   ],
   "author": "Docker Inc.",
-  "contributors": [
-    {
-      "name": "CrazyMax",
-      "url": "https://crazymax.dev"
-    }
-  ],
   "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",

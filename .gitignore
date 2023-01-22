@@ -89,7 +89,3 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-
-# Temp files for publication
-/src/package.json
-/src/README.md
