@@ -31,22 +31,10 @@ EOT
 FROM deps AS build
 RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
-  yarn run build && mkdir /out && cp -Rf dist /out/
+  yarn run build && mkdir /out && cp -Rf lib /out/
 
 FROM scratch AS build-update
 COPY --from=build /out /
-
-FROM build AS build-validate
-RUN --mount=type=bind,target=.,rw <<EOT
-set -e
-git add -A
-cp -rf /out/* .
-if [ -n "$(git status --porcelain -- dist)" ]; then
-  echo >&2 'ERROR: Build result differs. Please build first with "docker buildx bake build"'
-  git status --porcelain -- dist
-  exit 1
-fi
-EOT
 
 FROM deps AS format
 RUN --mount=type=bind,target=.,rw \

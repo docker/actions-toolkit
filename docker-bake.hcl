@@ -3,23 +3,17 @@ group "default" {
 }
 
 group "pre-checkin" {
-  targets = ["vendor-update", "format", "build"]
+  targets = ["vendor", "format", "build"]
 }
 
 group "validate" {
-  targets = ["lint", "build-validate", "vendor-validate"]
+  targets = ["lint", "vendor-validate"]
 }
 
 target "build" {
   dockerfile = "dev.Dockerfile"
   target = "build-update"
   output = ["."]
-}
-
-target "build-validate" {
-  dockerfile = "dev.Dockerfile"
-  target = "build-validate"
-  output = ["type=cacheonly"]
 }
 
 target "format" {
@@ -34,7 +28,7 @@ target "lint" {
   output = ["type=cacheonly"]
 }
 
-target "vendor-update" {
+target "vendor" {
   dockerfile = "dev.Dockerfile"
   target = "vendor-update"
   output = ["."]

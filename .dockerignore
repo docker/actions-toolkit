@@ -1,2 +1,5 @@
 /coverage
+/lib
 /node_modules
+/src/package.json
+/src/README.md

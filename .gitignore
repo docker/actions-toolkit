@@ -1,3 +1,4 @@
+lib
 node_modules
 
 # Rest of the file pulled from https://github.com/github/gitignore/blob/master/Node.gitignore
@@ -88,3 +89,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Temp files for publication
+/src/package.json
+/src/README.md
