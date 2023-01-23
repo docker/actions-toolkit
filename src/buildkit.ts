@@ -22,6 +22,14 @@ export class BuildKit {
     this.buildx = opts?.buildx || new Buildx();
   }
 
+  public tmpDir() {
+    return this.tmpdir;
+  }
+
+  public tmpName(options?: tmp.TmpNameOptions): string {
+    return tmp.tmpNameSync(options);
+  }
+
   private async getBuilderInfo(name: string): Promise<BuilderInfo> {
     const builder = new Builder({buildx: this.buildx});
     return builder.inspect(name);
@@ -113,13 +121,5 @@ export class BuildKit {
     const configFile = this.tmpName({tmpdir: this.tmpDir()});
     fs.writeFileSync(configFile, s);
     return configFile;
-  }
-
-  private tmpDir() {
-    return this.tmpdir;
-  }
-
-  private tmpName(options?: tmp.TmpNameOptions): string {
-    return tmp.tmpNameSync(options);
   }
 }

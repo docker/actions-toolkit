@@ -22,6 +22,14 @@ export class Buildx {
     this.version = this.getVersion();
   }
 
+  public tmpDir() {
+    return this.tmpdir;
+  }
+
+  public tmpName(options?: tmp.TmpNameOptions): string {
+    return tmp.tmpNameSync(options);
+  }
+
   public getCommand(args: Array<string>) {
     return {
       command: this.standalone ? 'buildx' : 'docker',
@@ -178,13 +186,5 @@ export class Buildx {
       }
     }
     return false;
-  }
-
-  private tmpDir() {
-    return this.tmpdir;
-  }
-
-  private tmpName(options?: tmp.TmpNameOptions): string {
-    return tmp.tmpNameSync(options);
   }
 }
