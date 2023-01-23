@@ -42,6 +42,12 @@ target "vendor-validate" {
 
 target "test" {
   dockerfile = "dev.Dockerfile"
+  target = "test"
+  output = ["type=cacheonly"]
+}
+
+target "test-coverage" {
+  dockerfile = "dev.Dockerfile"
   target = "test-coverage"
   output = ["./coverage"]
 }

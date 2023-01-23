@@ -5,7 +5,8 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts __tests__/**/*.ts",
     "format": "eslint --fix src/**/*.ts __tests__/**/*.ts",
-    "test": "jest --coverage"
+    "test": "jest",
+    "test-coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
