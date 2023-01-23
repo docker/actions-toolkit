@@ -19,7 +19,7 @@ describe('isAvailable', () => {
 describe('info', () => {
   it('standard', () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.info();
+    Docker.info(false);
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
       failOnStdErr: false
     });

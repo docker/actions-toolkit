@@ -18,20 +18,8 @@ export class Buildx {
   private tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
 
   constructor(opts?: BuildxOpts) {
-    this.standalone = opts?.standalone ?? this.isStandalone();
+    this.standalone = opts?.standalone ?? !Docker.isAvailable();
     this.version = this.getVersion();
-  }
-
-  private isStandalone(): boolean {
-    let dockerAvailable = false;
-    Docker.isAvailable()
-      .then((res: boolean) => {
-        dockerAvailable = res;
-      })
-      .catch(e => {
-        dockerAvailable = false;
-      });
-    return dockerAvailable;
   }
 
   public getCommand(args: Array<string>) {

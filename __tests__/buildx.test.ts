@@ -78,7 +78,9 @@ describe('hasLocalOrTarExporter', () => {
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
-    const buildx = new Buildx();
+    const buildx = new Buildx({
+      standalone: false
+    });
     await buildx.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx'], {
