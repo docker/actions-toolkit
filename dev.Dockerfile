@@ -59,7 +59,7 @@ RUN --mount=type=bind,target=.,rw \
   --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
   --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
   --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
-  yarn run test --coverageDirectory=/tmp/coverage
+  yarn run test-coverage --coverageDirectory=/tmp/coverage
 
 FROM scratch AS test-coverage
 COPY --from=test /tmp/coverage /
