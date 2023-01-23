@@ -157,6 +157,10 @@ export class Buildx {
     return Buildx.hasExporterType('tar', exporters);
   }
 
+  public static hasDockerExporter(exporters: string[], load?: boolean): boolean {
+    return load ?? Buildx.hasExporterType('docker', exporters);
+  }
+
   public static hasExporterType(name: string, exporters: string[]): boolean {
     const records = parse(exporters.join(`\n`), {
       delimiter: ',',

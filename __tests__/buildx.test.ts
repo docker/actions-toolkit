@@ -60,18 +60,51 @@ describe('getDigest', () => {
   });
 });
 
-describe('hasLocalOrTarExporter', () => {
+describe('hasLocalExporter', () => {
+  // prettier-ignore
   test.each([
     [['type=registry,ref=user/app'], false],
     [['type=docker'], false],
     [['type=local,dest=./release-out'], true],
-    [['type=tar,dest=/tmp/image.tar'], true],
-    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true],
-    [['"type=tar","dest=/tmp/image.tar"'], true],
+    [['type=tar,dest=/tmp/image.tar'], false],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], false],
+    [['"type=tar","dest=/tmp/image.tar"'], false],
     [['" type= local" , dest=./release-out'], true],
     [['.'], true]
   ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
-    expect(Buildx.hasLocalExporter(exporters) || Buildx.hasTarExporter(exporters)).toEqual(expected);
+    expect(Buildx.hasLocalExporter(exporters)).toEqual(expected);
+  });
+});
+
+describe('hasTarExporter', () => {
+  // prettier-ignore
+  test.each([
+    [['type=registry,ref=user/app'], false],
+    [['type=docker'], false],
+    [['type=local,dest=./release-out'], false],
+    [['type=tar,dest=/tmp/image.tar'], true],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true],
+    [['"type=tar","dest=/tmp/image.tar"'], true],
+    [['" type= local" , dest=./release-out'], false],
+    [['.'], false]
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+    expect(Buildx.hasTarExporter(exporters)).toEqual(expected);
+  });
+});
+
+describe('hasDockerExporter', () => {
+  // prettier-ignore
+  test.each([
+    [['type=registry,ref=user/app'], false, undefined],
+    [['type=docker'], true, undefined],
+    [['type=local,dest=./release-out'], false, undefined],
+    [['type=tar,dest=/tmp/image.tar'], false, undefined],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true, undefined],
+    [['"type=tar","dest=/tmp/image.tar"'], false, undefined],
+    [['" type= local" , dest=./release-out'], false, undefined],
+    [['.'], true, true],
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
+    expect(Buildx.hasDockerExporter(exporters, load)).toEqual(expected);
   });
 });
 
