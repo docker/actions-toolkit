@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 export class Docker {
@@ -17,5 +18,18 @@ export class Docker {
       .catch(error => {
         return false;
       });
+  }
+
+  public static async info(standalone?: boolean) {
+    if (standalone) {
+      core.info(`Docker info skipped in standalone mode`);
+    } else {
+      await exec.exec('docker', ['version'], {
+        failOnStdErr: false
+      });
+      await exec.exec('docker', ['info'], {
+        failOnStdErr: false
+      });
+    }
   }
 }

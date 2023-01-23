@@ -15,3 +15,20 @@ describe('isAvailable', () => {
     });
   });
 });
+
+describe('info', () => {
+  it('standard', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    Docker.info();
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
+      failOnStdErr: false
+    });
+  });
+  it('standalone', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    Docker.info(true);
+    expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['version'], {
+      failOnStdErr: false
+    });
+  });
+});
