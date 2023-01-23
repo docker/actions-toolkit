@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 export class Docker {
@@ -23,17 +22,23 @@ export class Docker {
     return dockerAvailable;
   }
 
-  public static async info(standalone?: boolean) {
-    const dockerAvailable = standalone ?? !Docker.isAvailable();
-    if (dockerAvailable) {
-      core.info(`Docker info skipped in standalone mode`);
-    } else {
-      await exec.exec('docker', ['version'], {
-        failOnStdErr: false
-      });
-      await exec.exec('docker', ['info'], {
-        failOnStdErr: false
-      });
+  public static async printVersion(standalone?: boolean) {
+    const noDocker = standalone ?? !Docker.isAvailable();
+    if (noDocker) {
+      return;
     }
+    await exec.exec('docker', ['version'], {
+      failOnStdErr: false
+    });
+  }
+
+  public static async printInfo(standalone?: boolean) {
+    const noDocker = standalone ?? !Docker.isAvailable();
+    if (noDocker) {
+      return;
+    }
+    await exec.exec('docker', ['info'], {
+      failOnStdErr: false
+    });
   }
 }

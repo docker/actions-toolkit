@@ -16,18 +16,35 @@ describe('isAvailable', () => {
   });
 });
 
-describe('info', () => {
+describe('printVersion', () => {
   it('standard', () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.info(false);
+    Docker.printVersion(false);
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
       failOnStdErr: false
     });
   });
   it('standalone', () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.info(true);
+    Docker.printVersion(true);
     expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['version'], {
+      failOnStdErr: false
+    });
+  });
+});
+
+describe('printInfo', () => {
+  it('standard', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    Docker.printInfo(false);
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['info'], {
+      failOnStdErr: false
+    });
+  });
+  it('standalone', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    Docker.printInfo(true);
+    expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['info'], {
       failOnStdErr: false
     });
   });
