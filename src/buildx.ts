@@ -6,6 +6,8 @@ import {parse} from 'csv-parse/sync';
 import * as semver from 'semver';
 import * as tmp from 'tmp';
 
+import {Docker} from './docker';
+
 export interface BuildxOpts {
   standalone?: boolean;
 }
@@ -16,8 +18,20 @@ export class Buildx {
   private tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
 
   constructor(opts?: BuildxOpts) {
-    this.standalone = opts?.standalone ?? false;
+    this.standalone = opts?.standalone ?? this.isStandalone();
     this.version = this.getVersion();
+  }
+
+  private isStandalone(): boolean {
+    let dockerAvailable = false;
+    Docker.isAvailable()
+      .then((res: boolean) => {
+        dockerAvailable = res;
+      })
+      .catch(e => {
+        dockerAvailable = false;
+      });
+    return dockerAvailable;
   }
 
   public getCommand(args: Array<string>) {
