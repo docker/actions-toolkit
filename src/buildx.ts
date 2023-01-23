@@ -71,6 +71,13 @@ export class Buildx {
       });
   }
 
+  public async printVersion() {
+    const cmd = this.getCommand(['version']);
+    await exec.exec(cmd.command, cmd.args, {
+      failOnStdErr: false
+    });
+  }
+
   public static parseVersion(stdout: string): string {
     const matches = /\sv?([0-9a-f]{7}|[0-9.]+)/.exec(stdout);
     if (!matches) {

@@ -17,7 +17,7 @@ describe('isAvailable', () => {
 });
 
 describe('printVersion', () => {
-  it('standard', () => {
+  it('docker cli', () => {
     const execSpy = jest.spyOn(exec, 'exec');
     Docker.printVersion(false);
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
@@ -34,7 +34,7 @@ describe('printVersion', () => {
 });
 
 describe('printInfo', () => {
-  it('standard', () => {
+  it('docker cli', () => {
     const execSpy = jest.spyOn(exec, 'exec');
     Docker.printInfo(false);
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['info'], {

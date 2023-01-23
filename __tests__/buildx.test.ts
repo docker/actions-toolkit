@@ -135,6 +135,29 @@ describe('isAvailable', () => {
   });
 });
 
+describe('printVersion', () => {
+  it('docker cli', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    const buildx = new Buildx({
+      standalone: false
+    });
+    buildx.printVersion();
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx', 'version'], {
+      failOnStdErr: false
+    });
+  });
+  it('standalone', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    const buildx = new Buildx({
+      standalone: true
+    });
+    buildx.printVersion();
+    expect(execSpy).toHaveBeenCalledWith(`buildx`, ['version'], {
+      failOnStdErr: false
+    });
+  });
+});
+
 describe('getVersion', () => {
   it('valid', async () => {
     const buildx = new Buildx();
