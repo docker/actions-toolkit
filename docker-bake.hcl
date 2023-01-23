@@ -44,10 +44,12 @@ target "test" {
   dockerfile = "dev.Dockerfile"
   target = "test"
   output = ["type=cacheonly"]
+  secret = ["id=GITHUB_TOKEN,env=GITHUB_TOKEN"]
 }
 
 target "test-coverage" {
   dockerfile = "dev.Dockerfile"
   target = "test-coverage"
   output = ["./coverage"]
+  secret = ["id=GITHUB_TOKEN,env=GITHUB_TOKEN"]
 }

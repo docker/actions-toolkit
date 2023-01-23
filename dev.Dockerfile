@@ -55,11 +55,12 @@ FROM docker/buildx-bin:${BUILDX_VERSION} as buildx
 
 FROM deps AS test
 RUN --mount=type=bind,target=.,rw \
-  --mount=type=cache,target=/src/node_modules \
-  --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
-  --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
-  --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
-  yarn run test-coverage --coverageDirectory=/tmp/coverage
+    --mount=type=cache,target=/src/node_modules \
+    --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
+    --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
+    --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
+    --mount=type=secret,id=GITHUB_TOKEN \
+  GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN) yarn run test-coverage --coverageDirectory=/tmp/coverage
 
 FROM scratch AS test-coverage
 COPY --from=test /tmp/coverage /
