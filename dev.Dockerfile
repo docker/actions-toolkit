@@ -18,14 +18,14 @@ COPY --from=deps /vendor /
 
 FROM deps AS vendor-validate
 RUN --mount=type=bind,target=.,rw <<EOT
-set -e
-git add -A
-cp -rf /vendor/* .
-if [ -n "$(git status --porcelain -- yarn.lock)" ]; then
-  echo >&2 'ERROR: Vendor result differs. Please vendor your package with "docker buildx bake vendor-update"'
-  git status --porcelain -- yarn.lock
-  exit 1
-fi
+  set -e
+  git add -A
+  cp -rf /vendor/* .
+  if [ -n "$(git status --porcelain -- yarn.lock)" ]; then
+    echo >&2 'ERROR: Vendor result differs. Please vendor your package with "docker buildx bake vendor-update"'
+    git status --porcelain -- yarn.lock
+    exit 1
+  fi
 EOT
 
 FROM deps AS build
@@ -58,6 +58,7 @@ RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
   --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
   --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
+  --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
   yarn run test --coverageDirectory=/tmp/coverage
 
 FROM scratch AS test-coverage
