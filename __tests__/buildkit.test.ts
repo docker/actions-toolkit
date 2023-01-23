@@ -1,32 +1,40 @@
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {afterEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as buildkit from '../src/buildkit';
-import * as buildx from '../src/buildx';
-import * as util from '../src/util';
+import rimraf from 'rimraf';
 
-const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
-jest.spyOn(util, 'tmpDir').mockImplementation((): string => {
-  return tmpdir;
+import {BuildKit} from '../src/buildkit';
+import {Builder, BuilderInfo} from '../src/builder';
+
+const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
+
+jest.spyOn(BuildKit.prototype as any, 'tmpDir').mockImplementation((): string => {
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, {recursive: true});
+  }
+  return tmpDir;
 });
 
-const tmpname = path.join(tmpdir, '.tmpname').split(path.sep).join(path.posix.sep);
-jest.spyOn(util, 'tmpNameSync').mockImplementation((): string => {
-  return tmpname;
+jest.spyOn(BuildKit.prototype as any, 'tmpName').mockImplementation((): string => {
+  return tmpName;
 });
 
-jest.spyOn(buildx, 'inspect').mockImplementation(async (): Promise<buildx.Builder> => {
+afterEach(() => {
+  rimraf.sync(tmpDir);
+});
+
+jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {
     name: 'builder2',
     driver: 'docker-container',
-    'last-activity': new Date('2023-01-16 09:45:23 +0000 UTC'),
+    lastActivity: new Date('2023-01-16 09:45:23 +0000 UTC'),
     nodes: [
       {
-        buildkit: 'v0.11.0',
-        'buildkitd-flags': '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
-        'driver-opts': ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
+        buildkitVersion: 'v0.11.0',
+        buildkitdFlags: '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        driverOpts: ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
         endpoint: 'unix:///var/run/docker.sock',
         name: 'builder20',
         platforms: 'linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6',
@@ -38,6 +46,7 @@ jest.spyOn(buildx, 'inspect').mockImplementation(async (): Promise<buildx.Builde
 
 describe('getVersion', () => {
   it('valid', async () => {
+    const buildkit = new BuildKit();
     const version = await buildkit.getVersion('builder2');
     expect(semver.valid(version)).not.toBeNull();
   });
@@ -48,14 +57,15 @@ describe('satisfies', () => {
     ['builder2', '>=0.10.0', true],
     ['builder2', '>0.11.0', false]
   ])('given %p', async (builderName, range, expected) => {
-    expect(await buildkit.satisfies(builderName, range)).toBe(expected);
+    const buildkit = new BuildKit();
+    expect(await buildkit.versionSatisfies(builderName, range)).toBe(expected);
   });
 });
 
-describe('getConfig', () => {
+describe('generateConfig', () => {
   test.each([
-    ['debug = true', false, 'debug = true', false],
-    [`notfound.toml`, true, '', true],
+    ['debug = true', false, 'debug = true', null],
+    [`notfound.toml`, true, '', new Error('config file notfound.toml not found')],
     [
       `${path.join(__dirname, 'fixtures', 'buildkitd.toml').split(path.sep).join(path.posix.sep)}`,
       true,
@@ -63,23 +73,23 @@ describe('getConfig', () => {
 [registry."docker.io"]
   mirrors = ["mirror.gcr.io"]
 `,
-      false
+      null
     ]
-  ])('given %p config', async (val, file, exValue, invalid) => {
+  ])('given %p config', async (val, file, exValue, error: Error) => {
     try {
+      const buildkit = new BuildKit();
       let config: string;
       if (file) {
-        config = await buildkit.getConfigFile(val);
+        config = buildkit.generateConfigFile(val);
       } else {
-        config = await buildkit.getConfigInline(val);
+        config = buildkit.generateConfigInline(val);
       }
-      expect(true).toBe(!invalid);
-      expect(config).toEqual(tmpname);
-      const configValue = fs.readFileSync(tmpname, 'utf-8');
+      expect(config).toEqual(tmpName);
+      const configValue = fs.readFileSync(tmpName, 'utf-8');
       expect(configValue).toEqual(exValue);
-    } catch (err) {
+    } catch (e) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(true).toBe(invalid);
+      expect(e.message).toEqual(error?.message);
     }
   });
 });

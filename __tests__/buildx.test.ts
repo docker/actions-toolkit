@@ -1,53 +1,61 @@
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {afterEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as exec from '@actions/exec';
-import * as buildx from '../src/buildx';
-import * as util from '../src/util';
+import rimraf from 'rimraf';
 
-const tmpNameSync = path.join('/tmp/.docker-actions-toolkit-jest', '.tmpname-jest').split(path.sep).join(path.posix.sep);
-const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
+import {Buildx} from '../src/buildx';
+
+const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 const metadata = `{
   "containerimage.config.digest": "sha256:059b68a595b22564a1cbc167af369349fdc2ecc1f7bc092c2235cbf601a795fd",
   "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
 }`;
 
-jest.spyOn(util, 'tmpDir').mockImplementation((): string => {
-  const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+jest.spyOn(Buildx.prototype as any, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
 
-jest.spyOn(util, 'tmpNameSync').mockImplementation((): string => {
-  return tmpNameSync;
+afterEach(() => {
+  rimraf.sync(tmpDir);
 });
 
-describe('getImageID', () => {
+jest.spyOn(Buildx.prototype as any, 'tmpName').mockImplementation((): string => {
+  return tmpName;
+});
+
+describe('getBuildImageID', () => {
   it('matches', async () => {
-    const imageIDFile = await buildx.getImageIDFile();
+    const buildx = new Buildx();
+    const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
+    const imageIDFile = buildx.getBuildImageIDFilePath();
     await fs.writeFileSync(imageIDFile, imageID);
-    const expected = await buildx.getImageID();
+    const expected = buildx.getBuildImageID();
     expect(expected).toEqual(imageID);
   });
 });
 
-describe('getMetadata', () => {
+describe('getBuildMetadata', () => {
   it('matches', async () => {
-    const metadataFile = await buildx.getMetadataFile();
+    const buildx = new Buildx();
+    const metadataFile = buildx.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
-    const expected = await buildx.getMetadata();
+    const expected = buildx.getBuildMetadata();
     expect(expected).toEqual(metadata);
   });
 });
 
 describe('getDigest', () => {
   it('matches', async () => {
-    const metadataFile = await buildx.getMetadataFile();
+    const buildx = new Buildx();
+    const metadataFile = buildx.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
-    const expected = await buildx.getDigest(metadata);
+    const expected = buildx.getDigest();
     expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
   });
 });
@@ -62,14 +70,15 @@ describe('hasLocalOrTarExporter', () => {
     [['"type=tar","dest=/tmp/image.tar"'], true],
     [['" type= local" , dest=./release-out'], true],
     [['.'], true]
-  ])('given %p returns %p', async (outputs: Array<string>, expected: boolean) => {
-    expect(buildx.hasLocalOrTarExporter(outputs)).toEqual(expected);
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+    expect(Buildx.hasLocalExporter(exporters) || Buildx.hasTarExporter(exporters)).toEqual(expected);
   });
 });
 
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
+    const buildx = new Buildx();
     await buildx.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx'], {
@@ -79,7 +88,10 @@ describe('isAvailable', () => {
   });
   it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
-    await buildx.isAvailable(true);
+    const buildx = new Buildx({
+      standalone: true
+    });
+    await buildx.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`buildx`, [], {
       silent: true,
@@ -88,161 +100,9 @@ describe('isAvailable', () => {
   });
 });
 
-describe('inspect', () => {
-  it('valid', async () => {
-    const builder = await buildx.inspect('');
-    expect(builder).not.toBeUndefined();
-    expect(builder.name).not.toEqual('');
-    expect(builder.driver).not.toEqual('');
-    expect(builder.nodes).not.toEqual({});
-  }, 100000);
-});
-
-describe('parseInspect', () => {
-  // prettier-ignore
-  test.each([
-    [
-     'inspect1.txt',
-     {
-       "name": "builder-5cb467f7-0940-47e1-b94b-d51f54054d62",
-       "driver": "docker-container",
-       "nodes": [
-         {
-           "name": "builder-5cb467f7-0940-47e1-b94b-d51f54054d620",
-           "endpoint": "unix:///var/run/docker.sock",
-           "status": "running",
-           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkit": "v0.10.4",
-           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/arm64,linux/riscv64,linux/386,linux/arm/v7,linux/arm/v6"
-         }
-       ]
-     }
-    ],
-    [
-     'inspect2.txt',
-     {
-       "name": "builder-5f449644-ff29-48af-8344-abb0292d0673",
-       "driver": "docker-container",
-       "nodes": [
-         {
-           "name": "builder-5f449644-ff29-48af-8344-abb0292d06730",
-           "endpoint": "unix:///var/run/docker.sock",
-           "driver-opts": [
-             "image=moby/buildkit:latest"
-           ],
-           "status": "running",
-           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkit": "v0.10.4",
-           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386"
-         }
-       ]
-     }
-    ],
-    [
-     'inspect3.txt',
-     {
-       "name": "builder-9929e463-7954-4dc3-89cd-514cca29ff80",
-       "driver": "docker-container",
-       "nodes": [
-         {
-           "name": "builder-9929e463-7954-4dc3-89cd-514cca29ff800",
-           "endpoint": "unix:///var/run/docker.sock",
-           "driver-opts": [
-             "image=moby/buildkit:master",
-             "network=host"
-           ],
-           "status": "running",
-           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkit": "3fab389",
-           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386"
-         }
-       ]
-     }
-    ],
-    [
-     'inspect4.txt',
-     {
-       "name": "default",
-       "driver": "docker",
-       "nodes": [
-         {
-           "name": "default",
-           "endpoint": "default",
-           "status": "running",
-           "buildkit": "20.10.17",
-           "platforms": "linux/amd64,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6"
-         }
-       ]
-     }
-    ],
-    [
-     'inspect5.txt',
-     {
-       "name": "remote-builder",
-       "driver": "remote",
-       "nodes": [
-         {
-           "name": "aws_graviton2",
-           "endpoint": "tcp://1.23.45.67:1234",
-           "driver-opts": [
-             "cert=/home/user/.certs/aws_graviton2/cert.pem",
-             "key=/home/user/.certs/aws_graviton2/key.pem",
-             "cacert=/home/user/.certs/aws_graviton2/ca.pem"
-           ],
-           "status": "running",
-           "platforms": "darwin/arm64,linux/arm64,linux/arm/v5,linux/arm/v6,linux/arm/v7,windows/arm64"
-         }
-       ]
-     }
-    ],
-    [
-     'inspect6.txt',
-     {
-       "nodes": [
-         {
-           "name": "builder-17cfff01-48d9-4c3d-9332-9992e308a5100",
-           "endpoint": "unix:///var/run/docker.sock",
-           "status": "running",
-           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386"
-         }
-       ],
-       "name": "builder-17cfff01-48d9-4c3d-9332-9992e308a510",
-       "driver": "docker-container"
-     }
-    ],
-    [
-     'inspect7.txt',
-     {
-       "name": "builder2",
-       "driver": "docker-container",
-       "last-activity": new Date("2023-01-16T09:45:23.000Z"),
-       "nodes": [
-         {
-           "buildkit": "v0.11.0",
-           "buildkitd-flags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "driver-opts": [
-             "BUILDKIT_STEP_LOG_MAX_SIZE=10485760",
-             "BUILDKIT_STEP_LOG_MAX_SPEED=10485760",
-             "JAEGER_TRACE=localhost:6831",
-             "image=moby/buildkit:latest",
-             "network=host"
-           ],
-           "endpoint": "unix:///var/run/docker.sock",
-           "name": "builder20",
-           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6",
-           "status": "running"
-         }
-       ]
-     }
-    ]
-  ])('given %p', async (inspectFile, expected) => {
-    expect(await buildx.parseInspect(fs.readFileSync(path.join(__dirname, 'fixtures', inspectFile)).toString())).toEqual(expected);
-  });
-});
-
 describe('getVersion', () => {
   it('valid', async () => {
+    const buildx = new Buildx();
     const version = await buildx.getVersion();
     expect(semver.valid(version)).not.toBeNull();
   });
@@ -255,44 +115,54 @@ describe('parseVersion', () => {
     ['github.com/docker/buildx v0.4.2 fb7b670b764764dc4716df3eba07ffdae4cc47b2', '0.4.2'],
     ['github.com/docker/buildx f117971 f11797113e5a9b86bd976329c5dbb8a8bfdfadfa', 'f117971']
   ])('given %p', async (stdout, expected) => {
-    expect(buildx.parseVersion(stdout)).toEqual(expected);
+    expect(Buildx.parseVersion(stdout)).toEqual(expected);
   });
 });
 
-describe('satisfies', () => {
+describe('versionSatisfies', () => {
   test.each([
     ['0.4.1', '>=0.3.2', true],
     ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
     ['f117971', '>0.6.0', true]
   ])('given %p', async (version, range, expected) => {
-    expect(buildx.satisfies(version, range)).toBe(expected);
+    expect(Buildx.versionSatisfies(version, range)).toBe(expected);
   });
 });
 
-describe('getSecret', () => {
+describe('generateBuildSecret', () => {
   test.each([
-    ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', false],
-    ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', false, 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789', false],
-    ['MY_KEY=c3RyaW5nLXdpdGgtZXF1YWxzCg==', false, 'MY_KEY', 'c3RyaW5nLXdpdGgtZXF1YWxzCg==', false],
-    ['aaaaaaaa', false, '', '', true],
-    ['aaaaaaaa=', false, '', '', true],
-    ['=bbbbbbb', false, '', '', true],
-    [`foo=${path.join(__dirname, 'fixtures', 'secret.txt').split(path.sep).join(path.posix.sep)}`, true, 'foo', 'bar', false],
-    [`notfound=secret`, true, '', '', true]
-  ])('given %p key and %p secret', async (kvp, file, exKey, exValue, invalid) => {
+    ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
+    ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', false, 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789', null],
+    ['MY_KEY=c3RyaW5nLXdpdGgtZXF1YWxzCg==', false, 'MY_KEY', 'c3RyaW5nLXdpdGgtZXF1YWxzCg==', null],
+    ['aaaaaaaa', false, '', '', new Error('aaaaaaaa is not a valid secret')],
+    ['aaaaaaaa=', false, '', '', new Error('aaaaaaaa= is not a valid secret')],
+    ['=bbbbbbb', false, '', '', new Error('=bbbbbbb is not a valid secret')],
+    [`foo=${path.join(__dirname, 'fixtures', 'secret.txt').split(path.sep).join(path.posix.sep)}`, true, 'foo', 'bar', null],
+    [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
+  ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error) => {
     try {
+      const buildx = new Buildx();
       let secret: string;
       if (file) {
-        secret = await buildx.getSecretFile(kvp);
+        secret = buildx.generateBuildSecretFile(kvp);
       } else {
-        secret = await buildx.getSecretString(kvp);
+        secret = buildx.generateBuildSecretString(kvp);
       }
-      expect(true).toBe(!invalid);
-      expect(secret).toEqual(`id=${exKey},src=${tmpNameSync}`);
-      expect(fs.readFileSync(tmpNameSync, 'utf-8')).toEqual(exValue);
-    } catch (err) {
+      expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
+      expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
+    } catch (e) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(true).toBe(invalid);
+      expect(e.message).toEqual(error?.message);
     }
+  });
+});
+
+describe('hasGitAuthTokenSecret', () => {
+  // prettier-ignore
+  test.each([
+    [['A_SECRET=abcdef0123456789'], false],
+    [['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789'], true],
+  ])('given %p secret', async (kvp: Array<string>, expected: boolean) => {
+    expect(Buildx.hasGitAuthTokenSecret(kvp)).toBe(expected);
   });
 });

@@ -1,281 +1,188 @@
-import {parse} from 'csv-parse/sync';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
-import * as semver from 'semver';
 import * as exec from '@actions/exec';
-import * as util from './util';
+import {parse} from 'csv-parse/sync';
+import * as semver from 'semver';
+import * as tmp from 'tmp';
 
-export type Builder = {
-  name?: string;
-  driver?: string;
-  'last-activity'?: Date;
-  nodes: Node[];
-};
-
-export type Node = {
-  name?: string;
-  endpoint?: string;
-  'driver-opts'?: Array<string>;
-  status?: string;
-  'buildkitd-flags'?: string;
-  buildkit?: string;
-  platforms?: string;
-};
-
-export async function getImageIDFile(): Promise<string> {
-  return path.join(util.tmpDir(), 'iidfile').split(path.sep).join(path.posix.sep);
+export interface BuildxOpts {
+  standalone?: boolean;
 }
 
-export async function getImageID(): Promise<string | undefined> {
-  const iidFile = await getImageIDFile();
-  if (!fs.existsSync(iidFile)) {
-    return undefined;
-  }
-  return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
-}
+export class Buildx {
+  private standalone: boolean;
+  private version: Promise<string>;
+  private tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
 
-export async function getMetadataFile(): Promise<string> {
-  return path.join(util.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
-}
-
-export async function getMetadata(): Promise<string | undefined> {
-  const metadataFile = await getMetadataFile();
-  if (!fs.existsSync(metadataFile)) {
-    return undefined;
-  }
-  const content = fs.readFileSync(metadataFile, {encoding: 'utf-8'}).trim();
-  if (content === 'null') {
-    return undefined;
-  }
-  return content;
-}
-
-export async function getDigest(metadata: string | undefined): Promise<string | undefined> {
-  if (metadata === undefined) {
-    return undefined;
-  }
-  const metadataJSON = JSON.parse(metadata);
-  if (metadataJSON['containerimage.digest']) {
-    return metadataJSON['containerimage.digest'];
-  }
-  return undefined;
-}
-
-export async function getSecretString(kvp: string): Promise<string> {
-  return getSecret(kvp, false);
-}
-
-export async function getSecretFile(kvp: string): Promise<string> {
-  return getSecret(kvp, true);
-}
-
-export async function getSecret(kvp: string, file: boolean): Promise<string> {
-  const delimiterIndex = kvp.indexOf('=');
-  const key = kvp.substring(0, delimiterIndex);
-  let value = kvp.substring(delimiterIndex + 1);
-  if (key.length == 0 || value.length == 0) {
-    throw new Error(`${kvp} is not a valid secret`);
+  constructor(opts?: BuildxOpts) {
+    this.standalone = opts?.standalone ?? false;
+    this.version = this.getVersion();
   }
 
-  if (file) {
-    if (!fs.existsSync(value)) {
-      throw new Error(`secret file ${value} not found`);
+  public getCommand(args: Array<string>) {
+    return {
+      command: this.standalone ? 'buildx' : 'docker',
+      args: this.standalone ? args : ['buildx', ...args]
+    };
+  }
+
+  public async isAvailable(): Promise<boolean> {
+    const cmd = this.getCommand([]);
+    return await exec
+      .getExecOutput(cmd.command, cmd.args, {
+        ignoreReturnCode: true,
+        silent: true
+      })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          return false;
+        }
+        return res.exitCode == 0;
+      })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .catch(error => {
+        return false;
+      });
+  }
+
+  public async getVersion(): Promise<string> {
+    const cmd = this.getCommand(['version']);
+    return await exec
+      .getExecOutput(cmd.command, cmd.args, {
+        ignoreReturnCode: true,
+        silent: true
+      })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          throw new Error(res.stderr.trim());
+        }
+        return Buildx.parseVersion(res.stdout.trim());
+      });
+  }
+
+  public static parseVersion(stdout: string): string {
+    const matches = /\sv?([0-9a-f]{7}|[0-9.]+)/.exec(stdout);
+    if (!matches) {
+      throw new Error(`Cannot parse buildx version`);
     }
-    value = fs.readFileSync(value, {encoding: 'utf-8'});
+    return matches[1];
   }
 
-  const secretFile = util.tmpNameSync({
-    tmpdir: util.tmpDir()
-  });
-  fs.writeFileSync(secretFile, value);
+  public static versionSatisfies(version: string, range: string): boolean {
+    return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
+  }
 
-  return `id=${key},src=${secretFile}`;
-}
+  public getBuildImageIDFilePath(): string {
+    return path.join(this.tmpDir(), 'iidfile').split(path.sep).join(path.posix.sep);
+  }
 
-export function hasLocalExporter(outputs: string[]): boolean {
-  return hasExporterType('local', outputs);
-}
+  public getBuildMetadataFilePath(): string {
+    return path.join(this.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
+  }
 
-export function hasTarExporter(outputs: string[]): boolean {
-  return hasExporterType('tar', outputs);
-}
-
-export function hasLocalOrTarExporter(outputs: string[]): boolean {
-  return hasLocalExporter(outputs) || hasTarExporter(outputs);
-}
-
-function hasExporterType(name: string, outputs: string[]): boolean {
-  const records = parse(outputs.join(`\n`), {
-    delimiter: ',',
-    trim: true,
-    columns: false,
-    relaxColumnCount: true
-  });
-  for (const record of records) {
-    if (record.length == 1 && !record[0].startsWith('type=')) {
-      // Local if no type is defined
-      // https://github.com/docker/buildx/blob/d2bf42f8b4784d83fde17acb3ed84703ddc2156b/build/output.go#L29-L43
-      return name == 'local';
+  public getBuildImageID(): string | undefined {
+    const iidFile = this.getBuildImageIDFilePath();
+    if (!fs.existsSync(iidFile)) {
+      return undefined;
     }
-    for (const [key, value] of record.map(chunk => chunk.split('=').map(item => item.trim()))) {
-      if (key == 'type' && value == name) {
+    return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
+  }
+
+  public getBuildMetadata(): string | undefined {
+    const metadataFile = this.getBuildMetadataFilePath();
+    if (!fs.existsSync(metadataFile)) {
+      return undefined;
+    }
+    const content = fs.readFileSync(metadataFile, {encoding: 'utf-8'}).trim();
+    if (content === 'null') {
+      return undefined;
+    }
+    return content;
+  }
+
+  public getDigest(): string | undefined {
+    const metadata = this.getBuildMetadata();
+    if (metadata === undefined) {
+      return undefined;
+    }
+    const metadataJSON = JSON.parse(metadata);
+    if (metadataJSON['containerimage.digest']) {
+      return metadataJSON['containerimage.digest'];
+    }
+    return undefined;
+  }
+
+  public generateBuildSecretString(kvp: string): string {
+    return this.generateBuildSecret(kvp, false);
+  }
+
+  public generateBuildSecretFile(kvp: string): string {
+    return this.generateBuildSecret(kvp, true);
+  }
+
+  private generateBuildSecret(kvp: string, file: boolean): string {
+    const delimiterIndex = kvp.indexOf('=');
+    const key = kvp.substring(0, delimiterIndex);
+    let value = kvp.substring(delimiterIndex + 1);
+    if (key.length == 0 || value.length == 0) {
+      throw new Error(`${kvp} is not a valid secret`);
+    }
+    if (file) {
+      if (!fs.existsSync(value)) {
+        throw new Error(`secret file ${value} not found`);
+      }
+      value = fs.readFileSync(value, {encoding: 'utf-8'});
+    }
+    const secretFile = this.tmpName({tmpdir: this.tmpDir()});
+    fs.writeFileSync(secretFile, value);
+    return `id=${key},src=${secretFile}`;
+  }
+
+  public static hasLocalExporter(exporters: string[]): boolean {
+    return Buildx.hasExporterType('local', exporters);
+  }
+
+  public static hasTarExporter(exporters: string[]): boolean {
+    return Buildx.hasExporterType('tar', exporters);
+  }
+
+  public static hasExporterType(name: string, exporters: string[]): boolean {
+    const records = parse(exporters.join(`\n`), {
+      delimiter: ',',
+      trim: true,
+      columns: false,
+      relaxColumnCount: true
+    });
+    for (const record of records) {
+      if (record.length == 1 && !record[0].startsWith('type=')) {
+        // Local if no type is defined
+        // https://github.com/docker/buildx/blob/d2bf42f8b4784d83fde17acb3ed84703ddc2156b/build/output.go#L29-L43
+        return name == 'local';
+      }
+      for (const [key, value] of record.map(chunk => chunk.split('=').map(item => item.trim()))) {
+        if (key == 'type' && value == name) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public static hasGitAuthTokenSecret(secrets: string[]): boolean {
+    for (const secret of secrets) {
+      if (secret.startsWith('GIT_AUTH_TOKEN=')) {
         return true;
       }
     }
+    return false;
   }
-  return false;
-}
 
-export function hasGitAuthToken(secrets: string[]): boolean {
-  for (const secret of secrets) {
-    if (secret.startsWith('GIT_AUTH_TOKEN=')) {
-      return true;
-    }
+  private tmpDir() {
+    return this.tmpdir;
   }
-  return false;
-}
 
-export async function isAvailable(standalone?: boolean): Promise<boolean> {
-  const cmd = getCommand([], standalone);
-  return await exec
-    .getExecOutput(cmd.command, cmd.args, {
-      ignoreReturnCode: true,
-      silent: true
-    })
-    .then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        return false;
-      }
-      return res.exitCode == 0;
-    })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .catch(error => {
-      return false;
-    });
-}
-
-export async function inspect(name: string, standalone?: boolean): Promise<Builder> {
-  const cmd = getCommand(['inspect', name], standalone);
-  return await exec
-    .getExecOutput(cmd.command, cmd.args, {
-      ignoreReturnCode: true,
-      silent: true
-    })
-    .then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(res.stderr.trim());
-      }
-      return parseInspect(res.stdout);
-    });
-}
-
-export async function parseInspect(data: string): Promise<Builder> {
-  const builder: Builder = {
-    nodes: []
-  };
-  let node: Node = {};
-  for (const line of data.trim().split(`\n`)) {
-    const [key, ...rest] = line.split(':');
-    const value = rest.map(v => v.trim()).join(':');
-    if (key.length == 0 || value.length == 0) {
-      continue;
-    }
-    switch (key.toLowerCase()) {
-      case 'name': {
-        if (builder.name == undefined) {
-          builder.name = value;
-        } else {
-          if (Object.keys(node).length > 0) {
-            builder.nodes.push(node);
-            node = {};
-          }
-          node.name = value;
-        }
-        break;
-      }
-      case 'driver': {
-        builder.driver = value;
-        break;
-      }
-      case 'last activity': {
-        builder['last-activity'] = new Date(value);
-        break;
-      }
-      case 'endpoint': {
-        node.endpoint = value;
-        break;
-      }
-      case 'driver options': {
-        node['driver-opts'] = (value.match(/(\w+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
-        break;
-      }
-      case 'status': {
-        node.status = value;
-        break;
-      }
-      case 'flags': {
-        node['buildkitd-flags'] = value;
-        break;
-      }
-      case 'buildkit': {
-        node.buildkit = value;
-        break;
-      }
-      case 'platforms': {
-        let platforms: Array<string> = [];
-        // if a preferred platform is being set then use only these
-        // https://docs.docker.com/engine/reference/commandline/buildx_inspect/#get-information-about-a-builder-instance
-        if (value.includes('*')) {
-          for (const platform of value.split(', ')) {
-            if (platform.includes('*')) {
-              platforms.push(platform.replace('*', ''));
-            }
-          }
-        } else {
-          // otherwise set all platforms available
-          platforms = value.split(', ');
-        }
-        node.platforms = platforms.join(',');
-        break;
-      }
-    }
+  private tmpName(options?: tmp.TmpNameOptions): string {
+    return tmp.tmpNameSync(options);
   }
-  if (Object.keys(node).length > 0) {
-    builder.nodes.push(node);
-  }
-  return builder;
-}
-
-export async function getVersion(standalone?: boolean): Promise<string> {
-  const cmd = getCommand(['version'], standalone);
-  return await exec
-    .getExecOutput(cmd.command, cmd.args, {
-      ignoreReturnCode: true,
-      silent: true
-    })
-    .then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(res.stderr.trim());
-      }
-      return parseVersion(res.stdout.trim());
-    });
-}
-
-export function parseVersion(stdout: string): string {
-  const matches = /\sv?([0-9a-f]{7}|[0-9.]+)/.exec(stdout);
-  if (!matches) {
-    throw new Error(`Cannot parse buildx version`);
-  }
-  return matches[1];
-}
-
-export function satisfies(version: string, range: string): boolean {
-  return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
-}
-
-export function getCommand(args: Array<string>, standalone?: boolean) {
-  return {
-    command: standalone ? 'buildx' : 'docker',
-    args: standalone ? args : ['buildx', ...args]
-  };
 }

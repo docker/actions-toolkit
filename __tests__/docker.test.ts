@@ -1,11 +1,12 @@
 import {describe, expect, it, jest} from '@jest/globals';
-import * as docker from '../src/docker';
 import * as exec from '@actions/exec';
+
+import {Docker} from '../src/docker';
 
 describe('isAvailable', () => {
   it('cli', () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
-    docker.isAvailable();
+    Docker.isAvailable();
 
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, undefined, {

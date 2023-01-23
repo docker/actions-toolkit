@@ -2,30 +2,73 @@ import jwt_decode, {JwtPayload} from 'jwt-decode';
 import * as github from '@actions/github';
 import {Context} from '@actions/github/lib/context';
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
-import * as util from './util';
+import {WebhookPayload} from '@actions/github/lib/interfaces';
 
+export type Payload = WebhookPayload;
 export type ReposGetResponseData = OctoOpenApiTypes['schemas']['repository'];
-
-export function context(): Context {
-  return github.context;
-}
-
-export async function repo(token: string): Promise<ReposGetResponseData> {
-  return github
-    .getOctokit(token)
-    .rest.repos.get({...github.context.repo})
-    .then(response => response.data as ReposGetResponseData);
-}
 
 interface Jwt extends JwtPayload {
   ac?: string;
 }
 
-export const parseRuntimeToken = (token: string): Jwt => {
-  return jwt_decode<Jwt>(token);
-};
+export class GitHub {
+  private static instance?: GitHub;
+  static getInstance = (): GitHub => (GitHub.instance = GitHub.instance ?? new GitHub());
+  private static _gitContext: string;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function fromPayload(path: string): any {
-  return util.select(github.context.payload, path);
+  private constructor() {
+    let ref = this.ref();
+    if (github.context.sha && ref && !ref.startsWith('refs/')) {
+      ref = `refs/heads/${this.ref()}`;
+    }
+    if (github.context.sha && !ref.startsWith(`refs/pull/`)) {
+      ref = github.context.sha;
+    }
+    GitHub._gitContext = `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${github.context.repo.owner}/${github.context.repo.repo}.git#${ref}`;
+  }
+
+  public context(): Context {
+    return github.context;
+  }
+
+  private ref(): string {
+    return github.context.ref;
+  }
+
+  public gitContext() {
+    return GitHub._gitContext;
+  }
+
+  private payload(): Payload {
+    return github.context.payload;
+  }
+
+  public repo(token: string): Promise<ReposGetResponseData> {
+    return github
+      .getOctokit(token)
+      .rest.repos.get({...github.context.repo})
+      .then(response => response.data as ReposGetResponseData);
+  }
+
+  public parseRuntimeToken(): Jwt {
+    return jwt_decode<Jwt>(process.env['ACTIONS_RUNTIME_TOKEN'] || '');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public fromPayload(path: string): any {
+    return this.select(this.payload(), path);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private select(obj: any, path: string): any {
+    if (!obj) {
+      return undefined;
+    }
+    const i = path.indexOf('.');
+    if (i < 0) {
+      return obj[path];
+    }
+    const key = path.slice(0, i);
+    return this.select(obj[key], path.slice(i + 1));
+  }
 }
