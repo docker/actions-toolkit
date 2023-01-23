@@ -1,5 +1,9 @@
-import {describe, expect, it} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest} from '@jest/globals';
 import * as git from '../src/git';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('git', () => {
   it('returns git remote ref', async () => {

@@ -1,7 +1,11 @@
-import {describe, expect, it, test} from '@jest/globals';
+import {jest, describe, expect, it, test, beforeEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import {Builder} from '../src/builder';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('inspect', () => {
   it('valid', async () => {

@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, it, jest, test} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -19,6 +19,10 @@ jest.spyOn(BuildKit.prototype as any, 'tmpDir').mockImplementation((): string =>
 
 jest.spyOn(BuildKit.prototype as any, 'tmpName').mockImplementation((): string => {
   return tmpName;
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 afterEach(() => {

@@ -1,7 +1,11 @@
-import {describe, expect, jest, it} from '@jest/globals';
+import {describe, expect, jest, it, beforeEach} from '@jest/globals';
 import {Context} from '@actions/github/lib/context';
 
 import {GitHub, Payload, ReposGetResponseData} from '../src/github';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 jest.spyOn(GitHub.prototype, 'context').mockImplementation((): Context => {
   return new Context();

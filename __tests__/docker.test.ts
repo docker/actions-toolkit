@@ -1,7 +1,11 @@
-import {describe, expect, it, jest} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest} from '@jest/globals';
 import * as exec from '@actions/exec';
 
 import {Docker} from '../src/docker';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('isAvailable', () => {
   it('cli', () => {

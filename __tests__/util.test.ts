@@ -1,8 +1,12 @@
-import {describe, expect, it, test} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import {Util} from '../src/util';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('getInputList', () => {
   it('single line correctly', async () => {
