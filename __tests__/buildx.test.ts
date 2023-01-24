@@ -191,7 +191,8 @@ describe('versionSatisfies', () => {
     ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
     ['f117971', '>0.6.0', true]
   ])('given %p', async (version, range, expected) => {
-    expect(Buildx.versionSatisfies(version, range)).toBe(expected);
+    const buildx = new Buildx();
+    expect(await buildx.versionSatisfies(range, version)).toBe(expected);
   });
 });
 

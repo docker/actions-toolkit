@@ -86,8 +86,9 @@ export class Buildx {
     return matches[1];
   }
 
-  public static versionSatisfies(version: string, range: string): boolean {
-    return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
+  public async versionSatisfies(range: string, version?: string): Promise<boolean> {
+    const ver = version ?? (await this.getVersion());
+    return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
   }
 
   public getBuildImageIDFilePath(): string {
