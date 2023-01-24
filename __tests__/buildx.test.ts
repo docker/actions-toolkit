@@ -169,8 +169,7 @@ describe('printVersion', () => {
 describe('getVersion', () => {
   it('valid', async () => {
     const buildx = new Buildx();
-    const version = await buildx.getVersion();
-    expect(semver.valid(version)).not.toBeNull();
+    expect(semver.valid(await buildx.version())).not.toBeNull();
   });
 });
 

@@ -13,17 +13,17 @@ export interface BuildxOpts {
 }
 
 export class Buildx {
-  private standalone: boolean;
-  private version: Promise<string>;
-  private tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
+  private _standalone: boolean;
+  private _version: Promise<string>;
+  private _tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
 
   constructor(opts?: BuildxOpts) {
-    this.standalone = opts?.standalone ?? !Docker.isAvailable();
-    this.version = this.getVersion();
+    this._standalone = opts?.standalone ?? !Docker.isAvailable();
+    this._version = this.getVersion();
   }
 
   public tmpDir() {
-    return this.tmpdir;
+    return this._tmpdir;
   }
 
   public tmpName(options?: tmp.TmpNameOptions): string {
@@ -32,8 +32,8 @@ export class Buildx {
 
   public getCommand(args: Array<string>) {
     return {
-      command: this.standalone ? 'buildx' : 'docker',
-      args: this.standalone ? args : ['buildx', ...args]
+      command: this._standalone ? 'buildx' : 'docker',
+      args: this._standalone ? args : ['buildx', ...args]
     };
   }
 
@@ -56,7 +56,7 @@ export class Buildx {
       });
   }
 
-  public async getVersion(): Promise<string> {
+  private async getVersion(): Promise<string> {
     const cmd = this.getCommand(['version']);
     return await exec
       .getExecOutput(cmd.command, cmd.args, {
@@ -69,6 +69,10 @@ export class Buildx {
         }
         return Buildx.parseVersion(res.stdout.trim());
       });
+  }
+
+  public async version(): Promise<string> {
+    return this._version;
   }
 
   public async printVersion() {
@@ -87,7 +91,7 @@ export class Buildx {
   }
 
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {
-    const ver = version ?? (await this.getVersion());
+    const ver = version ?? (await this.version());
     return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
   }
 
