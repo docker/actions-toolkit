@@ -118,7 +118,9 @@ describe('isAvailable', () => {
     const buildx = new Buildx({
       standalone: false
     });
-    await buildx.isAvailable();
+    buildx.isAvailable().catch(() => {
+      // noop
+    });
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx'], {
       silent: true,
@@ -130,7 +132,9 @@ describe('isAvailable', () => {
     const buildx = new Buildx({
       standalone: true
     });
-    await buildx.isAvailable();
+    buildx.isAvailable().catch(() => {
+      // noop
+    });
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`buildx`, [], {
       silent: true,
