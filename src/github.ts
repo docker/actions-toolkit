@@ -14,7 +14,9 @@ interface Jwt extends JwtPayload {
 export class GitHub {
   private static instance?: GitHub;
   static getInstance = (): GitHub => (GitHub.instance = GitHub.instance ?? new GitHub());
+  private static _serverURL: string;
   private static _gitContext: string;
+  private static _provenanceBuilderID: string;
 
   private constructor() {
     let ref = this.ref();
@@ -24,7 +26,13 @@ export class GitHub {
     if (github.context.sha && !ref.startsWith(`refs/pull/`)) {
       ref = github.context.sha;
     }
-    GitHub._gitContext = `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${github.context.repo.owner}/${github.context.repo.repo}.git#${ref}`;
+    GitHub._serverURL = process.env.GITHUB_SERVER_URL || 'https://github.com';
+    GitHub._gitContext = `${GitHub._serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git#${ref}`;
+    GitHub._provenanceBuilderID = `${GitHub._serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
+  }
+
+  public reset() {
+    GitHub.instance = undefined;
   }
 
   public context(): Context {
@@ -35,8 +43,16 @@ export class GitHub {
     return github.context.ref;
   }
 
+  public serverURL() {
+    return GitHub._serverURL;
+  }
+
   public gitContext() {
     return GitHub._gitContext;
+  }
+
+  public provenanceBuilderID() {
+    return GitHub._provenanceBuilderID;
   }
 
   private payload(): Payload {

@@ -1,5 +1,6 @@
 process.env = Object.assign({}, process.env, {
   GITHUB_REPOSITORY: 'docker/test-docker-action',
+  GITHUB_RUN_ID: '123',
   RUNNER_TEMP: '/tmp/github_runner',
   RUNNER_TOOL_CACHE: '/tmp/github_tool_cache'
 }) as {
