@@ -1,11 +1,12 @@
-import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import rimraf from 'rimraf';
 import * as semver from 'semver';
 import * as exec from '@actions/exec';
-import rimraf from 'rimraf';
 
 import {Buildx} from '../src/buildx';
+import {Context} from '../src/context';
 
 const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
@@ -14,11 +15,14 @@ const metadata = `{
   "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
 }`;
 
-jest.spyOn(Buildx.prototype as any, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context.prototype as any, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
+});
+jest.spyOn(Context.prototype as any, 'tmpName').mockImplementation((): string => {
+  return tmpName;
 });
 
 beforeEach(() => {
@@ -29,13 +33,11 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
-jest.spyOn(Buildx.prototype as any, 'tmpName').mockImplementation((): string => {
-  return tmpName;
-});
-
 describe('getBuildImageID', () => {
   it('matches', async () => {
-    const buildx = new Buildx();
+    const buildx = new Buildx({
+      context: new Context()
+    });
     const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
     const imageIDFile = buildx.getBuildImageIDFilePath();
     await fs.writeFileSync(imageIDFile, imageID);
@@ -46,7 +48,9 @@ describe('getBuildImageID', () => {
 
 describe('getBuildMetadata', () => {
   it('matches', async () => {
-    const buildx = new Buildx();
+    const buildx = new Buildx({
+      context: new Context()
+    });
     const metadataFile = buildx.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
     const expected = buildx.getBuildMetadata();
@@ -56,7 +60,9 @@ describe('getBuildMetadata', () => {
 
 describe('getDigest', () => {
   it('matches', async () => {
-    const buildx = new Buildx();
+    const buildx = new Buildx({
+      context: new Context()
+    });
     const metadataFile = buildx.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
     const expected = buildx.getDigest();
@@ -116,6 +122,7 @@ describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
     const buildx = new Buildx({
+      context: new Context(),
       standalone: false
     });
     buildx.isAvailable().catch(() => {
@@ -130,6 +137,7 @@ describe('isAvailable', () => {
   it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
     const buildx = new Buildx({
+      context: new Context(),
       standalone: true
     });
     buildx.isAvailable().catch(() => {
@@ -147,6 +155,7 @@ describe('printVersion', () => {
   it('docker cli', () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
+      context: new Context(),
       standalone: false
     });
     buildx.printVersion();
@@ -157,6 +166,7 @@ describe('printVersion', () => {
   it('standalone', () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
+      context: new Context(),
       standalone: true
     });
     buildx.printVersion();
@@ -168,8 +178,10 @@ describe('printVersion', () => {
 
 describe('getVersion', () => {
   it('valid', async () => {
-    const buildx = new Buildx();
-    expect(semver.valid(await buildx.version())).not.toBeNull();
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    expect(semver.valid(await buildx.version)).not.toBeNull();
   });
 });
 
@@ -190,7 +202,9 @@ describe('versionSatisfies', () => {
     ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
     ['f117971', '>0.6.0', true]
   ])('given %p', async (version, range, expected) => {
-    const buildx = new Buildx();
+    const buildx = new Buildx({
+      context: new Context()
+    });
     expect(await buildx.versionSatisfies(range, version)).toBe(expected);
   });
 });
@@ -207,7 +221,9 @@ describe('generateBuildSecret', () => {
     [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
   ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error) => {
     try {
-      const buildx = new Buildx();
+      const buildx = new Buildx({
+        context: new Context()
+      });
       let secret: string;
       if (file) {
         secret = buildx.generateBuildSecretFile(kvp);

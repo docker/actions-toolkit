@@ -1,39 +1,32 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import * as exec from '@actions/exec';
 import {parse} from 'csv-parse/sync';
 import * as semver from 'semver';
-import * as tmp from 'tmp';
 
 import {Docker} from './docker';
+import {Context} from './context';
 
 export interface BuildxOpts {
+  context: Context;
   standalone?: boolean;
 }
 
 export class Buildx {
-  private _standalone: boolean;
-  private _version: Promise<string>;
-  private _tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
+  private readonly context: Context;
+  public standalone: boolean;
+  public version: Promise<string>;
 
-  constructor(opts?: BuildxOpts) {
-    this._standalone = opts?.standalone ?? !Docker.isAvailable();
-    this._version = this.getVersion();
-  }
-
-  public tmpDir() {
-    return this._tmpdir;
-  }
-
-  public tmpName(options?: tmp.TmpNameOptions): string {
-    return tmp.tmpNameSync(options);
+  constructor(opts: BuildxOpts) {
+    this.context = opts.context;
+    this.standalone = opts?.standalone ?? !Docker.isAvailable();
+    this.version = this.getVersion();
   }
 
   public getCommand(args: Array<string>) {
     return {
-      command: this._standalone ? 'buildx' : 'docker',
-      args: this._standalone ? args : ['buildx', ...args]
+      command: this.standalone ? 'buildx' : 'docker',
+      args: this.standalone ? args : ['buildx', ...args]
     };
   }
 
@@ -71,10 +64,6 @@ export class Buildx {
       });
   }
 
-  public async version(): Promise<string> {
-    return this._version;
-  }
-
   public async printVersion() {
     const cmd = this.getCommand(['version']);
     await exec.exec(cmd.command, cmd.args, {
@@ -91,16 +80,16 @@ export class Buildx {
   }
 
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {
-    const ver = version ?? (await this.version());
+    const ver = version ?? (await this.version);
     return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
   }
 
   public getBuildImageIDFilePath(): string {
-    return path.join(this.tmpDir(), 'iidfile').split(path.sep).join(path.posix.sep);
+    return path.join(this.context.tmpDir(), 'iidfile').split(path.sep).join(path.posix.sep);
   }
 
   public getBuildMetadataFilePath(): string {
-    return path.join(this.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
+    return path.join(this.context.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
   }
 
   public getBuildImageID(): string | undefined {
@@ -143,7 +132,7 @@ export class Buildx {
     return this.generateBuildSecret(kvp, true);
   }
 
-  private generateBuildSecret(kvp: string, file: boolean): string {
+  public generateBuildSecret(kvp: string, file: boolean): string {
     const delimiterIndex = kvp.indexOf('=');
     const key = kvp.substring(0, delimiterIndex);
     let value = kvp.substring(delimiterIndex + 1);
@@ -156,7 +145,7 @@ export class Buildx {
       }
       value = fs.readFileSync(value, {encoding: 'utf-8'});
     }
-    const secretFile = this.tmpName({tmpdir: this.tmpDir()});
+    const secretFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
     fs.writeFileSync(secretFile, value);
     return `id=${key},src=${secretFile}`;
   }

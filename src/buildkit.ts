@@ -1,37 +1,36 @@
 import fs from 'fs';
-import os from 'os';
-import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
-import * as tmp from 'tmp';
 
+import {Context} from './context';
 import {Buildx} from './buildx';
 import {Builder, BuilderInfo} from './builder';
 
 export interface BuildKitOpts {
+  context: Context;
   buildx?: Buildx;
 }
 
 export class BuildKit {
-  private buildx: Buildx;
+  private readonly context: Context;
+  private readonly buildx: Buildx;
   private containerNamePrefix = 'buildx_buildkit_';
-  private tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
 
-  constructor(opts?: BuildKitOpts) {
-    this.buildx = opts?.buildx || new Buildx();
-  }
-
-  public tmpDir() {
-    return this.tmpdir;
-  }
-
-  public tmpName(options?: tmp.TmpNameOptions): string {
-    return tmp.tmpNameSync(options);
+  constructor(opts: BuildKitOpts) {
+    this.context = opts.context;
+    this.buildx =
+      opts?.buildx ||
+      new Buildx({
+        context: this.context
+      });
   }
 
   private async getBuilderInfo(name: string): Promise<BuilderInfo> {
-    const builder = new Builder({buildx: this.buildx});
+    const builder = new Builder({
+      context: this.context,
+      buildx: this.buildx
+    });
     return builder.inspect(name);
   }
 
@@ -118,7 +117,7 @@ export class BuildKit {
       }
       s = fs.readFileSync(s, {encoding: 'utf-8'});
     }
-    const configFile = this.tmpName({tmpdir: this.tmpDir()});
+    const configFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
     fs.writeFileSync(configFile, s);
     return configFile;
   }

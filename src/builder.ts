@@ -1,6 +1,7 @@
 import * as exec from '@actions/exec';
 
 import {Buildx} from './buildx';
+import {Context} from './context';
 
 export interface BuilderInfo {
   name?: string;
@@ -20,14 +21,21 @@ export interface NodeInfo {
 }
 
 export interface BuilderOpts {
+  context: Context;
   buildx?: Buildx;
 }
 
 export class Builder {
-  private buildx: Buildx;
+  private readonly context: Context;
+  private readonly buildx: Buildx;
 
-  constructor(opts?: BuilderOpts) {
-    this.buildx = opts?.buildx || new Buildx();
+  constructor(opts: BuilderOpts) {
+    this.context = opts.context;
+    this.buildx =
+      opts?.buildx ||
+      new Buildx({
+        context: this.context
+      });
   }
 
   public async inspect(name: string): Promise<BuilderInfo> {

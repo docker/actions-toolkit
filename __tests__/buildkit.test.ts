@@ -1,23 +1,23 @@
-import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as semver from 'semver';
 import rimraf from 'rimraf';
+import * as semver from 'semver';
 
 import {BuildKit} from '../src/buildkit';
 import {Builder, BuilderInfo} from '../src/builder';
+import {Context} from '../src/context';
 
 const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 
-jest.spyOn(BuildKit.prototype as any, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context.prototype as any, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-
-jest.spyOn(BuildKit.prototype as any, 'tmpName').mockImplementation((): string => {
+jest.spyOn(Context.prototype as any, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -50,7 +50,9 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
 
 describe('getVersion', () => {
   it('valid', async () => {
-    const buildkit = new BuildKit();
+    const buildkit = new BuildKit({
+      context: new Context()
+    });
     const version = await buildkit.getVersion('builder2');
     expect(semver.valid(version)).not.toBeNull();
   });
@@ -61,7 +63,9 @@ describe('satisfies', () => {
     ['builder2', '>=0.10.0', true],
     ['builder2', '>0.11.0', false]
   ])('given %p', async (builderName, range, expected) => {
-    const buildkit = new BuildKit();
+    const buildkit = new BuildKit({
+      context: new Context()
+    });
     expect(await buildkit.versionSatisfies(builderName, range)).toBe(expected);
   });
 });
@@ -81,7 +85,9 @@ describe('generateConfig', () => {
     ]
   ])('given %p config', async (val, file, exValue, error: Error) => {
     try {
-      const buildkit = new BuildKit();
+      const buildkit = new BuildKit({
+        context: new Context()
+      });
       let config: string;
       if (file) {
         config = buildkit.generateConfigFile(val);

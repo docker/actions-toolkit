@@ -1,15 +1,37 @@
-import {jest, describe, expect, it, test, beforeEach} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
-import {Builder} from '../src/builder';
+import {Builder, BuilderInfo} from '../src/builder';
+import {Context} from '../src/context';
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
+jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
+  return {
+    name: 'builder2',
+    driver: 'docker-container',
+    lastActivity: new Date('2023-01-16 09:45:23 +0000 UTC'),
+    nodes: [
+      {
+        buildkitVersion: 'v0.11.0',
+        buildkitdFlags: '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        driverOpts: ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
+        endpoint: 'unix:///var/run/docker.sock',
+        name: 'builder20',
+        platforms: 'linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6',
+        status: 'running'
+      }
+    ]
+  };
+});
+
 describe('inspect', () => {
   it('valid', async () => {
-    const builder = new Builder();
+    const builder = new Builder({
+      context: new Context()
+    });
     const builderInfo = await builder.inspect('');
     expect(builderInfo).not.toBeUndefined();
     expect(builderInfo.name).not.toEqual('');

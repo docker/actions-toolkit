@@ -15,9 +15,10 @@
     "useUnknownInCatchVariables": false,
   },
   "exclude": [
+    "./__mocks__/**/*",
+    "./__tests__/**/*",
     "./lib/**/*",
     "node_modules",
-    "**/*.test.ts",
     "jest.config.ts"
   ]
 }

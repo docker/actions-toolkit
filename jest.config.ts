@@ -1,6 +1,5 @@
 process.env = Object.assign({}, process.env, {
-  GITHUB_REPOSITORY: 'docker/test-docker-action',
-  GITHUB_RUN_ID: '123',
+  GITHUB_REPOSITORY: 'docker/actions-toolkit',
   RUNNER_TEMP: '/tmp/github_runner',
   RUNNER_TOOL_CACHE: '/tmp/github_tool_cache'
 }) as {
@@ -19,5 +18,7 @@ module.exports = {
   moduleNameMapper: {
     '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
   },
+  collectCoverageFrom: ['src/**/{!(toolkit.ts),}.ts'],
+  coveragePathIgnorePatterns: ['lib/', 'node_modules/', '__mocks__/', '__tests__/'],
   verbose: true
 };
