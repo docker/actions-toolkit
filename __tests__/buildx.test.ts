@@ -151,6 +151,22 @@ describe('isAvailable', () => {
   });
 });
 
+describe('printInspect', () => {
+  it('prints builder2 instance', () => {
+    const execSpy = jest.spyOn(exec, 'exec');
+    const buildx = new Buildx({
+      context: new Context(),
+      standalone: true
+    });
+    buildx.printInspect('builder2').catch(() => {
+      // noop
+    });
+    expect(execSpy).toHaveBeenCalledWith(`buildx`, ['inspect', 'builder2'], {
+      failOnStdErr: false
+    });
+  });
+});
+
 describe('printVersion', () => {
   it('docker cli', () => {
     const execSpy = jest.spyOn(exec, 'exec');
