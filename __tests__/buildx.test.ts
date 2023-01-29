@@ -177,6 +177,86 @@ describe('getDigest', () => {
   });
 });
 
+describe('getProvenanceInput', () => {
+  beforeEach(() => {
+    process.env = Object.keys(process.env).reduce((object, key) => {
+      if (!key.startsWith('INPUT_')) {
+        object[key] = process.env[key];
+      }
+      return object;
+    }, {});
+  });
+
+  // prettier-ignore
+  test.each([
+    [
+      'true',
+      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+    [
+      'false',
+      'false'
+    ],
+    [
+      'mode=min',
+      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+    [
+      'mode=max',
+      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+    [
+      'builder-id=foo',
+      'builder-id=foo'
+    ],
+    [
+      'mode=max,builder-id=foo',
+      'mode=max,builder-id=foo'
+    ],
+    [
+      '',
+      ''
+    ],
+  ])('given input %p', async (input: string, expected: string) => {
+    await setInput('provenance', input);
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    expect(buildx.getProvenanceInput('provenance')).toEqual(expected);
+  });
+});
+
+describe('getProvenanceAttrs', () => {
+  // prettier-ignore
+  test.each([
+    [
+      'mode=min',
+      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+    [
+      'mode=max',
+      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+    [
+      'builder-id=foo',
+      'builder-id=foo'
+    ],
+    [
+      'mode=max,builder-id=foo',
+      'mode=max,builder-id=foo'
+    ],
+    [
+      '',
+      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+    ],
+  ])('given %p', async (input: string, expected: string) => {
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    expect(buildx.getProvenanceAttrs(input)).toEqual(expected);
+  });
+});
+
 describe('generateBuildSecret', () => {
   test.each([
     ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
@@ -264,3 +344,12 @@ describe('hasGitAuthTokenSecret', () => {
     expect(Buildx.hasGitAuthTokenSecret(kvp)).toBe(expected);
   });
 });
+
+// See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
+function getInputName(name: string): string {
+  return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
+}
+
+function setInput(name: string, value: string): void {
+  process.env[getInputName(name)] = value;
+}

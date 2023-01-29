@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import {parse} from 'csv-parse/sync';
 import * as semver from 'semver';
@@ -155,6 +156,44 @@ export class Buildx {
     const secretFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
     fs.writeFileSync(secretFile, value);
     return `id=${key},src=${secretFile}`;
+  }
+
+  public getProvenanceInput(name: string): string {
+    const input = core.getInput(name);
+    if (!input) {
+      // if input is not set returns empty string
+      return input;
+    }
+    const builderID = this.context.provenanceBuilderID;
+    try {
+      return core.getBooleanInput(name) ? `builder-id=${builderID}` : 'false';
+    } catch (err) {
+      // not a valid boolean, so we assume it's a string
+      return this.getProvenanceAttrs(input);
+    }
+  }
+
+  public getProvenanceAttrs(input: string): string {
+    if (!input) {
+      return `builder-id=${this.context.provenanceBuilderID}`;
+    }
+    // parse attributes from input
+    const fields = parse(input, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+    // check if builder-id attribute exists in the input
+    for (const field of fields) {
+      const parts = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map(item => item.trim());
+      if (parts[0] == 'builder-id') {
+        return input;
+      }
+    }
+    // if not add builder-id attribute
+    return `${input},builder-id=${this.context.provenanceBuilderID}`;
   }
 
   public static hasLocalExporter(exporters: string[]): boolean {
