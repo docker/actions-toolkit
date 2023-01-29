@@ -33,91 +33,6 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
-describe('getBuildImageID', () => {
-  it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
-    const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
-    const imageIDFile = buildx.getBuildImageIDFilePath();
-    await fs.writeFileSync(imageIDFile, imageID);
-    const expected = buildx.getBuildImageID();
-    expect(expected).toEqual(imageID);
-  });
-});
-
-describe('getBuildMetadata', () => {
-  it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
-    const metadataFile = buildx.getBuildMetadataFilePath();
-    await fs.writeFileSync(metadataFile, metadata);
-    const expected = buildx.getBuildMetadata();
-    expect(expected).toEqual(metadata);
-  });
-});
-
-describe('getDigest', () => {
-  it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
-    const metadataFile = buildx.getBuildMetadataFilePath();
-    await fs.writeFileSync(metadataFile, metadata);
-    const expected = buildx.getDigest();
-    expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
-  });
-});
-
-describe('hasLocalExporter', () => {
-  // prettier-ignore
-  test.each([
-    [['type=registry,ref=user/app'], false],
-    [['type=docker'], false],
-    [['type=local,dest=./release-out'], true],
-    [['type=tar,dest=/tmp/image.tar'], false],
-    [['type=docker', 'type=tar,dest=/tmp/image.tar'], false],
-    [['"type=tar","dest=/tmp/image.tar"'], false],
-    [['" type= local" , dest=./release-out'], true],
-    [['.'], true]
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
-    expect(Buildx.hasLocalExporter(exporters)).toEqual(expected);
-  });
-});
-
-describe('hasTarExporter', () => {
-  // prettier-ignore
-  test.each([
-    [['type=registry,ref=user/app'], false],
-    [['type=docker'], false],
-    [['type=local,dest=./release-out'], false],
-    [['type=tar,dest=/tmp/image.tar'], true],
-    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true],
-    [['"type=tar","dest=/tmp/image.tar"'], true],
-    [['" type= local" , dest=./release-out'], false],
-    [['.'], false]
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
-    expect(Buildx.hasTarExporter(exporters)).toEqual(expected);
-  });
-});
-
-describe('hasDockerExporter', () => {
-  // prettier-ignore
-  test.each([
-    [['type=registry,ref=user/app'], false, undefined],
-    [['type=docker'], true, undefined],
-    [['type=local,dest=./release-out'], false, undefined],
-    [['type=tar,dest=/tmp/image.tar'], false, undefined],
-    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true, undefined],
-    [['"type=tar","dest=/tmp/image.tar"'], false, undefined],
-    [['" type= local" , dest=./release-out'], false, undefined],
-    [['.'], true, true],
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
-    expect(Buildx.hasDockerExporter(exporters, load)).toEqual(expected);
-  });
-});
-
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
@@ -225,6 +140,43 @@ describe('versionSatisfies', () => {
   });
 });
 
+describe('getBuildImageID', () => {
+  it('matches', async () => {
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
+    const imageIDFile = buildx.getBuildImageIDFilePath();
+    await fs.writeFileSync(imageIDFile, imageID);
+    const expected = buildx.getBuildImageID();
+    expect(expected).toEqual(imageID);
+  });
+});
+
+describe('getBuildMetadata', () => {
+  it('matches', async () => {
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    const metadataFile = buildx.getBuildMetadataFilePath();
+    await fs.writeFileSync(metadataFile, metadata);
+    const expected = buildx.getBuildMetadata();
+    expect(expected).toEqual(metadata);
+  });
+});
+
+describe('getDigest', () => {
+  it('matches', async () => {
+    const buildx = new Buildx({
+      context: new Context()
+    });
+    const metadataFile = buildx.getBuildMetadataFilePath();
+    await fs.writeFileSync(metadataFile, metadata);
+    const expected = buildx.getDigest();
+    expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
+  });
+});
+
 describe('generateBuildSecret', () => {
   test.each([
     ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
@@ -252,6 +204,54 @@ describe('generateBuildSecret', () => {
       // eslint-disable-next-line jest/no-conditional-expect
       expect(e.message).toEqual(error?.message);
     }
+  });
+});
+
+describe('hasLocalExporter', () => {
+  // prettier-ignore
+  test.each([
+    [['type=registry,ref=user/app'], false],
+    [['type=docker'], false],
+    [['type=local,dest=./release-out'], true],
+    [['type=tar,dest=/tmp/image.tar'], false],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], false],
+    [['"type=tar","dest=/tmp/image.tar"'], false],
+    [['" type= local" , dest=./release-out'], true],
+    [['.'], true]
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+    expect(Buildx.hasLocalExporter(exporters)).toEqual(expected);
+  });
+});
+
+describe('hasTarExporter', () => {
+  // prettier-ignore
+  test.each([
+    [['type=registry,ref=user/app'], false],
+    [['type=docker'], false],
+    [['type=local,dest=./release-out'], false],
+    [['type=tar,dest=/tmp/image.tar'], true],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true],
+    [['"type=tar","dest=/tmp/image.tar"'], true],
+    [['" type= local" , dest=./release-out'], false],
+    [['.'], false]
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+    expect(Buildx.hasTarExporter(exporters)).toEqual(expected);
+  });
+});
+
+describe('hasDockerExporter', () => {
+  // prettier-ignore
+  test.each([
+    [['type=registry,ref=user/app'], false, undefined],
+    [['type=docker'], true, undefined],
+    [['type=local,dest=./release-out'], false, undefined],
+    [['type=tar,dest=/tmp/image.tar'], false, undefined],
+    [['type=docker', 'type=tar,dest=/tmp/image.tar'], true, undefined],
+    [['"type=tar","dest=/tmp/image.tar"'], false, undefined],
+    [['" type= local" , dest=./release-out'], false, undefined],
+    [['.'], true, true],
+  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
+    expect(Buildx.hasDockerExporter(exporters, load)).toEqual(expected);
   });
 });
 
