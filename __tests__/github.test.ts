@@ -1,4 +1,6 @@
 import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import {GitHub, GitHubRepo} from '../src/github';
 
@@ -42,6 +44,31 @@ describe('serverURL', () => {
   it('returns from env', async () => {
     const github = new GitHub();
     expect(github.serverURL).toEqual('https://foo.github.com');
+  });
+});
+
+describe('actionsRuntimeToken', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('empty', async () => {
+    process.env.ACTIONS_RUNTIME_TOKEN = '';
+    const github = new GitHub();
+    expect(github.actionsRuntimeToken).toEqual({});
+  });
+  it('fixture', async () => {
+    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
+    const github = new GitHub();
+    const runtimeToken = github.actionsRuntimeToken;
+    expect(runtimeToken.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
+    expect(runtimeToken.iss).toEqual('vstoken.actions.githubusercontent.com');
   });
 });
 

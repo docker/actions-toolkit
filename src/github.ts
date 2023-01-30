@@ -6,7 +6,7 @@ import {Context} from '@actions/github/lib/context';
 
 export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
 
-export interface GitHubRuntimeToken extends JwtPayload {
+export interface GitHubActionsRuntimeToken extends JwtPayload {
   ac?: string;
 }
 
@@ -30,8 +30,9 @@ export class GitHub {
     return process.env.GITHUB_SERVER_URL || 'https://github.com';
   }
 
-  get runtimeToken(): GitHubRuntimeToken {
-    return jwt_decode<GitHubRuntimeToken>(`${process.env['ACTIONS_RUNTIME_TOKEN']}`);
+  get actionsRuntimeToken(): GitHubActionsRuntimeToken {
+    const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
+    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : {};
   }
 
   public repoData(): Promise<GitHubRepo> {
