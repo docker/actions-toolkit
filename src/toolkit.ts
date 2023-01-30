@@ -9,7 +9,7 @@ export {Buildx, BuildxOpts} from './buildx';
 export {Context} from './context';
 export {Docker} from './docker';
 export {Git} from './git';
-export {GitHub, GitHubRepo, GitHubRuntimeToken} from './github';
+export {GitHub, GitHubRepo, GitHubActionsRuntimeToken} from './github';
 export {Util} from './util';
 
 export interface ToolkitOpts {
