@@ -1,13 +1,15 @@
 import {Context} from './context';
 import {Buildx} from './buildx';
 import {BuildKit} from './buildkit';
+import {GitHub} from './github';
 
-export {BuildKit, BuildKitOpts} from './buildkit';
 export {Builder, BuilderOpts, BuilderInfo, NodeInfo} from './builder';
+export {BuildKit, BuildKitOpts} from './buildkit';
 export {Buildx, BuildxOpts} from './buildx';
-export {Context, ReposGetResponseData, Jwt} from './context';
+export {Context} from './context';
 export {Docker} from './docker';
 export {Git} from './git';
+export {GitHub, GitHubRepo, GitHubRuntimeToken} from './github';
 export {Util} from './util';
 
 export interface ToolkitOpts {
@@ -20,11 +22,13 @@ export interface ToolkitOpts {
 
 export class Toolkit {
   public context: Context;
+  public github: GitHub;
   public buildx: Buildx;
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
-    this.context = new Context(opts.githubToken);
+    this.context = new Context();
+    this.github = new GitHub({token: opts.githubToken});
     this.buildx = new Buildx({context: this.context});
     this.buildkit = new BuildKit({context: this.context, buildx: this.buildx});
   }
