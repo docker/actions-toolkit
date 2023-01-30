@@ -6,10 +6,12 @@ ARG BUILDX_VERSION=0.10.0
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
+RUN yarn config set --home enableTelemetry 0
 WORKDIR /src
 
 FROM base AS deps
 RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/src/.yarn/cache \
   --mount=type=cache,target=/src/node_modules \
   yarn install && mkdir /vendor && cp yarn.lock /vendor
 
@@ -30,6 +32,7 @@ EOT
 
 FROM deps AS build
 RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/src/.yarn/cache \
   --mount=type=cache,target=/src/node_modules \
   yarn run build && mkdir /out && cp -Rf lib /out/
 
@@ -38,9 +41,10 @@ COPY --from=build /out /
 
 FROM deps AS format
 RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/src/.yarn/cache \
   --mount=type=cache,target=/src/node_modules \
   yarn run format \
-  && mkdir /out && find . -name '*.ts' -not -path './node_modules/*' | cpio -pdm /out
+  && mkdir /out && find . -name '*.ts' -not -path './node_modules/*' -not -path './.yarn/*' | cpio -pdm /out
 
 FROM scratch AS format-update
 COPY --from=format /out /
@@ -55,6 +59,7 @@ FROM docker/buildx-bin:${BUILDX_VERSION} as buildx
 
 FROM deps AS test
 RUN --mount=type=bind,target=.,rw \
+    --mount=type=cache,target=/src/.yarn/cache \
     --mount=type=cache,target=/src/node_modules \
     --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
     --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
