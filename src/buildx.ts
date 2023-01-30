@@ -2,11 +2,19 @@ import fs from 'fs';
 import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as httpm from '@actions/http-client';
 import {parse} from 'csv-parse/sync';
 import * as semver from 'semver';
 
 import {Docker} from './docker';
 import {Context} from './context';
+
+export interface GitHubRelease {
+  id: number;
+  tag_name: string;
+  html_url: string;
+  assets: Array<string>;
+}
 
 export interface BuildxOpts {
   context: Context;
@@ -202,6 +210,22 @@ export class Buildx {
     }
     // if not add builder-id attribute
     return `${input},builder-id=${this.context.provenanceBuilderID}`;
+  }
+
+  public static async getRelease(version: string): Promise<GitHubRelease> {
+    const url = `https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json`;
+    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+    const resp: httpm.HttpClientResponse = await http.get(url);
+    const body = await resp.readBody();
+    const statusCode = resp.message.statusCode || 500;
+    if (statusCode >= 400) {
+      throw new Error(`Failed to get Buildx release ${version} from ${url} with status code ${statusCode}: ${body}`);
+    }
+    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+    if (!releases[version]) {
+      throw new Error(`Cannot find Buildx release ${version} in ${url}`);
+    }
+    return releases[version];
   }
 
   public static hasLocalExporter(exporters: string[]): boolean {
