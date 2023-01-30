@@ -53,3 +53,19 @@ target "test-coverage" {
   output = ["./coverage"]
   secret = ["id=GITHUB_TOKEN,env=GITHUB_TOKEN"]
 }
+
+# GITHUB_REF is the actual ref that triggers the workflow and used as version
+# when a tag is pushed: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+variable "GITHUB_REF" {
+  default = ""
+}
+
+target "publish" {
+  dockerfile = "dev.Dockerfile"
+  args = {
+    GITHUB_REF = GITHUB_REF
+  }
+  target = "publish"
+  output = ["type=cacheonly"]
+  secret = ["id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN"]
+}
