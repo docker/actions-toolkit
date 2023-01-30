@@ -107,12 +107,12 @@ describe('printVersion', () => {
   });
 });
 
-describe('getVersion', () => {
+describe('version', () => {
   it('valid', async () => {
     const buildx = new Buildx({
       context: new Context()
     });
-    expect(semver.valid(await buildx.version)).not.toBeNull();
+    expect(semver.valid(await buildx.version)).not.toBeUndefined();
   });
 });
 
