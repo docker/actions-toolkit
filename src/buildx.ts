@@ -15,13 +15,13 @@ export interface BuildxOpts {
 
 export class Buildx {
   private readonly context: Context;
+  private _version: string | undefined;
+
   public standalone: boolean;
-  public version: Promise<string>;
 
   constructor(opts: BuildxOpts) {
     this.context = opts.context;
     this.standalone = opts?.standalone ?? !Docker.isAvailable();
-    this.version = this.getVersion();
   }
 
   public getCommand(args: Array<string>) {
@@ -57,19 +57,24 @@ export class Buildx {
     });
   }
 
-  private async getVersion(): Promise<string> {
-    const cmd = this.getCommand(['version']);
-    return await exec
-      .getExecOutput(cmd.command, cmd.args, {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          throw new Error(res.stderr.trim());
-        }
-        return Buildx.parseVersion(res.stdout.trim());
-      });
+  get version() {
+    return (async () => {
+      if (!this._version) {
+        const cmd = this.getCommand(['version']);
+        this._version = await exec
+          .getExecOutput(cmd.command, cmd.args, {
+            ignoreReturnCode: true,
+            silent: true
+          })
+          .then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              throw new Error(res.stderr.trim());
+            }
+            return Buildx.parseVersion(res.stdout.trim());
+          });
+      }
+      return this._version;
+    })();
   }
 
   public async printVersion() {
@@ -89,6 +94,9 @@ export class Buildx {
 
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {
     const ver = version ?? (await this.version);
+    if (!ver) {
+      return false;
+    }
     return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
   }
 
