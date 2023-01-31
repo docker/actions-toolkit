@@ -7,7 +7,7 @@ group "pre-checkin" {
 }
 
 group "validate" {
-  targets = ["lint", "vendor-validate"]
+  targets = ["lint", "vendor-validate", "license-validate"]
 }
 
 target "build" {
@@ -68,4 +68,16 @@ target "publish" {
   target = "publish"
   output = ["type=cacheonly"]
   secret = ["id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN"]
+}
+
+target "license-validate" {
+  dockerfile = "./hack/dockerfiles/license.Dockerfile"
+  target = "validate"
+  output = ["type=cacheonly"]
+}
+
+target "license-update" {
+  dockerfile = "./hack/dockerfiles/license.Dockerfile"
+  target = "update"
+  output = ["."]
 }
