@@ -744,6 +744,7 @@ __metadata:
     "@actions/core": ^1.10.0
     "@actions/exec": ^1.1.1
     "@actions/github": ^5.1.1
+    "@actions/http-client": ^2.0.1
     "@types/csv-parse": ^1.2.2
     "@types/node": ^16.18.11
     "@types/semver": ^7.3.13
