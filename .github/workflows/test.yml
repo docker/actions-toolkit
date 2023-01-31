@@ -11,6 +11,13 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - lint
+          - vendor-validate
+          - license-validate
     steps:
       -
         name: Checkout
@@ -19,7 +26,7 @@ jobs:
         name: Validate
         uses: docker/bake-action@v2
         with:
-          targets: validate
+          targets: ${{ matrix.target }}
 
   test:
     runs-on: ubuntu-latest
