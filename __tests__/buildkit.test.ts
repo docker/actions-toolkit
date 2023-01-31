@@ -21,8 +21,10 @@ import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
 import {BuildKit} from '../src/buildkit';
-import {Builder, BuilderInfo} from '../src/builder';
+import {Builder} from '../src/buildx/builder';
 import {Context} from '../src/context';
+
+import {BuilderInfo} from '../src/types/builder';
 
 const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);

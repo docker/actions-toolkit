@@ -18,8 +18,12 @@ import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Builder, BuilderInfo} from '../src/builder';
-import {Context} from '../src/context';
+import {Builder} from '../../src/buildx/builder';
+import {Context} from '../../src/context';
+
+import {BuilderInfo} from '../../src/types/builder';
+
+const fixturesDir = path.join(__dirname, '..', 'fixtures');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -196,6 +200,6 @@ describe('parseInspect', () => {
      }
     ]
   ])('given %p', async (inspectFile, expected) => {
-    expect(await Builder.parseInspect(fs.readFileSync(path.join(__dirname, 'fixtures', inspectFile)).toString())).toEqual(expected);
+    expect(await Builder.parseInspect(fs.readFileSync(path.join(fixturesDir, inspectFile)).toString())).toEqual(expected);
   });
 });

@@ -20,8 +20,10 @@ import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
 import {Context} from './context';
-import {Buildx} from './buildx';
-import {Builder, BuilderInfo} from './builder';
+import {Buildx} from './buildx/buildx';
+import {Builder} from './buildx/builder';
+
+import {BuilderInfo} from './types/builder';
 
 export interface BuildKitOpts {
   context: Context;
@@ -40,14 +42,6 @@ export class BuildKit {
       new Buildx({
         context: this.context
       });
-  }
-
-  private async getBuilderInfo(name: string): Promise<BuilderInfo> {
-    const builder = new Builder({
-      context: this.context,
-      buildx: this.buildx
-    });
-    return builder.inspect(name);
   }
 
   public async getVersion(builderName: string): Promise<string | undefined> {
@@ -136,5 +130,13 @@ export class BuildKit {
     const configFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
     fs.writeFileSync(configFile, s);
     return configFile;
+  }
+
+  private async getBuilderInfo(name: string): Promise<BuilderInfo> {
+    const builder = new Builder({
+      context: this.context,
+      buildx: this.buildx
+    });
+    return builder.inspect(name);
   }
 }
