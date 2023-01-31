@@ -213,6 +213,7 @@ export class Buildx {
   }
 
   public static async getRelease(version: string): Promise<GitHubRelease> {
+    // FIXME: Use https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json when repo public
     const url = `https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json`;
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
     const resp: httpm.HttpClientResponse = await http.get(url);
