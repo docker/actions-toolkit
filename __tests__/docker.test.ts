@@ -14,13 +14,37 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
 import * as exec from '@actions/exec';
+import path from 'path';
+import osm = require('os');
 
 import {Docker} from '../src/docker';
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+describe('configDir', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      DOCKER_CONFIG: '/var/docker/config'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns default', async () => {
+    process.env.DOCKER_CONFIG = '';
+    jest.spyOn(osm, 'homedir').mockImplementation(() => path.join('/tmp', 'home'));
+    expect(Docker.configDir).toEqual(path.join('/tmp', 'home', '.docker'));
+  });
+  it('returns from env', async () => {
+    expect(Docker.configDir).toEqual('/var/docker/config');
+  });
 });
 
 describe('isAvailable', () => {

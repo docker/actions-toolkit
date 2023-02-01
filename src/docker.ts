@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import os from 'os';
+import path from 'path';
 import * as exec from '@actions/exec';
 
 export class Docker {
+  static get configDir(): string {
+    return process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
+  }
+
   public static isAvailable(): boolean {
     let dockerAvailable = false;
     exec
