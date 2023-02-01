@@ -15,14 +15,12 @@
  */
 
 import * as exec from '@actions/exec';
-import * as httpm from '@actions/http-client';
 import * as semver from 'semver';
 
 import {Docker} from '../docker';
 import {Context} from '../context';
 import {Inputs} from './inputs';
-
-import {GitHubRelease} from '../types/github';
+import {Install} from './install';
 
 export interface BuildxOpts {
   context: Context;
@@ -34,29 +32,14 @@ export class Buildx {
   private _version: string | undefined;
 
   public readonly inputs: Inputs;
+  public readonly install: Install;
   public readonly standalone: boolean;
 
   constructor(opts: BuildxOpts) {
     this.context = opts.context;
     this.inputs = new Inputs(this.context);
+    this.install = new Install({standalone: opts.standalone});
     this.standalone = opts?.standalone ?? !Docker.isAvailable();
-  }
-
-  public static async getRelease(version: string): Promise<GitHubRelease> {
-    // FIXME: Use https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json when repo public
-    const url = `https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json`;
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(url);
-    const body = await resp.readBody();
-    const statusCode = resp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get Buildx release ${version} from ${url} with status code ${statusCode}: ${body}`);
-    }
-    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
-    if (!releases[version]) {
-      throw new Error(`Cannot find Buildx release ${version} in ${url}`);
-    }
-    return releases[version];
   }
 
   public getCommand(args: Array<string>) {

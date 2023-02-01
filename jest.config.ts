@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
+
 process.env = Object.assign({}, process.env, {
+  TEMP: tmpDir,
   GITHUB_REPOSITORY: 'docker/actions-toolkit',
-  RUNNER_TEMP: '/tmp/github_runner',
-  RUNNER_TOOL_CACHE: '/tmp/github_tool_cache'
+  RUNNER_TEMP: path.join(tmpDir, 'runner-temp').split(path.sep).join(path.posix.sep),
+  RUNNER_TOOL_CACHE: path.join(tmpDir, 'runner-tool-cache').split(path.sep).join(path.posix.sep)
 }) as {
   [key: string]: string;
 };

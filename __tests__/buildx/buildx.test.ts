@@ -24,7 +24,8 @@ import * as exec from '@actions/exec';
 import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
 
-const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
@@ -43,34 +44,6 @@ beforeEach(() => {
 
 afterEach(() => {
   rimraf.sync(tmpDir);
-});
-
-describe('getRelease', () => {
-  it('returns latest buildx GitHub release', async () => {
-    const release = await Buildx.getRelease('latest');
-    expect(release).not.toBeNull();
-    expect(release?.tag_name).not.toEqual('');
-  });
-
-  it('returns v0.10.1 buildx GitHub release', async () => {
-    const release = await Buildx.getRelease('v0.10.1');
-    expect(release).not.toBeNull();
-    expect(release?.id).toEqual(90346950);
-    expect(release?.tag_name).toEqual('v0.10.1');
-    expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.10.1');
-  });
-
-  it('returns v0.2.2 buildx GitHub release', async () => {
-    const release = await Buildx.getRelease('v0.2.2');
-    expect(release).not.toBeNull();
-    expect(release?.id).toEqual(17671545);
-    expect(release?.tag_name).toEqual('v0.2.2');
-    expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.2.2');
-  });
-
-  it('unknown release', async () => {
-    await expect(Buildx.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json'));
-  });
 });
 
 describe('isAvailable', () => {
