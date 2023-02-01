@@ -1,6 +1,9 @@
 # Dependency directories
-node_modules/
-jspm_packages/
+/node_modules/**
+/jspm_packages/**
 
 # yarn v2
-.yarn/
+/.yarn/**
+
+# build
+/lib/**
