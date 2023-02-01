@@ -83,10 +83,5 @@ RUN --mount=type=bind,target=.,rw \
   fi
   yarn install
   yarn run build
-  npm config set //registry.npmjs.org/:_authToken $(cat /run/secrets/NODE_AUTH_TOKEN)
-  npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
-  npm publish --access public
-
-  # FIXME: Can't publish with yarn berry atm: https://github.com/changesets/changesets/pull/674
-  #NODE_AUTH_TOKEN=$(cat /run/secrets/NODE_AUTH_TOKEN) yarn publish --no-git-tag-version --new-version ${GITHUB_REF#refs/tags/v}
+  NODE_AUTH_TOKEN=$(cat /run/secrets/NODE_AUTH_TOKEN) yarn npm publish --access public --tag ${GITHUB_REF#refs/tags/v}
 EOT
