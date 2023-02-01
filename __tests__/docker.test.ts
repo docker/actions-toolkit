@@ -50,7 +50,7 @@ describe('configDir', () => {
 describe('isAvailable', () => {
   it('cli', () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
-    Docker.isAvailable();
+    Docker.isAvailable;
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, undefined, {
       silent: true,

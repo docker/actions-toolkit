@@ -39,7 +39,7 @@ export class Buildx {
     this.context = opts.context;
     this.inputs = new Inputs(this.context);
     this.install = new Install({standalone: opts.standalone});
-    this.standalone = opts?.standalone ?? !Docker.isAvailable();
+    this.standalone = opts?.standalone ?? !Docker.isAvailable;
   }
 
   public getCommand(args: Array<string>) {
