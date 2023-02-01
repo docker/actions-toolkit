@@ -15,27 +15,30 @@ export interface GitHubOpts {
 }
 
 export class GitHub {
-  public static readonly serverURL: string = process.env.GITHUB_SERVER_URL || 'https://github.com';
   public readonly octokit: InstanceType<typeof Octokit>;
 
   constructor(opts?: GitHubOpts) {
     this.octokit = github.getOctokit(`${opts?.token}`);
   }
 
-  get context(): Context {
+  public repoData(): Promise<GitHubRepo> {
+    return this.octokit.rest.repos.get({...github.context.repo}).then(response => response.data as GitHubRepo);
+  }
+
+  static get context(): Context {
     return github.context;
   }
 
-  get serverURL(): string {
+  static get serverURL(): string {
     return process.env.GITHUB_SERVER_URL || 'https://github.com';
   }
 
-  get actionsRuntimeToken(): GitHubActionsRuntimeToken {
-    const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
-    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : {};
+  static get apiURL(): string {
+    return process.env.GITHUB_API_URL || 'https://api.github.com';
   }
 
-  public repoData(): Promise<GitHubRepo> {
-    return this.octokit.rest.repos.get({...github.context.repo}).then(response => response.data as GitHubRepo);
+  static get actionsRuntimeToken(): GitHubActionsRuntimeToken {
+    const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
+    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : {};
   }
 }
