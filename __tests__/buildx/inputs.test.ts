@@ -24,7 +24,8 @@ import {Buildx} from '../../src/buildx/buildx';
 import {Inputs} from '../../src/buildx/inputs';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 const metadata = `{
   "containerimage.config.digest": "sha256:059b68a595b22564a1cbc167af369349fdc2ecc1f7bc092c2235cbf601a795fd",

@@ -23,7 +23,8 @@ import {BuildKit} from '../../src/buildkit/buildkit';
 import {Context} from '../../src/context';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildkit-config-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {

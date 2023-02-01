@@ -83,10 +83,10 @@ export class Install {
 
   private async download(version: string): Promise<string> {
     const targetFile: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-    const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, this.filename(version));
-    const downloadPath = await tc.downloadTool(downloadUrl);
-    core.debug(`downloadUrl=${downloadUrl}`);
-    core.debug(`downloadPath=${downloadPath}`);
+    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, this.filename(version));
+    const downloadPath = await tc.downloadTool(downloadURL);
+    core.debug(`downloadURL: ${downloadURL}`);
+    core.debug(`downloadPath: ${downloadPath}`);
     return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
   }
 

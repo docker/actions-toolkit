@@ -16,7 +16,6 @@
 
 import {describe, expect, it, jest, test, beforeEach} from '@jest/globals';
 import * as fs from 'fs';
-import os from 'os';
 import * as path from 'path';
 import osm = require('os');
 
@@ -27,7 +26,8 @@ beforeEach(() => {
 });
 
 describe('install', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'actions-toolkit-'));
+  // prettier-ignore
+  const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-install-jest').split(path.sep).join(path.posix.sep);
 
   // prettier-ignore
   test.each([
@@ -65,6 +65,12 @@ describe('install', () => {
     },
     100000
   );
+
+  it('returns latest buildx GitHub release', async () => {
+    const release = await Install.getRelease('latest');
+    expect(release).not.toBeNull();
+    expect(release?.tag_name).not.toEqual('');
+  });
 });
 
 describe('getRelease', () => {

@@ -24,7 +24,8 @@ import * as exec from '@actions/exec';
 import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
 
-const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
