@@ -18,13 +18,14 @@ import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {GitHub, GitHubRepo} from '../src/github';
+import {GitHub} from '../src/github';
+import {GitHubRepo} from '../src/types/github';
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-import * as repoFixture from './fixtures/repo.json';
+import repoFixture from './fixtures/repo.json';
 jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
   return <Promise<GitHubRepo>>(repoFixture as unknown);
 });

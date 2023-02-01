@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
-import {Context} from './context';
-import {Buildx} from './buildx';
-import {Builder, BuilderInfo} from './builder';
+import {Context} from '../context';
+import {Buildx} from '../buildx/buildx';
+import {Builder} from '../buildx/builder';
+import {Config} from './config';
+
+import {BuilderInfo} from '../types/builder';
 
 export interface BuildKitOpts {
   context: Context;
@@ -33,21 +35,16 @@ export class BuildKit {
   private readonly buildx: Buildx;
   private containerNamePrefix = 'buildx_buildkit_';
 
+  public readonly config: Config;
+
   constructor(opts: BuildKitOpts) {
     this.context = opts.context;
+    this.config = new Config(this.context);
     this.buildx =
       opts?.buildx ||
       new Buildx({
         context: this.context
       });
-  }
-
-  private async getBuilderInfo(name: string): Promise<BuilderInfo> {
-    const builder = new Builder({
-      context: this.context,
-      buildx: this.buildx
-    });
-    return builder.inspect(name);
   }
 
   public async getVersion(builderName: string): Promise<string | undefined> {
@@ -118,23 +115,11 @@ export class BuildKit {
     return true;
   }
 
-  public generateConfigInline(s: string): string {
-    return this.generateConfig(s, false);
-  }
-
-  public generateConfigFile(s: string): string {
-    return this.generateConfig(s, true);
-  }
-
-  private generateConfig(s: string, file: boolean): string {
-    if (file) {
-      if (!fs.existsSync(s)) {
-        throw new Error(`config file ${s} not found`);
-      }
-      s = fs.readFileSync(s, {encoding: 'utf-8'});
-    }
-    const configFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
-    fs.writeFileSync(configFile, s);
-    return configFile;
+  private async getBuilderInfo(name: string): Promise<BuilderInfo> {
+    const builder = new Builder({
+      context: this.context,
+      buildx: this.buildx
+    });
+    return builder.inspect(name);
   }
 }

@@ -14,35 +14,17 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as rimraf from 'rimraf';
+import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as semver from 'semver';
 
-import {BuildKit} from '../src/buildkit';
-import {Builder, BuilderInfo} from '../src/builder';
-import {Context} from '../src/context';
+import {BuildKit} from '../../src/buildkit/buildkit';
+import {Builder} from '../../src/buildx/builder';
+import {Context} from '../../src/context';
 
-const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
-const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
-
-jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
-  return tmpDir;
-});
-jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
-  return tmpName;
-});
+import {BuilderInfo} from '../../src/types/builder';
 
 beforeEach(() => {
   jest.clearAllMocks();
-});
-
-afterEach(() => {
-  rimraf.sync(tmpDir);
 });
 
 jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
@@ -83,39 +65,5 @@ describe('satisfies', () => {
       context: new Context()
     });
     expect(await buildkit.versionSatisfies(builderName, range)).toBe(expected);
-  });
-});
-
-describe('generateConfig', () => {
-  test.each([
-    ['debug = true', false, 'debug = true', null],
-    [`notfound.toml`, true, '', new Error('config file notfound.toml not found')],
-    [
-      `${path.join(__dirname, 'fixtures', 'buildkitd.toml').split(path.sep).join(path.posix.sep)}`,
-      true,
-      `debug = true
-[registry."docker.io"]
-  mirrors = ["mirror.gcr.io"]
-`,
-      null
-    ]
-  ])('given %p config', async (val, file, exValue, error: Error) => {
-    try {
-      const buildkit = new BuildKit({
-        context: new Context()
-      });
-      let config: string;
-      if (file) {
-        config = buildkit.generateConfigFile(val);
-      } else {
-        config = buildkit.generateConfigInline(val);
-      }
-      expect(config).toEqual(tmpName);
-      const configValue = fs.readFileSync(tmpName, 'utf-8');
-      expect(configValue).toEqual(exValue);
-    } catch (e) {
-      // eslint-disable-next-line jest/no-conditional-expect
-      expect(e.message).toEqual(error?.message);
-    }
   });
 });

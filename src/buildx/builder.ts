@@ -17,24 +17,9 @@
 import * as exec from '@actions/exec';
 
 import {Buildx} from './buildx';
-import {Context} from './context';
+import {Context} from '../context';
 
-export interface BuilderInfo {
-  name?: string;
-  driver?: string;
-  lastActivity?: Date;
-  nodes: NodeInfo[];
-}
-
-export interface NodeInfo {
-  name?: string;
-  endpoint?: string;
-  driverOpts?: Array<string>;
-  status?: string;
-  buildkitdFlags?: string;
-  buildkitVersion?: string;
-  platforms?: string;
-}
+import {BuilderInfo, NodeInfo} from '../types/builder';
 
 export interface BuilderOpts {
   context: Context;
