@@ -16,15 +16,10 @@
 
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import * as github from '@actions/github';
-import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
-import jwt_decode, {JwtPayload} from 'jwt-decode';
 import {Context} from '@actions/github/lib/context';
+import jwt_decode from 'jwt-decode';
 
-export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
-
-export interface GitHubActionsRuntimeToken extends JwtPayload {
-  ac?: string;
-}
+import {GitHubActionsRuntimeToken, GitHubRepo} from './types/github';
 
 export interface GitHubOpts {
   token?: string;
