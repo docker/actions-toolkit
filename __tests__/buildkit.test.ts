@@ -17,7 +17,7 @@
 import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
-import rimraf from 'rimraf';
+import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
 import {BuildKit} from '../src/buildkit';
@@ -27,13 +27,13 @@ import {Context} from '../src/context';
 const tmpDir = path.join('/tmp/.docker-actions-toolkit-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
 
-jest.spyOn(Context.prototype as any, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-jest.spyOn(Context.prototype as any, 'tmpName').mockImplementation((): string => {
+jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 

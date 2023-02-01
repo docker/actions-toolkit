@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
-import rimraf from 'rimraf';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as rimraf from 'rimraf';
 import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
 
 import {Context} from '../src/context';

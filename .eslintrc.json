@@ -2,11 +2,15 @@
   "env": {
     "node": true,
     "es2021": true,
-    "jest/globals": true
+    "mocha": true,
+    "jest": true
   },
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:import/errors",
+    "plugin:import/typescript", // this is needed to allow importing typescript files from JS
+    "plugin:import/warnings",
     "plugin:jest/recommended",
     "plugin:prettier/recommended"
   ],
@@ -19,5 +23,12 @@
     "@typescript-eslint",
     "jest",
     "prettier"
-  ]
+  ],
+  "rules": {
+    "import/no-unresolved": [
+      "error", {
+        "ignore": ["csv-parse/sync"]
+      }
+    ]
+  }
 }
