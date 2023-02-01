@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+import os from 'os';
+import path from 'path';
 import * as exec from '@actions/exec';
 
 export class Docker {
-  public static isAvailable(): boolean {
+  static get configDir(): string {
+    return process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
+  }
+
+  static get isAvailable(): boolean {
     let dockerAvailable = false;
     exec
       .getExecOutput('docker', undefined, {
@@ -39,7 +45,7 @@ export class Docker {
   }
 
   public static async printVersion(standalone?: boolean) {
-    const noDocker = standalone ?? !Docker.isAvailable();
+    const noDocker = standalone ?? !Docker.isAvailable;
     if (noDocker) {
       return;
     }
@@ -49,7 +55,7 @@ export class Docker {
   }
 
   public static async printInfo(standalone?: boolean) {
-    const noDocker = standalone ?? !Docker.isAvailable();
+    const noDocker = standalone ?? !Docker.isAvailable;
     if (noDocker) {
       return;
     }
