@@ -5,7 +5,7 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actions/core@npm:^1.10.0":
+"@actions/core@npm:^1.10.0, @actions/core@npm:^1.2.6":
   version: 1.10.0
   resolution: "@actions/core@npm:1.10.0"
   dependencies:
@@ -15,7 +15,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/exec@npm:^1.1.1":
+"@actions/exec@npm:^1.0.0, @actions/exec@npm:^1.1.1":
   version: 1.1.1
   resolution: "@actions/exec@npm:1.1.1"
   dependencies:
@@ -49,6 +49,27 @@ __metadata:
   version: 1.0.2
   resolution: "@actions/io@npm:1.0.2"
   checksum: e37e4cc826d15b437056a4b2c9d8c386bb0750ec9b22f11287981fe2764b32197fba9879db803a9e719dcc9fd0fca33759a676d8ec9eb21537e8346ec6fec0bf
+  languageName: node
+  linkType: hard
+
+"@actions/io@npm:^1.1.1":
+  version: 1.1.2
+  resolution: "@actions/io@npm:1.1.2"
+  checksum: 3c6583c4557abf6c95e9cfc9b6377045e65ba2c5dd4863f4feedd6be9daf4f6b60e588ab0151d5626b5f8320a37f05b8d44ab5c329b8c19f65be31b0616e1464
+  languageName: node
+  linkType: hard
+
+"@actions/tool-cache@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@actions/tool-cache@npm:2.0.1"
+  dependencies:
+    "@actions/core": ^1.2.6
+    "@actions/exec": ^1.0.0
+    "@actions/http-client": ^2.0.1
+    "@actions/io": ^1.1.1
+    semver: ^6.1.0
+    uuid: ^3.3.2
+  checksum: 33f6393b9b163e4af2b9759e8d37cda4f018f10ddda3643355bb8a9f92d732e5bdff089cf8036b46d181e1ef2b3210b895b2f746fdf54487afe88f1d340aa9e1
   languageName: node
   linkType: hard
 
@@ -745,6 +766,7 @@ __metadata:
     "@actions/exec": ^1.1.1
     "@actions/github": ^5.1.1
     "@actions/http-client": ^2.0.1
+    "@actions/tool-cache": ^2.0.1
     "@types/csv-parse": ^1.2.2
     "@types/node": ^16.18.11
     "@types/semver": ^7.3.13
@@ -5986,7 +6008,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^6.0.0, semver@npm:^6.3.0":
+"semver@npm:^6.0.0, semver@npm:^6.1.0, semver@npm:^6.3.0":
   version: 6.3.0
   resolution: "semver@npm:6.3.0"
   bin:
@@ -6728,6 +6750,15 @@ __metadata:
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
   checksum: 474acf1146cb2701fe3b074892217553dfcf9a031280919ba1b8d651a068c9b15d863b7303cb15bd00a862b498e6cf4ad7b4a08fb134edd5a6f7641681cb54a2
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^3.3.2":
+  version: 3.4.0
+  resolution: "uuid@npm:3.4.0"
+  bin:
+    uuid: ./bin/uuid
+  checksum: 58de2feed61c59060b40f8203c0e4ed7fd6f99d42534a499f1741218a1dd0c129f4aa1de797bcf822c8ea5da7e4137aa3673431a96dae729047f7aca7b27866f
   languageName: node
   linkType: hard
 
