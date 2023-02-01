@@ -19,17 +19,6 @@ import {Buildx} from './buildx/buildx';
 import {BuildKit} from './buildkit/buildkit';
 import {GitHub} from './github';
 
-export {Builder, BuilderOpts} from './buildx/builder';
-export {BuildKit, BuildKitOpts} from './buildkit/buildkit';
-export {Buildx, BuildxOpts} from './buildx/buildx';
-export {Context} from './context';
-export {Docker} from './docker';
-export {Git} from './git';
-export {GitHub, GitHubRepo, GitHubActionsRuntimeToken} from './github';
-export {Util} from './util';
-
-export {BuilderInfo, NodeInfo} from './types/builder';
-
 export interface ToolkitOpts {
   /**
    * GitHub token to use for authentication.
