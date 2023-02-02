@@ -97,6 +97,6 @@ describe('getRelease', () => {
   });
 
   it('unknown release', async () => {
-    await expect(Install.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json'));
+    await expect(Install.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
   });
 });

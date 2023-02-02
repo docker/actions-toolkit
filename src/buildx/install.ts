@@ -54,7 +54,7 @@ export class Install {
     return this.setPlugin(toolPath, dest);
   }
 
-  public async setStandalone(toolPath: string, dest: string): Promise<string> {
+  private async setStandalone(toolPath: string, dest: string): Promise<string> {
     const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
     const binDir = path.join(dest, 'bin');
     if (!fs.existsSync(binDir)) {
@@ -68,7 +68,7 @@ export class Install {
     return buildxPath;
   }
 
-  public async setPlugin(toolPath: string, dest: string): Promise<string> {
+  private async setPlugin(toolPath: string, dest: string): Promise<string> {
     const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
     const pluginsDir: string = path.join(dest, 'cli-plugins');
     if (!fs.existsSync(pluginsDir)) {
@@ -124,8 +124,7 @@ export class Install {
   }
 
   public static async getRelease(version: string): Promise<GitHubRelease> {
-    // FIXME: Use https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json when repo public
-    const url = `https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json`;
+    const url = `https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json`;
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
     const resp: httpm.HttpClientResponse = await http.get(url);
     const body = await resp.readBody();
