@@ -36,7 +36,7 @@ export class Inputs {
     return path.join(this.context.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
   }
 
-  public getBuildImageID(): string | undefined {
+  public resolveBuildImageID(): string | undefined {
     const iidFile = this.getBuildImageIDFilePath();
     if (!fs.existsSync(iidFile)) {
       return undefined;
@@ -44,7 +44,7 @@ export class Inputs {
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
   }
 
-  public getBuildMetadata(): string | undefined {
+  public resolveBuildMetadata(): string | undefined {
     const metadataFile = this.getBuildMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
@@ -56,8 +56,8 @@ export class Inputs {
     return content;
   }
 
-  public getDigest(): string | undefined {
-    const metadata = this.getBuildMetadata();
+  public resolveDigest(): string | undefined {
+    const metadata = this.resolveBuildMetadata();
     if (metadata === undefined) {
       return undefined;
     }
@@ -68,15 +68,15 @@ export class Inputs {
     return undefined;
   }
 
-  public generateBuildSecretString(kvp: string): string {
-    return this.generateBuildSecret(kvp, false);
+  public resolveBuildSecretString(kvp: string): string {
+    return this.resolveBuildSecret(kvp, false);
   }
 
-  public generateBuildSecretFile(kvp: string): string {
-    return this.generateBuildSecret(kvp, true);
+  public resolveBuildSecretFile(kvp: string): string {
+    return this.resolveBuildSecret(kvp, true);
   }
 
-  public generateBuildSecret(kvp: string, file: boolean): string {
+  public resolveBuildSecret(kvp: string, file: boolean): string {
     const delimiterIndex = kvp.indexOf('=');
     const key = kvp.substring(0, delimiterIndex);
     let value = kvp.substring(delimiterIndex + 1);
@@ -105,11 +105,11 @@ export class Inputs {
       return core.getBooleanInput(name) ? `builder-id=${builderID}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
-      return this.getProvenanceAttrs(input);
+      return this.resolveProvenanceAttrs(input);
     }
   }
 
-  public getProvenanceAttrs(input: string): string {
+  public resolveProvenanceAttrs(input: string): string {
     if (!input) {
       return `builder-id=${this.context.provenanceBuilderID}`;
     }
