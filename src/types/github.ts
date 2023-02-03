@@ -29,3 +29,8 @@ export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
 export interface GitHubActionsRuntimeToken extends JwtPayload {
   ac?: string;
 }
+
+export interface GitHubActionsRuntimeTokenAC {
+  Scope: string;
+  Permission: number;
+}

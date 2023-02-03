@@ -15,11 +15,12 @@
  */
 
 import {GitHub as Octokit} from '@actions/github/lib/utils';
+import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Context} from '@actions/github/lib/context';
 import jwt_decode from 'jwt-decode';
 
-import {GitHubActionsRuntimeToken, GitHubRepo} from './types/github';
+import {GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo} from './types/github';
 
 export interface GitHubOpts {
   token?: string;
@@ -48,8 +49,43 @@ export class GitHub {
     return process.env.GITHUB_API_URL || 'https://api.github.com';
   }
 
-  static get actionsRuntimeToken(): GitHubActionsRuntimeToken {
+  static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
     const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
-    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : {};
+    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : undefined;
+  }
+
+  public static async printActionsRuntimeTokenACs() {
+    let jwt: GitHubActionsRuntimeToken | undefined;
+    try {
+      jwt = GitHub.actionsRuntimeToken;
+    } catch (e) {
+      core.warning(`Cannot parse Actions Runtime Token: ${e.message}`);
+      return;
+    }
+    if (!jwt) {
+      core.warning(`ACTIONS_RUNTIME_TOKEN not set`);
+      return;
+    }
+    try {
+      <Array<GitHubActionsRuntimeTokenAC>>JSON.parse(`${jwt.ac}`).forEach(ac => {
+        let permission: string;
+        switch (ac.Permission) {
+          case 1:
+            permission = 'read';
+            break;
+          case 2:
+            permission = 'write';
+            break;
+          case 3:
+            permission = 'read/write';
+            break;
+          default:
+            permission = `unimplemented (${ac.Permission})`;
+        }
+        core.info(`${ac.Scope}: ${permission}`);
+      });
+    } catch (e) {
+      core.warning(`Cannot parse Actions Runtime Token Access Controls: ${e.message}`);
+    }
   }
 }

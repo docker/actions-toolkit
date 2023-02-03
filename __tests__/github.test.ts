@@ -17,6 +17,7 @@
 import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as core from '@actions/core';
 
 import {GitHub} from '../src/github';
 import {GitHubRepo} from '../src/types/github';
@@ -101,12 +102,52 @@ describe('actionsRuntimeToken', () => {
   });
   it('empty', async () => {
     process.env.ACTIONS_RUNTIME_TOKEN = '';
-    expect(GitHub.actionsRuntimeToken).toEqual({});
+    expect(GitHub.actionsRuntimeToken).toBeUndefined();
+  });
+  it('malformed', async () => {
+    process.env.ACTIONS_RUNTIME_TOKEN = 'foo';
+    expect(() => {
+      GitHub.actionsRuntimeToken;
+    }).toThrowError();
   });
   it('fixture', async () => {
     process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
     const runtimeToken = GitHub.actionsRuntimeToken;
-    expect(runtimeToken.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
-    expect(runtimeToken.iss).toEqual('vstoken.actions.githubusercontent.com');
+    expect(runtimeToken?.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
+    expect(runtimeToken?.iss).toEqual('vstoken.actions.githubusercontent.com');
+  });
+});
+
+describe('printActionsRuntimeTokenACs', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('empty', async () => {
+    const warnSpy = jest.spyOn(core, 'warning');
+    process.env.ACTIONS_RUNTIME_TOKEN = '';
+    await GitHub.printActionsRuntimeTokenACs();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(`ACTIONS_RUNTIME_TOKEN not set`);
+  });
+  it('malformed', async () => {
+    const warnSpy = jest.spyOn(core, 'warning');
+    process.env.ACTIONS_RUNTIME_TOKEN = 'foo';
+    await GitHub.printActionsRuntimeTokenACs();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(`Cannot parse Actions Runtime Token: Invalid token specified: Cannot read properties of undefined (reading 'replace')`);
+  });
+  it('refs/heads/master', async () => {
+    const infoSpy = jest.spyOn(core, 'info');
+    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
+    await GitHub.printActionsRuntimeTokenACs();
+    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(infoSpy).toHaveBeenCalledWith(`refs/heads/master: read/write`);
   });
 });

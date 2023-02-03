@@ -50,7 +50,7 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
-describe('getBuildImageID', () => {
+describe('resolveBuildImageID', () => {
   it('matches', async () => {
     const buildx = new Buildx({
       context: new Context()
@@ -58,31 +58,31 @@ describe('getBuildImageID', () => {
     const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
     const imageIDFile = buildx.inputs.getBuildImageIDFilePath();
     await fs.writeFileSync(imageIDFile, imageID);
-    const expected = buildx.inputs.getBuildImageID();
+    const expected = buildx.inputs.resolveBuildImageID();
     expect(expected).toEqual(imageID);
   });
 });
 
-describe('getBuildMetadata', () => {
+describe('resolveBuildMetadata', () => {
   it('matches', async () => {
     const buildx = new Buildx({
       context: new Context()
     });
     const metadataFile = buildx.inputs.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
-    const expected = buildx.inputs.getBuildMetadata();
+    const expected = buildx.inputs.resolveBuildMetadata();
     expect(expected).toEqual(metadata);
   });
 });
 
-describe('getDigest', () => {
+describe('resolveDigest', () => {
   it('matches', async () => {
     const buildx = new Buildx({
       context: new Context()
     });
     const metadataFile = buildx.inputs.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
-    const expected = buildx.inputs.getDigest();
+    const expected = buildx.inputs.resolveDigest();
     expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
   });
 });
@@ -136,7 +136,7 @@ describe('getProvenanceInput', () => {
   });
 });
 
-describe('getProvenanceAttrs', () => {
+describe('resolveProvenanceAttrs', () => {
   // prettier-ignore
   test.each([
     [
@@ -163,11 +163,11 @@ describe('getProvenanceAttrs', () => {
     const buildx = new Buildx({
       context: new Context()
     });
-    expect(buildx.inputs.getProvenanceAttrs(input)).toEqual(expected);
+    expect(buildx.inputs.resolveProvenanceAttrs(input)).toEqual(expected);
   });
 });
 
-describe('generateBuildSecret', () => {
+describe('resolveBuildSecret', () => {
   test.each([
     ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
     ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', false, 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789', null],
@@ -184,9 +184,9 @@ describe('generateBuildSecret', () => {
       });
       let secret: string;
       if (file) {
-        secret = buildx.inputs.generateBuildSecretFile(kvp);
+        secret = buildx.inputs.resolveBuildSecretFile(kvp);
       } else {
-        secret = buildx.inputs.generateBuildSecretString(kvp);
+        secret = buildx.inputs.resolveBuildSecretString(kvp);
       }
       expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
       expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
