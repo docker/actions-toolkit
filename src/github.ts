@@ -15,6 +15,7 @@
  */
 
 import {GitHub as Octokit} from '@actions/github/lib/utils';
+import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Context} from '@actions/github/lib/context';
 import jwt_decode from 'jwt-decode';
@@ -51,5 +52,14 @@ export class GitHub {
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken {
     const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
     return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : {};
+  }
+
+  public static async printActionsRuntimeToken() {
+    const actionsRuntimeToken = process.env['ACTIONS_RUNTIME_TOKEN'];
+    if (actionsRuntimeToken) {
+      core.info(JSON.stringify(JSON.parse(GitHub.actionsRuntimeToken.ac as string), undefined, 2));
+    } else {
+      core.info(`ACTIONS_RUNTIME_TOKEN not set`);
+    }
   }
 }

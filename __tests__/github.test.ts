@@ -17,6 +17,7 @@
 import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as core from '@actions/core';
 
 import {GitHub} from '../src/github';
 import {GitHubRepo} from '../src/types/github';
@@ -108,5 +109,35 @@ describe('actionsRuntimeToken', () => {
     const runtimeToken = GitHub.actionsRuntimeToken;
     expect(runtimeToken.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
     expect(runtimeToken.iss).toEqual('vstoken.actions.githubusercontent.com');
+  });
+});
+
+describe('printActionsRuntimeToken', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('empty', async () => {
+    const execSpy = jest.spyOn(core, 'info');
+    process.env.ACTIONS_RUNTIME_TOKEN = '';
+    GitHub.printActionsRuntimeToken();
+    expect(execSpy).toHaveBeenCalledWith(`ACTIONS_RUNTIME_TOKEN not set`);
+  });
+  it('prints ac', () => {
+    const execSpy = jest.spyOn(core, 'info');
+    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
+    GitHub.printActionsRuntimeToken();
+    expect(execSpy).toHaveBeenCalledWith(`[
+  {
+    "Scope": "refs/heads/master",
+    "Permission": 3
+  }
+]`);
   });
 });
