@@ -45,7 +45,7 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
-describe('generate', () => {
+describe('resolve', () => {
   test.each([
     ['debug = true', false, 'debug = true', null],
     [`notfound.toml`, true, '', new Error('config file notfound.toml not found')],
@@ -65,9 +65,9 @@ describe('generate', () => {
       });
       let config: string;
       if (file) {
-        config = buildkit.config.generateFromFile(val);
+        config = buildkit.config.resolveFromFile(val);
       } else {
-        config = buildkit.config.generateFromString(val);
+        config = buildkit.config.resolveFromString(val);
       }
       expect(config).toEqual(tmpName);
       const configValue = fs.readFileSync(tmpName, 'utf-8');
