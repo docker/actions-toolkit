@@ -55,9 +55,15 @@ export class GitHub {
   }
 
   public static async printActionsRuntimeTokenACs() {
-    const jwt = GitHub.actionsRuntimeToken;
+    let jwt: GitHubActionsRuntimeToken | undefined;
+    try {
+      jwt = GitHub.actionsRuntimeToken;
+    } catch (e) {
+      core.warning(`Cannot parse Actions Runtime Token: ${e.message}`);
+      return;
+    }
     if (!jwt) {
-      core.info(`ACTIONS_RUNTIME_TOKEN not set`);
+      core.warning(`ACTIONS_RUNTIME_TOKEN not set`);
       return;
     }
     try {
