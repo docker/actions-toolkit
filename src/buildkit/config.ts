@@ -25,15 +25,15 @@ export class Config {
     this.context = context;
   }
 
-  public generateFromString(s: string): string {
-    return this.generate(s, false);
+  public resolveFromString(s: string): string {
+    return this.resolve(s, false);
   }
 
-  public generateFromFile(s: string): string {
-    return this.generate(s, true);
+  public resolveFromFile(s: string): string {
+    return this.resolve(s, true);
   }
 
-  private generate(s: string, file: boolean): string {
+  private resolve(s: string, file: boolean): string {
     if (file) {
       if (!fs.existsSync(s)) {
         throw new Error(`config file ${s} not found`);

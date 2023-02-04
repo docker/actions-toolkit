@@ -29,6 +29,7 @@
       "error", {
         "ignore": ["csv-parse/sync"]
       }
-    ]
+    ],
+    "jest/no-disabled-tests": 0
   }
 }
