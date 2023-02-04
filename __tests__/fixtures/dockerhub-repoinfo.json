@@ -1,0 +1,34 @@
+{
+    "user": "foo",
+    "name": "bar",
+    "namespace": "foo",
+    "repository_type": "image",
+    "status": 1,
+    "status_description": "active",
+    "description": "Bar",
+    "is_private": false,
+    "is_automated": false,
+    "can_edit": true,
+    "star_count": 68,
+    "pull_count": 178255909,
+    "last_updated": "2023-02-02T14:22:31.184404Z",
+    "date_registered": "2019-06-04T20:08:57.306333Z",
+    "collaborator_count": 0,
+    "affiliation": "owner",
+    "hub_user": "foo",
+    "has_starred": false,
+    "full_description": "This is the full description of the repo.",
+    "permissions": {
+        "read": true,
+        "write": true,
+        "admin": true
+    },
+    "media_types": [
+        "application/vnd.docker.container.image.v1+json",
+        "application/vnd.docker.distribution.manifest.list.v2+json",
+        "application/vnd.oci.image.index.v1+json"
+    ],
+    "content_types": [
+        "image"
+    ]
+}
