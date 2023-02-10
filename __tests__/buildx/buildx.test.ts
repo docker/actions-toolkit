@@ -46,6 +46,28 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
+describe('configDir', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      BUILDX_CONFIG: '/var/docker/buildx',
+      DOCKER_CONFIG: '/var/docker/config'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns default', async () => {
+    process.env.BUILDX_CONFIG = '';
+    expect(Buildx.configDir).toEqual(path.join('/var/docker/config', 'buildx'));
+  });
+  it('returns from env', async () => {
+    expect(Buildx.configDir).toEqual('/var/docker/buildx');
+  });
+});
+
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import path from 'path';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
@@ -40,6 +41,10 @@ export class Buildx {
     this.inputs = new Inputs(this.context);
     this.install = new Install({standalone: opts.standalone});
     this.standalone = opts?.standalone ?? !Docker.isAvailable;
+  }
+
+  static get configDir(): string {
+    return process.env.BUILDX_CONFIG || path.join(Docker.configDir, 'buildx');
   }
 
   public getCommand(args: Array<string>) {
