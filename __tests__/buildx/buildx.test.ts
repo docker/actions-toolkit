@@ -68,6 +68,24 @@ describe('configDir', () => {
   });
 });
 
+describe('certsDir', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      BUILDX_CONFIG: '/var/docker/buildx'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns default', async () => {
+    process.env.BUILDX_CONFIG = '/var/docker/buildx';
+    expect(Buildx.certsDir).toEqual(path.join('/var/docker/buildx', 'certs'));
+  });
+});
+
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');

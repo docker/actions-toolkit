@@ -47,6 +47,10 @@ export class Buildx {
     return process.env.BUILDX_CONFIG || path.join(Docker.configDir, 'buildx');
   }
 
+  static get certsDir(): string {
+    return path.join(Buildx.configDir, 'certs');
+  }
+
   public getCommand(args: Array<string>) {
     return {
       command: this.standalone ? 'buildx' : 'docker',
