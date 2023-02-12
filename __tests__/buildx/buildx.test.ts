@@ -24,6 +24,8 @@ import * as exec from '@actions/exec';
 import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
 
+import {Cert} from '../../src/types/buildx';
+
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
 const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
@@ -44,6 +46,46 @@ beforeEach(() => {
 
 afterEach(() => {
   rimraf.sync(tmpDir);
+});
+
+describe('configDir', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      BUILDX_CONFIG: '/var/docker/buildx',
+      DOCKER_CONFIG: '/var/docker/config'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns default', async () => {
+    process.env.BUILDX_CONFIG = '';
+    expect(Buildx.configDir).toEqual(path.join('/var/docker/config', 'buildx'));
+  });
+  it('returns from env', async () => {
+    expect(Buildx.configDir).toEqual('/var/docker/buildx');
+  });
+});
+
+describe('certsDir', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      BUILDX_CONFIG: '/var/docker/buildx'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns default', async () => {
+    process.env.BUILDX_CONFIG = '/var/docker/buildx';
+    expect(Buildx.certsDir).toEqual(path.join('/var/docker/buildx', 'certs'));
+  });
 });
 
 describe('isAvailable', () => {
@@ -150,5 +192,90 @@ describe('versionSatisfies', () => {
       context: new Context()
     });
     expect(await buildx.versionSatisfies(range, version)).toBe(expected);
+  });
+});
+
+describe('resolveCertsDriverOpts', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      BUILDX_CONFIG: path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx')
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+    rimraf.sync(path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx'));
+  });
+  // prettier-ignore
+  test.each([
+    [
+      1,
+      'mycontext',
+      'docker-container',
+      {},
+      [],
+      []
+    ],
+    [
+      2,
+      'docker-container://mycontainer',
+      'docker-container',
+      {},
+      [],
+      []
+    ],
+    [
+      3,
+      'tcp://graviton2:1234',
+      'remote',
+      {},
+      [],
+      []
+    ],
+    [
+      4,
+      'tcp://graviton2:1234',
+      'remote',
+      {
+        cacert: 'foo',
+        cert: 'foo',
+        key: 'foo',
+      } as Cert,
+      [
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cacert_graviton2-1234.pem'),
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cert_graviton2-1234.pem'),
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'key_graviton2-1234.pem')
+      ],
+      [
+        `cacert=${path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cacert_graviton2-1234.pem')}`,
+        `cert=${path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cert_graviton2-1234.pem')}`,
+        `key=${path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'key_graviton2-1234.pem')}`
+      ]
+    ],
+    [
+      5,
+      'tcp://mybuilder:1234',
+      'docker-container',
+      {
+        cacert: 'foo',
+        cert: 'foo',
+        key: 'foo',
+      } as Cert,
+      [
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cacert_mybuilder-1234.pem'),
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'cert_mybuilder-1234.pem'),
+        path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx', 'certs', 'key_mybuilder-1234.pem')
+      ],
+      []
+    ],
+  ])('%p. given %p endpoint, %p driver', async (id: number, endpoint: string, driver: string, cert: Cert, expectedFiles: Array<string>, expectedOpts: Array<string>) => {
+    fs.mkdirSync(Buildx.certsDir, {recursive: true});
+    expect(Buildx.resolveCertsDriverOpts(driver, endpoint, cert)).toEqual(expectedOpts);
+    for (const k in expectedFiles) {
+      const file = expectedFiles[k];
+      expect(fs.existsSync(file)).toBe(true);
+    }
   });
 });

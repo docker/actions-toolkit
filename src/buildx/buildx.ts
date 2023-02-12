@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
+import path from 'path';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
@@ -21,6 +23,8 @@ import {Docker} from '../docker';
 import {Context} from '../context';
 import {Inputs} from './inputs';
 import {Install} from './install';
+
+import {Cert} from '../types/buildx';
 
 export interface BuildxOpts {
   context: Context;
@@ -40,6 +44,14 @@ export class Buildx {
     this.inputs = new Inputs(this.context);
     this.install = new Install({standalone: opts.standalone});
     this.standalone = opts?.standalone ?? !Docker.isAvailable;
+  }
+
+  static get configDir(): string {
+    return process.env.BUILDX_CONFIG || path.join(Docker.configDir, 'buildx');
+  }
+
+  static get certsDir(): string {
+    return path.join(Buildx.configDir, 'certs');
   }
 
   public getCommand(args: Array<string>) {
@@ -116,5 +128,44 @@ export class Buildx {
       return false;
     }
     return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
+  }
+
+  public static resolveCertsDriverOpts(driver: string, endpoint: string, cert: Cert): Array<string> {
+    let url: URL;
+    try {
+      url = new URL(endpoint);
+    } catch (e) {
+      return [];
+    }
+    if (url.protocol != 'tcp:') {
+      return [];
+    }
+    const driverOpts: Array<string> = [];
+    if (Object.keys(cert).length == 0) {
+      return driverOpts;
+    }
+    let host = url.hostname;
+    if (url.port.length > 0) {
+      host += `-${url.port}`;
+    }
+    if (cert.cacert !== undefined) {
+      const cacertpath = path.join(Buildx.certsDir, `cacert_${host}.pem`);
+      fs.writeFileSync(cacertpath, cert.cacert);
+      driverOpts.push(`cacert=${cacertpath}`);
+    }
+    if (cert.cert !== undefined) {
+      const certpath = path.join(Buildx.certsDir, `cert_${host}.pem`);
+      fs.writeFileSync(certpath, cert.cert);
+      driverOpts.push(`cert=${certpath}`);
+    }
+    if (cert.key !== undefined) {
+      const keypath = path.join(Buildx.certsDir, `key_${host}.pem`);
+      fs.writeFileSync(keypath, cert.key);
+      driverOpts.push(`key=${keypath}`);
+    }
+    if (driver != 'remote') {
+      return [];
+    }
+    return driverOpts;
   }
 }
