@@ -58,6 +58,53 @@ export interface RepositoryResponse {
   content_types: Array<string>;
 }
 
+export interface RepositoryTagsRequest {
+  namespace: string;
+  name: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface RepositoryTagsResponse {
+  count: number;
+  next?: string;
+  previous?: string;
+  results: Array<RepositoryTagsResult>;
+}
+
+export interface RepositoryTagsResult {
+  creator: number;
+  id: number;
+  images: Array<RepositoryTagsResultImage>;
+  last_updated: Date;
+  last_updater: number;
+  last_updater_username: string;
+  name: string;
+  repository: number;
+  full_size: number;
+  v2: boolean;
+  tag_status: string;
+  tag_last_pulled: Date;
+  tag_last_pushed: Date;
+  media_type: string;
+  content_type: string;
+  digest: string;
+}
+
+export interface RepositoryTagsResultImage {
+  architecture: string;
+  features: string;
+  variant?: string;
+  digest: string;
+  os: string;
+  os_features: string;
+  os_version?: string;
+  size: number;
+  status: string;
+  last_pulled: Date;
+  last_pushed: Date;
+}
+
 export interface UpdateRepoDescriptionRequest {
   name: string;
   namespace: string;
