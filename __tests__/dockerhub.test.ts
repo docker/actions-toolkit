@@ -19,13 +19,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {DockerHub} from '../src/dockerhub';
-import {RepositoryResponse} from '../src/types/dockerhub';
+import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 import repoInfoFixture from './fixtures/dockerhub-repoinfo.json';
+import repoTagsFixture from './fixtures/dockerhub-repotags.json';
+import repoAllTagsFixture from './fixtures/dockerhub-repoalltags.json';
 
 describe('getRepository', () => {
   it('returns repo info', async () => {
@@ -47,6 +49,54 @@ describe('getRepository', () => {
     expect(repoinfo.namespace).toEqual('foo');
     expect(repoinfo.name).toEqual('bar');
     expect(repoinfo.repository_type).toEqual('image');
+  });
+});
+
+describe('getRepositoryTags', () => {
+  it('return repo tags', async () => {
+    jest.spyOn(DockerHub.prototype, 'getRepositoryTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
+      return <Promise<RepositoryTagsResponse>>(repoTagsFixture as unknown);
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
+    const dockerhub = await DockerHub.build({
+      credentials: {
+        username: 'foo',
+        password: '0123456-7890-0000-1111-222222222'
+      }
+    });
+    const resp = await dockerhub.getRepositoryTags({
+      namespace: 'crazymax',
+      name: 'diun'
+    });
+    expect(resp.count).toBeGreaterThan(0);
+    expect(resp.next).not.toBeNull();
+    expect(resp.results.length).toBeGreaterThan(0);
+    expect(resp.results[0].last_updater_username).toEqual('crazymax');
+  });
+});
+
+describe('getRepositoryAllTags', () => {
+  it('return repo all tags', async () => {
+    jest.spyOn(DockerHub.prototype, 'getRepositoryAllTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
+      return <Promise<RepositoryTagsResponse>>(repoAllTagsFixture as unknown);
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
+    const dockerhub = await DockerHub.build({
+      credentials: {
+        username: 'foo',
+        password: '0123456-7890-0000-1111-222222222'
+      }
+    });
+    const resp = await dockerhub.getRepositoryAllTags({
+      namespace: 'crazymax',
+      name: 'diun'
+    });
+    expect(resp.count).toBeGreaterThan(0);
+    expect(resp.next).toBeNull();
+    expect(resp.results.length).toBeGreaterThan(0);
+    expect(resp.results[0].last_updater_username).toEqual('crazymax');
   });
 });
 

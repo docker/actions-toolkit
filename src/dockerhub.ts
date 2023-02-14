@@ -18,7 +18,7 @@ import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
 import {HttpCodes} from '@actions/http-client';
 
-import {RepositoryRequest, RepositoryResponse, TokenRequest, TokenResponse, UpdateRepoDescriptionRequest} from './types/dockerhub';
+import {RepositoryRequest, RepositoryResponse, RepositoryTagsRequest, RepositoryTagsResponse, TokenRequest, TokenResponse, UpdateRepoDescriptionRequest} from './types/dockerhub';
 
 export interface DockerHubOpts {
   credentials: TokenRequest;
@@ -47,6 +47,36 @@ export class DockerHub {
         }
       })
     );
+  }
+
+  public async getRepositoryTags(req: RepositoryTagsRequest): Promise<RepositoryTagsResponse> {
+    const url = new URL(`${repositoriesURL}${req.namespace}/${req.name}/tags`);
+    if (req.page) {
+      url.searchParams.append('page', req.page.toString());
+    }
+    if (req.page_size) {
+      url.searchParams.append('page_size', req.page_size.toString());
+    }
+    const resp: httpm.HttpClientResponse = await this.httpc.get(url.toString());
+    return <RepositoryTagsResponse>JSON.parse(await DockerHub.handleResponse(resp));
+  }
+
+  public async getRepositoryAllTags(req: RepositoryTagsRequest): Promise<RepositoryTagsResponse> {
+    const tags: RepositoryTagsResponse = await this.getRepositoryTags(req);
+    while (tags.next) {
+      const nextURL = new URL(tags.next);
+      const pageNumber = Number(nextURL.searchParams.get('page'));
+      const pageSize = Number(nextURL.searchParams.get('page_size')) || undefined;
+      const nextTags = await this.getRepositoryTags({
+        namespace: req.namespace,
+        name: req.name,
+        page: pageNumber,
+        page_size: pageSize || req.page_size
+      } as RepositoryTagsRequest);
+      tags.results.push(...nextTags.results);
+      tags.next = nextTags.next;
+    }
+    return tags;
   }
 
   public async getRepository(req: RepositoryRequest): Promise<RepositoryResponse> {
