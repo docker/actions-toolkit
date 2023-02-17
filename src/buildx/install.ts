@@ -18,27 +18,37 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
+import {Buildx} from './buildx';
+import {Context} from '../context';
+import {Docker} from '../docker';
+import {Git} from '../git';
+
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
+  context?: Context;
   standalone?: boolean;
 }
 
 export class Install {
-  private readonly opts: InstallOpts;
+  private readonly context: Context;
+  private readonly standalone: boolean;
 
   constructor(opts?: InstallOpts) {
-    this.opts = opts || {};
+    this.context = opts?.context || new Context();
+    this.standalone = opts?.standalone ?? !Docker.isAvailable;
   }
 
-  public async install(version: string, dest: string): Promise<string> {
+  public async download(version: string, dest: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
     const fversion = release.tag_name.replace(/^v+|v+$/g, '');
+
     let toolPath: string;
     toolPath = tc.find('buildx', fversion, this.platform());
     if (!toolPath) {
@@ -46,12 +56,83 @@ export class Install {
       if (!semver.valid(c)) {
         throw new Error(`Invalid Buildx version "${fversion}".`);
       }
-      toolPath = await this.download(fversion);
+      toolPath = await this.fetchBinary(fversion);
     }
-    if (this.opts.standalone) {
+
+    if (this.standalone) {
       return this.setStandalone(toolPath, dest);
     }
     return this.setPlugin(toolPath, dest);
+  }
+
+  public async build(gitContext: string, dest: string): Promise<string> {
+    // eslint-disable-next-line prefer-const
+    let [repo, ref] = gitContext.split('#');
+    if (ref.length == 0) {
+      ref = 'master';
+    }
+
+    let vspec: string;
+    // TODO: include full ref as fingerprint. Use commit sha as best-effort in the meantime.
+    if (ref.match(/^[0-9a-fA-F]{40}$/)) {
+      vspec = ref;
+    } else {
+      vspec = await Git.getRemoteSha(repo, ref);
+    }
+    core.debug(`Tool version spec ${vspec}`);
+
+    let toolPath: string;
+    toolPath = tc.find('buildx', vspec);
+    if (!toolPath) {
+      const outputDir = path.join(this.context.tmpDir(), 'build-cache').split(path.sep).join(path.posix.sep);
+      const buildCmd = await this.buildCommand(gitContext, outputDir);
+      toolPath = await exec
+        .getExecOutput(buildCmd.command, buildCmd.args, {
+          ignoreReturnCode: true
+        })
+        .then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.warning(res.stderr.trim());
+          }
+          return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
+        });
+    }
+
+    if (this.standalone) {
+      return this.setStandalone(toolPath, dest);
+    }
+    return this.setPlugin(toolPath, dest);
+  }
+
+  private async buildCommand(gitContext: string, outputDir: string): Promise<{args: Array<string>; command: string}> {
+    const buildxStandaloneFound = await new Buildx({context: this.context, standalone: true}).isAvailable();
+    const buildxPluginFound = await new Buildx({context: this.context, standalone: false}).isAvailable();
+
+    let buildStandalone = false;
+    if (this.standalone && buildxStandaloneFound) {
+      core.debug(`Buildx standalone found, build with it`);
+      buildStandalone = true;
+    } else if (!this.standalone && buildxPluginFound) {
+      core.debug(`Buildx plugin found, build with it`);
+      buildStandalone = false;
+    } else if (buildxStandaloneFound) {
+      core.debug(`Buildx plugin not found, but standalone found so trying to build with it`);
+      buildStandalone = true;
+    } else if (buildxPluginFound) {
+      core.debug(`Buildx standalone not found, but plugin found so trying to build with it`);
+      buildStandalone = false;
+    } else {
+      throw new Error(`Neither buildx standalone or plugin have been found to build from ref ${gitContext}`);
+    }
+
+    //prettier-ignore
+    return new Buildx({context: this.context, standalone: buildStandalone}).getCommand([
+      'build',
+      '--target', 'binaries',
+      '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1',
+      '--output', `type=local,dest=${outputDir}`,
+      gitContext
+    ]);
   }
 
   private async setStandalone(toolPath: string, dest: string): Promise<string> {
@@ -81,7 +162,7 @@ export class Install {
     return pluginPath;
   }
 
-  private async download(version: string): Promise<string> {
+  private async fetchBinary(version: string): Promise<string> {
     const targetFile: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
     const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, this.filename(version));
     const downloadPath = await tc.downloadTool(downloadURL);
