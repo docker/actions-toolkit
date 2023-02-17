@@ -30,3 +30,11 @@ export interface NodeInfo {
   buildkitVersion?: string;
   platforms?: string;
 }
+
+export interface Node {
+  name?: string;
+  endpoint?: string;
+  'driver-opts'?: Array<string>;
+  'buildkitd-flags'?: string;
+  platforms?: string;
+}
