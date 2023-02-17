@@ -16,6 +16,7 @@
 
 import {Context} from './context';
 import {Buildx} from './buildx/buildx';
+import {Install} from './buildx/install';
 import {BuildKit} from './buildkit/buildkit';
 import {GitHub} from './github';
 
@@ -31,12 +32,14 @@ export class Toolkit {
   public context: Context;
   public github: GitHub;
   public buildx: Buildx;
+  public buildxInstall: Install;
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
     this.context = new Context();
     this.github = new GitHub({token: opts.githubToken});
     this.buildx = new Buildx({context: this.context});
+    this.buildxInstall = new Install({context: this.context, standalone: this.buildx.standalone});
     this.buildkit = new BuildKit({context: this.context, buildx: this.buildx});
   }
 }
