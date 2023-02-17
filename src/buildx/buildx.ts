@@ -22,7 +22,6 @@ import * as semver from 'semver';
 import {Docker} from '../docker';
 import {Context} from '../context';
 import {Inputs} from './inputs';
-import {Install} from './install';
 
 import {Cert} from '../types/buildx';
 
@@ -34,7 +33,6 @@ export interface BuildxOpts {
 export class Buildx {
   private readonly context: Context;
   private _version: string | undefined;
-  private _install: Install;
 
   public readonly inputs: Inputs;
   public readonly standalone: boolean;
@@ -43,7 +41,6 @@ export class Buildx {
     this.context = opts.context;
     this.inputs = new Inputs(this.context);
     this.standalone = opts?.standalone ?? !Docker.isAvailable;
-    this._install = new Install({standalone: opts.standalone});
   }
 
   static get configDir(): string {
@@ -59,10 +56,6 @@ export class Buildx {
       command: this.standalone ? 'buildx' : 'docker',
       args: this.standalone ? args : ['buildx', ...args]
     };
-  }
-
-  public async install(version: string, dest: string): Promise<string> {
-    return await this._install.install(version, dest);
   }
 
   public async isAvailable(): Promise<boolean> {

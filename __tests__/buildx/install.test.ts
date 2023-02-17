@@ -33,7 +33,7 @@ afterEach(function () {
   rimraf.sync(tmpDir);
 });
 
-describe('install', () => {
+describe('download', () => {
   // prettier-ignore
   test.each([
     ['v0.9.1', false],
@@ -43,7 +43,7 @@ describe('install', () => {
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
       const install = new Install({standalone: standalone});
-      const buildxBin = await install.install(version, tmpDir);
+      const buildxBin = await install.download(version, tmpDir);
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
     100000
@@ -65,7 +65,7 @@ describe('install', () => {
       jest.spyOn(osm, 'platform').mockImplementation(() => os);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
       const install = new Install();
-      const buildxBin = await install.install('latest', tmpDir);
+      const buildxBin = await install.download('latest', tmpDir);
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
     100000
@@ -76,6 +76,22 @@ describe('install', () => {
     expect(release).not.toBeNull();
     expect(release?.tag_name).not.toEqual('');
   });
+});
+
+describe('build', () => {
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('builds refs/pull/648/head', async () => {
+    const install = new Install();
+    const buildxBin = await install.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
+
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
+    const install = new Install();
+    const buildxBin = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
 });
 
 describe('getRelease', () => {
