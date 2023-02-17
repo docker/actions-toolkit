@@ -88,6 +88,14 @@ describe('certsDir', () => {
   });
 });
 
+describe('install', () => {
+  it('acquires buildx v0.9.1', async () => {
+    const buildx = new Buildx({context: new Context()});
+    const buildxBin = await buildx.install('v0.9.1', tmpDir);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
+});
+
 describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');

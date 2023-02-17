@@ -34,16 +34,16 @@ export interface BuildxOpts {
 export class Buildx {
   private readonly context: Context;
   private _version: string | undefined;
+  private _install: Install;
 
   public readonly inputs: Inputs;
-  public readonly install: Install;
   public readonly standalone: boolean;
 
   constructor(opts: BuildxOpts) {
     this.context = opts.context;
     this.inputs = new Inputs(this.context);
-    this.install = new Install({standalone: opts.standalone});
     this.standalone = opts?.standalone ?? !Docker.isAvailable;
+    this._install = new Install({standalone: opts.standalone});
   }
 
   static get configDir(): string {
@@ -59,6 +59,10 @@ export class Buildx {
       command: this.standalone ? 'buildx' : 'docker',
       args: this.standalone ? args : ['buildx', ...args]
     };
+  }
+
+  public async install(version: string, dest: string): Promise<string> {
+    return await this._install.install(version, dest);
   }
 
   public async isAvailable(): Promise<boolean> {

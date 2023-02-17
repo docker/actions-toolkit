@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, beforeEach} from '@jest/globals';
+import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install} from '../../src/buildx/install';
+
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
+afterEach(function () {
+  rimraf.sync(tmpDir);
+});
+
 describe('install', () => {
   // prettier-ignore
-  const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-install-jest').split(path.sep).join(path.posix.sep);
-
-  // prettier-ignore
   test.each([
-    ['v0.4.1', false],
+    ['v0.9.1', false],
     ['latest', false],
-    ['v0.4.1', true],
+    ['v0.9.1', true],
     ['latest', true]
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
