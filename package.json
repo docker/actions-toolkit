@@ -1,5 +1,6 @@
 {
   "name": "@docker/actions-toolkit",
+  "version": "0.0.0+unknown",
   "description": "Toolkit for Docker (GitHub) Actions",
   "scripts": {
     "build": "tsc",
