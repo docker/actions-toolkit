@@ -45,7 +45,7 @@ export class Install {
     this.standalone = opts?.standalone ?? !Docker.isAvailable;
   }
 
-  public async download(version: string, dest: string): Promise<string> {
+  public async download(version: string, dest?: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
     const fversion = release.tag_name.replace(/^v+|v+$/g, '');
 
@@ -59,13 +59,14 @@ export class Install {
       toolPath = await this.fetchBinary(fversion);
     }
 
+    dest = dest || (this.standalone ? this.context.tmpDir() : Docker.configDir);
     if (this.standalone) {
       return this.setStandalone(toolPath, dest);
     }
     return this.setPlugin(toolPath, dest);
   }
 
-  public async build(gitContext: string, dest: string): Promise<string> {
+  public async build(gitContext: string, dest?: string): Promise<string> {
     // eslint-disable-next-line prefer-const
     let [repo, ref] = gitContext.split('#');
     if (ref.length == 0) {
@@ -98,6 +99,7 @@ export class Install {
         });
     }
 
+    dest = dest || Docker.configDir;
     if (this.standalone) {
       return this.setStandalone(toolPath, dest);
     }
