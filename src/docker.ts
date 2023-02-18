@@ -32,35 +32,34 @@ export class Docker {
     return process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
   }
 
-  get available() {
-    return (async () => {
-      if (!this._available) {
-        this._available = await exec
-          .getExecOutput('docker', undefined, {
-            ignoreReturnCode: true,
-            silent: true
-          })
-          .then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.debug(`Docker.isAvailable error: ${res.stderr}`);
-              return false;
-            } else {
-              core.debug(`Docker.isAvailable ok`);
-              return res.exitCode == 0;
-            }
-          })
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .catch(error => {
-            core.debug(`Docker.isAvailable failed: ${error}`);
-            return false;
-          });
-      }
-      return this._available;
-    })();
+  public async isAvailable(): Promise<boolean> {
+    if (this._available === undefined) {
+      await exec
+        .getExecOutput('docker', undefined, {
+          ignoreReturnCode: true,
+          silent: true
+        })
+        .then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.debug(`Docker.available error: ${res.stderr}`);
+            this._available = false;
+          } else {
+            core.debug(`Docker.available ok`);
+            this._available = res.exitCode == 0;
+          }
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(error => {
+          core.debug(`Docker.available failed: ${error}`);
+          this._available = false;
+        });
+    }
+    core.debug(`Docker.available: ${this._available}`);
+    return this._available ?? false;
   }
 
   public static async printVersion(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !Docker.getInstance().available;
+    const noDocker = standalone ?? !(await Docker.getInstance().isAvailable());
     if (noDocker) {
       core.debug('Docker.printVersion: Docker is not available, skipping.');
       return;
@@ -71,7 +70,7 @@ export class Docker {
   }
 
   public static async printInfo(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !Docker.getInstance().available;
+    const noDocker = standalone ?? !(await Docker.getInstance().isAvailable());
     if (noDocker) {
       core.debug('Docker.printInfo: Docker is not available, skipping.');
       return;

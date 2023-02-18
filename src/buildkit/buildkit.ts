@@ -58,6 +58,7 @@ export class BuildKit {
   }
 
   private async getVersionWithinImage(nodeName: string): Promise<string> {
+    core.debug(`BuildKit.getVersionWithinImage nodeName: ${nodeName}`);
     return exec
       .getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
         ignoreReturnCode: true,
@@ -65,6 +66,7 @@ export class BuildKit {
       })
       .then(bkitimage => {
         if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
+          core.debug(`BuildKit.getVersionWithinImage image: ${bkitimage.stdout.trim()}`);
           return exec
             .getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout.trim(), '--version'], {
               ignoreReturnCode: true,
@@ -93,14 +95,17 @@ export class BuildKit {
       }).inspect(builderName);
     }
     for (const node of builderInfo.nodes) {
+      core.debug(`BuildKit.versionSatisfies ${node}: ${range}`);
       let bkversion = node.buildkitVersion;
       if (!bkversion) {
         try {
           bkversion = await this.getVersionWithinImage(node.name || '');
         } catch (e) {
+          core.debug(`BuildKit.versionSatisfies ${node}: can't get version`);
           return false;
         }
       }
+      core.debug(`BuildKit.versionSatisfies ${node}: version ${bkversion}`);
       // BuildKit version reported by moby is in the format of `v0.11.0-moby`
       if (builderInfo.driver == 'docker' && !bkversion.endsWith('-moby')) {
         return false;
