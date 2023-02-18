@@ -42,7 +42,7 @@ export class Install {
 
   constructor(opts?: InstallOpts) {
     this.context = opts?.context || new Context();
-    this.standalone = opts?.standalone ?? !Docker.isAvailable;
+    this.standalone = opts?.standalone ?? !Docker.getInstance().available;
   }
 
   public async download(version: string, dest?: string): Promise<string> {

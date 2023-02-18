@@ -41,8 +41,8 @@ export class Buildx {
 
   constructor(opts: BuildxOpts) {
     this.context = opts.context;
+    this.standalone = opts?.standalone ?? !Docker.getInstance().available;
     this.inputs = new Inputs(this.context);
-    this.standalone = opts?.standalone ?? !Docker.isAvailable;
   }
 
   static get configDir(): string {

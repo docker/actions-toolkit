@@ -20,36 +20,47 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 export class Docker {
+  private static instance?: Docker;
+  static getInstance = (): Docker => (Docker.instance = Docker.instance ?? new Docker());
+
+  private _available: boolean | undefined;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
+
   static get configDir(): string {
     return process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
   }
 
-  static get isAvailable(): boolean {
-    let dockerAvailable = false;
-    exec
-      .getExecOutput('docker', undefined, {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.debug(`Docker.isAvailable error: ${res.stderr}`);
-          dockerAvailable = false;
-        } else {
-          core.debug(`Docker.isAvailable ok`);
-          dockerAvailable = res.exitCode == 0;
-        }
-      })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch(error => {
-        core.debug(`Docker.isAvailable failed: ${error}`);
-        dockerAvailable = false;
-      });
-    return dockerAvailable;
+  get available() {
+    return (async () => {
+      if (!this._available) {
+        this._available = await exec
+          .getExecOutput('docker', undefined, {
+            ignoreReturnCode: true,
+            silent: true
+          })
+          .then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              core.debug(`Docker.isAvailable error: ${res.stderr}`);
+              return false;
+            } else {
+              core.debug(`Docker.isAvailable ok`);
+              return res.exitCode == 0;
+            }
+          })
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .catch(error => {
+            core.debug(`Docker.isAvailable failed: ${error}`);
+            return false;
+          });
+      }
+      return this._available;
+    })();
   }
 
   public static async printVersion(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !Docker.isAvailable;
+    const noDocker = standalone ?? !Docker.getInstance().available;
     if (noDocker) {
       core.debug('Docker.printVersion: Docker is not available, skipping.');
       return;
@@ -60,7 +71,7 @@ export class Docker {
   }
 
   public static async printInfo(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !Docker.isAvailable;
+    const noDocker = standalone ?? !Docker.getInstance().available;
     if (noDocker) {
       core.debug('Docker.printInfo: Docker is not available, skipping.');
       return;
