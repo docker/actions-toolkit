@@ -17,8 +17,13 @@
 import * as core from '@actions/core';
 import {parse} from 'csv-parse/sync';
 
+export interface InputListOpts {
+  ignoreComma?: boolean;
+  escapeQuotes?: boolean;
+}
+
 export class Util {
-  public static getInputList(name: string, ignoreComma?: boolean): string[] {
+  public static getInputList(name: string, opts?: InputListOpts): string[] {
     const res: Array<string> = [];
 
     const items = core.getInput(name);
@@ -31,18 +36,22 @@ export class Util {
       relaxQuotes: true,
       comment: '#',
       relaxColumnCount: true,
-      skipEmptyLines: true
+      skipEmptyLines: true,
+      quote: opts?.escapeQuotes ?? `"`
     });
 
     for (const record of records as Array<string[]>) {
       if (record.length == 1) {
-        res.push(record[0]);
-        continue;
-      } else if (!ignoreComma) {
+        if (opts?.ignoreComma) {
+          res.push(record[0]);
+        } else {
+          res.push(...record[0].split(','));
+        }
+      } else if (!opts?.ignoreComma) {
         res.push(...record);
-        continue;
+      } else {
+        res.push(record.join(','));
       }
-      res.push(record.join(','));
     }
 
     return res.filter(item => item).map(pat => pat.trim());
