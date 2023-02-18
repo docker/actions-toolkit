@@ -69,14 +69,20 @@ describe('getInputList', () => {
 
   it('multiline and ignoring comma correctly', async () => {
     setInput('cache-from', 'user/app:cache\ntype=local,src=path/to/dir');
-    const res = Util.getInputList('cache-from', true);
+    const res = Util.getInputList('cache-from', {ignoreComma: true});
     expect(res).toEqual(['user/app:cache', 'type=local,src=path/to/dir']);
   });
 
   it('different new lines and ignoring comma correctly', async () => {
     setInput('cache-from', 'user/app:cache\r\ntype=local,src=path/to/dir');
-    const res = Util.getInputList('cache-from', true);
+    const res = Util.getInputList('cache-from', {ignoreComma: true});
     expect(res).toEqual(['user/app:cache', 'type=local,src=path/to/dir']);
+  });
+
+  it('escape surrounding quotes', async () => {
+    setInput('platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"');
+    const res = Util.getInputList('platforms', {escapeQuotes: true});
+    expect(res).toEqual(['linux/amd64', 'linux/arm64', 'linux/arm/v7']);
   });
 
   it('multiline values', async () => {
@@ -88,7 +94,7 @@ bbbbbbb
 ccccccccc"
 FOO=bar`
     );
-    const res = Util.getInputList('secrets', true);
+    const res = Util.getInputList('secrets', {ignoreComma: true});
     expect(res).toEqual([
       'GIT_AUTH_TOKEN=abcdefgh,ijklmno=0123456789',
       `MYSECRET=aaaaaaaa
@@ -111,7 +117,7 @@ FOO=bar
 bbbb
 ccc"`
     );
-    const res = Util.getInputList('secrets', true);
+    const res = Util.getInputList('secrets', {ignoreComma: true});
     expect(res).toEqual([
       'GIT_AUTH_TOKEN=abcdefgh,ijklmno=0123456789',
       `MYSECRET=aaaaaaaa
@@ -134,7 +140,7 @@ bbbbbbb
 ccccccccc
 FOO=bar`
     );
-    const res = Util.getInputList('secrets', true);
+    const res = Util.getInputList('secrets', {ignoreComma: true});
     expect(res).toEqual(['GIT_AUTH_TOKEN=abcdefgh,ijklmno=0123456789', 'MYSECRET=aaaaaaaa', 'bbbbbbb', 'ccccccccc', 'FOO=bar']);
   });
 
@@ -145,7 +151,7 @@ FOO=bar`
       `"GPG_KEY=${pgp}"
 FOO=bar`
     );
-    const res = Util.getInputList('secrets', true);
+    const res = Util.getInputList('secrets', {ignoreComma: true});
     expect(res).toEqual([`GPG_KEY=${pgp}`, 'FOO=bar']);
   });
 
@@ -158,7 +164,7 @@ bbbb""bbb
 ccccccccc"
 FOO=bar`
     );
-    const res = Util.getInputList('secrets', true);
+    const res = Util.getInputList('secrets', {ignoreComma: true});
     expect(res).toEqual([
       'GIT_AUTH_TOKEN=abcdefgh,ijklmno=0123456789',
       `MYSECRET=aaaaaaaa
