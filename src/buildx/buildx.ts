@@ -16,6 +16,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
@@ -123,9 +124,12 @@ export class Buildx {
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {
     const ver = version ?? (await this.version);
     if (!ver) {
+      core.debug(`Buildx.versionSatisfies false: undefined version`);
       return false;
     }
-    return semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
+    const res = semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
+    core.debug(`Buildx.versionSatisfies ${ver} statisfies ${range}: ${res}`);
+    return res;
   }
 
   public static resolveCertsDriverOpts(driver: string, endpoint: string, cert: Cert): Array<string> {
