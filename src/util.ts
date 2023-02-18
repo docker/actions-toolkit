@@ -19,7 +19,7 @@ import {parse} from 'csv-parse/sync';
 
 export interface InputListOpts {
   ignoreComma?: boolean;
-  escapeQuotes?: boolean;
+  quote?: string | boolean | Buffer | null;
 }
 
 export class Util {
@@ -37,7 +37,7 @@ export class Util {
       comment: '#',
       relaxColumnCount: true,
       skipEmptyLines: true,
-      quote: opts?.escapeQuotes ?? `"`
+      quote: opts?.quote
     });
 
     for (const record of records as Array<string[]>) {

@@ -79,9 +79,15 @@ describe('getInputList', () => {
     expect(res).toEqual(['user/app:cache', 'type=local,src=path/to/dir']);
   });
 
+  it('do not escape surrounding quotes', async () => {
+    setInput('driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`);
+    const res = Util.getInputList('driver-opts', {ignoreComma: true, quote: false});
+    expect(res).toEqual(['"env.no_proxy=localhost,127.0.0.1,.mydomain"']);
+  });
+
   it('escape surrounding quotes', async () => {
     setInput('platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"');
-    const res = Util.getInputList('platforms', {escapeQuotes: true});
+    const res = Util.getInputList('platforms');
     expect(res).toEqual(['linux/amd64', 'linux/arm64', 'linux/arm/v7']);
   });
 
