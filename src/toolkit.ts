@@ -20,7 +20,6 @@ import {Install} from './buildx/install';
 import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
 import {GitHub} from './github';
-import {Docker} from './docker';
 
 export interface ToolkitOpts {
   /**
@@ -33,7 +32,6 @@ export interface ToolkitOpts {
 export class Toolkit {
   public context: Context;
   public github: GitHub;
-  public docker: Docker;
   public buildx: Buildx;
   public buildxInstall: Install;
   public builder: Builder;
@@ -42,9 +40,8 @@ export class Toolkit {
   constructor(opts: ToolkitOpts = {}) {
     this.context = new Context();
     this.github = new GitHub({token: opts.githubToken});
-    this.docker = Docker.getInstance();
-    this.buildx = new Buildx({context: this.context, standalone: !this.docker.available});
-    this.buildxInstall = new Install({context: this.context, standalone: this.buildx.standalone});
+    this.buildx = new Buildx({context: this.context});
+    this.buildxInstall = new Install({context: this.context});
     this.builder = new Builder({context: this.context, buildx: this.buildx});
     this.buildkit = new BuildKit({context: this.context, buildx: this.buildx});
   }
