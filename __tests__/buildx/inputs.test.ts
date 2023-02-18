@@ -25,8 +25,8 @@ import {Inputs} from '../../src/buildx/inputs';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest').split(path.sep).join(path.posix.sep);
-const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
 const metadata = `{
   "containerimage.config.digest": "sha256:059b68a595b22564a1cbc167af369349fdc2ecc1f7bc092c2235cbf601a795fd",
   "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
@@ -175,7 +175,7 @@ describe('resolveBuildSecret', () => {
     ['aaaaaaaa', false, '', '', new Error('aaaaaaaa is not a valid secret')],
     ['aaaaaaaa=', false, '', '', new Error('aaaaaaaa= is not a valid secret')],
     ['=bbbbbbb', false, '', '', new Error('=bbbbbbb is not a valid secret')],
-    [`foo=${path.join(fixturesDir, 'secret.txt').split(path.sep).join(path.posix.sep)}`, true, 'foo', 'bar', null],
+    [`foo=${path.join(fixturesDir, 'secret.txt')}`, true, 'foo', 'bar', null],
     [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
   ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error) => {
     try {

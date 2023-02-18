@@ -24,8 +24,8 @@ import {Context} from '../../src/context';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildkit-config-jest').split(path.sep).join(path.posix.sep);
-const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildkit-config-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
@@ -50,7 +50,7 @@ describe('resolve', () => {
     ['debug = true', false, 'debug = true', null],
     [`notfound.toml`, true, '', new Error('config file notfound.toml not found')],
     [
-      `${path.join(fixturesDir, 'buildkitd.toml').split(path.sep).join(path.posix.sep)}`,
+      `${path.join(fixturesDir, 'buildkitd.toml')}`,
       true,
       `debug = true
 [registry."docker.io"]

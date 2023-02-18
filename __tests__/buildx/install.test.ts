@@ -23,7 +23,7 @@ import osm = require('os');
 import {Install} from '../../src/buildx/install';
 
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
 
 beforeEach(() => {
   jest.clearAllMocks();

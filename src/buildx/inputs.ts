@@ -29,11 +29,11 @@ export class Inputs {
   }
 
   public getBuildImageIDFilePath(): string {
-    return path.join(this.context.tmpDir(), 'iidfile').split(path.sep).join(path.posix.sep);
+    return path.join(this.context.tmpDir(), 'iidfile');
   }
 
   public getBuildMetadataFilePath(): string {
-    return path.join(this.context.tmpDir(), 'metadata-file').split(path.sep).join(path.posix.sep);
+    return path.join(this.context.tmpDir(), 'metadata-file');
   }
 
   public resolveBuildImageID(): string | undefined {
