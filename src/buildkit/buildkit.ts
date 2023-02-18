@@ -33,7 +33,6 @@ export interface BuildKitOpts {
 export class BuildKit {
   private readonly context: Context;
   private readonly buildx: Buildx;
-  private containerNamePrefix = 'buildx_buildkit_';
 
   public readonly config: Config;
 
@@ -67,7 +66,7 @@ export class BuildKit {
 
   private async getVersionWithinImage(nodeName: string): Promise<string> {
     return exec
-      .getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${this.containerNamePrefix}${nodeName}`], {
+      .getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
         ignoreReturnCode: true,
         silent: true
       })

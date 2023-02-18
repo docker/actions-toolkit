@@ -36,6 +36,7 @@ export class Buildx {
 
   public readonly inputs: Inputs;
   public readonly standalone: boolean;
+  public static readonly containerNamePrefix = 'buildx_buildkit_';
 
   constructor(opts: BuildxOpts) {
     this.context = opts.context;
