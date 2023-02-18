@@ -32,16 +32,17 @@ export interface BuildxOpts {
 }
 
 export class Buildx {
-  private readonly context: Context;
   private _version: string | undefined;
+  private readonly _standalone: boolean | undefined;
 
+  private readonly context: Context;
   public readonly inputs: Inputs;
-  public readonly standalone: boolean;
+
   public static readonly containerNamePrefix = 'buildx_buildkit_';
 
   constructor(opts: BuildxOpts) {
+    this._standalone = opts?.standalone;
     this.context = opts.context;
-    this.standalone = opts?.standalone ?? !Docker.getInstance().available;
     this.inputs = new Inputs(this.context);
   }
 
@@ -53,15 +54,22 @@ export class Buildx {
     return path.join(Buildx.configDir, 'certs');
   }
 
-  public getCommand(args: Array<string>) {
+  public async isStandalone(): Promise<boolean> {
+    const standalone = this._standalone ?? !(await Docker.getInstance().isAvailable());
+    core.debug(`Buildx.isStandalone: ${standalone}`);
+    return standalone;
+  }
+
+  public async getCommand(args: Array<string>) {
+    const standalone = await this.isStandalone();
     return {
-      command: this.standalone ? 'buildx' : 'docker',
-      args: this.standalone ? args : ['buildx', ...args]
+      command: standalone ? 'buildx' : 'docker',
+      args: standalone ? args : ['buildx', ...args]
     };
   }
 
   public async isAvailable(): Promise<boolean> {
-    const cmd = this.getCommand([]);
+    const cmd = await this.getCommand([]);
     return await exec
       .getExecOutput(cmd.command, cmd.args, {
         ignoreReturnCode: true,
@@ -80,7 +88,7 @@ export class Buildx {
   }
 
   public async printInspect(name: string): Promise<void> {
-    const cmd = this.getCommand(['inspect', name]);
+    const cmd = await this.getCommand(['inspect', name]);
     await exec.exec(cmd.command, cmd.args, {
       failOnStdErr: false
     });
@@ -89,7 +97,7 @@ export class Buildx {
   get version() {
     return (async () => {
       if (!this._version) {
-        const cmd = this.getCommand(['version']);
+        const cmd = await this.getCommand(['version']);
         this._version = await exec
           .getExecOutput(cmd.command, cmd.args, {
             ignoreReturnCode: true,
@@ -107,7 +115,7 @@ export class Buildx {
   }
 
   public async printVersion() {
-    const cmd = this.getCommand(['version']);
+    const cmd = await this.getCommand(['version']);
     await exec.exec(cmd.command, cmd.args, {
       failOnStdErr: false
     });

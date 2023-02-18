@@ -37,17 +37,19 @@ export interface InstallOpts {
 }
 
 export class Install {
+  private readonly _standalone: boolean | undefined;
+
   private readonly context: Context;
-  private readonly standalone: boolean;
 
   constructor(opts?: InstallOpts) {
     this.context = opts?.context || new Context();
-    this.standalone = opts?.standalone ?? !Docker.getInstance().available;
+    this._standalone = opts?.standalone;
   }
 
   public async download(version: string, dest?: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
     const fversion = release.tag_name.replace(/^v+|v+$/g, '');
+    core.debug(`Install.download version: ${fversion}`);
 
     let toolPath: string;
     toolPath = tc.find('buildx', fversion, this.platform());
@@ -58,9 +60,11 @@ export class Install {
       }
       toolPath = await this.fetchBinary(fversion);
     }
+    core.debug(`Install.download toolPath: ${toolPath}`);
 
-    dest = dest || (this.standalone ? this.context.tmpDir() : Docker.configDir);
-    if (this.standalone) {
+    dest = dest || ((await this.isStandalone()) ? this.context.tmpDir() : Docker.configDir);
+    core.debug(`Install.download dest: ${dest}`);
+    if (await this.isStandalone()) {
       return this.setStandalone(toolPath, dest);
     }
     return this.setPlugin(toolPath, dest);
@@ -100,7 +104,8 @@ export class Install {
     }
 
     dest = dest || Docker.configDir;
-    if (this.standalone) {
+    core.debug(`Install.build dest: ${dest}`);
+    if (await this.isStandalone()) {
       return this.setStandalone(toolPath, dest);
     }
     return this.setPlugin(toolPath, dest);
@@ -111,10 +116,10 @@ export class Install {
     const buildxPluginFound = await new Buildx({context: this.context, standalone: false}).isAvailable();
 
     let buildStandalone = false;
-    if (this.standalone && buildxStandaloneFound) {
+    if ((await this.isStandalone()) && buildxStandaloneFound) {
       core.debug(`Install.buildCommand: Buildx standalone found, build with it`);
       buildStandalone = true;
-    } else if (!this.standalone && buildxPluginFound) {
+    } else if (!(await this.isStandalone()) && buildxPluginFound) {
       core.debug(`Install.buildCommand: Buildx plugin found, build with it`);
       buildStandalone = false;
     } else if (buildxStandaloneFound) {
@@ -128,13 +133,19 @@ export class Install {
     }
 
     //prettier-ignore
-    return new Buildx({context: this.context, standalone: buildStandalone}).getCommand([
+    return await new Buildx({context: this.context, standalone: buildStandalone}).getCommand([
       'build',
       '--target', 'binaries',
       '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1',
       '--output', `type=local,dest=${outputDir}`,
       gitContext
     ]);
+  }
+
+  private async isStandalone(): Promise<boolean> {
+    const standalone = this._standalone ?? !(await Docker.getInstance().isAvailable());
+    core.debug(`Install.isStandalone: ${standalone}`);
+    return standalone;
   }
 
   private async setStandalone(toolPath: string, dest: string): Promise<string> {
@@ -148,6 +159,7 @@ export class Install {
     fs.copyFileSync(toolBinPath, buildxPath);
     fs.chmodSync(buildxPath, '0755');
     core.addPath(binDir);
+    core.debug(`Install.setStandalone buildxPath: ${buildxPath}`);
     return buildxPath;
   }
 
@@ -161,6 +173,7 @@ export class Install {
     const pluginPath: string = path.join(pluginsDir, filename);
     fs.copyFileSync(toolBinPath, pluginPath);
     fs.chmodSync(pluginPath, '0755');
+    core.debug(`Install.setPlugin pluginPath: ${pluginPath}`);
     return pluginPath;
   }
 

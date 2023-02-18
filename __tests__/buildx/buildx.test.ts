@@ -95,9 +95,7 @@ describe('isAvailable', () => {
       context: new Context(),
       standalone: false
     });
-    buildx.isAvailable().catch(() => {
-      // noop
-    });
+    await buildx.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx'], {
       silent: true,
@@ -110,9 +108,7 @@ describe('isAvailable', () => {
       context: new Context(),
       standalone: true
     });
-    buildx.isAvailable().catch(() => {
-      // noop
-    });
+    await buildx.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`buildx`, [], {
       silent: true,
@@ -122,13 +118,13 @@ describe('isAvailable', () => {
 });
 
 describe('printInspect', () => {
-  it('prints builder2 instance', () => {
+  it('prints builder2 instance', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
       context: new Context(),
       standalone: true
     });
-    buildx.printInspect('builder2').catch(() => {
+    await buildx.printInspect('builder2').catch(() => {
       // noop
     });
     expect(execSpy).toHaveBeenCalledWith(`buildx`, ['inspect', 'builder2'], {
@@ -138,24 +134,24 @@ describe('printInspect', () => {
 });
 
 describe('printVersion', () => {
-  it('docker cli', () => {
+  it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
       context: new Context(),
       standalone: false
     });
-    buildx.printVersion();
+    await buildx.printVersion();
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx', 'version'], {
       failOnStdErr: false
     });
   });
-  it('standalone', () => {
+  it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
       context: new Context(),
       standalone: true
     });
-    buildx.printVersion();
+    await buildx.printVersion();
     expect(execSpy).toHaveBeenCalledWith(`buildx`, ['version'], {
       failOnStdErr: false
     });

@@ -40,7 +40,7 @@ export class Builder {
   }
 
   public async inspect(name: string): Promise<BuilderInfo> {
-    const cmd = this.buildx.getCommand(['inspect', name]);
+    const cmd = await this.buildx.getCommand(['inspect', name]);
     return await exec
       .getExecOutput(cmd.command, cmd.args, {
         ignoreReturnCode: true,
