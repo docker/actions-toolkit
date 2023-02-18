@@ -16,6 +16,7 @@
 
 import os from 'os';
 import path from 'path';
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 export class Docker {
@@ -32,21 +33,25 @@ export class Docker {
       })
       .then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.debug(`Docker.isAvailable error: ${res.stderr}`);
           dockerAvailable = false;
         } else {
+          core.debug(`Docker.isAvailable ok`);
           dockerAvailable = res.exitCode == 0;
         }
       })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .catch(error => {
+        core.debug(`Docker.isAvailable failed: ${error}`);
         dockerAvailable = false;
       });
     return dockerAvailable;
   }
 
-  public static async printVersion(standalone?: boolean) {
+  public static async printVersion(standalone?: boolean): Promise<void> {
     const noDocker = standalone ?? !Docker.isAvailable;
     if (noDocker) {
+      core.debug('Docker.printVersion: Docker is not available, skipping.');
       return;
     }
     await exec.exec('docker', ['version'], {
@@ -54,9 +59,10 @@ export class Docker {
     });
   }
 
-  public static async printInfo(standalone?: boolean) {
+  public static async printInfo(standalone?: boolean): Promise<void> {
     const noDocker = standalone ?? !Docker.isAvailable;
     if (noDocker) {
+      core.debug('Docker.printInfo: Docker is not available, skipping.');
       return;
     }
     await exec.exec('docker', ['info'], {

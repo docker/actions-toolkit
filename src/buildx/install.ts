@@ -80,7 +80,7 @@ export class Install {
     } else {
       vspec = await Git.getRemoteSha(repo, ref);
     }
-    core.debug(`Tool version spec ${vspec}`);
+    core.debug(`Install.build: tool version spec ${vspec}`);
 
     let toolPath: string;
     toolPath = tc.find('buildx', vspec);
@@ -112,16 +112,16 @@ export class Install {
 
     let buildStandalone = false;
     if (this.standalone && buildxStandaloneFound) {
-      core.debug(`Buildx standalone found, build with it`);
+      core.debug(`Install.buildCommand: Buildx standalone found, build with it`);
       buildStandalone = true;
     } else if (!this.standalone && buildxPluginFound) {
-      core.debug(`Buildx plugin found, build with it`);
+      core.debug(`Install.buildCommand: Buildx plugin found, build with it`);
       buildStandalone = false;
     } else if (buildxStandaloneFound) {
-      core.debug(`Buildx plugin not found, but standalone found so trying to build with it`);
+      core.debug(`Install.buildCommand: Buildx plugin not found, but standalone found so trying to build with it`);
       buildStandalone = true;
     } else if (buildxPluginFound) {
-      core.debug(`Buildx standalone not found, but plugin found so trying to build with it`);
+      core.debug(`Install.buildCommand: Buildx standalone not found, but plugin found so trying to build with it`);
       buildStandalone = false;
     } else {
       throw new Error(`Neither buildx standalone or plugin have been found to build from ref ${gitContext}`);
