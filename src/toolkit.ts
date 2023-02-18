@@ -17,6 +17,7 @@
 import {Context} from './context';
 import {Buildx} from './buildx/buildx';
 import {Install} from './buildx/install';
+import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
 import {GitHub} from './github';
 
@@ -33,6 +34,7 @@ export class Toolkit {
   public github: GitHub;
   public buildx: Buildx;
   public buildxInstall: Install;
+  public builder: Builder;
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
@@ -40,6 +42,7 @@ export class Toolkit {
     this.github = new GitHub({token: opts.githubToken});
     this.buildx = new Buildx({context: this.context});
     this.buildxInstall = new Install({context: this.context, standalone: this.buildx.standalone});
+    this.builder = new Builder({context: this.context, buildx: this.buildx});
     this.buildkit = new BuildKit({context: this.context, buildx: this.buildx});
   }
 }
