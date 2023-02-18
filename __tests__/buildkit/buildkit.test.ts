@@ -15,7 +15,6 @@
  */
 
 import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
-import * as semver from 'semver';
 
 import {BuildKit} from '../../src/buildkit/buildkit';
 import {Builder} from '../../src/buildx/builder';
@@ -48,11 +47,15 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
 
 describe('getVersion', () => {
   it('valid', async () => {
+    const builder = new Builder({
+      context: new Context()
+    });
+    const builderInfo = await builder.inspect('builder2');
     const buildkit = new BuildKit({
       context: new Context()
     });
-    const version = await buildkit.getVersion('builder2');
-    expect(semver.valid(version)).not.toBeNull();
+    const version = await buildkit.getVersion(builderInfo.nodes[0]);
+    expect(version).toBe('v0.11.0');
   });
 });
 
