@@ -23,7 +23,7 @@ import {Buildx} from '../buildx/buildx';
 import {Builder} from '../buildx/builder';
 import {Config} from './config';
 
-import {BuilderInfo} from '../types/builder';
+import {BuilderInfo, NodeInfo} from '../types/builder';
 
 export interface BuildKitOpts {
   context: Context;
@@ -46,14 +46,7 @@ export class BuildKit {
       });
   }
 
-  public async getVersion(builderName: string): Promise<string | undefined> {
-    const builderInfo = await this.getBuilderInfo(builderName);
-    if (builderInfo.nodes.length == 0) {
-      // a builder always have on node, should not happen.
-      return undefined;
-    }
-    // TODO: get version for all nodes
-    const node = builderInfo.nodes[0];
+  public async getVersion(node: NodeInfo): Promise<string | undefined> {
     if (!node.buildkitVersion && node.name) {
       try {
         return await this.getVersionWithinImage(node.name);
@@ -92,8 +85,13 @@ export class BuildKit {
       });
   }
 
-  public async versionSatisfies(builderName: string, range: string): Promise<boolean> {
-    const builderInfo = await this.getBuilderInfo(builderName);
+  public async versionSatisfies(builderName: string, range: string, builderInfo?: BuilderInfo): Promise<boolean> {
+    if (!builderInfo) {
+      builderInfo = await new Builder({
+        context: this.context,
+        buildx: this.buildx
+      }).inspect(builderName);
+    }
     for (const node of builderInfo.nodes) {
       let bkversion = node.buildkitVersion;
       if (!bkversion) {
@@ -112,13 +110,5 @@ export class BuildKit {
       }
     }
     return true;
-  }
-
-  private async getBuilderInfo(name: string): Promise<BuilderInfo> {
-    const builder = new Builder({
-      context: this.context,
-      buildx: this.buildx
-    });
-    return builder.inspect(name);
   }
 }
