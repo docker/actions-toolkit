@@ -60,18 +60,18 @@ describe('isAvailable', () => {
 });
 
 describe('printVersion', () => {
-  it('docker cli', () => {
+  it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.printVersion(false).catch(() => {
+    await Docker.printVersion(false).catch(() => {
       // noop
     });
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
       failOnStdErr: false
     });
   });
-  it('standalone', () => {
+  it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.printVersion(true).catch(() => {
+    await Docker.printVersion(true).catch(() => {
       // noop
     });
     expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['version'], {

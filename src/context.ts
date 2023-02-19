@@ -27,7 +27,7 @@ export class Context {
   public buildGitContext: string;
   public provenanceBuilderID: string;
 
-  private readonly _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-')).split(path.sep).join(path.posix.sep);
+  private readonly _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
 
   constructor() {
     this.gitRef = github.context.ref;

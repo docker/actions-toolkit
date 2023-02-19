@@ -22,8 +22,8 @@ import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
 import {Context} from '../src/context';
 
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'context-jest').split(path.sep).join(path.posix.sep);
-const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'context-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {

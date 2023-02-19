@@ -89,7 +89,7 @@ export class Install {
     let toolPath: string;
     toolPath = tc.find('buildx', vspec);
     if (!toolPath) {
-      const outputDir = path.join(this.context.tmpDir(), 'build-cache').split(path.sep).join(path.posix.sep);
+      const outputDir = path.join(this.context.tmpDir(), 'build-cache');
       const buildCmd = await this.buildCommand(gitContext, outputDir);
       toolPath = await exec
         .getExecOutput(buildCmd.command, buildCmd.args, {

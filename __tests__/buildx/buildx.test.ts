@@ -27,8 +27,8 @@ import {Context} from '../../src/context';
 import {Cert} from '../../src/types/buildx';
 
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest').split(path.sep).join(path.posix.sep);
-const tmpName = path.join(tmpDir, '.tmpname-jest').split(path.sep).join(path.posix.sep);
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
 
 jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
