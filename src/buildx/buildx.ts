@@ -55,7 +55,7 @@ export class Buildx {
   }
 
   public async isStandalone(): Promise<boolean> {
-    const standalone = this._standalone ?? !(await Docker.getInstance().isAvailable());
+    const standalone = this._standalone ?? !(await Docker.isAvailable());
     core.debug(`Buildx.isStandalone: ${standalone}`);
     return standalone;
   }
