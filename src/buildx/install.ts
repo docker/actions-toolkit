@@ -102,6 +102,7 @@ export class Install {
   }
 
   public async installStandalone(toolPath: string, dest?: string): Promise<string> {
+    core.info('Standalone mode');
     dest = dest || this.context.tmpDir();
     const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
     const binDir = path.join(dest, 'bin');
@@ -111,13 +112,19 @@ export class Install {
     const filename: string = os.platform() == 'win32' ? 'buildx.exe' : 'buildx';
     const buildxPath: string = path.join(binDir, filename);
     fs.copyFileSync(toolBinPath, buildxPath);
+
+    core.info('Fixing perms');
     fs.chmodSync(buildxPath, '0755');
+
     core.addPath(binDir);
-    core.debug(`Install.installStandalone buildxPath: ${buildxPath}`);
+    core.info('Added Buildx to PATH');
+
+    core.info(`Binary path: ${buildxPath}`);
     return buildxPath;
   }
 
   public async installPlugin(toolPath: string, dest?: string): Promise<string> {
+    core.info('Docker plugin mode');
     dest = dest || Docker.configDir;
     const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
     const pluginsDir: string = path.join(dest, 'cli-plugins');
@@ -127,8 +134,11 @@ export class Install {
     const filename: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
     const pluginPath: string = path.join(pluginsDir, filename);
     fs.copyFileSync(toolBinPath, pluginPath);
+
+    core.info('Fixing perms');
     fs.chmodSync(pluginPath, '0755');
-    core.debug(`Install.installPlugin pluginPath: ${pluginPath}`);
+
+    core.info(`Plugin path: ${pluginPath}`);
     return pluginPath;
   }
 
@@ -172,9 +182,9 @@ export class Install {
   private async fetchBinary(version: string): Promise<string> {
     const targetFile: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
     const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, this.filename(version));
+    core.info(`Downloading ${downloadURL}`);
     const downloadPath = await tc.downloadTool(downloadURL);
-    core.debug(`downloadURL: ${downloadURL}`);
-    core.debug(`downloadPath: ${downloadPath}`);
+    core.debug(`Install.fetchBinary downloadPath: ${downloadPath}`);
     return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
   }
 
