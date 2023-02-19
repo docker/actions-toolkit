@@ -46,7 +46,7 @@ export class Install {
     this._standalone = opts?.standalone;
   }
 
-  public async download(version: string, dest?: string): Promise<string> {
+  public async download(version: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
     const fversion = release.tag_name.replace(/^v+|v+$/g, '');
     core.debug(`Install.download version: ${fversion}`);
@@ -62,15 +62,10 @@ export class Install {
     }
     core.debug(`Install.download toolPath: ${toolPath}`);
 
-    dest = dest || ((await this.isStandalone()) ? this.context.tmpDir() : Docker.configDir);
-    core.debug(`Install.download dest: ${dest}`);
-    if (await this.isStandalone()) {
-      return this.setStandalone(toolPath, dest);
-    }
-    return this.setPlugin(toolPath, dest);
+    return toolPath;
   }
 
-  public async build(gitContext: string, dest?: string): Promise<string> {
+  public async build(gitContext: string): Promise<string> {
     // eslint-disable-next-line prefer-const
     let [repo, ref] = gitContext.split('#');
     if (ref.length == 0) {
@@ -103,12 +98,38 @@ export class Install {
         });
     }
 
-    dest = dest || Docker.configDir;
-    core.debug(`Install.build dest: ${dest}`);
-    if (await this.isStandalone()) {
-      return this.setStandalone(toolPath, dest);
+    return toolPath;
+  }
+
+  public async installStandalone(toolPath: string, dest?: string): Promise<string> {
+    dest = dest || this.context.tmpDir();
+    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
+    const binDir = path.join(dest, 'bin');
+    if (!fs.existsSync(binDir)) {
+      fs.mkdirSync(binDir, {recursive: true});
     }
-    return this.setPlugin(toolPath, dest);
+    const filename: string = os.platform() == 'win32' ? 'buildx.exe' : 'buildx';
+    const buildxPath: string = path.join(binDir, filename);
+    fs.copyFileSync(toolBinPath, buildxPath);
+    fs.chmodSync(buildxPath, '0755');
+    core.addPath(binDir);
+    core.debug(`Install.installStandalone buildxPath: ${buildxPath}`);
+    return buildxPath;
+  }
+
+  public async installPlugin(toolPath: string, dest?: string): Promise<string> {
+    dest = dest || Docker.configDir;
+    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
+    const pluginsDir: string = path.join(dest, 'cli-plugins');
+    if (!fs.existsSync(pluginsDir)) {
+      fs.mkdirSync(pluginsDir, {recursive: true});
+    }
+    const filename: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+    const pluginPath: string = path.join(pluginsDir, filename);
+    fs.copyFileSync(toolBinPath, pluginPath);
+    fs.chmodSync(pluginPath, '0755');
+    core.debug(`Install.installPlugin pluginPath: ${pluginPath}`);
+    return pluginPath;
   }
 
   private async buildCommand(gitContext: string, outputDir: string): Promise<{args: Array<string>; command: string}> {
@@ -146,35 +167,6 @@ export class Install {
     const standalone = this._standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
-  }
-
-  private async setStandalone(toolPath: string, dest: string): Promise<string> {
-    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
-    const binDir = path.join(dest, 'bin');
-    if (!fs.existsSync(binDir)) {
-      fs.mkdirSync(binDir, {recursive: true});
-    }
-    const filename: string = os.platform() == 'win32' ? 'buildx.exe' : 'buildx';
-    const buildxPath: string = path.join(binDir, filename);
-    fs.copyFileSync(toolBinPath, buildxPath);
-    fs.chmodSync(buildxPath, '0755');
-    core.addPath(binDir);
-    core.debug(`Install.setStandalone buildxPath: ${buildxPath}`);
-    return buildxPath;
-  }
-
-  private async setPlugin(toolPath: string, dest: string): Promise<string> {
-    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
-    const pluginsDir: string = path.join(dest, 'cli-plugins');
-    if (!fs.existsSync(pluginsDir)) {
-      fs.mkdirSync(pluginsDir, {recursive: true});
-    }
-    const filename: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-    const pluginPath: string = path.join(pluginsDir, filename);
-    fs.copyFileSync(toolBinPath, pluginPath);
-    fs.chmodSync(pluginPath, '0755');
-    core.debug(`Install.setPlugin pluginPath: ${pluginPath}`);
-    return pluginPath;
   }
 
   private async fetchBinary(version: string): Promise<string> {

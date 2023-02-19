@@ -43,7 +43,14 @@ describe('download', () => {
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
       const install = new Install({standalone: standalone});
-      const buildxBin = await install.download(version, tmpDir);
+      const toolPath = await install.download(version);
+      expect(fs.existsSync(toolPath)).toBe(true);
+      let buildxBin: string;
+      if (standalone) {
+        buildxBin = await install.installStandalone(toolPath, tmpDir);
+      } else {
+        buildxBin = await install.installPlugin(toolPath, tmpDir);
+      }
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
     100000
@@ -65,7 +72,7 @@ describe('download', () => {
       jest.spyOn(osm, 'platform').mockImplementation(() => os);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
       const install = new Install();
-      const buildxBin = await install.download('latest', tmpDir);
+      const buildxBin = await install.download('latest');
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
     100000
@@ -82,14 +89,18 @@ describe('build', () => {
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds refs/pull/648/head', async () => {
     const install = new Install();
-    const buildxBin = await install.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
+    const toolPath = await install.build('https://github.com/docker/buildx.git#refs/pull/648/head');
+    expect(fs.existsSync(toolPath)).toBe(true);
+    const buildxBin = await install.installStandalone(toolPath, tmpDir);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
     const install = new Install();
-    const buildxBin = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir);
+    const toolPath = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14');
+    expect(fs.existsSync(toolPath)).toBe(true);
+    const buildxBin = await install.installPlugin(toolPath, tmpDir);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });
