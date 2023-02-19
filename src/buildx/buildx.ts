@@ -70,21 +70,26 @@ export class Buildx {
 
   public async isAvailable(): Promise<boolean> {
     const cmd = await this.getCommand([]);
-    return await exec
+
+    const ok: boolean = await exec
       .getExecOutput(cmd.command, cmd.args, {
         ignoreReturnCode: true,
         silent: true
       })
       .then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.debug(`Buildx.isAvailable cmd err: ${res.stderr}`);
           return false;
         }
         return res.exitCode == 0;
       })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .catch(error => {
+        core.debug(`Buildx.isAvailable error: ${error}`);
         return false;
       });
+
+    core.debug(`Buildx.isAvailable: ${ok}`);
+    return ok;
   }
 
   public async printInspect(name: string): Promise<void> {
