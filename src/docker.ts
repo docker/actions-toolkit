@@ -46,25 +46,11 @@ export class Docker {
     return ok;
   }
 
-  public static async printVersion(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !(await Docker.isAvailable());
-    if (noDocker) {
-      core.debug('Docker.printVersion: Docker is not available, skipping.');
-      return;
-    }
-    await exec.exec('docker', ['version'], {
-      failOnStdErr: false
-    });
+  public static async printVersion(): Promise<void> {
+    await exec.exec('docker', ['version']);
   }
 
-  public static async printInfo(standalone?: boolean): Promise<void> {
-    const noDocker = standalone ?? !(await Docker.isAvailable());
-    if (noDocker) {
-      core.debug('Docker.printInfo: Docker is not available, skipping.');
-      return;
-    }
-    await exec.exec('docker', ['info'], {
-      failOnStdErr: false
-    });
+  public static async printInfo(): Promise<void> {
+    await exec.exec('docker', ['info']);
   }
 }

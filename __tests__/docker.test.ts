@@ -60,43 +60,21 @@ describe('isAvailable', () => {
 });
 
 describe('printVersion', () => {
-  it('docker cli', async () => {
+  it('call docker version', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    await Docker.printVersion(false).catch(() => {
+    await Docker.printVersion().catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['version'], {
-      failOnStdErr: false
-    });
-  });
-  it('standalone', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
-    await Docker.printVersion(true).catch(() => {
-      // noop
-    });
-    expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['version'], {
-      failOnStdErr: false
-    });
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['version']);
   });
 });
 
 describe('printInfo', () => {
-  it('docker cli', () => {
+  it('call docker info', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
-    Docker.printInfo(false).catch(() => {
+    await Docker.printInfo().catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['info'], {
-      failOnStdErr: false
-    });
-  });
-  it('standalone', () => {
-    const execSpy = jest.spyOn(exec, 'exec');
-    Docker.printInfo(true).catch(() => {
-      // noop
-    });
-    expect(execSpy).not.toHaveBeenCalledWith(`docker`, ['info'], {
-      failOnStdErr: false
-    });
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['info']);
   });
 });
