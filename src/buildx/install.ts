@@ -143,7 +143,7 @@ export class Install {
   }
 
   private async isStandalone(): Promise<boolean> {
-    const standalone = this._standalone ?? !(await Docker.getInstance().isAvailable());
+    const standalone = this._standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
   }
