@@ -30,7 +30,8 @@ export interface BuildxOpts {
 }
 
 export class Buildx {
-  private _version: string | undefined;
+  private _version: string;
+  private _versionOnce: boolean;
   private readonly _standalone: boolean | undefined;
 
   public readonly inputs: Inputs;
@@ -39,6 +40,8 @@ export class Buildx {
 
   constructor(opts?: BuildxOpts) {
     this._standalone = opts?.standalone;
+    this._version = '';
+    this._versionOnce = false;
     this.inputs = new Inputs();
   }
 
@@ -94,22 +97,22 @@ export class Buildx {
     });
   }
 
-  get version() {
-    return (async () => {
-      if (!this._version) {
-        const cmd = await this.getCommand(['version']);
-        this._version = await Exec.getExecOutput(cmd.command, cmd.args, {
-          ignoreReturnCode: true,
-          silent: true
-        }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            throw new Error(res.stderr.trim());
-          }
-          return Buildx.parseVersion(res.stdout.trim());
-        });
-      }
+  public async version(): Promise<string> {
+    if (this._versionOnce) {
       return this._version;
-    })();
+    }
+    this._versionOnce = true;
+    const cmd = await this.getCommand(['version']);
+    this._version = await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return Buildx.parseVersion(res.stdout.trim());
+    });
+    return this._version;
   }
 
   public async printVersion() {
@@ -128,7 +131,7 @@ export class Buildx {
   }
 
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {
-    const ver = version ?? (await this.version);
+    const ver = version ?? (await this.version());
     if (!ver) {
       core.debug(`Buildx.versionSatisfies false: undefined version`);
       return false;

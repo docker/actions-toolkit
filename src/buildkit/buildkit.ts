@@ -80,17 +80,17 @@ export class BuildKit {
       builderInfo = await new Builder({buildx: this.buildx}).inspect(builderName);
     }
     for (const node of builderInfo.nodes) {
-      core.debug(`BuildKit.versionSatisfies ${node}: ${range}`);
       let bkversion = node.buildkitVersion;
+      core.debug(`BuildKit.versionSatisfies ${bkversion}: ${range}`);
       if (!bkversion) {
         try {
           bkversion = await this.getVersionWithinImage(node.name || '');
         } catch (e) {
-          core.debug(`BuildKit.versionSatisfies ${node}: can't get version`);
+          core.debug(`BuildKit.versionSatisfies ${node.name}: can't get version`);
           return false;
         }
       }
-      core.debug(`BuildKit.versionSatisfies ${node}: version ${bkversion}`);
+      core.debug(`BuildKit.versionSatisfies ${node.name}: version ${bkversion}`);
       // BuildKit version reported by moby is in the format of `v0.11.0-moby`
       if (builderInfo.driver == 'docker' && !bkversion.endsWith('-moby')) {
         return false;
