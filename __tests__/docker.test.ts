@@ -52,7 +52,7 @@ describe('isAvailable', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     await Docker.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
-    expect(execSpy).toHaveBeenCalledWith(`docker`, undefined, {
+    expect(execSpy).toHaveBeenCalledWith(`docker`, [], {
       silent: true,
       ignoreReturnCode: true
     });

@@ -25,7 +25,7 @@ export class Docker {
   }
 
   public static async isAvailable(): Promise<boolean> {
-    const ok: boolean = await Exec.getExecOutput('docker', undefined, {
+    const ok: boolean = await Exec.getExecOutput('docker', [], {
       ignoreReturnCode: true,
       silent: true
     })
