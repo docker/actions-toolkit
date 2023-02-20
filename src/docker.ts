@@ -17,7 +17,7 @@
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
+import {Exec} from './exec';
 
 export class Docker {
   static get configDir(): string {
@@ -25,11 +25,10 @@ export class Docker {
   }
 
   public static async isAvailable(): Promise<boolean> {
-    const ok: boolean = await exec
-      .getExecOutput('docker', undefined, {
-        ignoreReturnCode: true,
-        silent: true
-      })
+    const ok: boolean = await Exec.getExecOutput('docker', undefined, {
+      ignoreReturnCode: true,
+      silent: true
+    })
       .then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
           core.debug(`Docker.isAvailable cmd err: ${res.stderr}`);
@@ -47,10 +46,10 @@ export class Docker {
   }
 
   public static async printVersion(): Promise<void> {
-    await exec.exec('docker', ['version']);
+    await Exec.exec('docker', ['version']);
   }
 
   public static async printInfo(): Promise<void> {
-    await exec.exec('docker', ['info']);
+    await Exec.exec('docker', ['info']);
   }
 }

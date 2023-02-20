@@ -17,10 +17,10 @@
 import fs from 'fs';
 import path from 'path';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
 import {Docker} from '../docker';
+import {Exec} from '../exec';
 import {Inputs} from './inputs';
 
 import {Cert} from '../types/buildx';
@@ -67,11 +67,10 @@ export class Buildx {
   public async isAvailable(): Promise<boolean> {
     const cmd = await this.getCommand([]);
 
-    const ok: boolean = await exec
-      .getExecOutput(cmd.command, cmd.args, {
-        ignoreReturnCode: true,
-        silent: true
-      })
+    const ok: boolean = await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    })
       .then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
           core.debug(`Buildx.isAvailable cmd err: ${res.stderr}`);
@@ -90,7 +89,7 @@ export class Buildx {
 
   public async printInspect(name: string): Promise<void> {
     const cmd = await this.getCommand(['inspect', name]);
-    await exec.exec(cmd.command, cmd.args, {
+    await Exec.exec(cmd.command, cmd.args, {
       failOnStdErr: false
     });
   }
@@ -99,17 +98,15 @@ export class Buildx {
     return (async () => {
       if (!this._version) {
         const cmd = await this.getCommand(['version']);
-        this._version = await exec
-          .getExecOutput(cmd.command, cmd.args, {
-            ignoreReturnCode: true,
-            silent: true
-          })
-          .then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              throw new Error(res.stderr.trim());
-            }
-            return Buildx.parseVersion(res.stdout.trim());
-          });
+        this._version = await Exec.getExecOutput(cmd.command, cmd.args, {
+          ignoreReturnCode: true,
+          silent: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr.trim());
+          }
+          return Buildx.parseVersion(res.stdout.trim());
+        });
       }
       return this._version;
     })();
@@ -117,7 +114,7 @@ export class Buildx {
 
   public async printVersion() {
     const cmd = await this.getCommand(['version']);
-    await exec.exec(cmd.command, cmd.args, {
+    await Exec.exec(cmd.command, cmd.args, {
       failOnStdErr: false
     });
   }

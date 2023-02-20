@@ -15,12 +15,12 @@
  */
 
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
 import {Buildx} from '../buildx/buildx';
 import {Builder} from '../buildx/builder';
 import {Config} from './config';
+import {Exec} from '../exec';
 
 import {BuilderInfo, NodeInfo} from '../types/builder';
 
@@ -51,32 +51,28 @@ export class BuildKit {
 
   private async getVersionWithinImage(nodeName: string): Promise<string> {
     core.debug(`BuildKit.getVersionWithinImage nodeName: ${nodeName}`);
-    return exec
-      .getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(bkitimage => {
-        if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
-          core.debug(`BuildKit.getVersionWithinImage image: ${bkitimage.stdout.trim()}`);
-          return exec
-            .getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout.trim(), '--version'], {
-              ignoreReturnCode: true,
-              silent: true
-            })
-            .then(bkitversion => {
-              if (bkitversion.exitCode == 0 && bkitversion.stdout.length > 0) {
-                return `${bkitimage.stdout.trim()} => ${bkitversion.stdout.trim()}`;
-              } else if (bkitversion.stderr.length > 0) {
-                throw new Error(bkitimage.stderr.trim());
-              }
-              return bkitversion.stdout.trim();
-            });
-        } else if (bkitimage.stderr.length > 0) {
-          throw new Error(bkitimage.stderr.trim());
-        }
-        return bkitimage.stdout.trim();
-      });
+    return Exec.getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(bkitimage => {
+      if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
+        core.debug(`BuildKit.getVersionWithinImage image: ${bkitimage.stdout.trim()}`);
+        return Exec.getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout.trim(), '--version'], {
+          ignoreReturnCode: true,
+          silent: true
+        }).then(bkitversion => {
+          if (bkitversion.exitCode == 0 && bkitversion.stdout.length > 0) {
+            return `${bkitimage.stdout.trim()} => ${bkitversion.stdout.trim()}`;
+          } else if (bkitversion.stderr.length > 0) {
+            throw new Error(bkitimage.stderr.trim());
+          }
+          return bkitversion.stdout.trim();
+        });
+      } else if (bkitimage.stderr.length > 0) {
+        throw new Error(bkitimage.stderr.trim());
+      }
+      return bkitimage.stdout.trim();
+    });
   }
 
   public async versionSatisfies(builderName: string, range: string, builderInfo?: BuilderInfo): Promise<boolean> {

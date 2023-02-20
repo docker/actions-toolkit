@@ -15,11 +15,11 @@
  */
 
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
-import * as exec from '@actions/exec';
 import path from 'path';
 import osm = require('os');
 
 import {Docker} from '../src/docker';
+import {Exec} from '../src/exec';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -49,7 +49,7 @@ describe('configDir', () => {
 
 describe('isAvailable', () => {
   it('cli', async () => {
-    const execSpy = jest.spyOn(exec, 'getExecOutput');
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
     await Docker.isAvailable();
     // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, undefined, {
@@ -61,7 +61,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('call docker version', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
+    const execSpy = jest.spyOn(Exec, 'exec');
     await Docker.printVersion().catch(() => {
       // noop
     });
@@ -71,7 +71,7 @@ describe('printVersion', () => {
 
 describe('printInfo', () => {
   it('call docker info', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
+    const execSpy = jest.spyOn(Exec, 'exec');
     await Docker.printInfo().catch(() => {
       // noop
     });

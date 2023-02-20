@@ -18,7 +18,6 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
@@ -26,6 +25,7 @@ import * as util from 'util';
 
 import {Buildx} from './buildx';
 import {Context} from '../context';
+import {Exec} from '../exec';
 import {Docker} from '../docker';
 import {Git} from '../git';
 
@@ -82,16 +82,14 @@ export class Install {
     if (!toolPath) {
       const outputDir = path.join(Context.tmpDir(), 'build-cache');
       const buildCmd = await this.buildCommand(gitContext, outputDir);
-      toolPath = await exec
-        .getExecOutput(buildCmd.command, buildCmd.args, {
-          ignoreReturnCode: true
-        })
-        .then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.warning(res.stderr.trim());
-          }
-          return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
-        });
+      toolPath = await Exec.getExecOutput(buildCmd.command, buildCmd.args, {
+        ignoreReturnCode: true
+      }).then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(res.stderr.trim());
+        }
+        return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
+      });
     }
 
     return toolPath;
