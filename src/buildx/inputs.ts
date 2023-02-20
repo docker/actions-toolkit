@@ -134,7 +134,7 @@ export class Inputs {
   }
 
   public static hasDockerExporter(exporters: string[], load?: boolean): boolean {
-    return load ?? Inputs.hasExporterType('docker', exporters);
+    return load || Inputs.hasExporterType('docker', exporters);
   }
 
   public static hasExporterType(name: string, exporters: string[]): boolean {
