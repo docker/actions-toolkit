@@ -157,7 +157,7 @@ describe('printVersion', () => {
 describe('version', () => {
   it('valid', async () => {
     const buildx = new Buildx();
-    expect(semver.valid(await buildx.version)).not.toBeUndefined();
+    expect(semver.valid(await buildx.version())).not.toBeUndefined();
   });
 });
 
