@@ -228,6 +228,8 @@ describe('hasDockerExporter', () => {
     [['type=docker', 'type=tar,dest=/tmp/image.tar'], true, undefined],
     [['"type=tar","dest=/tmp/image.tar"'], false, undefined],
     [['" type= local" , dest=./release-out'], false, undefined],
+    [['type=docker'], true, false],
+    [['type=docker'], true, true],
     [['.'], true, true],
   ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
     expect(Inputs.hasDockerExporter(exporters, load)).toEqual(expected);
