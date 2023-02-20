@@ -22,18 +22,12 @@ import {parse} from 'csv-parse/sync';
 import {Context} from '../context';
 
 export class Inputs {
-  private readonly context: Context;
-
-  constructor(context: Context) {
-    this.context = context;
-  }
-
   public getBuildImageIDFilePath(): string {
-    return path.join(this.context.tmpDir(), 'iidfile');
+    return path.join(Context.tmpDir(), 'iidfile');
   }
 
   public getBuildMetadataFilePath(): string {
-    return path.join(this.context.tmpDir(), 'metadata-file');
+    return path.join(Context.tmpDir(), 'metadata-file');
   }
 
   public resolveBuildImageID(): string | undefined {
@@ -89,7 +83,7 @@ export class Inputs {
       }
       value = fs.readFileSync(value, {encoding: 'utf-8'});
     }
-    const secretFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
+    const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
     fs.writeFileSync(secretFile, value);
     return `id=${key},src=${secretFile}`;
   }
@@ -100,9 +94,8 @@ export class Inputs {
       // if input is not set returns empty string
       return input;
     }
-    const builderID = this.context.provenanceBuilderID;
     try {
-      return core.getBooleanInput(name) ? `builder-id=${builderID}` : 'false';
+      return core.getBooleanInput(name) ? `builder-id=${Context.provenanceBuilderID()}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
       return this.resolveProvenanceAttrs(input);
@@ -111,7 +104,7 @@ export class Inputs {
 
   public resolveProvenanceAttrs(input: string): string {
     if (!input) {
-      return `builder-id=${this.context.provenanceBuilderID}`;
+      return `builder-id=${Context.provenanceBuilderID()}`;
     }
     // parse attributes from input
     const fields = parse(input, {
@@ -129,7 +122,7 @@ export class Inputs {
       }
     }
     // if not add builder-id attribute
-    return `${input},builder-id=${this.context.provenanceBuilderID}`;
+    return `${input},builder-id=${Context.provenanceBuilderID()}`;
   }
 
   public static hasLocalExporter(exporters: string[]): boolean {

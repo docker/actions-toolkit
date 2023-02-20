@@ -30,13 +30,14 @@ import {Cert} from '../../src/types/buildx';
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 
-jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -92,7 +93,6 @@ describe('isAvailable', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
     const buildx = new Buildx({
-      context: new Context(),
       standalone: false
     });
     await buildx.isAvailable();
@@ -105,7 +105,6 @@ describe('isAvailable', () => {
   it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'getExecOutput');
     const buildx = new Buildx({
-      context: new Context(),
       standalone: true
     });
     await buildx.isAvailable();
@@ -121,7 +120,6 @@ describe('printInspect', () => {
   it('prints builder2 instance', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
-      context: new Context(),
       standalone: true
     });
     await buildx.printInspect('builder2').catch(() => {
@@ -137,7 +135,6 @@ describe('printVersion', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
-      context: new Context(),
       standalone: false
     });
     await buildx.printVersion();
@@ -148,7 +145,6 @@ describe('printVersion', () => {
   it('standalone', async () => {
     const execSpy = jest.spyOn(exec, 'exec');
     const buildx = new Buildx({
-      context: new Context(),
       standalone: true
     });
     await buildx.printVersion();
@@ -160,9 +156,7 @@ describe('printVersion', () => {
 
 describe('version', () => {
   it('valid', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     expect(semver.valid(await buildx.version)).not.toBeUndefined();
   });
 });
@@ -184,9 +178,7 @@ describe('versionSatisfies', () => {
     ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
     ['f117971', '>0.6.0', true]
   ])('given %p', async (version, range, expected) => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     expect(await buildx.versionSatisfies(range, version)).toBe(expected);
   });
 });

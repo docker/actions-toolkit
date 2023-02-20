@@ -19,7 +19,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {Builder} from '../../src/buildx/builder';
-import {Context} from '../../src/context';
 
 import {BuilderInfo} from '../../src/types/builder';
 
@@ -50,9 +49,7 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
 
 describe('inspect', () => {
   it('valid', async () => {
-    const builder = new Builder({
-      context: new Context()
-    });
+    const builder = new Builder();
     const builderInfo = await builder.inspect('');
     expect(builderInfo).not.toBeUndefined();
     expect(builderInfo.name).not.toEqual('');

@@ -27,13 +27,14 @@ const fixturesDir = path.join(__dirname, '..', 'fixtures');
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildkit-config-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 
-jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -60,9 +61,7 @@ describe('resolve', () => {
     ]
   ])('given %p config', async (val, file, exValue, error: Error) => {
     try {
-      const buildkit = new BuildKit({
-        context: new Context()
-      });
+      const buildkit = new BuildKit();
       let config: string;
       if (file) {
         config = buildkit.config.resolveFromFile(val);

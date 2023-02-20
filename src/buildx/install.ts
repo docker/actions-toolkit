@@ -32,17 +32,13 @@ import {Git} from '../git';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
-  context?: Context;
   standalone?: boolean;
 }
 
 export class Install {
   private readonly _standalone: boolean | undefined;
 
-  private readonly context: Context;
-
   constructor(opts?: InstallOpts) {
-    this.context = opts?.context || new Context();
     this._standalone = opts?.standalone;
   }
 
@@ -84,7 +80,7 @@ export class Install {
     let toolPath: string;
     toolPath = tc.find('buildx', vspec);
     if (!toolPath) {
-      const outputDir = path.join(this.context.tmpDir(), 'build-cache');
+      const outputDir = path.join(Context.tmpDir(), 'build-cache');
       const buildCmd = await this.buildCommand(gitContext, outputDir);
       toolPath = await exec
         .getExecOutput(buildCmd.command, buildCmd.args, {
@@ -103,7 +99,7 @@ export class Install {
 
   public async installStandalone(toolPath: string, dest?: string): Promise<string> {
     core.info('Standalone mode');
-    dest = dest || this.context.tmpDir();
+    dest = dest || Context.tmpDir();
     const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
     const binDir = path.join(dest, 'bin');
     if (!fs.existsSync(binDir)) {
@@ -143,8 +139,8 @@ export class Install {
   }
 
   private async buildCommand(gitContext: string, outputDir: string): Promise<{args: Array<string>; command: string}> {
-    const buildxStandaloneFound = await new Buildx({context: this.context, standalone: true}).isAvailable();
-    const buildxPluginFound = await new Buildx({context: this.context, standalone: false}).isAvailable();
+    const buildxStandaloneFound = await new Buildx({standalone: true}).isAvailable();
+    const buildxPluginFound = await new Buildx({standalone: false}).isAvailable();
 
     let buildStandalone = false;
     if ((await this.isStandalone()) && buildxStandaloneFound) {
@@ -164,7 +160,7 @@ export class Install {
     }
 
     //prettier-ignore
-    return await new Buildx({context: this.context, standalone: buildStandalone}).getCommand([
+    return await new Buildx({standalone: buildStandalone}).getCommand([
       'build',
       '--target', 'binaries',
       '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1',

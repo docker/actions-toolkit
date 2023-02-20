@@ -21,13 +21,11 @@ import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
 import {Docker} from '../docker';
-import {Context} from '../context';
 import {Inputs} from './inputs';
 
 import {Cert} from '../types/buildx';
 
 export interface BuildxOpts {
-  context: Context;
   standalone?: boolean;
 }
 
@@ -35,15 +33,13 @@ export class Buildx {
   private _version: string | undefined;
   private readonly _standalone: boolean | undefined;
 
-  private readonly context: Context;
   public readonly inputs: Inputs;
 
   public static readonly containerNamePrefix = 'buildx_buildkit_';
 
-  constructor(opts: BuildxOpts) {
+  constructor(opts?: BuildxOpts) {
     this._standalone = opts?.standalone;
-    this.context = opts.context;
-    this.inputs = new Inputs(this.context);
+    this.inputs = new Inputs();
   }
 
   static get configDir(): string {

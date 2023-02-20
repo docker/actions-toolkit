@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Context} from './context';
 import {Buildx} from './buildx/buildx';
 import {Install} from './buildx/install';
 import {Builder} from './buildx/builder';
@@ -30,7 +29,6 @@ export interface ToolkitOpts {
 }
 
 export class Toolkit {
-  public context: Context;
   public github: GitHub;
   public buildx: Buildx;
   public buildxInstall: Install;
@@ -38,11 +36,10 @@ export class Toolkit {
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
-    this.context = new Context();
     this.github = new GitHub({token: opts.githubToken});
-    this.buildx = new Buildx({context: this.context});
-    this.buildxInstall = new Install({context: this.context});
-    this.builder = new Builder({context: this.context, buildx: this.buildx});
-    this.buildkit = new BuildKit({context: this.context, buildx: this.buildx});
+    this.buildx = new Buildx();
+    this.buildxInstall = new Install();
+    this.builder = new Builder({buildx: this.buildx});
+    this.buildkit = new BuildKit({buildx: this.buildx});
   }
 }
