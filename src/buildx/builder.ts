@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import * as exec from '@actions/exec';
-
 import {Buildx} from './buildx';
+import {Exec} from '../exec';
 
 import {BuilderInfo, NodeInfo} from '../types/builder';
 
@@ -33,17 +32,15 @@ export class Builder {
 
   public async inspect(name: string): Promise<BuilderInfo> {
     const cmd = await this.buildx.getCommand(['inspect', name]);
-    return await exec
-      .getExecOutput(cmd.command, cmd.args, {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          throw new Error(res.stderr.trim());
-        }
-        return Builder.parseInspect(res.stdout);
-      });
+    return await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return Builder.parseInspect(res.stdout);
+    });
   }
 
   public static parseInspect(data: string): BuilderInfo {

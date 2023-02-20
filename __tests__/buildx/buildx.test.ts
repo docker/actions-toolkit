@@ -19,10 +19,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import * as semver from 'semver';
-import * as exec from '@actions/exec';
 
 import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
+import {Exec} from '../../src/exec';
 
 import {Cert} from '../../src/types/buildx';
 
@@ -91,7 +91,7 @@ describe('certsDir', () => {
 
 describe('isAvailable', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(exec, 'getExecOutput');
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const buildx = new Buildx({
       standalone: false
     });
@@ -103,7 +103,7 @@ describe('isAvailable', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(exec, 'getExecOutput');
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const buildx = new Buildx({
       standalone: true
     });
@@ -118,7 +118,7 @@ describe('isAvailable', () => {
 
 describe('printInspect', () => {
   it('prints builder2 instance', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
+    const execSpy = jest.spyOn(Exec, 'exec');
     const buildx = new Buildx({
       standalone: true
     });
@@ -133,7 +133,7 @@ describe('printInspect', () => {
 
 describe('printVersion', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
+    const execSpy = jest.spyOn(Exec, 'exec');
     const buildx = new Buildx({
       standalone: false
     });
@@ -143,7 +143,7 @@ describe('printVersion', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(exec, 'exec');
+    const execSpy = jest.spyOn(Exec, 'exec');
     const buildx = new Buildx({
       standalone: true
     });
