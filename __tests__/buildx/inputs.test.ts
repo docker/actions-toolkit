@@ -32,13 +32,14 @@ const metadata = `{
   "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
 }`;
 
-jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -52,9 +53,7 @@ afterEach(() => {
 
 describe('resolveBuildImageID', () => {
   it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
     const imageIDFile = buildx.inputs.getBuildImageIDFilePath();
     await fs.writeFileSync(imageIDFile, imageID);
@@ -65,9 +64,7 @@ describe('resolveBuildImageID', () => {
 
 describe('resolveBuildMetadata', () => {
   it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     const metadataFile = buildx.inputs.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
     const expected = buildx.inputs.resolveBuildMetadata();
@@ -77,9 +74,7 @@ describe('resolveBuildMetadata', () => {
 
 describe('resolveDigest', () => {
   it('matches', async () => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     const metadataFile = buildx.inputs.getBuildMetadataFilePath();
     await fs.writeFileSync(metadataFile, metadata);
     const expected = buildx.inputs.resolveDigest();
@@ -129,9 +124,7 @@ describe('getProvenanceInput', () => {
     ],
   ])('given input %p', async (input: string, expected: string) => {
     await setInput('provenance', input);
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     expect(buildx.inputs.getProvenanceInput('provenance')).toEqual(expected);
   });
 });
@@ -160,9 +153,7 @@ describe('resolveProvenanceAttrs', () => {
       'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
     ],
   ])('given %p', async (input: string, expected: string) => {
-    const buildx = new Buildx({
-      context: new Context()
-    });
+    const buildx = new Buildx();
     expect(buildx.inputs.resolveProvenanceAttrs(input)).toEqual(expected);
   });
 });
@@ -179,9 +170,7 @@ describe('resolveBuildSecret', () => {
     [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
   ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error) => {
     try {
-      const buildx = new Buildx({
-        context: new Context()
-      });
+      const buildx = new Buildx();
       let secret: string;
       if (file) {
         secret = buildx.inputs.resolveBuildSecretFile(kvp);

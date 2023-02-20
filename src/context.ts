@@ -23,29 +23,32 @@ import * as github from '@actions/github';
 import {GitHub} from './github';
 
 export class Context {
-  public gitRef: string;
-  public buildGitContext: string;
-  public provenanceBuilderID: string;
+  private static readonly _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
 
-  private readonly _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
-
-  constructor() {
-    this.gitRef = github.context.ref;
-    if (github.context.sha && this.gitRef && !this.gitRef.startsWith('refs/')) {
-      this.gitRef = `refs/heads/${github.context.ref}`;
-    }
-    if (github.context.sha && !this.gitRef.startsWith(`refs/pull/`)) {
-      this.gitRef = github.context.sha;
-    }
-    this.buildGitContext = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git#${this.gitRef}`;
-    this.provenanceBuilderID = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
+  public static tmpDir(): string {
+    return Context._tmpDir;
   }
 
-  public tmpDir(): string {
-    return this._tmpDir;
-  }
-
-  public tmpName(options?: tmp.TmpNameOptions): string {
+  public static tmpName(options?: tmp.TmpNameOptions): string {
     return tmp.tmpNameSync(options);
+  }
+
+  public static gitRef(): string {
+    let gitRef = github.context.ref;
+    if (github.context.sha && gitRef && !gitRef.startsWith('refs/')) {
+      gitRef = `refs/heads/${github.context.ref}`;
+    }
+    if (github.context.sha && !gitRef.startsWith(`refs/pull/`)) {
+      gitRef = github.context.sha;
+    }
+    return gitRef;
+  }
+
+  public static gitContext(): string {
+    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git#${Context.gitRef()}`;
+  }
+
+  public static provenanceBuilderID(): string {
+    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
   }
 }

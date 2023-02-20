@@ -25,13 +25,14 @@ import {Context} from '../src/context';
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'context-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 
-jest.spyOn(Context.prototype, 'tmpDir').mockImplementation((): string => {
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
-jest.spyOn(Context.prototype, 'tmpName').mockImplementation((): string => {
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -43,16 +44,20 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
+describe('gitRef', () => {
+  it('returns refs/heads/master', async () => {
+    expect(Context.gitRef()).toEqual('refs/heads/master');
+  });
+});
+
 describe('gitContext', () => {
   it('returns refs/heads/master', async () => {
-    const context = new Context();
-    expect(context.buildGitContext).toEqual('https://github.com/docker/actions-toolkit.git#refs/heads/master');
+    expect(Context.gitContext()).toEqual('https://github.com/docker/actions-toolkit.git#refs/heads/master');
   });
 });
 
 describe('provenanceBuilderID', () => {
   it('returns 123', async () => {
-    const context = new Context();
-    expect(context.provenanceBuilderID).toEqual('https://github.com/docker/actions-toolkit/actions/runs/123');
+    expect(Context.provenanceBuilderID()).toEqual('https://github.com/docker/actions-toolkit/actions/runs/123');
   });
 });

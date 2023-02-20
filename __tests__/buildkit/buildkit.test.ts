@@ -18,7 +18,6 @@ import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 
 import {BuildKit} from '../../src/buildkit/buildkit';
 import {Builder} from '../../src/buildx/builder';
-import {Context} from '../../src/context';
 
 import {BuilderInfo} from '../../src/types/builder';
 
@@ -47,13 +46,9 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
 
 describe('getVersion', () => {
   it('valid', async () => {
-    const builder = new Builder({
-      context: new Context()
-    });
+    const builder = new Builder();
     const builderInfo = await builder.inspect('builder2');
-    const buildkit = new BuildKit({
-      context: new Context()
-    });
+    const buildkit = new BuildKit();
     const version = await buildkit.getVersion(builderInfo.nodes[0]);
     expect(version).toBe('v0.11.0');
   });
@@ -64,9 +59,7 @@ describe('satisfies', () => {
     ['builder2', '>=0.10.0', true],
     ['builder2', '>0.11.0', false]
   ])('given %p', async (builderName, range, expected) => {
-    const buildkit = new BuildKit({
-      context: new Context()
-    });
+    const buildkit = new BuildKit();
     expect(await buildkit.versionSatisfies(builderName, range)).toBe(expected);
   });
 });

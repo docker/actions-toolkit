@@ -18,7 +18,6 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as semver from 'semver';
 
-import {Context} from '../context';
 import {Buildx} from '../buildx/buildx';
 import {Builder} from '../buildx/builder';
 import {Config} from './config';
@@ -26,24 +25,17 @@ import {Config} from './config';
 import {BuilderInfo, NodeInfo} from '../types/builder';
 
 export interface BuildKitOpts {
-  context: Context;
   buildx?: Buildx;
 }
 
 export class BuildKit {
-  private readonly context: Context;
   private readonly buildx: Buildx;
 
   public readonly config: Config;
 
-  constructor(opts: BuildKitOpts) {
-    this.context = opts.context;
-    this.config = new Config(this.context);
-    this.buildx =
-      opts?.buildx ||
-      new Buildx({
-        context: this.context
-      });
+  constructor(opts?: BuildKitOpts) {
+    this.config = new Config();
+    this.buildx = opts?.buildx || new Buildx();
   }
 
   public async getVersion(node: NodeInfo): Promise<string | undefined> {
@@ -89,10 +81,7 @@ export class BuildKit {
 
   public async versionSatisfies(builderName: string, range: string, builderInfo?: BuilderInfo): Promise<boolean> {
     if (!builderInfo) {
-      builderInfo = await new Builder({
-        context: this.context,
-        buildx: this.buildx
-      }).inspect(builderName);
+      builderInfo = await new Builder({buildx: this.buildx}).inspect(builderName);
     }
     for (const node of builderInfo.nodes) {
       core.debug(`BuildKit.versionSatisfies ${node}: ${range}`);

@@ -19,12 +19,6 @@ import fs from 'fs';
 import {Context} from '../context';
 
 export class Config {
-  private readonly context: Context;
-
-  constructor(context: Context) {
-    this.context = context;
-  }
-
   public resolveFromString(s: string): string {
     return this.resolve(s, false);
   }
@@ -40,7 +34,7 @@ export class Config {
       }
       s = fs.readFileSync(s, {encoding: 'utf-8'});
     }
-    const configFile = this.context.tmpName({tmpdir: this.context.tmpDir()});
+    const configFile = Context.tmpName({tmpdir: Context.tmpDir()});
     fs.writeFileSync(configFile, s);
     return configFile;
   }
