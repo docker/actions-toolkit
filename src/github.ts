@@ -59,12 +59,10 @@ export class GitHub {
     try {
       jwt = GitHub.actionsRuntimeToken;
     } catch (e) {
-      core.warning(`Cannot parse Actions Runtime Token: ${e.message}`);
-      return;
+      throw new Error(`Cannot parse GitHub Actions Runtime Token: ${e.message}`);
     }
     if (!jwt) {
-      core.warning(`ACTIONS_RUNTIME_TOKEN not set`);
-      return;
+      throw new Error(`ACTIONS_RUNTIME_TOKEN not set`);
     }
     try {
       <Array<GitHubActionsRuntimeTokenAC>>JSON.parse(`${jwt.ac}`).forEach(ac => {
@@ -85,7 +83,7 @@ export class GitHub {
         core.info(`${ac.Scope}: ${permission}`);
       });
     } catch (e) {
-      core.warning(`Cannot parse Actions Runtime Token Access Controls: ${e.message}`);
+      throw new Error(`Cannot parse GitHub Actions Runtime Token ACs: ${e.message}`);
     }
   }
 }
