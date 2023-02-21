@@ -52,7 +52,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/io@npm:^1.1.1":
+"@actions/io@npm:^1.1.1, @actions/io@npm:^1.1.2":
   version: 1.1.2
   resolution: "@actions/io@npm:1.1.2"
   checksum: 3c6583c4557abf6c95e9cfc9b6377045e65ba2c5dd4863f4feedd6be9daf4f6b60e588ab0151d5626b5f8320a37f05b8d44ab5c329b8c19f65be31b0616e1464
@@ -766,6 +766,7 @@ __metadata:
     "@actions/exec": ^1.1.1
     "@actions/github": ^5.1.1
     "@actions/http-client": ^2.0.1
+    "@actions/io": ^1.1.2
     "@actions/tool-cache": ^2.0.1
     "@types/csv-parse": ^1.2.2
     "@types/node": ^16.18.11
