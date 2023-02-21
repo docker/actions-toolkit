@@ -16,6 +16,7 @@
 
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
 import path from 'path';
+import * as io from '@actions/io';
 import osm = require('os');
 
 import {Docker} from '../src/docker';
@@ -49,13 +50,10 @@ describe('configDir', () => {
 
 describe('isAvailable', () => {
   it('cli', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const ioWhichSpy = jest.spyOn(io, 'which');
     await Docker.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
-    expect(execSpy).toHaveBeenCalledWith(`docker`, [], {
-      silent: true,
-      ignoreReturnCode: true
-    });
+    expect(ioWhichSpy).toHaveBeenCalledTimes(1);
+    expect(ioWhichSpy).toHaveBeenCalledWith('docker', true);
   });
 });
 

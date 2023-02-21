@@ -17,6 +17,7 @@
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
+import * as io from '@actions/io';
 import {Exec} from './exec';
 
 export class Docker {
@@ -25,24 +26,16 @@ export class Docker {
   }
 
   public static async isAvailable(): Promise<boolean> {
-    const ok: boolean = await Exec.getExecOutput('docker', [], {
-      ignoreReturnCode: true,
-      silent: true
-    })
+    return await io
+      .which('docker', true)
       .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.debug(`Docker.isAvailable cmd err: ${res.stderr}`);
-          return false;
-        }
-        return res.exitCode == 0;
+        core.debug(`Docker.isAvailable ok: ${res}`);
+        return true;
       })
       .catch(error => {
         core.debug(`Docker.isAvailable error: ${error}`);
         return false;
       });
-
-    core.debug(`Docker.isAvailable: ${ok}`);
-    return ok;
   }
 
   public static async printVersion(): Promise<void> {
