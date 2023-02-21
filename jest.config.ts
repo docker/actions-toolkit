@@ -41,7 +41,7 @@ module.exports = {
   moduleNameMapper: {
     '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
   },
-  collectCoverageFrom: ['src/**/{!(toolkit.ts),}.ts'],
+  collectCoverageFrom: ['src/**/{!(index.ts),}.ts'],
   coveragePathIgnorePatterns: ['lib/', 'node_modules/', '__mocks__/', '__tests__/'],
   verbose: true
 };

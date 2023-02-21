@@ -39,7 +39,7 @@ $ npm install @docker/actions-toolkit
 ## Usage
 
 ```js
-const { Toolkit } = require('@docker/actions-toolkit')
+const { Toolkit } = require('@docker/actions-toolkit/lib/toolkit')
 const toolkit = new Toolkit()
 ```
 
