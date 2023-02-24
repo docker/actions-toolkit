@@ -39,14 +39,14 @@ export class BuildKit {
   }
 
   public async getVersion(node: NodeInfo): Promise<string | undefined> {
-    if (!node.buildkitVersion && node.name) {
+    if (!node.buildkit && node.name) {
       try {
         return await this.getVersionWithinImage(node.name);
       } catch (e) {
         core.warning(e);
       }
     }
-    return node.buildkitVersion;
+    return node.buildkit;
   }
 
   private async getVersionWithinImage(nodeName: string): Promise<string> {
@@ -80,7 +80,7 @@ export class BuildKit {
       builderInfo = await new Builder({buildx: this.buildx}).inspect(builderName);
     }
     for (const node of builderInfo.nodes) {
-      let bkversion = node.buildkitVersion;
+      let bkversion = node.buildkit;
       core.debug(`BuildKit.versionSatisfies ${bkversion}: ${range}`);
       if (!bkversion) {
         try {

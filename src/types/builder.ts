@@ -21,20 +21,15 @@ export interface BuilderInfo {
   nodes: NodeInfo[];
 }
 
-export interface NodeInfo {
-  name?: string;
-  endpoint?: string;
-  driverOpts?: Array<string>;
-  status?: string;
-  buildkitdFlags?: string;
-  buildkitVersion?: string;
-  platforms?: string;
-}
-
 export interface Node {
   name?: string;
   endpoint?: string;
   'driver-opts'?: Array<string>;
   'buildkitd-flags'?: string;
   platforms?: string;
+}
+
+export interface NodeInfo extends Node {
+  status?: string;
+  buildkit?: string;
 }
