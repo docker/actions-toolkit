@@ -35,9 +35,9 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
     lastActivity: new Date('2023-01-16 09:45:23 +0000 UTC'),
     nodes: [
       {
-        buildkitVersion: 'v0.11.0',
-        buildkitdFlags: '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
-        driverOpts: ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
+        buildkit: 'v0.11.0',
+        'buildkitd-flags': '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        'driver-opts': ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
         endpoint: 'unix:///var/run/docker.sock',
         name: 'builder20',
         platforms: 'linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6',
@@ -71,8 +71,8 @@ describe('parseInspect', () => {
            "name": "builder-5cb467f7-0940-47e1-b94b-d51f54054d620",
            "endpoint": "unix:///var/run/docker.sock",
            "status": "running",
-           "buildkitdFlags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkitVersion": "v0.10.4",
+           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "buildkit": "v0.10.4",
            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/arm64,linux/riscv64,linux/386,linux/arm/v7,linux/arm/v6"
          }
        ]
@@ -87,12 +87,12 @@ describe('parseInspect', () => {
          {
            "name": "builder-5f449644-ff29-48af-8344-abb0292d06730",
            "endpoint": "unix:///var/run/docker.sock",
-           "driverOpts": [
+           "driver-opts": [
              "image=moby/buildkit:latest"
            ],
            "status": "running",
-           "buildkitdFlags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkitVersion": "v0.10.4",
+           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "buildkit": "v0.10.4",
            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386"
          }
        ]
@@ -107,13 +107,13 @@ describe('parseInspect', () => {
          {
            "name": "builder-9929e463-7954-4dc3-89cd-514cca29ff800",
            "endpoint": "unix:///var/run/docker.sock",
-           "driverOpts": [
+           "driver-opts": [
              "image=moby/buildkit:master",
              "network=host"
            ],
            "status": "running",
-           "buildkitdFlags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "buildkitVersion": "3fab389",
+           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "buildkit": "3fab389",
            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386"
          }
        ]
@@ -129,7 +129,7 @@ describe('parseInspect', () => {
            "name": "default",
            "endpoint": "default",
            "status": "running",
-           "buildkitVersion": "20.10.17",
+           "buildkit": "20.10.17",
            "platforms": "linux/amd64,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6"
          }
        ]
@@ -144,7 +144,7 @@ describe('parseInspect', () => {
          {
            "name": "aws_graviton2",
            "endpoint": "tcp://1.23.45.67:1234",
-           "driverOpts": [
+           "driver-opts": [
              "cert=/home/user/.certs/aws_graviton2/cert.pem",
              "key=/home/user/.certs/aws_graviton2/key.pem",
              "cacert=/home/user/.certs/aws_graviton2/ca.pem"
@@ -163,7 +163,7 @@ describe('parseInspect', () => {
            "name": "builder-17cfff01-48d9-4c3d-9332-9992e308a5100",
            "endpoint": "unix:///var/run/docker.sock",
            "status": "running",
-           "buildkitdFlags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386"
          }
        ],
@@ -179,9 +179,9 @@ describe('parseInspect', () => {
        "lastActivity": new Date("2023-01-16T09:45:23.000Z"),
        "nodes": [
          {
-           "buildkitVersion": "v0.11.0",
-           "buildkitdFlags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
-           "driverOpts": [
+           "buildkit": "v0.11.0",
+           "buildkitd-flags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "driver-opts": [
              "BUILDKIT_STEP_LOG_MAX_SIZE=10485760",
              "BUILDKIT_STEP_LOG_MAX_SPEED=10485760",
              "JAEGER_TRACE=localhost:6831",

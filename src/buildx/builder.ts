@@ -80,7 +80,7 @@ export class Builder {
           break;
         }
         case 'driver options': {
-          node.driverOpts = (value.match(/(\w+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
+          node['driver-opts'] = (value.match(/(\w+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
           break;
         }
         case 'status': {
@@ -88,11 +88,11 @@ export class Builder {
           break;
         }
         case 'flags': {
-          node.buildkitdFlags = value;
+          node['buildkitd-flags'] = value;
           break;
         }
         case 'buildkit': {
-          node.buildkitVersion = value;
+          node.buildkit = value;
           break;
         }
         case 'platforms': {
