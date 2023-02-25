@@ -57,6 +57,19 @@ describe('isAvailable', () => {
   });
 });
 
+describe('context', () => {
+  it('call docker context show', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    await Docker.context().catch(() => {
+      // noop
+    });
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['context', 'show'], {
+      ignoreReturnCode: true,
+      silent: true
+    });
+  });
+});
+
 describe('printVersion', () => {
   it('call docker version', async () => {
     const execSpy = jest.spyOn(Exec, 'exec');
