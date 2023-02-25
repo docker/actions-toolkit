@@ -19,7 +19,7 @@ import path from 'path';
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import {Docker} from '../docker';
+import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 import {Inputs} from './inputs';
 

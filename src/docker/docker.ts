@@ -18,7 +18,7 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
-import {Exec} from './exec';
+import {Exec} from '../exec';
 
 export class Docker {
   static get configDir(): string {
