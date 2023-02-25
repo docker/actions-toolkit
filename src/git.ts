@@ -15,21 +15,81 @@
  */
 
 import {Exec} from './exec';
+import {Context} from '@actions/github/lib/context';
+import {Context as GitContext} from './types/git';
 
 export class Git {
-  public static async getRemoteSha(repo: string, ref: string): Promise<string> {
-    return await Exec.getExecOutput(`git`, ['ls-remote', repo, ref], {
+  public static async context(): Promise<GitContext> {
+    const ctx = new Context();
+    ctx.ref = await Git.ref();
+    ctx.sha = await Git.fullCommit();
+    return ctx;
+  }
+
+  public static async isInsideWorkTree(): Promise<boolean> {
+    return await Git.exec(['rev-parse', '--is-inside-work-tree'])
+      .then(out => {
+        return out === 'true';
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  public static async remoteSha(repo: string, ref: string): Promise<string> {
+    return await Git.exec(['ls-remote', repo, ref]).then(out => {
+      const [rsha] = out.split(/[\s\t]/);
+      if (rsha.length == 0) {
+        throw new Error(`Cannot find remote ref for ${repo}#${ref}`);
+      }
+      return rsha;
+    });
+  }
+
+  public static async remoteURL(): Promise<string> {
+    return await Git.exec(['remote', 'get-url', 'origin']).then(rurl => {
+      if (rurl.length == 0) {
+        return Git.exec(['remote', 'get-url', 'upstream']).then(rurl => {
+          if (rurl.length == 0) {
+            throw new Error(`Cannot find remote URL for origin or upstream`);
+          }
+          return rurl;
+        });
+      }
+      return rurl;
+    });
+  }
+
+  public static async ref(): Promise<string> {
+    return await Git.exec(['symbolic-ref', 'HEAD']);
+  }
+
+  public static async fullCommit(): Promise<string> {
+    return await Git.exec(['show', '--format=%H', 'HEAD', '--quiet', '--']);
+  }
+
+  public static async shortCommit(): Promise<string> {
+    return await Git.exec(['show', '--format=%h', 'HEAD', '--quiet', '--']);
+  }
+
+  public static async tag(): Promise<string> {
+    return await Git.exec(['tag', '--points-at', 'HEAD', '--sort', '-version:creatordate']).then(tags => {
+      if (tags.length == 0) {
+        return Git.exec(['describe', '--tags', '--abbrev=0']);
+      }
+      return tags.split('\n')[0];
+    });
+  }
+
+  private static async exec(args: string[] = []): Promise<string> {
+    return await Exec.getExecOutput(`git`, args, {
       ignoreReturnCode: true,
       silent: true
     }).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
         throw new Error(res.stderr);
       }
-      const [rsha] = res.stdout.trim().split(/[\s\t]/);
-      if (rsha.length == 0) {
-        throw new Error(`Cannot find remote ref for ${repo}#${ref}`);
-      }
-      return rsha;
+      return res.stdout.trim();
     });
   }
 }

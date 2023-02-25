@@ -17,18 +17,131 @@
 import {beforeEach, describe, expect, it, jest} from '@jest/globals';
 
 import {Git} from '../src/git';
+import {Exec} from '../src/exec';
+import {ExecOutput} from '@actions/exec';
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.restoreAllMocks();
 });
 
-describe('git', () => {
-  it('returns git remote ref', async () => {
+describe('context', () => {
+  it('returns mocked ref and sha', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git show --format=%H HEAD --quiet --':
+          result = 'test-sha';
+          break;
+        case 'git symbolic-ref HEAD':
+          result = 'refs/heads/test';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+    const ctx = await Git.context();
+    expect(ctx.ref).toEqual('refs/heads/test');
+    expect(ctx.sha).toEqual('test-sha');
+  });
+});
+
+describe('isInsideWorkTree', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      expect(await Git.getRemoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
-    } catch (e) {
-      // eslint-disable-next-line jest/no-conditional-expect
-      expect(e).toEqual(null);
+      await Git.isInsideWorkTree();
+    } catch (err) {
+      // noop
     }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['rev-parse', '--is-inside-work-tree'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
+});
+
+describe('remoteSha', () => {
+  it('returns git remote sha', async () => {
+    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
+  });
+});
+
+describe('remoteURL', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    try {
+      await Git.remoteURL();
+    } catch (err) {
+      // noop
+    }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['remote', 'get-url', 'origin'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
+});
+
+describe('ref', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    try {
+      await Git.ref();
+    } catch (err) {
+      // noop
+    }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['symbolic-ref', 'HEAD'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
+});
+
+describe('fullCommit', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    try {
+      await Git.fullCommit();
+    } catch (err) {
+      // noop
+    }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['show', '--format=%H', 'HEAD', '--quiet', '--'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
+});
+
+describe('shortCommit', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    try {
+      await Git.shortCommit();
+    } catch (err) {
+      // noop
+    }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['show', '--format=%h', 'HEAD', '--quiet', '--'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
+});
+
+describe('tag', () => {
+  it('have been called', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    try {
+      await Git.tag();
+    } catch (err) {
+      // noop
+    }
+    expect(execSpy).toHaveBeenCalledWith(`git`, ['tag', '--points-at', 'HEAD', '--sort', '-version:creatordate'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
   });
 });

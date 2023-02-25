@@ -73,7 +73,7 @@ export class Install {
     if (ref.match(/^[0-9a-fA-F]{40}$/)) {
       vspec = ref;
     } else {
-      vspec = await Git.getRemoteSha(repo, ref);
+      vspec = await Git.remoteSha(repo, ref);
     }
     core.debug(`Install.build: tool version spec ${vspec}`);
 
