@@ -38,8 +38,12 @@ export class Docker {
       });
   }
 
-  public static async context(): Promise<string> {
-    return await Exec.getExecOutput(`docker`, ['context', 'show'], {
+  public static async context(name?: string): Promise<string> {
+    const args = ['context', 'inspect', '--format', '{{.Name}}'];
+    if (name) {
+      args.push(name);
+    }
+    return await Exec.getExecOutput(`docker`, args, {
       ignoreReturnCode: true,
       silent: true
     }).then(res => {
