@@ -63,7 +63,7 @@ describe('context', () => {
     await Docker.context().catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['context', 'show'], {
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['context', 'inspect', '--format', '{{.Name}}'], {
       ignoreReturnCode: true,
       silent: true
     });
