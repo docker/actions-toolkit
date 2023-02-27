@@ -19,3 +19,4 @@ import path from 'path';
 const scriptsPath = path.join(__dirname, '..', 'scripts');
 
 export const setupDockerPowershell = path.join(scriptsPath, 'setup-docker.ps1');
+export const colimaConfig = path.join(scriptsPath, 'colima.yaml');

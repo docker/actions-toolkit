@@ -26,7 +26,7 @@ describe('install', () => {
       await expect((async () => {
         const install = new Install();
         const toolPath = await install.download(version);
-        await install.install(toolPath);
+        await install.install(toolPath, version);
         await Docker.printVersion();
         await Docker.printInfo();
       })()).resolves.not.toThrow();

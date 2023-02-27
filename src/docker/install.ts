@@ -17,10 +17,11 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import * as handlebars from 'handlebars';
+import * as util from 'util';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
-import * as util from 'util';
 
 import * as scripts from '../scripts';
 import {Context} from '../context';
@@ -64,10 +65,11 @@ export class Install {
     return tooldir;
   }
 
-  public async install(toolDir: string): Promise<void> {
+  public async install(toolDir: string, version: string, channel?: string): Promise<void> {
+    channel = channel || 'stable';
     switch (os.platform()) {
       case 'darwin': {
-        await this.installDarwin(toolDir);
+        await this.installDarwin(toolDir, version, channel);
         break;
       }
       case 'linux': {
@@ -84,12 +86,33 @@ export class Install {
     }
   }
 
-  private async installDarwin(toolDir: string): Promise<void> {
+  private async installDarwin(toolDir: string, version: string, channel?: string): Promise<void> {
+    const colimaDir = path.join(os.homedir(), '.colima', 'default');
+    await io.mkdirP(colimaDir);
+    const dockerHost = `unix://${colimaDir}/docker.sock`;
+
     if (!(await Install.colimaInstalled())) {
       await core.group('Installing colima', async () => {
         await Exec.exec('brew', ['install', 'colima']);
       });
     }
+
+    await core.group('Creating colima config', async () => {
+      const colimaCfg = handlebars.compile(
+        fs.readFileSync(scripts.colimaConfig, {
+          encoding: 'utf8',
+          flag: 'r'
+        })
+      )({
+        hostArch: Install.platformArch(),
+        dockerVersion: version,
+        dockerChannel: channel
+      });
+      core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
+      fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
+      core.info(colimaCfg);
+    });
+
     // colima is already started on the runner so env var added in download
     // method is not expanded to the running process.
     const envs = Object.assign({}, process.env, {
@@ -98,7 +121,12 @@ export class Install {
       [key: string]: string;
     };
     await core.group('Starting colima', async () => {
-      await Exec.exec('colima', ['start', '--runtime', 'docker', '--mount-type', '9p'], {env: envs});
+      await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+    });
+
+    await core.group('Create Docker context', async () => {
+      await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
+      await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
     });
   }
 
@@ -109,6 +137,7 @@ export class Install {
 
   private async installWindows(toolDir: string): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
+
     const setupCmd = await Util.powershellCommand(scripts.setupDockerPowershell, {
       ToolDir: toolDir,
       TmpDir: Context.tmpDir(),
@@ -117,6 +146,7 @@ export class Install {
     await core.group('Install Docker daemon service', async () => {
       await Exec.exec(setupCmd.command, setupCmd.args);
     });
+
     await core.group('Create Docker context', async () => {
       await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
       await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
@@ -124,60 +154,56 @@ export class Install {
   }
 
   private downloadURL(version: string, channel: string): string {
-    let platformOS, platformArch: string;
+    const platformOS = Install.platformOS();
+    const platformArch = Install.platformArch();
+    const ext = platformOS === 'win' ? '.zip' : '.tgz';
+    return util.format('https://download.docker.com/%s/static/%s/%s/docker-%s%s', platformOS, channel, platformArch, version, ext);
+  }
+
+  private static platformOS(): string {
     switch (os.platform()) {
       case 'darwin': {
-        platformOS = 'mac';
-        break;
+        return 'mac';
       }
       case 'linux': {
-        platformOS = 'linux';
-        break;
+        return 'linux';
       }
       case 'win32': {
-        platformOS = 'win';
-        break;
+        return 'win';
       }
       default: {
-        platformOS = os.platform();
-        break;
+        return os.platform();
       }
     }
+  }
+
+  private static platformArch(): string {
     switch (os.arch()) {
       case 'x64': {
-        platformArch = 'x86_64';
-        break;
+        return 'x86_64';
       }
       case 'ppc64': {
-        platformArch = 'ppc64le';
-        break;
+        return 'ppc64le';
       }
       case 'arm': {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const arm_version = (process.config.variables as any).arm_version;
         switch (arm_version) {
           case 6: {
-            platformArch = 'armel';
-            break;
+            return 'armel';
           }
           case 7: {
-            platformArch = 'armhf';
-            break;
+            return 'armhf';
           }
           default: {
-            platformArch = `v${arm_version}`;
-            break;
+            return `v${arm_version}`;
           }
         }
-        break;
       }
       default: {
-        platformArch = os.arch();
-        break;
+        return os.arch();
       }
     }
-    const ext = platformOS === 'win' ? '.zip' : '.tgz';
-    return util.format('https://download.docker.com/%s/static/%s/%s/docker-%s%s', platformOS, channel, platformArch, version, ext);
   }
 
   private static async colimaInstalled(): Promise<boolean> {
