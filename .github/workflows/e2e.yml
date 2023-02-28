@@ -34,6 +34,12 @@ jobs:
         run: yarn install
       -
         name: Test
-        run: yarn test:e2e
+        run: yarn test-coverage:e2e --coverageDirectory=./coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/clover.xml
+          flags: e2e

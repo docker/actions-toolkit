@@ -11,8 +11,9 @@
     "prettier": "prettier --check \"./**/*.ts\"",
     "prettier:fix": "prettier --write \"./**/*.ts\"",
     "test": "jest",
+    "test:e2e": "jest -c jest.config.e2e.ts --runInBand --detectOpenHandles --forceExit",
     "test-coverage": "jest --coverage",
-    "test:e2e": "jest -c jest.config.e2e.ts --runInBand --detectOpenHandles --forceExit"
+    "test-coverage:e2e": "jest --coverage -c jest.config.e2e.ts --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",
