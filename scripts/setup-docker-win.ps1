@@ -66,3 +66,8 @@ While ($true) {
   Start-Sleep -Seconds 1
 }
 Write-Host "Docker daemon started successfully!"
+
+Get-WinEvent -ea SilentlyContinue `
+  -FilterHashtable @{ProviderName= "docker"; LogName = "application"} |
+    Sort-Object @{Expression="TimeCreated";Descending=$false} |
+    ForEach-Object {"$($_.TimeCreated.ToUniversalTime().ToString("o")) [$($_.LevelDisplayName)] $($_.Message)"}
