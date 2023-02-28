@@ -12,7 +12,7 @@
     "prettier:fix": "prettier --write \"./**/*.ts\"",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "test:e2e": "jest -c jest.config.e2e.ts"
+    "test:e2e": "jest -c jest.config.e2e.ts --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",

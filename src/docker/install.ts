@@ -131,14 +131,31 @@ export class Install {
   }
 
   private async installLinux(toolDir: string): Promise<void> {
-    core.addPath(toolDir);
-    core.info('Added Docker to PATH');
+    const dockerHost = `unix://${path.join(Context.tmpDir(), 'docker.sock')}`;
+
+    await core.group('Install Docker daemon', async () => {
+      const bashPath: string = await io.which('bash', true);
+      await Exec.exec('sudo', ['-E', bashPath, scripts.setupDockerLinux], {
+        env: Object.assign({}, process.env, {
+          TOOLDIR: toolDir,
+          RUNDIR: Context.tmpDir(),
+          DOCKER_HOST: dockerHost
+        }) as {
+          [key: string]: string;
+        }
+      });
+    });
+
+    await core.group('Create Docker context', async () => {
+      await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
+      await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
+    });
   }
 
   private async installWindows(toolDir: string): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
-    const setupCmd = await Util.powershellCommand(scripts.setupDockerPowershell, {
+    const setupCmd = await Util.powershellCommand(scripts.setupDockerWin, {
       ToolDir: toolDir,
       TmpDir: Context.tmpDir(),
       DockerHost: dockerHost
