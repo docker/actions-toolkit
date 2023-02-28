@@ -3,8 +3,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ToolDir,
 
-    [Parameter(Mandatory = $false)]
-    [string]$TmpDir,
+    [Parameter(Mandatory = $true)]
+    [string]$RunDir,
 
     [Parameter(Mandatory = $true)]
     [string]$DockerHost)
@@ -12,9 +12,8 @@ param(
 $pwver = (Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\PowerShell\3\PowerShellEngine -Name 'PowerShellVersion').PowerShellVersion
 Write-Host "PowerShell version: $pwver"
 
-# Create temp directory
-if (!$TmpDir) { $TmpDir = $env:TEMP }
-New-Item -ItemType Directory "$TmpDir" -ErrorAction SilentlyContinue | Out-Null
+# Create run directory
+New-Item -ItemType Directory "$RunDir" -ErrorAction SilentlyContinue | Out-Null
 
 # Remove existing service
 if (Get-Service docker -ErrorAction SilentlyContinue) {
@@ -37,14 +36,14 @@ $env:DOCKER_HOST = $DockerHost
 Write-Host "DOCKER_HOST: $env:DOCKER_HOST"
 
 Write-Host "Creating service"
-New-Item -ItemType Directory "$TmpDir\moby-root" -ErrorAction SilentlyContinue | Out-Null
-New-Item -ItemType Directory "$TmpDir\moby-exec" -ErrorAction SilentlyContinue | Out-Null
+New-Item -ItemType Directory "$RunDir\moby-root" -ErrorAction SilentlyContinue | Out-Null
+New-Item -ItemType Directory "$RunDir\moby-exec" -ErrorAction SilentlyContinue | Out-Null
 Start-Process -Wait -NoNewWindow "$ToolDir\dockerd" `
   -ArgumentList `
     "--host=$DockerHost", `
-    "--data-root=$TmpDir\moby-root", `
-    "--exec-root=$TmpDir\moby-exec", `
-    "--pidfile=$TmpDir\docker.pid", `
+    "--data-root=$RunDir\moby-root", `
+    "--exec-root=$RunDir\moby-exec", `
+    "--pidfile=$RunDir\docker.pid", `
     "--register-service"
 Write-Host "Starting service"
 Start-Service -Name docker

@@ -24,7 +24,6 @@ import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
 import * as scripts from '../scripts';
-import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
 
@@ -41,7 +40,7 @@ export class Install {
     if (os.platform() == 'win32') {
       extractFolder = await tc.extractZip(downloadPath);
     } else {
-      extractFolder = await tc.extractTar(downloadPath, path.join(Context.tmpDir(), 'docker'));
+      extractFolder = await tc.extractTar(downloadPath);
     }
     if (Util.isDirectory(path.join(extractFolder, 'docker'))) {
       extractFolder = path.join(extractFolder, 'docker');
@@ -65,7 +64,7 @@ export class Install {
     return tooldir;
   }
 
-  public async install(toolDir: string, version: string, channel?: string): Promise<void> {
+  public async install(toolDir: string, runDir: string, version: string, channel?: string): Promise<void> {
     channel = channel || 'stable';
     switch (os.platform()) {
       case 'darwin': {
@@ -73,11 +72,11 @@ export class Install {
         break;
       }
       case 'linux': {
-        await this.installLinux(toolDir);
+        await this.installLinux(toolDir, runDir);
         break;
       }
       case 'win32': {
-        await this.installWindows(toolDir);
+        await this.installWindows(toolDir, runDir);
         break;
       }
       default: {
@@ -87,7 +86,7 @@ export class Install {
   }
 
   private async installDarwin(toolDir: string, version: string, channel?: string): Promise<void> {
-    const colimaDir = path.join(os.homedir(), '.colima', 'default');
+    const colimaDir = path.join(os.homedir(), '.colima', 'default'); // TODO: create a custom colima profile to avoid overlap with other actions
     await io.mkdirP(colimaDir);
     const dockerHost = `unix://${colimaDir}/docker.sock`;
 
@@ -130,15 +129,15 @@ export class Install {
     });
   }
 
-  private async installLinux(toolDir: string): Promise<void> {
-    const dockerHost = `unix://${path.join(Context.tmpDir(), 'docker.sock')}`;
+  private async installLinux(toolDir: string, runDir: string): Promise<void> {
+    const dockerHost = `unix://${path.join(runDir, 'docker.sock')}`;
 
     await core.group('Install Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
       await Exec.exec('sudo', ['-E', bashPath, scripts.setupDockerLinux], {
         env: Object.assign({}, process.env, {
           TOOLDIR: toolDir,
-          RUNDIR: Context.tmpDir(),
+          RUNDIR: runDir,
           DOCKER_HOST: dockerHost
         }) as {
           [key: string]: string;
@@ -152,12 +151,12 @@ export class Install {
     });
   }
 
-  private async installWindows(toolDir: string): Promise<void> {
+  private async installWindows(toolDir: string, runDir: string): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
     const setupCmd = await Util.powershellCommand(scripts.setupDockerWin, {
       ToolDir: toolDir,
-      TmpDir: Context.tmpDir(),
+      RunDir: runDir,
       DockerHost: dockerHost
     });
     await core.group('Install Docker daemon service', async () => {

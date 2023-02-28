@@ -18,6 +18,8 @@ if ! command -v dockerd &> /dev/null; then
   false
 fi
 
+mkdir -p "$RUNDIR"
+
 (
   echo "Starting dockerd"
   set -x
@@ -31,21 +33,16 @@ fi
 ) &
 
 tries=60
-echo "Waiting for daemon to start..."
 while ! docker version &> /dev/null; do
-	((tries--))
-	if [ $tries -le 0 ]; then
-		printf "\n"
-		if [ -z "$DOCKER_HOST" ]; then
-			echo >&2 "error: daemon failed to start"
-			echo >&2 "  check $RUNDIR/docker.log for details"
-		else
-			echo >&2 "error: daemon at $DOCKER_HOST fails to 'docker version':"
-			docker version >&2 || true
-		fi
-		false
-	fi
-	printf "."
-	sleep 2
+  ((tries--))
+  if [ $tries -le 0 ]; then
+    if [ -z "$DOCKER_HOST" ]; then
+      echo >&2 "error: daemon failed to start"
+    else
+      echo >&2 "error: daemon at $DOCKER_HOST fails to 'docker version':"
+      docker version >&2 || true
+    fi
+    false
+  fi
+  sleep 2
 done
-printf "\n"

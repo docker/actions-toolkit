@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import path from 'path';
 import {describe, expect, test} from '@jest/globals';
 
 import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
+
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
 
 describe('install', () => {
   // prettier-ignore
@@ -26,7 +30,7 @@ describe('install', () => {
       await expect((async () => {
         const install = new Install();
         const toolPath = await install.download(version);
-        await install.install(toolPath, version);
+        await install.install(toolPath, tmpDir, version);
         await Docker.printVersion();
         await Docker.printInfo();
       })()).resolves.not.toThrow();
