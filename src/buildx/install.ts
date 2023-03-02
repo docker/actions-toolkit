@@ -26,7 +26,7 @@ import * as util from 'util';
 import {Buildx} from './buildx';
 import {Context} from '../context';
 import {Exec} from '../exec';
-import {Docker} from '../docker';
+import {Docker} from '../docker/docker';
 import {Git} from '../git';
 
 import {GitHubRelease} from '../types/github';

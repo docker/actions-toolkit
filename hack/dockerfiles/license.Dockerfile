@@ -16,7 +16,7 @@
 
 ARG LICENSE_HOLDER="actions-toolkit authors"
 ARG LICENSE_TYPE="apache"
-ARG LICENSE_FILES=".*\(Dockerfile\|Makefile\|\.js\|\.ts\|\.hcl\|\.sh\)"
+ARG LICENSE_FILES=".*\(Dockerfile\|Makefile\|\.js\|\.ts\|\.hcl\|\.sh|\.ps1\)"
 ARG ADDLICENSE_VERSION="v1.0.0"
 
 FROM ghcr.io/google/addlicense:${ADDLICENSE_VERSION} AS addlicense

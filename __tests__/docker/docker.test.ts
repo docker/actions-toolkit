@@ -19,8 +19,8 @@ import path from 'path';
 import * as io from '@actions/io';
 import osm = require('os');
 
-import {Docker} from '../src/docker';
-import {Exec} from '../src/exec';
+import {Docker} from '../../src/docker/docker';
+import {Exec} from '../../src/exec';
 
 beforeEach(() => {
   jest.clearAllMocks();

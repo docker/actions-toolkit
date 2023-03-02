@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
 import * as core from '@actions/core';
+import * as io from '@actions/io';
 import {parse} from 'csv-parse/sync';
 
 export interface InputListOpts {
@@ -70,5 +72,29 @@ export class Util {
       return false;
     }
     return true;
+  }
+
+  public static async powershellCommand(script: string, params?: Record<string, string>) {
+    const powershellPath: string = await io.which('powershell', true);
+    const escapedScript = script.replace(/'/g, "''").replace(/"|\n|\r/g, '');
+    const escapedParams: string[] = [];
+    if (params) {
+      for (const key in params) {
+        escapedParams.push(`-${key} '${params[key].replace(/'/g, "''").replace(/"|\n|\r/g, '')}'`);
+      }
+    }
+    return {
+      command: `"${powershellPath}"`,
+      args: ['-NoLogo', '-Sta', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Unrestricted', '-Command', `& '${escapedScript}' ${escapedParams.join(' ')}`]
+    };
+  }
+
+  public static isDirectory(p) {
+    try {
+      return fs.lstatSync(p).isDirectory();
+    } catch (_) {
+      // noop
+    }
+    return false;
   }
 }

@@ -19,6 +19,6 @@
     "./__tests__/**/*",
     "./lib/**/*",
     "node_modules",
-    "jest.config.ts"
+    "jest.config*.ts"
   ]
 }

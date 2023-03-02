@@ -1,6 +1,7 @@
-name: test
+name: e2e
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'main'
@@ -9,36 +10,31 @@ on:
       - '.github/buildx-releases.json'
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - lint
-          - vendor-validate
-          - license-validate
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
       -
-        name: Validate
-        uses: docker/bake-action@v2
+        name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          targets: ${{ matrix.target }}
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
+          node-version: 16
+          cache: 'yarn'
       -
-        name: Checkout
-        uses: actions/checkout@v3
+        name: Install
+        run: yarn install
       -
         name: Test
-        uses: docker/bake-action@v2
-        with:
-          targets: test-coverage
+        run: yarn test-coverage:e2e --coverageDirectory=./coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
@@ -46,4 +42,4 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage/clover.xml
-          flags: unit
+          flags: e2e
