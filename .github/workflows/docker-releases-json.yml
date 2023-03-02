@@ -1,4 +1,4 @@
-name: buildx-releases-json
+name: docker-releases-json
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,9 +19,9 @@ jobs:
   generate:
     uses: crazy-max/.github/.github/workflows/releases-json.yml@2a596c917a8ad3e6203ae99b777148525a2e00d5
     with:
-      repository: docker/buildx
-      artifact_name: buildx-releases-json
-      filename: buildx-releases.json
+      repository: moby/moby
+      artifact_name: docker-releases-json
+      filename: docker-releases.json
     secrets: inherit
 
   open-pr:
@@ -37,7 +37,7 @@ jobs:
         name: Download
         uses: actions/download-artifact@v3
         with:
-          name: buildx-releases-json
+          name: docker-releases-json
           path: .github
       -
         name: Commit changes
@@ -48,11 +48,11 @@ jobs:
         uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04
         with:
           base: main
-          branch: bot/buildx-releases-json
-          commit-message: "github: update .github/buildx-releases.json"
+          branch: bot/docker-releases-json
+          commit-message: "github: update .github/docker-releases.json"
           signoff: true
           delete-branch: true
-          title: "Update `.github/buildx-releases.json`"
+          title: "Update `.github/docker-releases.json`"
           body: |
-            Update `.github/buildx-releases.json` to keep in sync with [https://github.com/docker/buildx](https://github.com/docker/buildx).
+            Update `.github/docker-releases.json` to keep in sync with [https://github.com/moby/moby](https://github.com/moby/moby).
           draft: false

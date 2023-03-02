@@ -6,7 +6,7 @@ on:
       - 'main'
   pull_request:
     paths-ignore:
-      - '.github/buildx-releases.json'
+      - '.github/*-releases.json'
 
 jobs:
   build:
