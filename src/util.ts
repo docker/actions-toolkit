@@ -74,12 +74,14 @@ export class Util {
     return true;
   }
 
-  public static async powershellCommand(script: string, params: Record<string, string>) {
+  public static async powershellCommand(script: string, params?: Record<string, string>) {
     const powershellPath: string = await io.which('powershell', true);
     const escapedScript = script.replace(/'/g, "''").replace(/"|\n|\r/g, '');
     const escapedParams: string[] = [];
-    for (const key in params) {
-      escapedParams.push(`-${key} '${params[key].replace(/'/g, "''").replace(/"|\n|\r/g, '')}'`);
+    if (params) {
+      for (const key in params) {
+        escapedParams.push(`-${key} '${params[key].replace(/'/g, "''").replace(/"|\n|\r/g, '')}'`);
+      }
     }
     return {
       command: `"${powershellPath}"`,

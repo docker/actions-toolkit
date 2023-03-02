@@ -33,6 +33,7 @@ describe('install', () => {
         await install.install(toolPath, tmpDir, version);
         await Docker.printVersion();
         await Docker.printInfo();
+        await install.tearDown(tmpDir);
       })()).resolves.not.toThrow();
     });
 });

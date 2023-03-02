@@ -27,7 +27,7 @@ import * as tc from '@actions/tool-cache';
 
 import {Exec} from '../exec';
 import {Util} from '../util';
-import {colimaYamlData, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
+import {colimaYamlData, dockerServiceLogsPs1, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
 
 export class Install {
   public async download(version: string, channel?: string): Promise<string> {
@@ -134,6 +134,7 @@ export class Install {
 
   private async installLinux(toolDir: string, runDir: string): Promise<void> {
     const dockerHost = `unix://${path.join(runDir, 'docker.sock')}`;
+    await io.mkdirP(runDir);
 
     await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
@@ -189,18 +190,80 @@ export class Install {
   private async installWindows(toolDir: string, runDir: string): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
-    const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
-      ToolDir: toolDir,
-      RunDir: runDir,
-      DockerHost: dockerHost
-    });
     await core.group('Install Docker daemon service', async () => {
+      const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
+        ToolDir: toolDir,
+        RunDir: runDir,
+        DockerHost: dockerHost
+      });
       await Exec.exec(setupCmd.command, setupCmd.args);
+      const logCmd = await Util.powershellCommand(dockerServiceLogsPs1());
+      await Exec.exec(logCmd.command, logCmd.args);
     });
 
     await core.group('Create Docker context', async () => {
       await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
       await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
+    });
+  }
+
+  public async tearDown(runDir: string): Promise<void> {
+    switch (os.platform()) {
+      case 'darwin': {
+        await this.tearDownDarwin(runDir);
+        break;
+      }
+      case 'linux': {
+        await this.tearDownLinux(runDir);
+        break;
+      }
+      case 'win32': {
+        await this.tearDownWindows();
+        break;
+      }
+      default: {
+        throw new Error(`Unsupported platform: ${os.platform()}`);
+      }
+    }
+  }
+
+  private async tearDownDarwin(runDir: string): Promise<void> {
+    await core.group('Docker daemon logs', async () => {
+      await Exec.exec('colima', ['exec', '--', 'cat', '/var/log/docker.log']);
+    });
+    await core.group('Stopping colima', async () => {
+      await Exec.exec('colima', ['stop', '--very-verbose']);
+    });
+    await core.group('Removing Docker context', async () => {
+      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
+    });
+    await core.group(`Cleaning up runDir`, async () => {
+      await Exec.exec('sudo', ['rm', '-rf', runDir]);
+    });
+  }
+
+  private async tearDownLinux(runDir: string): Promise<void> {
+    await core.group('Docker daemon logs', async () => {
+      core.info(fs.readFileSync(path.join(runDir, 'dockerd.log'), {encoding: 'utf8'}));
+    });
+    await core.group('Stopping Docker daemon', async () => {
+      await Exec.exec('sudo', ['kill', fs.readFileSync(path.join(runDir, 'docker.pid')).toString().trim()]);
+    });
+    await core.group('Removing Docker context', async () => {
+      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
+    });
+    await core.group(`Cleaning up runDir`, async () => {
+      await Exec.exec('sudo', ['rm', '-rf', runDir]);
+    });
+  }
+
+  private async tearDownWindows(): Promise<void> {
+    await core.group('Docker daemon logs', async () => {
+      const logCmd = await Util.powershellCommand(dockerServiceLogsPs1());
+      await Exec.exec(logCmd.command, logCmd.args);
+    });
+    await core.group('Removing Docker context', async () => {
+      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
     });
   }
 

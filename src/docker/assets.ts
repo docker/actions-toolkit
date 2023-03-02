@@ -25,6 +25,10 @@ export const setupDockerWinPs1 = (): string => {
   return get('docker-setup-win.ps1', setupDockerWinPs1Data);
 };
 
+export const dockerServiceLogsPs1 = (): string => {
+  return get('docker-service-logs.ps1', dockerServiceLogsPs1Data);
+};
+
 export const colimaYaml = (): string => {
   return get('colima.yaml', colimaYamlData);
 };
@@ -146,7 +150,9 @@ While ($true) {
   Start-Sleep -Seconds 1
 }
 Write-Host "Docker daemon started successfully!"
+`;
 
+export const dockerServiceLogsPs1Data = `
 Get-WinEvent -ea SilentlyContinue \`
   -FilterHashtable @{ProviderName= "docker"; LogName = "application"} |
     Sort-Object @{Expression="TimeCreated";Descending=$false} |
