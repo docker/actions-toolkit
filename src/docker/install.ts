@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import * as child_process from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import retry from 'async-retry';
 import * as handlebars from 'handlebars';
 import * as util from 'util';
 import * as core from '@actions/core';
@@ -133,9 +135,12 @@ export class Install {
   private async installLinux(toolDir: string, runDir: string): Promise<void> {
     const dockerHost = `unix://${path.join(runDir, 'docker.sock')}`;
 
-    await core.group('Install Docker daemon', async () => {
+    await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
-      await Exec.exec('sudo', ['-E', bashPath, setupDockerLinuxSh()], {
+      const proc = await child_process.spawn(`sudo -E ${bashPath} ${setupDockerLinuxSh()}`, [], {
+        detached: true,
+        shell: true,
+        stdio: ['ignore', process.stdout, process.stderr],
         env: Object.assign({}, process.env, {
           TOOLDIR: toolDir,
           RUNDIR: runDir,
@@ -144,6 +149,35 @@ export class Install {
           [key: string]: string;
         }
       });
+      proc.unref();
+      await retry(
+        async bail => {
+          await Exec.getExecOutput(`docker version`, undefined, {
+            ignoreReturnCode: true,
+            silent: true,
+            env: Object.assign({}, process.env, {
+              DOCKER_HOST: dockerHost
+            }) as {
+              [key: string]: string;
+            }
+          })
+            .then(res => {
+              if (res.stderr.length > 0 && res.exitCode != 0) {
+                bail(new Error(res.stderr));
+                return false;
+              }
+              return res.exitCode == 0;
+            })
+            .catch(error => {
+              bail(error);
+              return false;
+            });
+        },
+        {
+          retries: 5
+        }
+      );
+      core.info(`Docker daemon started started successfully`);
     });
 
     await core.group('Create Docker context', async () => {

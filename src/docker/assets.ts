@@ -75,22 +75,6 @@ mkdir -p "$RUNDIR"
     --userland-proxy=false \\
     2>&1 | tee "$RUNDIR/dockerd.log"
 ) &
-
-tries=60
-while ! docker version &> /dev/null; do
-  ((tries--))
-  if [ $tries -le 0 ]; then
-    if [ -z "$DOCKER_HOST" ]; then
-      echo >&2 "error: daemon failed to start"
-    else
-      echo >&2 "error: daemon at $DOCKER_HOST fails to 'docker version':"
-      docker version >&2 || true
-    fi
-    false
-  fi
-  sleep 2
-done
-echo "Docker daemon started successfully!"
 `;
 
 export const setupDockerWinPs1Data = `
