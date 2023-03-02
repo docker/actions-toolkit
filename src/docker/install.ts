@@ -23,9 +23,9 @@ import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
-import * as scripts from '../scripts';
 import {Exec} from '../exec';
 import {Util} from '../util';
+import {colimaYamlData, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
 
 export class Install {
   public async download(version: string, channel?: string): Promise<string> {
@@ -65,6 +65,12 @@ export class Install {
   }
 
   public async install(toolDir: string, runDir: string, version: string, channel?: string): Promise<void> {
+    if (toolDir.length == 0) {
+      throw new Error('toolDir must be set');
+    }
+    if (runDir.length == 0) {
+      throw new Error('runDir must be set');
+    }
     channel = channel || 'stable';
     switch (os.platform()) {
       case 'darwin': {
@@ -97,12 +103,7 @@ export class Install {
     }
 
     await core.group('Creating colima config', async () => {
-      const colimaCfg = handlebars.compile(
-        fs.readFileSync(scripts.colimaConfig, {
-          encoding: 'utf8',
-          flag: 'r'
-        })
-      )({
+      const colimaCfg = handlebars.compile(colimaYamlData)({
         hostArch: Install.platformArch(),
         dockerVersion: version,
         dockerChannel: channel
@@ -134,7 +135,7 @@ export class Install {
 
     await core.group('Install Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
-      await Exec.exec('sudo', ['-E', bashPath, scripts.setupDockerLinux], {
+      await Exec.exec('sudo', ['-E', bashPath, setupDockerLinuxSh()], {
         env: Object.assign({}, process.env, {
           TOOLDIR: toolDir,
           RUNDIR: runDir,
@@ -154,7 +155,7 @@ export class Install {
   private async installWindows(toolDir: string, runDir: string): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
-    const setupCmd = await Util.powershellCommand(scripts.setupDockerWin, {
+    const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
       ToolDir: toolDir,
       RunDir: runDir,
       DockerHost: dockerHost
