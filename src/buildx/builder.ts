@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as core from '@actions/core';
+
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
@@ -28,6 +30,29 @@ export class Builder {
 
   constructor(opts?: BuilderOpts) {
     this.buildx = opts?.buildx || new Buildx();
+  }
+
+  public async exists(name: string): Promise<boolean> {
+    const cmd = await this.buildx.getCommand(['inspect', name]);
+
+    const ok: boolean = await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.debug(`Builder.exists cmd err: ${res.stderr.trim()}`);
+          return false;
+        }
+        return res.exitCode == 0;
+      })
+      .catch(error => {
+        core.debug(`Builder.exists error: ${error}`);
+        return false;
+      });
+
+    core.debug(`Builder.exists: ${ok}`);
+    return ok;
   }
 
   public async inspect(name: string): Promise<BuilderInfo> {

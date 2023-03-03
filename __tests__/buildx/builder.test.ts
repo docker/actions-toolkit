@@ -19,6 +19,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {Builder} from '../../src/buildx/builder';
+import {Exec} from '../../src/exec';
 
 import {BuilderInfo} from '../../src/types/builder';
 
@@ -45,6 +46,19 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
       }
     ]
   };
+});
+
+describe('exists', () => {
+  it('valid', async () => {
+    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const builder = new Builder();
+    await builder.exists('foo');
+    // eslint-disable-next-line jest/no-standalone-expect
+    expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx', 'inspect', 'foo'], {
+      silent: true,
+      ignoreReturnCode: true
+    });
+  });
 });
 
 describe('inspect', () => {

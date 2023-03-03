@@ -76,7 +76,7 @@ export class Buildx {
     })
       .then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.debug(`Buildx.isAvailable cmd err: ${res.stderr}`);
+          core.debug(`Buildx.isAvailable cmd err: ${res.stderr.trim()}`);
           return false;
         }
         return res.exitCode == 0;
