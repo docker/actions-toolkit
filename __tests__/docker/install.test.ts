@@ -23,7 +23,7 @@ import osm = require('os');
 import {Install} from '../../src/docker/install';
 
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -43,8 +43,11 @@ describe('download', () => {
   ])(
   'acquires %p of docker (%s)', async (version, platformOS) => {
     jest.spyOn(osm, 'platform').mockImplementation(() => platformOS);
-    const install = new Install();
-    const toolPath = await install.download(version);
+    const install = new Install({
+      version: version,
+      runDir: tmpDir,
+    });
+    const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
 });

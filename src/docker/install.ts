@@ -25,14 +25,38 @@ import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
+import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
 import {colimaYamlData, dockerServiceLogsPs1, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
 
+export interface InstallOpts {
+  version: string;
+  channel?: string;
+  runDir: string;
+  contextName?: string;
+}
+
 export class Install {
-  public async download(version: string, channel?: string): Promise<string> {
-    channel = channel || 'stable';
-    const downloadURL = this.downloadURL(version, channel);
+  private readonly version: string;
+  private readonly channel: string;
+  private readonly runDir: string;
+  private readonly contextName: string;
+  private _toolDir: string | undefined;
+
+  constructor(opts: InstallOpts) {
+    this.version = opts.version;
+    this.channel = opts.channel || 'stable';
+    this.runDir = opts.runDir;
+    this.contextName = opts.contextName || 'setup-docker-action';
+  }
+
+  get toolDir(): string {
+    return this._toolDir || Context.tmpDir();
+  }
+
+  public async download(): Promise<string> {
+    const downloadURL = this.downloadURL(this.version, this.channel);
 
     core.info(`Downloading ${downloadURL}`);
     const downloadPath = await tc.downloadTool(downloadURL);
@@ -60,31 +84,32 @@ export class Install {
       });
     });
 
-    const tooldir = await tc.cacheDir(extractFolder, `docker-${channel}`, version.replace(/(0+)([1-9]+)/, '$2'));
+    const tooldir = await tc.cacheDir(extractFolder, `docker-${this.channel}`, this.version.replace(/(0+)([1-9]+)/, '$2'));
     core.addPath(tooldir);
     core.info('Added Docker to PATH');
+
+    this._toolDir = tooldir;
     return tooldir;
   }
 
-  public async install(toolDir: string, runDir: string, version: string, channel?: string): Promise<void> {
-    if (toolDir.length == 0) {
-      throw new Error('toolDir must be set');
+  public async install(): Promise<void> {
+    if (!this.toolDir) {
+      throw new Error('toolDir must be set. Run download first.');
     }
-    if (runDir.length == 0) {
+    if (!this.runDir) {
       throw new Error('runDir must be set');
     }
-    channel = channel || 'stable';
     switch (os.platform()) {
       case 'darwin': {
-        await this.installDarwin(toolDir, version, channel);
+        await this.installDarwin();
         break;
       }
       case 'linux': {
-        await this.installLinux(toolDir, runDir);
+        await this.installLinux();
         break;
       }
       case 'win32': {
-        await this.installWindows(toolDir, runDir);
+        await this.installWindows();
         break;
       }
       default: {
@@ -93,7 +118,7 @@ export class Install {
     }
   }
 
-  private async installDarwin(toolDir: string, version: string, channel?: string): Promise<void> {
+  private async installDarwin(): Promise<void> {
     const colimaDir = path.join(os.homedir(), '.colima', 'default'); // TODO: create a custom colima profile to avoid overlap with other actions
     await io.mkdirP(colimaDir);
     const dockerHost = `unix://${colimaDir}/docker.sock`;
@@ -107,8 +132,8 @@ export class Install {
     await core.group('Creating colima config', async () => {
       const colimaCfg = handlebars.compile(colimaYamlData)({
         hostArch: Install.platformArch(),
-        dockerVersion: version,
-        dockerChannel: channel
+        dockerVersion: this.version,
+        dockerChannel: this.channel
       });
       core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
       fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
@@ -118,7 +143,7 @@ export class Install {
     // colima is already started on the runner so env var added in download
     // method is not expanded to the running process.
     const envs = Object.assign({}, process.env, {
-      PATH: `${toolDir}:${process.env.PATH}`
+      PATH: `${this.toolDir}:${process.env.PATH}`
     }) as {
       [key: string]: string;
     };
@@ -127,14 +152,14 @@ export class Install {
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
   }
 
-  private async installLinux(toolDir: string, runDir: string): Promise<void> {
-    const dockerHost = `unix://${path.join(runDir, 'docker.sock')}`;
-    await io.mkdirP(runDir);
+  private async installLinux(): Promise<void> {
+    const dockerHost = `unix://${path.join(this.runDir, 'docker.sock')}`;
+    await io.mkdirP(this.runDir);
 
     await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
@@ -143,8 +168,8 @@ export class Install {
         shell: true,
         stdio: ['ignore', process.stdout, process.stderr],
         env: Object.assign({}, process.env, {
-          TOOLDIR: toolDir,
-          RUNDIR: runDir,
+          TOOLDIR: this.toolDir,
+          RUNDIR: this.runDir,
           DOCKER_HOST: dockerHost
         }) as {
           [key: string]: string;
@@ -182,18 +207,18 @@ export class Install {
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
   }
 
-  private async installWindows(toolDir: string, runDir: string): Promise<void> {
+  private async installWindows(): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
     await core.group('Install Docker daemon service', async () => {
       const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
-        ToolDir: toolDir,
-        RunDir: runDir,
+        ToolDir: this.toolDir,
+        RunDir: this.runDir,
         DockerHost: dockerHost
       });
       await Exec.exec(setupCmd.command, setupCmd.args);
@@ -202,19 +227,22 @@ export class Install {
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', 'setup-docker-action', '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
   }
 
-  public async tearDown(runDir: string): Promise<void> {
+  public async tearDown(): Promise<void> {
+    if (!this.runDir) {
+      throw new Error('runDir must be set');
+    }
     switch (os.platform()) {
       case 'darwin': {
-        await this.tearDownDarwin(runDir);
+        await this.tearDownDarwin();
         break;
       }
       case 'linux': {
-        await this.tearDownLinux(runDir);
+        await this.tearDownLinux();
         break;
       }
       case 'win32': {
@@ -227,7 +255,7 @@ export class Install {
     }
   }
 
-  private async tearDownDarwin(runDir: string): Promise<void> {
+  private async tearDownDarwin(): Promise<void> {
     await core.group('Docker daemon logs', async () => {
       await Exec.exec('colima', ['exec', '--', 'cat', '/var/log/docker.log']);
     });
@@ -235,25 +263,25 @@ export class Install {
       await Exec.exec('colima', ['stop', '--very-verbose']);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
     });
     await core.group(`Cleaning up runDir`, async () => {
-      await Exec.exec('sudo', ['rm', '-rf', runDir]);
+      await Exec.exec('sudo', ['rm', '-rf', this.runDir]);
     });
   }
 
-  private async tearDownLinux(runDir: string): Promise<void> {
+  private async tearDownLinux(): Promise<void> {
     await core.group('Docker daemon logs', async () => {
-      core.info(fs.readFileSync(path.join(runDir, 'dockerd.log'), {encoding: 'utf8'}));
+      core.info(fs.readFileSync(path.join(this.runDir, 'dockerd.log'), {encoding: 'utf8'}));
     });
     await core.group('Stopping Docker daemon', async () => {
-      await Exec.exec('sudo', ['kill', fs.readFileSync(path.join(runDir, 'docker.pid')).toString().trim()]);
+      await Exec.exec('sudo', ['kill', fs.readFileSync(path.join(this.runDir, 'docker.pid')).toString().trim()]);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
     });
     await core.group(`Cleaning up runDir`, async () => {
-      await Exec.exec('sudo', ['rm', '-rf', runDir]);
+      await Exec.exec('sudo', ['rm', '-rf', this.runDir]);
     });
   }
 
@@ -263,7 +291,7 @@ export class Install {
       await Exec.exec(logCmd.command, logCmd.args);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', 'setup-docker-action']);
+      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
     });
   }
 

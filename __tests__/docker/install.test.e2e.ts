@@ -21,19 +21,23 @@ import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
 
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 
 describe('install', () => {
   // prettier-ignore
   test.each(['23.0.0'])(
     'install docker %s', async (version) => {
       await expect((async () => {
-        const install = new Install();
-        const toolPath = await install.download(version);
-        await install.install(toolPath, tmpDir, version);
+        const install = new Install({
+          version: version,
+          runDir: tmpDir,
+          contextName: 'foo'
+        });
+        await install.download();
+        await install.install();
         await Docker.printVersion();
         await Docker.printInfo();
-        await install.tearDown(tmpDir);
+        await install.tearDown();
       })()).resolves.not.toThrow();
     });
 });
