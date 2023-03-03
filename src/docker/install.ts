@@ -22,6 +22,7 @@ import retry from 'async-retry';
 import * as handlebars from 'handlebars';
 import * as util from 'util';
 import * as core from '@actions/core';
+import * as httpm from '@actions/http-client';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
@@ -29,25 +30,27 @@ import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
 import {colimaYamlData, dockerServiceLogsPs1, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
+import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
-  version: string;
+  version?: string;
   channel?: string;
   runDir: string;
   contextName?: string;
 }
 
 export class Install {
+  private readonly runDir: string;
   private readonly version: string;
   private readonly channel: string;
-  private readonly runDir: string;
   private readonly contextName: string;
+  private _version: string | undefined;
   private _toolDir: string | undefined;
 
   constructor(opts: InstallOpts) {
-    this.version = opts.version;
-    this.channel = opts.channel || 'stable';
     this.runDir = opts.runDir;
+    this.version = opts.version || 'latest';
+    this.channel = opts.channel || 'stable';
     this.contextName = opts.contextName || 'setup-docker-action';
   }
 
@@ -56,9 +59,13 @@ export class Install {
   }
 
   public async download(): Promise<string> {
-    const downloadURL = this.downloadURL(this.version, this.channel);
+    const release: GitHubRelease = await Install.getRelease(this.version);
+    this._version = release.tag_name.replace(/^v+|v+$/g, '');
+    core.debug(`docker.Install.download version: ${this._version}`);
 
+    const downloadURL = this.downloadURL(this._version, this.channel);
     core.info(`Downloading ${downloadURL}`);
+
     const downloadPath = await tc.downloadTool(downloadURL);
     core.debug(`docker.Install.download downloadPath: ${downloadPath}`);
 
@@ -84,7 +91,7 @@ export class Install {
       });
     });
 
-    const tooldir = await tc.cacheDir(extractFolder, `docker-${this.channel}`, this.version.replace(/(0+)([1-9]+)/, '$2'));
+    const tooldir = await tc.cacheDir(extractFolder, `docker-${this.channel}`, this._version.replace(/(0+)([1-9]+)/, '$2'));
     core.addPath(tooldir);
     core.info('Added Docker to PATH');
 
@@ -132,7 +139,7 @@ export class Install {
     await core.group('Creating colima config', async () => {
       const colimaCfg = handlebars.compile(colimaYamlData)({
         hostArch: Install.platformArch(),
-        dockerVersion: this.version,
+        dockerVersion: this._version,
         dockerChannel: this.channel
       });
       core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
@@ -359,5 +366,21 @@ export class Install {
         core.debug(`docker.Install.colimaAvailable error: ${error}`);
         return false;
       });
+  }
+
+  public static async getRelease(version: string): Promise<GitHubRelease> {
+    const url = `https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json`;
+    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+    const resp: httpm.HttpClientResponse = await http.get(url);
+    const body = await resp.readBody();
+    const statusCode = resp.message.statusCode || 500;
+    if (statusCode >= 400) {
+      throw new Error(`Failed to get Docker release ${version} from ${url} with status code ${statusCode}: ${body}`);
+    }
+    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+    if (!releases[version]) {
+      throw new Error(`Cannot find Docker release ${version} in ${url}`);
+    }
+    return releases[version];
   }
 }

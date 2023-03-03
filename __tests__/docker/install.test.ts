@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, jest, test, beforeEach, afterEach, it} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
@@ -36,10 +36,10 @@ afterEach(function () {
 describe('download', () => {
   // prettier-ignore
   test.each([
-    ['19.03.6', 'linux'],
-    ['20.10.22', 'linux'],
-    ['20.10.22', 'darwin'],
-    ['20.10.22', 'win32'],
+    ['v19.03.14', 'linux'],
+    ['v20.10.22', 'linux'],
+    ['v20.10.22', 'darwin'],
+    ['v20.10.22', 'win32'],
   ])(
   'acquires %p of docker (%s)', async (version, platformOS) => {
     jest.spyOn(osm, 'platform').mockImplementation(() => platformOS);
@@ -50,4 +50,24 @@ describe('download', () => {
     const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
+});
+
+describe('getRelease', () => {
+  it('returns latest docker GitHub release', async () => {
+    const release = await Install.getRelease('latest');
+    expect(release).not.toBeNull();
+    expect(release?.tag_name).not.toEqual('');
+  });
+
+  it('returns v23.0.0 buildx GitHub release', async () => {
+    const release = await Install.getRelease('v23.0.0');
+    expect(release).not.toBeNull();
+    expect(release?.id).toEqual(91109643);
+    expect(release?.tag_name).toEqual('v23.0.0');
+    expect(release?.html_url).toEqual('https://github.com/moby/moby/releases/tag/v23.0.0');
+  });
+
+  it('unknown release', async () => {
+    await expect(Install.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Docker release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json'));
+  });
 });
