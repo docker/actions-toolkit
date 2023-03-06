@@ -37,11 +37,11 @@ __metadata:
   linkType: hard
 
 "@actions/http-client@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@actions/http-client@npm:2.0.1"
+  version: 2.1.0
+  resolution: "@actions/http-client@npm:2.1.0"
   dependencies:
     tunnel: ^0.0.6
-  checksum: 799ec3df91e28a9da91ce6592e94f8b8923ccf6cc21a2f72c7429be5af5273f1625335411adc2a1bb222d56c852d5767214dfa6fa32a6da7e81dba8290e08f17
+  checksum: 25a72a952cc95fb4b3ab086da73a5754dd0957c206637cace69be2e16f018cc1b3d3c40d3bcf89ffd8a5929d5e8445594b498b50db306a50ad7536023f8e3800
   languageName: node
   linkType: hard
 
