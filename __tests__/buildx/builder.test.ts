@@ -38,7 +38,7 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
       {
         buildkit: 'v0.11.0',
         'buildkitd-flags': '--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
-        'driver-opts': ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host'],
+        'driver-opts': ['BUILDKIT_STEP_LOG_MAX_SIZE=10485760', 'BUILDKIT_STEP_LOG_MAX_SPEED=10485760', 'JAEGER_TRACE=localhost:6831', 'image=moby/buildkit:latest', 'network=host', 'qemu.install=true'],
         endpoint: 'unix:///var/run/docker.sock',
         name: 'builder20',
         platforms: 'linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6',
@@ -196,11 +196,12 @@ describe('parseInspect', () => {
            "buildkit": "v0.11.0",
            "buildkitd-flags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
            "driver-opts": [
-             "BUILDKIT_STEP_LOG_MAX_SIZE=10485760",
-             "BUILDKIT_STEP_LOG_MAX_SPEED=10485760",
-             "JAEGER_TRACE=localhost:6831",
+             "env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760",
+             "env.BUILDKIT_STEP_LOG_MAX_SPEED=10485760",
+             "env.JAEGER_TRACE=localhost:6831",
              "image=moby/buildkit:latest",
-             "network=host"
+             "network=host",
+             "qemu.install=true"
            ],
            "endpoint": "unix:///var/run/docker.sock",
            "name": "builder20",
