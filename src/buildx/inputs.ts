@@ -22,24 +22,24 @@ import {parse} from 'csv-parse/sync';
 import {Context} from '../context';
 
 export class Inputs {
-  public getBuildImageIDFilePath(): string {
+  public static getBuildImageIDFilePath(): string {
     return path.join(Context.tmpDir(), 'iidfile');
   }
 
-  public getBuildMetadataFilePath(): string {
+  public static getBuildMetadataFilePath(): string {
     return path.join(Context.tmpDir(), 'metadata-file');
   }
 
-  public resolveBuildImageID(): string | undefined {
-    const iidFile = this.getBuildImageIDFilePath();
+  public static resolveBuildImageID(): string | undefined {
+    const iidFile = Inputs.getBuildImageIDFilePath();
     if (!fs.existsSync(iidFile)) {
       return undefined;
     }
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
   }
 
-  public resolveBuildMetadata(): string | undefined {
-    const metadataFile = this.getBuildMetadataFilePath();
+  public static resolveBuildMetadata(): string | undefined {
+    const metadataFile = Inputs.getBuildMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
     }
@@ -50,8 +50,8 @@ export class Inputs {
     return content;
   }
 
-  public resolveDigest(): string | undefined {
-    const metadata = this.resolveBuildMetadata();
+  public static resolveDigest(): string | undefined {
+    const metadata = Inputs.resolveBuildMetadata();
     if (metadata === undefined) {
       return undefined;
     }
@@ -62,15 +62,15 @@ export class Inputs {
     return undefined;
   }
 
-  public resolveBuildSecretString(kvp: string): string {
-    return this.resolveBuildSecret(kvp, false);
+  public static resolveBuildSecretString(kvp: string): string {
+    return Inputs.resolveBuildSecret(kvp, false);
   }
 
-  public resolveBuildSecretFile(kvp: string): string {
-    return this.resolveBuildSecret(kvp, true);
+  public static resolveBuildSecretFile(kvp: string): string {
+    return Inputs.resolveBuildSecret(kvp, true);
   }
 
-  public resolveBuildSecret(kvp: string, file: boolean): string {
+  public static resolveBuildSecret(kvp: string, file: boolean): string {
     const delimiterIndex = kvp.indexOf('=');
     const key = kvp.substring(0, delimiterIndex);
     let value = kvp.substring(delimiterIndex + 1);
@@ -88,7 +88,7 @@ export class Inputs {
     return `id=${key},src=${secretFile}`;
   }
 
-  public getProvenanceInput(name: string): string {
+  public static getProvenanceInput(name: string): string {
     const input = core.getInput(name);
     if (!input) {
       // if input is not set returns empty string
@@ -98,11 +98,11 @@ export class Inputs {
       return core.getBooleanInput(name) ? `builder-id=${Context.provenanceBuilderID()}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
-      return this.resolveProvenanceAttrs(input);
+      return Inputs.resolveProvenanceAttrs(input);
     }
   }
 
-  public resolveProvenanceAttrs(input: string): string {
+  public static resolveProvenanceAttrs(input: string): string {
     if (!input) {
       return `builder-id=${Context.provenanceBuilderID()}`;
     }
