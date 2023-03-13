@@ -21,7 +21,6 @@ import * as semver from 'semver';
 
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
-import {Inputs} from './inputs';
 
 import {Cert} from '../types/buildx';
 
@@ -34,15 +33,12 @@ export class Buildx {
   private _versionOnce: boolean;
   private readonly _standalone: boolean | undefined;
 
-  public readonly inputs: Inputs;
-
   public static readonly containerNamePrefix = 'buildx_buildkit_';
 
   constructor(opts?: BuildxOpts) {
     this._standalone = opts?.standalone;
     this._version = '';
     this._versionOnce = false;
-    this.inputs = new Inputs();
   }
 
   static get configDir(): string {
