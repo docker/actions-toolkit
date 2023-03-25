@@ -88,7 +88,7 @@ export class Install {
         if (res.stderr.length > 0 && res.exitCode != 0) {
           core.warning(res.stderr.trim());
         }
-        return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
+        return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec, this.platform());
       });
     }
 
@@ -179,7 +179,7 @@ export class Install {
     core.info(`Downloading ${downloadURL}`);
     const downloadPath = await tc.downloadTool(downloadURL);
     core.debug(`Install.fetchBinary downloadPath: ${downloadPath}`);
-    return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
+    return await tc.cacheFile(downloadPath, targetFile, 'buildx', version, this.platform());
   }
 
   private platform(): string {
