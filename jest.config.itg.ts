@@ -19,7 +19,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['js', 'ts'],
   setupFiles: ['dotenv/config'],
-  testMatch: ['**/*.test.e2e.ts'],
+  testMatch: ['**/*.test.itg.ts'],
   testTimeout: 1800000, // 30 minutes
   transform: {
     '^.+\\.ts$': 'ts-jest'
