@@ -75,6 +75,18 @@ export class Util {
     return url.protocol === 'http:' || url.protocol === 'https:';
   }
 
+  public static isValidRef(refStr: string): boolean {
+    if (Util.isValidURL(refStr)) {
+      return true;
+    }
+    for (const prefix of ['git://', 'github.com/', 'git@']) {
+      if (refStr.startsWith(prefix)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static async powershellCommand(script: string, params?: Record<string, string>) {
     const powershellPath: string = await io.which('powershell', true);
     const escapedScript = script.replace(/'/g, "''").replace(/"|\n|\r/g, '');

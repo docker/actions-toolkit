@@ -194,7 +194,7 @@ describe('asyncForEach', () => {
   });
 });
 
-describe('isValidUrl', () => {
+describe('isValidURL', () => {
   test.each([
     ['https://github.com/docker/buildx.git', true],
     ['https://github.com/docker/buildx.git#refs/pull/648/head', true],
@@ -204,6 +204,19 @@ describe('isValidUrl', () => {
     ['v0.4.1', false]
   ])('given %p', async (url, expected) => {
     expect(Util.isValidURL(url)).toEqual(expected);
+  });
+});
+
+describe('isValidRef', () => {
+  test.each([
+    ['https://github.com/docker/buildx.git', true],
+    ['https://github.com/docker/buildx.git#refs/pull/648/head', true],
+    ['git@github.com:moby/buildkit.git', true],
+    ['git://github.com/user/repo.git', true],
+    ['github.com/moby/buildkit.git#main', true],
+    ['v0.4.1', false]
+  ])('given %p', async (url, expected) => {
+    expect(Util.isValidRef(url)).toEqual(expected);
   });
 });
 
