@@ -65,13 +65,14 @@ export class Util {
     }
   }
 
-  public static isValidUrl(url: string): boolean {
+  public static isValidURL(urlStr: string): boolean {
+    let url;
     try {
-      new URL(url);
+      url = new URL(urlStr);
     } catch (e) {
       return false;
     }
-    return true;
+    return url.protocol === 'http:' || url.protocol === 'https:';
   }
 
   public static async powershellCommand(script: string, params?: Record<string, string>) {

@@ -198,9 +198,12 @@ describe('isValidUrl', () => {
   test.each([
     ['https://github.com/docker/buildx.git', true],
     ['https://github.com/docker/buildx.git#refs/pull/648/head', true],
+    ['git@github.com:moby/buildkit.git', false],
+    ['git://github.com/user/repo.git', false],
+    ['github.com/moby/buildkit.git#main', false],
     ['v0.4.1', false]
   ])('given %p', async (url, expected) => {
-    expect(Util.isValidUrl(url)).toEqual(expected);
+    expect(Util.isValidURL(url)).toEqual(expected);
   });
 });
 
