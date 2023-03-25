@@ -15,6 +15,7 @@
  */
 
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import * as fs from 'fs';
 import * as path from 'path';
 
 import {Bake} from '../../src/buildx/bake';
@@ -32,65 +33,12 @@ describe('parseDefinitions', () => {
     [
       [path.join(fixturesDir, 'bake.hcl')],
       ['validate'],
-      {
-        "group": {
-          "default": {
-            "targets": [
-              "validate"
-            ]
-          },
-          "validate": {
-            "targets": [
-              "lint",
-              "validate-vendor",
-              "validate-docs"
-            ]
-          }
-        },
-        "target": {
-          "lint": {
-            "context": ".",
-            "dockerfile": "./hack/dockerfiles/lint.Dockerfile",
-            "args": {
-              "BUILDKIT_CONTEXT_KEEP_GIT_DIR": "1",
-              "GO_VERSION": "1.20"
-            },
-            "output": [
-              "type=cacheonly"
-            ]
-          },
-          "validate-docs": {
-            "context": ".",
-            "dockerfile": "./hack/dockerfiles/docs.Dockerfile",
-            "args": {
-              "BUILDKIT_CONTEXT_KEEP_GIT_DIR": "1",
-              "BUILDX_EXPERIMENTAL": "1",
-              "FORMATS": "md",
-              "GO_VERSION": "1.20"
-            },
-            "target": "validate",
-            "output": [
-              "type=cacheonly"
-            ]
-          },
-          "validate-vendor": {
-            "context": ".",
-            "dockerfile": "./hack/dockerfiles/vendor.Dockerfile",
-            "args": {
-              "BUILDKIT_CONTEXT_KEEP_GIT_DIR": "1",
-              "GO_VERSION": "1.20"
-            },
-            "target": "validate",
-            "output": [
-              "type=cacheonly"
-            ]
-          }
-        }
-      }
+      path.join(fixturesDir, 'bake-validate.json')
     ]
-  ])('given %p', async (files, targets, expected: BakeDefinition) => {
+  ])('given %p', async (sources: string[], targets: string[], out: string) => {
     const bake = new Bake();
-    expect(await bake.parseDefinitions(files, targets)).toEqual(expected);
+    const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
+    expect(await bake.parseDefinitions(sources, targets)).toEqual(expectedDef);
   });
 });
 

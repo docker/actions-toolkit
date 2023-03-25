@@ -17,6 +17,7 @@
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 import {Inputs} from './inputs';
+import {Util} from '../util';
 
 import {BakeDefinition} from '../types/bake';
 
@@ -31,12 +32,28 @@ export class Bake {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async parseDefinitions(files: Array<string>, targets: Array<string>): Promise<BakeDefinition> {
+  public async parseDefinitions(sources: Array<string>, targets: Array<string>): Promise<BakeDefinition> {
     const args = ['bake'];
-    if (files) {
-      for (const file of files) {
-        args.push('--file', file);
+
+    let remoteDef;
+    const files: Array<string> = [];
+    if (sources) {
+      for (const source of sources) {
+        if (!Util.isValidRef(source)) {
+          files.push(source);
+          continue;
+        }
+        if (remoteDef) {
+          throw new Error(`Only one remote bake definition is allowed`);
+        }
+        remoteDef = source;
       }
+    }
+    if (remoteDef) {
+      args.push(remoteDef);
+    }
+    for (const file of files) {
+      args.push('--file', file);
     }
 
     const printCmd = await this.buildx.getCommand([...args, '--print', ...targets]);
