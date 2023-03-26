@@ -42,7 +42,7 @@ describe('download', () => {
     ['v20.10.22', 'win32'],
   ])(
   'acquires %p of docker (%s)', async (version, platformOS) => {
-    jest.spyOn(osm, 'platform').mockImplementation(() => platformOS);
+    jest.spyOn(osm, 'platform').mockImplementation(() => platformOS as NodeJS.Platform);
     const install = new Install({
       version: version,
       runDir: tmpDir,
@@ -68,6 +68,6 @@ describe('getRelease', () => {
   });
 
   it('unknown release', async () => {
-    await expect(Install.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Docker release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json'));
+    await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Docker release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json'));
   });
 });

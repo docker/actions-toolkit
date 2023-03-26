@@ -162,7 +162,7 @@ describe('resolveBuildSecret', () => {
     ['=bbbbbbb', false, '', '', new Error('=bbbbbbb is not a valid secret')],
     [`foo=${path.join(fixturesDir, 'secret.txt')}`, true, 'foo', 'bar', null],
     [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
-  ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error) => {
+  ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error | null) => {
     try {
       let secret: string;
       if (file) {

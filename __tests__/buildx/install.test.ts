@@ -69,7 +69,7 @@ describe('download', () => {
     ['linux', 's390x'],
   ])(
   'acquires buildx for %s/%s', async (os, arch) => {
-      jest.spyOn(osm, 'platform').mockImplementation(() => os);
+      jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
       const install = new Install();
       const buildxBin = await install.download('latest');
@@ -129,6 +129,6 @@ describe('getRelease', () => {
   });
 
   it('unknown release', async () => {
-    await expect(Install.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
+    await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
   });
 });

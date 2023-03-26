@@ -59,7 +59,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -69,7 +69,7 @@ describe('hasLocalExporter', () => {
             "target": "build"
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -81,7 +81,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ],
     [
@@ -93,7 +93,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -105,7 +105,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -117,7 +117,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ],
     [
@@ -129,7 +129,7 @@ describe('hasLocalExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ]
   ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
@@ -149,7 +149,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -161,7 +161,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -173,7 +173,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -185,7 +185,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ],
     [
@@ -198,7 +198,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ],
     [
@@ -210,7 +210,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true
     ],
     [
@@ -222,7 +222,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
     [
@@ -234,7 +234,7 @@ describe('hasTarExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false
     ],
   ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
@@ -254,7 +254,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -267,7 +267,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       undefined
     ],
@@ -281,7 +281,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       undefined
     ],
@@ -294,7 +294,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -307,7 +307,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -320,7 +320,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -334,7 +334,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       undefined
     ],
@@ -347,7 +347,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -360,7 +360,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -373,7 +373,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       false,
       undefined
     ],
@@ -386,7 +386,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       false
     ],
@@ -399,7 +399,7 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       true
     ],
@@ -412,11 +412,11 @@ describe('hasDockerExporter', () => {
             ]
           },
         }
-      },
+      } as unknown as BakeDefinition,
       true,
       true
     ],
-  ])('given %o and load:%p returns %p', async (def: BakeDefinition, expected: boolean, load: boolean) => {
+  ])('given %o and load:%p returns %p', async (def: BakeDefinition, expected: boolean, load: boolean | undefined) => {
     expect(Bake.hasDockerExporter(def, load)).toEqual(expected);
   });
 });

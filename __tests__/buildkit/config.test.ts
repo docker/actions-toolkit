@@ -59,7 +59,7 @@ describe('resolve', () => {
 `,
       null
     ]
-  ])('given %p config', async (val, file, exValue, error: Error) => {
+  ])('given %p config', async (val: string, file: boolean, exValue: string, error: Error | null) => {
     try {
       const buildkit = new BuildKit();
       let config: string;
