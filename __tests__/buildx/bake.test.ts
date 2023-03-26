@@ -31,9 +31,14 @@ describe('parseDefinitions', () => {
   // prettier-ignore
   test.each([
     [
-      [path.join(fixturesDir, 'bake.hcl')],
+      [path.join(fixturesDir, 'bake-01.hcl')],
       ['validate'],
-      path.join(fixturesDir, 'bake-validate.json')
+      path.join(fixturesDir, 'bake-01-validate.json')
+    ],
+    [
+      [path.join(fixturesDir, 'bake-02.hcl')],
+      ['build'],
+      path.join(fixturesDir, 'bake-02-build.json')
     ]
   ])('given %p', async (sources: string[], targets: string[], out: string) => {
     const bake = new Bake();
@@ -52,6 +57,16 @@ describe('hasLocalExporter', () => {
             "output": [
               "type=docker"
             ]
+          },
+        }
+      },
+      false
+    ],
+    [
+      {
+        "target": {
+          "build": {
+            "target": "build"
           },
         }
       },
