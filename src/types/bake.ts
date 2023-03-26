@@ -24,22 +24,22 @@ export interface Group {
 }
 
 export interface Target {
-  args: Record<string, string>;
-  attest: Array<string>;
-  'cache-from': Array<string>;
-  'cache-to': Array<string>;
+  args?: Record<string, string>;
+  attest?: Array<string>;
+  'cache-from'?: Array<string>;
+  'cache-to'?: Array<string>;
   context: string;
-  contexts: Record<string, string>;
+  contexts?: Record<string, string>;
   dockerfile: string;
-  'dockerfile-inline': string;
-  labels: Record<string, string>;
-  'no-cache': boolean;
-  'no-cache-filter': Array<string>;
-  output: Array<string>;
-  platforms: Array<string>;
-  pull: boolean;
-  secret: Array<string>;
-  ssh: Array<string>;
-  tags: Array<string>;
-  target: string;
+  'dockerfile-inline'?: string;
+  labels?: Record<string, string>;
+  'no-cache'?: boolean;
+  'no-cache-filter'?: Array<string>;
+  output?: Array<string>;
+  platforms?: Array<string>;
+  pull?: boolean;
+  secret?: Array<string>;
+  ssh?: Array<string>;
+  tags?: Array<string>;
+  target?: string;
 }

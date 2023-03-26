@@ -84,7 +84,9 @@ export class Bake {
     const exporters = new Array<string>();
     for (const key in def.target) {
       const target = def.target[key];
-      exporters.push(...target.output);
+      if (target.output) {
+        exporters.push(...target.output);
+      }
     }
     return exporters;
   }
