@@ -24,7 +24,7 @@ import {Docker} from '../../src/docker/docker';
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 
 describe('install', () => {
-  jest.retryTimes(2);
+  jest.retryTimes(2, {logErrorsBeforeRetry: true});
   // prettier-ignore
   test.each(['v23.0.0'])(
     'install docker %s', async (version) => {
