@@ -32,7 +32,7 @@ export class Bake {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async parseDefinitions(sources: Array<string>, targets: Array<string>): Promise<BakeDefinition> {
+  public async parseDefinitions(sources: Array<string>, targets: Array<string>, workdir?: string): Promise<BakeDefinition> {
     const args = ['bake'];
 
     let remoteDef;
@@ -58,6 +58,7 @@ export class Bake {
 
     const printCmd = await this.buildx.getCommand([...args, '--print', ...targets]);
     return await Exec.getExecOutput(printCmd.command, printCmd.args, {
+      cwd: workdir,
       ignoreReturnCode: true,
       silent: true
     }).then(res => {
