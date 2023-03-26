@@ -10,15 +10,54 @@ on:
       - '.github/*-releases.json'
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.tests.outputs.matrix }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      -
+        name: Install
+        run: yarn install
+      -
+        name: Create matrix
+        id: tests
+        run: |
+          declare -a tests
+          for test in $(yarn run test:e2e-list); do
+            tests+=("${test#$(pwd)/__tests__/}")
+          done
+          echo "matrix=$(echo ${tests[@]} | jq -cR 'split(" ")')" >>${GITHUB_OUTPUT}
+      -
+        name: Show matrix
+        run: |
+          echo ${{ steps.tests.outputs.matrix }}
+
   test:
     runs-on: ${{ matrix.os }}
+    needs:
+      - prepare
     strategy:
       fail-fast: false
       matrix:
+        test: ${{ fromJson(needs.prepare.outputs.matrix) }}
         os:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        exclude:
+          - os: macos-latest
+            test: buildx/bake.test.e2e.ts
+          - os: windows-latest
+            test: buildx/bake.test.e2e.ts
     steps:
       -
         name: Checkout
@@ -34,7 +73,7 @@ jobs:
         run: yarn install
       -
         name: Test
-        run: yarn test-coverage:e2e --coverageDirectory=./coverage
+        run: yarn test-coverage:e2e --runTestsByPath __tests__/${{ matrix.test }} --coverageDirectory=./coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -

@@ -65,13 +65,26 @@ export class Util {
     }
   }
 
-  public static isValidUrl(url: string): boolean {
+  public static isValidURL(urlStr: string): boolean {
+    let url;
     try {
-      new URL(url);
+      url = new URL(urlStr);
     } catch (e) {
       return false;
     }
-    return true;
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  }
+
+  public static isValidRef(refStr: string): boolean {
+    if (Util.isValidURL(refStr)) {
+      return true;
+    }
+    for (const prefix of ['git://', 'github.com/', 'git@']) {
+      if (refStr.startsWith(prefix)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static async powershellCommand(script: string, params?: Record<string, string>) {
