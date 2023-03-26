@@ -1,0 +1,43 @@
+name: validate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths-ignore:
+      - '.github/*-releases.json'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-20.04
+    outputs:
+      targets: ${{ steps.targets.outputs.matrix }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Matrix
+        id: targets
+        run: |
+          echo "matrix=$(docker buildx bake validate --print | jq -cr '.group.validate.targets')" >> $GITHUB_OUTPUT
+
+  validate:
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.prepare.outputs.targets) }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Validate
+        uses: docker/bake-action@v2
+        with:
+          targets: ${{ matrix.target }}

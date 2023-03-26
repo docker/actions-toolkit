@@ -2,6 +2,7 @@
 [![Downloads](https://img.shields.io/npm/dw/@docker/actions-toolkit?logo=npm&style=flat-square)](https://www.npmjs.com/package/@docker/actions-toolkit)
 [![Build workflow](https://img.shields.io/github/actions/workflow/status/docker/actions-toolkit/build.yml?label=build&logo=github&style=flat-square)](https://github.com/docker/actions-toolkit/actions?workflow=build)
 [![Test workflow](https://img.shields.io/github/actions/workflow/status/docker/actions-toolkit/test.yml?label=test&logo=github&style=flat-square)](https://github.com/docker/actions-toolkit/actions?workflow=test)
+[![Validate workflow](https://img.shields.io/github/actions/workflow/status/docker/actions-toolkit/validate.yml?label=validate&logo=github&style=flat-square)](https://github.com/docker/actions-toolkit/actions?workflow=validate)
 [![Codecov](https://img.shields.io/codecov/c/github/docker/actions-toolkit?logo=codecov&style=flat-square)](https://codecov.io/gh/docker/actions-toolkit)
 
 # Actions Toolkit
