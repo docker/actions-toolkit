@@ -15,7 +15,8 @@
  */
 
 import {Buildx} from './buildx/buildx';
-import {Install} from './buildx/install';
+import {Install as BuildxInstall} from './buildx/install';
+import {Bake} from './buildx/bake';
 import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
 import {GitHub} from './github';
@@ -31,14 +32,16 @@ export interface ToolkitOpts {
 export class Toolkit {
   public github: GitHub;
   public buildx: Buildx;
-  public buildxInstall: Install;
+  public buildxInstall: BuildxInstall;
+  public bake: Bake;
   public builder: Builder;
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
     this.github = new GitHub({token: opts.githubToken});
     this.buildx = new Buildx();
-    this.buildxInstall = new Install();
+    this.buildxInstall = new BuildxInstall();
+    this.bake = new Bake({buildx: this.buildx});
     this.builder = new Builder({buildx: this.buildx});
     this.buildkit = new BuildKit({buildx: this.buildx});
   }
