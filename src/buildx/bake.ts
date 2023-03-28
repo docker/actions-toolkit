@@ -38,7 +38,10 @@ export class Bake {
     let remoteDef;
     const files: Array<string> = [];
     if (sources) {
-      for (const source of sources) {
+      for (const source of sources.map(v => v.trim())) {
+        if (source.length == 0) {
+          continue;
+        }
         if (!Util.isValidRef(source)) {
           files.push(source);
           continue;
