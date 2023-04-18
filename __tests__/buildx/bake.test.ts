@@ -33,17 +33,25 @@ describe('parseDefinitions', () => {
     [
       [path.join(fixturesDir, 'bake-01.hcl')],
       ['validate'],
+      [],
       path.join(fixturesDir, 'bake-01-validate.json')
     ],
     [
       [path.join(fixturesDir, 'bake-02.hcl')],
       ['build'],
+      [],
       path.join(fixturesDir, 'bake-02-build.json')
+    ],
+    [
+      [path.join(fixturesDir, 'bake-01.hcl')],
+      ['image'],
+      ['*.output=type=docker', '*.platform=linux/amd64'],
+      path.join(fixturesDir, 'bake-01-overrides.json')
     ]
-  ])('given %p', async (sources: string[], targets: string[], out: string) => {
+  ])('given %p', async (sources: string[], targets: string[], overrides: string[], out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
-    expect(await bake.parseDefinitions(sources, targets)).toEqual(expectedDef);
+    expect(await bake.parseDefinitions(sources, targets, overrides)).toEqual(expectedDef);
   });
 });
 
