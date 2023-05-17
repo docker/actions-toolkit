@@ -55,13 +55,13 @@
     "csv-parse": "^5.3.8",
     "handlebars": "^4.7.7",
     "jwt-decode": "^3.1.2",
-    "semver": "^7.5.0",
+    "semver": "^7.5.1",
     "tmp": "^0.2.1"
   },
   "devDependencies": {
     "@types/csv-parse": "^1.2.2",
     "@types/node": "^16.18.21",
-    "@types/semver": "^7.3.13",
+    "@types/semver": "^7.5.0",
     "@types/tmp": "^0.2.3",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
