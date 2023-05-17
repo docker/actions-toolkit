@@ -812,7 +812,7 @@ __metadata:
     "@actions/tool-cache": ^2.0.1
     "@types/csv-parse": ^1.2.2
     "@types/node": ^16.18.21
-    "@types/semver": ^7.3.13
+    "@types/semver": ^7.5.0
     "@types/tmp": ^0.2.3
     "@typescript-eslint/eslint-plugin": ^5.56.0
     "@typescript-eslint/parser": ^5.56.0
@@ -1668,7 +1668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:^7.3.12, @types/semver@npm:^7.3.13":
+"@types/semver@npm:^7.3.12, @types/semver@npm:^7.5.0":
   version: 7.5.0
   resolution: "@types/semver@npm:7.5.0"
   checksum: 0a64b9b9c7424d9a467658b18dd70d1d781c2d6f033096a6e05762d20ebbad23c1b69b0083b0484722aabf35640b78ccc3de26368bcae1129c87e9df028a22e2
