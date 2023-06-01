@@ -21,6 +21,18 @@ import {parse} from 'csv-parse/sync';
 
 import {Context} from '../context';
 
+const parseKvp = (kvp: string): [string, string] => {
+  const delimiterIndex = kvp.indexOf('=');
+  const key = kvp.substring(0, delimiterIndex);
+  const value = kvp.substring(delimiterIndex + 1);
+
+  if (key.length == 0 || value.length == 0) {
+    throw new Error(`${kvp} is not a valid secret`);
+  }
+
+  return [key, value];
+};
+
 export class Inputs {
   public static getBuildImageIDFilePath(): string {
     return path.join(Context.tmpDir(), 'iidfile');
@@ -70,13 +82,17 @@ export class Inputs {
     return Inputs.resolveBuildSecret(kvp, true);
   }
 
+  public static resolveBuildSecretEnv(kvp: string): string {
+    const [key, value] = parseKvp(kvp);
+
+    return `id=${key},env="${value}"`;
+  }
+
   public static resolveBuildSecret(kvp: string, file: boolean): string {
-    const delimiterIndex = kvp.indexOf('=');
-    const key = kvp.substring(0, delimiterIndex);
-    let value = kvp.substring(delimiterIndex + 1);
-    if (key.length == 0 || value.length == 0) {
-      throw new Error(`${kvp} is not a valid secret`);
-    }
+    const [key, _value] = parseKvp(kvp);
+
+    let value = _value;
+
     if (file) {
       if (!fs.existsSync(value)) {
         throw new Error(`secret file ${value} not found`);
