@@ -177,6 +177,21 @@ describe('resolveBuildSecret', () => {
       expect(e.message).toEqual(error?.message);
     }
   });
+
+  test.each([
+    ['FOO=bar', 'FOO', 'bar', null],
+    ['FOO=', 'FOO', '', new Error('FOO= is not a valid secret')],
+    ['=bar', '', '', new Error('=bar is not a valid secret')],
+    ['FOO=bar=baz', 'FOO', 'bar=baz', null]
+  ])('given %p key and %p env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
+    try {
+      const secret = Inputs.resolveBuildSecretEnv(kvp);
+      expect(secret).toEqual(`id=${exKey},env="${exValue}"`);
+    } catch (e) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(e.message).toEqual(error?.message);
+    }
+  });
 });
 
 describe('hasLocalExporter', () => {
