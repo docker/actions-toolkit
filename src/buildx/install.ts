@@ -86,7 +86,7 @@ export class Install {
         ignoreReturnCode: true
       }).then(res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.warning(res.stderr.trim());
+          throw new Error(`build failed with: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
         }
         return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec, this.platform());
       });
