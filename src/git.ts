@@ -61,7 +61,13 @@ export class Git {
   }
 
   public static async ref(): Promise<string> {
-    return await Git.exec(['symbolic-ref', 'HEAD']);
+    return await Git.exec(['symbolic-ref', 'HEAD']).catch(() => {
+      // if it fails (for example in a detached HEAD state), falls back to
+      // using git tag or describe to get the exact matching tag name.
+      return Git.tag().then(tag => {
+        return `refs/tags/${tag}`;
+      });
+    });
   }
 
   public static async fullCommit(): Promise<string> {
