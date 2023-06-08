@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
+
 import {Exec} from '../exec';
+
+import {ConfigFile} from '../types/docker';
 
 export class Docker {
   static get configDir(): string {
     return process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
+  }
+
+  public static configFile(): ConfigFile | undefined {
+    const f = path.join(Docker.configDir, 'config.json');
+    if (!fs.existsSync(f)) {
+      return undefined;
+    }
+    return <ConfigFile>JSON.parse(fs.readFileSync(f, {encoding: 'utf-8'}));
   }
 
   public static async isAvailable(): Promise<boolean> {

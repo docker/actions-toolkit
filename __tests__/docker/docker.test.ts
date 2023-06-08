@@ -15,15 +15,28 @@
  */
 
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
+import * as fs from 'fs';
 import path from 'path';
 import * as io from '@actions/io';
 import osm = require('os');
+import * as rimraf from 'rimraf';
 
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
+import {ConfigFile} from '../../src/types/docker';
+
+const fixturesDir = path.join(__dirname, '..', 'fixtures');
+
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-jest');
+
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+afterEach(function () {
+  rimraf.sync(tmpDir);
 });
 
 describe('configDir', () => {
@@ -45,6 +58,45 @@ describe('configDir', () => {
   });
   it('returns from env', async () => {
     expect(Docker.configDir).toEqual('/var/docker/config');
+  });
+});
+
+describe('configFile', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, {recursive: true});
+    }
+    process.env = {
+      ...originalEnv,
+      DOCKER_CONFIG: tmpDir
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('auths', async () => {
+    fs.copyFileSync(path.join(fixturesDir, 'docker-config-auths.json'), path.join(tmpDir, 'config.json'));
+    expect(Docker.configFile()).toEqual({
+      auths: {
+        'https://index.docker.io/v1/': {
+          auth: 'am9lam9lOmhlbGxv',
+          email: 'user@example.com'
+        }
+      }
+    } as unknown as ConfigFile);
+  });
+  it('proxies', async () => {
+    fs.copyFileSync(path.join(fixturesDir, 'docker-config-proxies.json'), path.join(tmpDir, 'config.json'));
+    expect(Docker.configFile()).toEqual({
+      proxies: {
+        default: {
+          httpProxy: 'http://127.0.0.1:3128',
+          httpsProxy: 'http://127.0.0.1:3128'
+        }
+      }
+    } as unknown as ConfigFile);
   });
 });
 
