@@ -157,14 +157,14 @@ export class Install {
       throw new Error(`Neither buildx standalone or plugin have been found to build from ref ${gitContext}`);
     }
 
+    const args = ['build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outputDir}`];
+    if (process.env.GIT_AUTH_TOKEN) {
+      args.push('--secret', 'id=GIT_AUTH_TOKEN');
+    }
+    args.push(gitContext);
+
     //prettier-ignore
-    return await new Buildx({standalone: buildStandalone}).getCommand([
-      'build',
-      '--target', 'binaries',
-      '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1',
-      '--output', `type=local,dest=${outputDir}`,
-      gitContext
-    ]);
+    return await new Buildx({standalone: buildStandalone}).getCommand(args);
   }
 
   private async isStandalone(): Promise<boolean> {
