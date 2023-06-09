@@ -21,6 +21,7 @@ import {parse} from 'csv-parse/sync';
 
 export interface InputListOpts {
   ignoreComma?: boolean;
+  comment?: string;
   quote?: string | boolean | Buffer | null;
 }
 
@@ -36,7 +37,7 @@ export class Util {
     const records = parse(items, {
       columns: false,
       relaxQuotes: true,
-      comment: '#',
+      comment: opts?.comment,
       relaxColumnCount: true,
       skipEmptyLines: true,
       quote: opts?.quote
