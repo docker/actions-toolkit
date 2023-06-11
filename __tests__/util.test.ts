@@ -207,6 +207,19 @@ describe('isValidURL', () => {
   });
 });
 
+describe('isNotValidURL', () => {
+  test.each([
+    ['https://github.com/docker/buildx.git', false],
+    ['https://github.com/docker/buildx.git#refs/pull/648/head', false],
+    ['git@github.com:moby/buildkit.git', true],
+    ['git://github.com/user/repo.git', true],
+    ['github.com/moby/buildkit.git#main', true],
+    ['v0.4.1', true]
+  ])('given %p', async (url, expected) => {
+    expect(Util.isValidURL(url)).toEqual(expected);
+  });
+});
+
 describe('isValidRef', () => {
   test.each([
     ['https://github.com/docker/buildx.git', true],
@@ -215,6 +228,19 @@ describe('isValidRef', () => {
     ['git://github.com/user/repo.git', true],
     ['github.com/moby/buildkit.git#main', true],
     ['v0.4.1', false]
+  ])('given %p', async (url, expected) => {
+    expect(Util.isValidRef(url)).toEqual(expected);
+  });
+});
+
+describe('isNotValidRef', () => {
+  test.each([
+    ['https://github.com/docker/buildx.git', false],
+    ['https://github.com/docker/buildx.git#refs/pull/648/head', false],
+    ['git@github.com:moby/buildkit.git', false],
+    ['git://github.com/user/repo.git', false],
+    ['github.com/moby/buildkit.git#main', false],
+    ['v0.4.1', true]
   ])('given %p', async (url, expected) => {
     expect(Util.isValidRef(url)).toEqual(expected);
   });
