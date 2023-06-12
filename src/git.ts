@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+import * as core from '@actions/core';
+import {Octokit} from '@octokit/core';
+import {restEndpointMethods} from '@octokit/plugin-rest-endpoint-methods';
+
 import {Exec} from './exec';
+import {GitHub} from './github';
 import {Context} from '@actions/github/lib/context';
+
 import {Context as GitContext} from './types/git';
 
 export class Git {
@@ -36,7 +42,29 @@ export class Git {
       });
   }
 
-  public static async remoteSha(repo: string, ref: string): Promise<string> {
+  public static async remoteSha(repo: string, ref: string, token?: string): Promise<string> {
+    const repoMatch = repo.match(/github.com\/([^/]+)\/([^/]+?)(?:\.git)?(\/|$)/);
+    // if we have a token and this is a GitHub repo we can use the GitHub API
+    if (token && repoMatch) {
+      core.setSecret(token);
+      const octokit = new (Octokit.plugin(restEndpointMethods).defaults({
+        baseUrl: GitHub.apiURL
+      }))({auth: token});
+      const [owner, repoName] = repoMatch.slice(1, 3);
+      try {
+        return (
+          await octokit.rest.repos.listCommits({
+            owner: owner,
+            repo: repoName,
+            sha: ref,
+            per_page: 1
+          })
+        ).data[0].sha;
+      } catch (e) {
+        throw new Error(`Cannot find remote ref for ${repo}#${ref}: ${e.message}`);
+      }
+    }
+    // otherwise we fall back to git ls-remote
     return await Git.exec(['ls-remote', repo, ref]).then(out => {
       const [rsha] = out.split(/[\s\t]/);
       if (rsha.length == 0) {
