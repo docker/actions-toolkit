@@ -66,8 +66,11 @@ describe('isInsideWorkTree', () => {
 });
 
 describe('remoteSha', () => {
-  it('returns git remote sha', async () => {
+  it('returns sha using git ls-remote', async () => {
     expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
+  });
+  it('returns sha using github api', async () => {
+    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head', process.env.GITHUB_TOKEN)).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
   });
 });
 
