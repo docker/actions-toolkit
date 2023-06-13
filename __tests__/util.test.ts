@@ -73,6 +73,18 @@ describe('getInputList', () => {
     expect(res).toEqual(['user/app:cache', 'type=local,src=path/to/dir']);
   });
 
+  it('multiline and ignoring comment correctly', async () => {
+    setInput('labels', 'foo=bar\nbar=qux#baz');
+    const res = Util.getInputList('labels');
+    expect(res).toEqual(['foo=bar', 'bar=qux#baz']);
+  });
+
+  it('multiline with comment', async () => {
+    setInput('labels', 'foo=bar\nbar=qux#baz');
+    const res = Util.getInputList('labels', {comment: '#'});
+    expect(res).toEqual(['foo=bar', 'bar=qux']);
+  });
+
   it('different new lines and ignoring comma correctly', async () => {
     setInput('cache-from', 'user/app:cache\r\ntype=local,src=path/to/dir');
     const res = Util.getInputList('cache-from', {ignoreComma: true});
