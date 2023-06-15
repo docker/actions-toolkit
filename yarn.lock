@@ -810,7 +810,7 @@ __metadata:
     "@actions/http-client": ^2.0.1
     "@actions/io": ^1.1.2
     "@actions/tool-cache": ^2.0.1
-    "@octokit/plugin-rest-endpoint-methods": ^7.2.1
+    "@octokit/plugin-rest-endpoint-methods": ^7.2.3
     "@types/csv-parse": ^1.2.2
     "@types/node": ^16.18.21
     "@types/semver": ^7.5.0
@@ -1393,7 +1393,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-rest-endpoint-methods@npm:^7.2.1":
+"@octokit/plugin-rest-endpoint-methods@npm:^7.2.3":
   version: 7.2.3
   resolution: "@octokit/plugin-rest-endpoint-methods@npm:7.2.3"
   dependencies:
