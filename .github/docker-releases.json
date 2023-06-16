@@ -545,12 +545,6 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v1.12.2-rc2",
     "assets": []
   },
-  "v1.12.2-rc1": {
-    "id": 4246481,
-    "tag_name": "v1.12.2-rc1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.2-rc1",
-    "assets": []
-  },
   "v1.12.1": {
     "id": 3919520,
     "tag_name": "v1.12.1",
