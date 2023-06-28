@@ -210,6 +210,189 @@ describe('parseInspect', () => {
          }
        ]
      }
+    ],
+    [
+     'inspect8.txt',
+     {
+       "name": "builder-52aa0611-faf0-42ac-a940-461e4e287d68",
+       "driver": "docker-container",
+       "lastActivity": new Date("2023-06-13T13:52:31.000Z"),
+       "nodes": [
+         {
+           "buildkit": "v0.11.6",
+           "buildkitd-flags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+           "driver-opts": [
+             "image=moby/buildkit:buildx-stable-1",
+             "network=host",
+           ],
+           "endpoint": "unix:///var/run/docker.sock",
+           "name": "builder-52aa0611-faf0-42ac-a940-461e4e287d680",
+           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6",
+           "status": "running",
+           "labels": {
+             "org.mobyproject.buildkit.worker.executor": "oci",
+             "org.mobyproject.buildkit.worker.hostname": "fv-az572-38",
+             "org.mobyproject.buildkit.worker.network": "host",
+             "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+             "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+             "org.mobyproject.buildkit.worker.snapshotter": "overlayfs",
+           },
+           "gcPolicy": [
+             {
+               "all": false,
+               "filter": [
+                 "type==source.local",
+                 "type==exec.cachemount",
+                 "type==source.git.checkout"
+               ],
+               "keepDuration": "48h0m0s",
+               "keepBytes": "488.3MiB",
+             },
+             {
+               "all": false,
+               "keepDuration": "1440h0m0s",
+               "keepBytes": "8.382GiB",
+             },
+             {
+               "all": false,
+               "keepBytes": "8.382GiB",
+             },
+             {
+               "all": true,
+               "keepBytes": "8.382GiB",
+             }
+           ]
+         }
+       ]
+     }
+    ],
+    [
+      'inspect9.txt',
+      {
+        "name": "default",
+        "driver": "docker",
+        "lastActivity": new Date("2023-06-13T18:13:43.000Z"),
+        "nodes": [
+          {
+            "buildkit": "v0.11.7-0.20230525183624-798ad6b0ce9f",
+            "endpoint": "default",
+            "name": "default",
+            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6",
+            "status": "running",
+            "gcPolicy": [
+              {
+                "all": true,
+                "keepBytes": "100GiB",
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    [
+      'inspect10.txt',
+      {
+        "name": "remote-builder",
+        "driver": "remote",
+        "lastActivity": new Date("2023-04-20T12:47:49.000Z"),
+        "nodes": [
+          {
+            "name": "remote-builder0",
+            "endpoint": "docker-container://buildx_buildkit_dk-remote-builder0",
+            "status": "inactive"
+          },
+          {
+            "name": "aws_graviton2",
+            "endpoint": "tcp://10.0.0.1:1234",
+            "driver-opts": [
+              "cacert=/home/user/.certs/aws_graviton2/ca.pem",
+              "cert=/home/user/.certs/aws_graviton2/cert.pem",
+              "key=/home/user/.certs/aws_graviton2/key.pem"
+            ],
+            "status": "running",
+            "buildkit": "v0.11.6",
+            "platforms": "darwin/arm64,linux/arm64,linux/arm/v5,linux/arm/v6,linux/arm/v7,windows/arm64",
+            "labels": {
+              "org.mobyproject.buildkit.worker.executor": "oci",
+              "org.mobyproject.buildkit.worker.hostname": "77ebc22e2d82",
+              "org.mobyproject.buildkit.worker.network": "host",
+              "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+              "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+              "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+            },
+            "gcPolicy": [
+              {
+                "all": false,
+                "filter": [
+                  "type==source.local",
+                  "type==exec.cachemount",
+                  "type==source.git.checkout"
+                ],
+                "keepDuration": "48h0m0s",
+                "keepBytes": "488.3MiB"
+              },
+              {
+                "all": false,
+                "keepDuration": "1440h0m0s",
+                "keepBytes": "23.28GiB"
+              },
+              {
+                "all": false,
+                "keepBytes": "23.28GiB"
+              },
+              {
+                "all": true,
+                "keepBytes": "23.28GiB"
+              }
+            ]
+          },
+          {
+            "name": "linuxone_s390x",
+            "endpoint": "tcp://10.0.0.2:1234",
+            "driver-opts": [
+              "cacert=/home/user/.certs/linuxone_s390x/ca.pem",
+              "cert=/home/user/.certs/linuxone_s390x/cert.pem",
+              "key=/home/user/.certs/linuxone_s390x/key.pem"
+            ],
+            "status": "running",
+            "buildkit": "v0.11.6",
+            "platforms": "linux/s390x",
+            "labels": {
+              "org.mobyproject.buildkit.worker.executor": "oci",
+              "org.mobyproject.buildkit.worker.hostname": "9d0d62a96818",
+              "org.mobyproject.buildkit.worker.network": "host",
+              "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+              "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+              "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+            },
+            "gcPolicy": [
+              {
+                "all": false,
+                "keepBytes": "488.3MiB",
+                "filter": [
+                  "type==source.local",
+                  "type==exec.cachemount",
+                  "type==source.git.checkout"
+                ],
+                "keepDuration": "48h0m0s"
+              },
+              {
+                "all": false,
+                "keepDuration": "1440h0m0s",
+                "keepBytes": "9.313GiB"
+              },
+              {
+                "all": false,
+                "keepBytes": "9.313GiB"
+              },
+              {
+                "all": true,
+                "keepBytes": "9.313GiB"
+              }
+            ]
+          }
+        ],
+      }
     ]
   ])('given %p', async (inspectFile, expected) => {
     expect(await Builder.parseInspect(fs.readFileSync(path.join(fixturesDir, inspectFile)).toString())).toEqual(expected);

@@ -1,0 +1,14 @@
+Name:          default
+Driver:        docker
+Last Activity: 2023-06-13 18:13:43 +0000 UTC
+
+Nodes:
+Name:      default
+Endpoint:  default
+Status:    running
+Buildkit:  v0.11.7-0.20230525183624-798ad6b0ce9f
+Platforms: linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/mips64le, linux/mips64, linux/arm/v7, linux/arm/v6
+GC Policy rule#0:
+ All:        true
+ Filters:
+ Keep Bytes: 100GiB

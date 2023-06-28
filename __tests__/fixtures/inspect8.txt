@@ -1,0 +1,34 @@
+Name:          builder-52aa0611-faf0-42ac-a940-461e4e287d68
+Driver:        docker-container
+Last Activity: 2023-06-13 13:52:31 +0000 UTC
+
+Nodes:
+Name:           builder-52aa0611-faf0-42ac-a940-461e4e287d680
+Endpoint:       unix:///var/run/docker.sock
+Driver Options: image="moby/buildkit:buildx-stable-1" network="host"
+Status:         running
+Flags:          --debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+Buildkit:       v0.11.6
+Platforms:      linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/amd64/v4, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/mips64le, linux/mips64, linux/arm/v7, linux/arm/v6
+Labels:
+ org.mobyproject.buildkit.worker.executor:         oci
+ org.mobyproject.buildkit.worker.hostname:         fv-az572-38
+ org.mobyproject.buildkit.worker.network:          host
+ org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+ org.mobyproject.buildkit.worker.selinux.enabled:  false
+ org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+GC Policy rule#0:
+ All:           false
+ Filters:       type==source.local,type==exec.cachemount,type==source.git.checkout
+ Keep Duration: 48h0m0s
+ Keep Bytes:    488.3MiB
+GC Policy rule#1:
+ All:           false
+ Keep Duration: 1440h0m0s
+ Keep Bytes:    8.382GiB
+GC Policy rule#2:
+ All:        false
+ Keep Bytes: 8.382GiB
+GC Policy rule#3:
+ All:        true
+ Keep Bytes: 8.382GiB

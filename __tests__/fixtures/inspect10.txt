@@ -1,0 +1,67 @@
+Name:          remote-builder
+Driver:        remote
+Last Activity: 2023-04-20 12:47:49 +0000 UTC
+
+Nodes:
+Name:      remote-builder0
+Endpoint:  docker-container://buildx_buildkit_dk-remote-builder0
+Status:    inactive
+Platforms:
+
+Name:           aws_graviton2
+Endpoint:       tcp://10.0.0.1:1234
+Driver Options: cacert="/home/user/.certs/aws_graviton2/ca.pem" cert="/home/user/.certs/aws_graviton2/cert.pem" key="/home/user/.certs/aws_graviton2/key.pem"
+Status:         running
+Buildkit:       v0.11.6
+Platforms:      darwin/arm64*, linux/arm64*, linux/arm/v5*, linux/arm/v6*, linux/arm/v7*, windows/arm64*
+Labels:
+ org.mobyproject.buildkit.worker.executor:         oci
+ org.mobyproject.buildkit.worker.hostname:         77ebc22e2d82
+ org.mobyproject.buildkit.worker.network:          host
+ org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+ org.mobyproject.buildkit.worker.selinux.enabled:  false
+ org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+GC Policy rule#0:
+ All:           false
+ Filters:       type==source.local,type==exec.cachemount,type==source.git.checkout
+ Keep Duration: 48h0m0s
+ Keep Bytes:    488.3MiB
+GC Policy rule#1:
+ All:           false
+ Keep Duration: 1440h0m0s
+ Keep Bytes:    23.28GiB
+GC Policy rule#2:
+ All:        false
+ Keep Bytes: 23.28GiB
+GC Policy rule#3:
+ All:        true
+ Keep Bytes: 23.28GiB
+
+Name:           linuxone_s390x
+Endpoint:       tcp://10.0.0.2:1234
+Driver Options: cacert="/home/user/.certs/linuxone_s390x/ca.pem" cert="/home/user/.certs/linuxone_s390x/cert.pem" key="/home/user/.certs/linuxone_s390x/key.pem"
+Status:         running
+Buildkit:       v0.11.6
+Platforms:      linux/s390x*
+Labels:
+ org.mobyproject.buildkit.worker.executor:         oci
+ org.mobyproject.buildkit.worker.hostname:         9d0d62a96818
+ org.mobyproject.buildkit.worker.network:          host
+ org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+ org.mobyproject.buildkit.worker.selinux.enabled:  false
+ org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+GC Policy rule#0:
+ All:           false
+ Filters:       type==source.local,type==exec.cachemount,type==source.git.checkout
+ Keep Duration: 48h0m0s
+ Keep Bytes:    488.3MiB
+GC Policy rule#1:
+ All:           false
+ Keep Duration: 1440h0m0s
+ Keep Bytes:    9.313GiB
+GC Policy rule#2:
+ All:        false
+ Keep Bytes: 9.313GiB
+GC Policy rule#3:
+ All:        true
+ Keep Bytes: 9.313GiB

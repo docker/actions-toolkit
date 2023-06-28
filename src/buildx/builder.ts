@@ -19,7 +19,7 @@ import * as core from '@actions/core';
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
-import {BuilderInfo, NodeInfo} from '../types/builder';
+import {BuilderInfo, GCPolicy, NodeInfo} from '../types/builder';
 
 export interface BuilderOpts {
   buildx?: Buildx;
@@ -72,55 +72,73 @@ export class Builder {
     const builder: BuilderInfo = {
       nodes: []
     };
-    let node: NodeInfo = {};
+    let parsingType: string | undefined;
+    let currentNode: NodeInfo = {};
+    let currentGCPolicy: GCPolicy | undefined;
     for (const line of data.trim().split(`\n`)) {
       const [key, ...rest] = line.split(':');
+      const lkey = key.toLowerCase();
       const value = rest.map(v => v.trim()).join(':');
-      if (key.length == 0 || value.length == 0) {
+      if (key.length == 0) {
         continue;
       }
-      switch (key.toLowerCase()) {
-        case 'name': {
+      switch (true) {
+        case lkey == 'name': {
+          parsingType = undefined;
           if (builder.name == undefined) {
             builder.name = value;
           } else {
-            if (Object.keys(node).length > 0) {
-              builder.nodes.push(node);
-              node = {};
+            if (currentGCPolicy && currentNode.gcPolicy) {
+              currentNode.gcPolicy.push(currentGCPolicy);
+              currentGCPolicy = undefined;
             }
-            node.name = value;
+            if (currentNode.name) {
+              builder.nodes.push(currentNode);
+            }
+            currentNode = {name: value};
           }
           break;
         }
-        case 'driver': {
+        case lkey == 'driver': {
+          parsingType = undefined;
           builder.driver = value;
           break;
         }
-        case 'last activity': {
+        case lkey == 'last activity': {
+          parsingType = undefined;
           builder.lastActivity = new Date(value);
           break;
         }
-        case 'endpoint': {
-          node.endpoint = value;
+        case lkey == 'endpoint': {
+          parsingType = undefined;
+          currentNode.endpoint = value;
           break;
         }
-        case 'driver options': {
-          node['driver-opts'] = (value.match(/([a-zA-Z0-9_.]+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
+        case lkey == 'driver options': {
+          parsingType = undefined;
+          currentNode['driver-opts'] = (value.match(/([a-zA-Z0-9_.]+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
           break;
         }
-        case 'status': {
-          node.status = value;
+        case lkey == 'status': {
+          parsingType = undefined;
+          currentNode.status = value;
           break;
         }
-        case 'flags': {
-          node['buildkitd-flags'] = value;
+        case lkey == 'flags': {
+          parsingType = undefined;
+          currentNode['buildkitd-flags'] = value;
           break;
         }
-        case 'buildkit': {
-          node.buildkit = value;
+        case lkey == 'buildkit': {
+          parsingType = undefined;
+          currentNode.buildkit = value;
           break;
         }
-        case 'platforms': {
+        case lkey == 'platforms': {
+          parsingType = undefined;
+          if (!value) {
+            break;
+          }
           let platforms: Array<string> = [];
           // if a preferred platform is being set then use only these
           // https://docs.docker.com/engine/reference/commandline/buildx_inspect/#get-information-about-a-builder-instance
@@ -134,13 +152,63 @@ export class Builder {
             // otherwise set all platforms available
             platforms = value.split(', ');
           }
-          node.platforms = platforms.join(',');
+          currentNode.platforms = platforms.join(',');
           break;
+        }
+        case lkey == 'labels': {
+          parsingType = 'label';
+          currentNode.labels = {};
+          break;
+        }
+        case lkey.startsWith('gc policy rule#'): {
+          parsingType = 'gcpolicy';
+          if (currentNode.gcPolicy && currentGCPolicy) {
+            currentNode.gcPolicy.push(currentGCPolicy);
+            currentGCPolicy = undefined;
+          }
+          break;
+        }
+        default: {
+          switch (parsingType || '') {
+            case 'label': {
+              currentNode.labels = currentNode.labels || {};
+              currentNode.labels[key.trim()] = value;
+              break;
+            }
+            case 'gcpolicy': {
+              currentNode.gcPolicy = currentNode.gcPolicy || [];
+              currentGCPolicy = currentGCPolicy || {};
+              switch (lkey.trim()) {
+                case 'all': {
+                  currentGCPolicy.all = value == 'true';
+                  break;
+                }
+                case 'filters': {
+                  if (value) {
+                    currentGCPolicy.filter = value.split(',');
+                  }
+                  break;
+                }
+                case 'keep duration': {
+                  currentGCPolicy.keepDuration = value;
+                  break;
+                }
+                case 'keep bytes': {
+                  currentGCPolicy.keepBytes = value;
+                  break;
+                }
+              }
+              break;
+            }
+          }
         }
       }
     }
-    if (Object.keys(node).length > 0) {
-      builder.nodes.push(node);
+    if (currentGCPolicy && currentNode.gcPolicy) {
+      currentNode.gcPolicy.push(currentGCPolicy);
+    }
+    if (currentNode.name) {
+      builder.nodes.push(currentNode);
     }
     return builder;
   }
