@@ -19,8 +19,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
+import * as github from '@actions/github';
 
 import {Install} from '../../src/buildx/install';
+
+import release_0_11_0 = require('./release-v0.11.0.json');
 
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
@@ -101,6 +104,22 @@ describe('build', () => {
     const toolPath = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14');
     expect(fs.existsSync(toolPath)).toBe(true);
     const buildxBin = await install.installPlugin(toolPath, tmpDir);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
+});
+
+describe('installReleaseFromFork', () => {
+  it('installs v0.11.0 by querying github releases', async () => {
+    jest.spyOn(github, 'getOctokit').mockImplementation(() => {
+      const request = () => Promise.resolve({data: release_0_11_0});
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return {request} as any;
+    });
+    const install = new Install();
+    const toolPath = await install.installReleaseFromFork('https://github.com/docker/buildx.git#v0.11.0');
+    expect(fs.existsSync(toolPath)).toBe(true);
+    const buildxBin = await install.installStandalone(toolPath, tmpDir);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });

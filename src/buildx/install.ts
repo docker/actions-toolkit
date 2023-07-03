@@ -22,6 +22,7 @@ import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
+import type {GitHub as Octokit} from '@actions/github/lib/utils';
 
 import {Buildx} from './buildx';
 import {Context} from '../context';
@@ -33,13 +34,19 @@ import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
   standalone?: boolean;
+  gitAuthToken?: string;
+  octokit?: InstanceType<typeof Octokit>;
 }
 
 export class Install {
   private readonly _standalone: boolean | undefined;
+  private readonly _gitAuthToken: string | undefined;
+  private readonly _octokit: InstanceType<typeof Octokit> | undefined;
 
   constructor(opts?: InstallOpts) {
     this._standalone = opts?.standalone;
+    this._gitAuthToken = opts?.gitAuthToken;
+    this._octokit = opts?.octokit;
   }
 
   public async download(version: string): Promise<string> {
@@ -229,5 +236,70 @@ export class Install {
       throw new Error(`Cannot find Buildx release ${version} in ${url}`);
     }
     return releases[version];
+  }
+
+  // Fetches a pre-compiled release. Returns an empty string if there are no
+  // releases for this URL.
+  public async installReleaseFromFork(url: string): Promise<string> {
+    const targetFile: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+    const [base, fullVersion] = url.split('#');
+    if (!fullVersion) {
+      return '';
+    }
+    if (!fullVersion.startsWith('v')) {
+      core.info(`Only supports v-prefixed releases`);
+      return '';
+    }
+    const version = fullVersion.substring(1);
+
+    if (!base.startsWith('https://github.com/')) {
+      core.info(`Only supports github releases. Actual: ${base}`);
+      return '';
+    }
+
+    const [owner, fullRepo] = base.substring('https://github.com/'.length).split('/');
+    if (!owner || !fullRepo) {
+      core.info(`Only supports github releases. Actual: ${base}, owner: ${owner}, repo: ${fullRepo}`);
+      return '';
+    }
+    const repo = fullRepo.endsWith('.git') ? fullRepo.substring(0, fullRepo.length - 4) : fullRepo;
+
+    core.info(`Checking for releases in ${owner}/${repo}`);
+    const cachedPath = tc.find('buildx', version, this.platform());
+    if (cachedPath) {
+      core.info(`Using cached download ${version}`);
+      return cachedPath;
+    }
+
+    const octokit = this._octokit;
+    if (!octokit) {
+      core.info(`GitHub API not available`);
+      return '';
+    }
+    const release = await octokit.request('GET https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', {
+      repo: repo,
+      owner: owner,
+      tag: 'v' + version
+    });
+
+    const expectedFilename = this.filename(version);
+    const asset = release.data.assets.find(asset => asset.name == expectedFilename);
+    if (!asset) {
+      core.info(`Could not find download asset: ${asset}`);
+      return '';
+    }
+    const downloadURL = asset.url;
+    core.info(`Downloading ${asset.name} from ${downloadURL}`);
+
+    let auth: string | undefined = undefined;
+    if (this._gitAuthToken) {
+      auth = `Bearer ${this._gitAuthToken}`;
+    }
+    const downloadPath = await tc.downloadTool(downloadURL.toString(), undefined, auth, {
+      Accept: 'application/octet-stream',
+      'X-GitHub-Api-Version': '2022-11-28'
+    });
+    core.debug(`Install.fetchBinary downloadPath: ${downloadPath}`);
+    return await tc.cacheFile(downloadPath, targetFile, 'buildx', version, this.platform());
   }
 }
