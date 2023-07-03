@@ -24,6 +24,7 @@ import * as tc from '@actions/tool-cache';
 import * as cache from '@actions/cache';
 import * as semver from 'semver';
 import * as util from 'util';
+import type {GitHub as Octokit} from '@actions/github/lib/utils';
 
 import {Buildx} from './buildx';
 import {Context} from '../context';
@@ -32,35 +33,70 @@ import {Docker} from '../docker/docker';
 import {Git} from '../git';
 import {Util} from '../util';
 
-import {GitHubRelease} from '../types/github';
+import {GitHubRelease, OctokitRelease} from '../types/github';
 
 export interface InstallOpts {
   standalone?: boolean;
+  gitAuthToken?: string;
+  octokit?: InstanceType<typeof Octokit>;
+}
+
+interface ReleaseLocation {
+  owner: string;
+  repo: string;
+  tag: string;
 }
 
 export class Install {
   private readonly _standalone: boolean | undefined;
+  private readonly _gitAuthToken: string | undefined;
+  private readonly _octokit: InstanceType<typeof Octokit> | undefined;
 
   constructor(opts?: InstallOpts) {
     this._standalone = opts?.standalone;
+    this._gitAuthToken = opts?.gitAuthToken;
+    this._octokit = opts?.octokit;
   }
 
   /*
    * Download buildx binary from GitHub release
-   * @param version semver version or latest
+   * @param version semver version, latest, or a tagged release url
+   *    of the form 'https://github.com/docker/buildx/releases/tag/v0.11.1' or
+   *    'https://github.com/docker/buildx/releases/latest'
    * @returns path to the buildx binary
    */
   public async download(version: string): Promise<string> {
-    const release: GitHubRelease = await Install.getRelease(version);
-    core.debug(`Install.download release tag name: ${release.tag_name}`);
+    const releaseLocation = Install.releaseLocationFromUrl(version);
+    let vspec = '';
+    let downloadURL = '';
+    if (releaseLocation) {
+      const release = await this.getReleaseFromAPI(releaseLocation);
 
-    const vspec = await this.vspec(release.tag_name);
-    core.debug(`Install.download vspec: ${vspec}`);
+      const fversion = release.tag_name.replace(/^v+|v+$/g, '');
+      core.debug(`Install.download release ${releaseLocation.owner}/${releaseLocation.repo}: ${release.tag_name}`);
 
-    const c = semver.clean(vspec) || '';
-    if (!semver.valid(c)) {
-      throw new Error(`Invalid Buildx version "${vspec}".`);
+      const expectedFilename = this.filename(fversion);
+      const asset = release.assets.find(asset => asset.name == expectedFilename);
+      if (!asset) {
+        throw new Error(`Could not find asset "${expectedFilename}" in release: ${release.tag_name}`);
+      }
+
+      vspec = await this.vspec(`https://github.com/${releaseLocation.owner}/${releaseLocation.repo}.git#${release.tag_name}`);
+      downloadURL = asset.url;
+    } else {
+      const release: GitHubRelease = await Install.getReleaseFromJSON(version);
+      core.debug(`Install.download release tag name: ${release.tag_name}`);
+
+      vspec = await this.vspec(release.tag_name);
+      downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', vspec, this.filename(vspec));
+
+      const c = semver.clean(vspec) || '';
+      if (!semver.valid(c)) {
+        throw new Error(`Invalid Buildx version "${vspec}".`);
+      }
     }
+
+    core.debug(`Install.download vspec: ${vspec}`);
 
     const installCache = new InstallCache('buildx-dl-bin', vspec);
 
@@ -70,10 +106,17 @@ export class Install {
       return cacheFoundPath;
     }
 
-    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', vspec, this.filename(vspec));
     core.info(`Downloading ${downloadURL}`);
 
-    const htcDownloadPath = await tc.downloadTool(downloadURL);
+    let auth: string | undefined = undefined;
+    if (this._gitAuthToken) {
+      auth = `Bearer ${this._gitAuthToken}`;
+    }
+    const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, auth, {
+      // Headers required when downloading binaries from the github api.
+      Accept: 'application/octet-stream',
+      'X-GitHub-Api-Version': '2022-11-28'
+    });
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
     const cacheSavePath = await installCache.save(htcDownloadPath);
@@ -253,7 +296,59 @@ export class Install {
     return hash;
   }
 
+  private async getReleaseFromAPI(location: ReleaseLocation): Promise<OctokitRelease> {
+    const octokit = this._octokit;
+    if (!octokit) {
+      throw new Error(`GitHub API not available`);
+    }
+
+    const {owner, repo, tag} = location;
+    try {
+      const release = await (tag == 'latest'
+        ? octokit.rest.repos.getLatestRelease({owner, repo})
+        : octokit.rest.repos.getReleaseByTag({
+            owner,
+            repo,
+            tag
+          }));
+      return release.data;
+    } catch (e) {
+      throw new Error(`fetch release failed. release: ${JSON.stringify({owner, repo, tag})}. Error: ${e}`);
+    }
+  }
+
+  // Checks if url is of the form 'https://github.com/docker/buildx/releases/tag/v0.11.1'.
+  public static async isReleaseUrl(url: string): Promise<boolean> {
+    return !!(await this.releaseLocationFromUrl(url));
+  }
+
+  // Deconstructs url of the form 'https://github.com/docker/buildx/releases/tag/v0.11.1'.
+  private static releaseLocationFromUrl(url: string): ReleaseLocation | null {
+    if (!url.startsWith('https://github.com/')) {
+      return null;
+    }
+
+    const path = Util.trimPrefix(url, 'https://github.com/');
+    const pathParts = path.split('/');
+    const isReleaseTagUrl = pathParts.length == 5 && pathParts[2] == 'releases' && pathParts[3] == 'tag';
+    if (isReleaseTagUrl) {
+      return {owner: pathParts[0], repo: pathParts[1], tag: pathParts[4]};
+    }
+    const isReleaseLatestUrl = pathParts.length == 4 && pathParts[2] == 'releases' && pathParts[3] == 'latest';
+    if (isReleaseLatestUrl) {
+      return {owner: pathParts[0], repo: pathParts[1], tag: 'latest'};
+    }
+    return null;
+  }
+
+  // Fetches release info from a pre-generated json file.
+  // Deprecated: use getReleaseFromJSON(version).
   public static async getRelease(version: string): Promise<GitHubRelease> {
+    return Install.getReleaseFromJSON(version);
+  }
+
+  // Fetches release info from a pre-generated json file.
+  public static async getReleaseFromJSON(version: string): Promise<GitHubRelease> {
     const url = `https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json`;
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
     const resp: httpm.HttpClientResponse = await http.get(url);

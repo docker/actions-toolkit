@@ -38,9 +38,13 @@ export class Toolkit {
   public buildkit: BuildKit;
 
   constructor(opts: ToolkitOpts = {}) {
-    this.github = new GitHub({token: opts.githubToken});
+    const gitAuthToken = process.env.GIT_AUTH_TOKEN || opts.githubToken;
+    this.github = new GitHub({token: gitAuthToken});
     this.buildx = new Buildx();
-    this.buildxInstall = new BuildxInstall();
+    this.buildxInstall = new BuildxInstall({
+      gitAuthToken: gitAuthToken,
+      octokit: this.github.octokit
+    });
     this.bake = new Bake({buildx: this.buildx});
     this.builder = new Builder({buildx: this.buildx});
     this.buildkit = new BuildKit({buildx: this.buildx});
