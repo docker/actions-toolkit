@@ -19,17 +19,34 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
-import * as github from '@actions/github';
 
 import {Install} from '../../src/buildx/install';
 
 import release_0_11_0 = require('./release-v0.11.0.json');
+import release_0_9_1 = require('./release-v0.9.1.json');
 
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+let octokit;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  octokit = {
+    rest: {
+      repos: {
+        getLatestRelease: jest.fn().mockImplementation(() => {
+          return {data: release_0_11_0};
+        }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        getReleaseByTag: jest.fn().mockImplementation((args: any) => {
+          if (args.tag == 'v0.9.1') {
+            return {data: release_0_9_1};
+          }
+          throw new Error(`Unknown release: ${args.tag}`);
+        })
+      }
+    }
+  };
 });
 
 afterEach(function () {
@@ -41,11 +58,13 @@ describe('download', () => {
   test.each([
     ['v0.9.1', false],
     ['latest', false],
+    ['https://github.com/docker/buildx.git#v0.9.1', false],
     ['v0.9.1', true],
-    ['latest', true]
+    ['latest', true],
+    ['https://github.com/docker/buildx.git#v0.9.1', true],
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
-      const install = new Install({standalone: standalone});
+      const install = new Install({octokit, standalone: standalone});
       const toolPath = await install.download(version);
       expect(fs.existsSync(toolPath)).toBe(true);
       let buildxBin: string;
@@ -74,7 +93,7 @@ describe('download', () => {
   'acquires buildx for %s/%s', async (os, arch) => {
       jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
-      const install = new Install();
+      const install = new Install({octokit});
       const buildxBin = await install.download('latest');
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
@@ -91,7 +110,7 @@ describe('download', () => {
 describe('build', () => {
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds refs/pull/648/head', async () => {
-    const install = new Install();
+    const install = new Install({octokit});
     const toolPath = await install.build('https://github.com/docker/buildx.git#refs/pull/648/head');
     expect(fs.existsSync(toolPath)).toBe(true);
     const buildxBin = await install.installStandalone(toolPath, tmpDir);
@@ -100,26 +119,10 @@ describe('build', () => {
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
-    const install = new Install();
+    const install = new Install({octokit});
     const toolPath = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14');
     expect(fs.existsSync(toolPath)).toBe(true);
     const buildxBin = await install.installPlugin(toolPath, tmpDir);
-    expect(fs.existsSync(buildxBin)).toBe(true);
-  }, 100000);
-});
-
-describe('installReleaseFromFork', () => {
-  it('installs v0.11.0 by querying github releases', async () => {
-    jest.spyOn(github, 'getOctokit').mockImplementation(() => {
-      const request = () => Promise.resolve({data: release_0_11_0});
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return {request} as any;
-    });
-    const install = new Install();
-    const toolPath = await install.installReleaseFromFork('https://github.com/docker/buildx.git#v0.11.0');
-    expect(fs.existsSync(toolPath)).toBe(true);
-    const buildxBin = await install.installStandalone(toolPath, tmpDir);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });

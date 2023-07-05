@@ -17,11 +17,20 @@
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
+// Our custom release JSON.
 export interface GitHubRelease {
   id: number;
   tag_name: string;
   html_url: string;
   assets: Array<string>;
+}
+
+// Release JSON from the github api. Api version: 2022-11-28
+// https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-the-latest-release
+export interface OctokitRelease {
+  id: number;
+  tag_name: string;
+  assets: Array<{name: string; url: string}>;
 }
 
 export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
