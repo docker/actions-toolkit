@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -29,6 +30,7 @@ import {Context} from '../context';
 import {Exec} from '../exec';
 import {Docker} from '../docker/docker';
 import {Git} from '../git';
+import {Util} from '../util';
 
 import {GitHubRelease} from '../types/github';
 
@@ -50,15 +52,17 @@ export class Install {
    */
   public async download(version: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
-    const fversion = release.tag_name.replace(/^v+|v+$/g, '');
-    core.debug(`Install.download version: ${fversion}`);
+    core.debug(`Install.download release tag name: ${release.tag_name}`);
 
-    const c = semver.clean(fversion) || '';
+    const vspec = await this.vspec(release.tag_name);
+    core.debug(`Install.download vspec: ${vspec}`);
+
+    const c = semver.clean(vspec) || '';
     if (!semver.valid(c)) {
-      throw new Error(`Invalid Buildx version "${fversion}".`);
+      throw new Error(`Invalid Buildx version "${vspec}".`);
     }
 
-    const installCache = new InstallCache('buildx-dl-bin', fversion);
+    const installCache = new InstallCache('buildx-dl-bin', vspec);
 
     const cacheFoundPath = await installCache.find();
     if (cacheFoundPath) {
@@ -66,7 +70,7 @@ export class Install {
       return cacheFoundPath;
     }
 
-    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', fversion, this.filename(fversion));
+    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', vspec, this.filename(vspec));
     core.info(`Downloading ${downloadURL}`);
 
     const htcDownloadPath = await tc.downloadTool(downloadURL);
@@ -83,20 +87,8 @@ export class Install {
    * @returns path to the buildx binary
    */
   public async build(gitContext: string): Promise<string> {
-    // eslint-disable-next-line prefer-const
-    let [repo, ref] = gitContext.split('#');
-    if (ref.length == 0) {
-      ref = 'master';
-    }
-
-    let vspec: string;
-    // TODO: include full ref as fingerprint. Use commit sha as best-effort in the meantime.
-    if (ref.match(/^[0-9a-fA-F]{40}$/)) {
-      vspec = ref;
-    } else {
-      vspec = await Git.remoteSha(repo, ref, process.env.GIT_AUTH_TOKEN);
-    }
-    core.debug(`Install.build: tool version spec ${vspec}`);
+    const vspec = await this.vspec(gitContext);
+    core.debug(`Install.build vspec: ${vspec}`);
 
     const installCache = new InstallCache('buildx-build-bin', vspec);
 
@@ -226,6 +218,39 @@ export class Install {
     const platform: string = os.platform() == 'win32' ? 'windows' : os.platform();
     const ext: string = os.platform() == 'win32' ? '.exe' : '';
     return util.format('buildx-v%s.%s-%s%s', version, platform, arch, ext);
+  }
+
+  /*
+   * Get version spec (fingerprint) for cache key. If versionOrRef is a valid
+   * Git context, then return the SHA of the ref along the repo and owner and
+   * create a hash of it. Otherwise, return the versionOrRef (semver) as is
+   * without the 'v' prefix.
+   */
+  private async vspec(versionOrRef: string): Promise<string> {
+    if (!Util.isValidRef(versionOrRef)) {
+      const v = versionOrRef.replace(/^v+|v+$/g, '');
+      core.info(`Use ${v} version spec cache key for ${versionOrRef}`);
+      return v;
+    }
+
+    // eslint-disable-next-line prefer-const
+    let [baseURL, ref] = versionOrRef.split('#');
+    if (ref.length == 0) {
+      ref = 'master';
+    }
+
+    let sha: string;
+    if (ref.match(/^[0-9a-fA-F]{40}$/)) {
+      sha = ref;
+    } else {
+      sha = await Git.remoteSha(baseURL, ref, process.env.GIT_AUTH_TOKEN);
+    }
+
+    const [owner, repo] = baseURL.substring('https://github.com/'.length).split('/');
+    const key = `${owner}/${Util.trimSuffix(repo, '.git')}/${sha}`;
+    const hash = crypto.createHash('sha256').update(key).digest('hex');
+    core.info(`Use ${hash} version spec cache key for ${key}`);
+    return hash;
   }
 
   public static async getRelease(version: string): Promise<GitHubRelease> {
