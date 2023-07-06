@@ -36,9 +36,8 @@ afterEach(function () {
 describe('download', () => {
   // prettier-ignore
   test.each([
-    ['v0.9.1', false],
-    ['latest', false],
-    ['v0.9.1', true],
+    ['v0.9.0', false],
+    ['v0.10.5', true],
     ['latest', true]
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
@@ -55,6 +54,18 @@ describe('download', () => {
     },
     100000
   );
+
+  // prettier-ignore
+  test.each([
+    // following versions are already cached to htc from previous test cases
+    ['v0.9.0'],
+    ['v0.10.5'],
+  ])(
+  'acquires %p of buildx with cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  });
 
   // TODO: add tests for arm
   // prettier-ignore

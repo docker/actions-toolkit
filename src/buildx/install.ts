@@ -20,6 +20,7 @@ import path from 'path';
 import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
+import * as cache from '@actions/cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -42,25 +43,45 @@ export class Install {
     this._standalone = opts?.standalone;
   }
 
+  /*
+   * Download buildx binary from GitHub release
+   * @param version semver version or latest
+   * @returns path to the buildx binary
+   */
   public async download(version: string): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(version);
     const fversion = release.tag_name.replace(/^v+|v+$/g, '');
     core.debug(`Install.download version: ${fversion}`);
 
-    let toolPath: string;
-    toolPath = tc.find('buildx', fversion, this.platform());
-    if (!toolPath) {
-      const c = semver.clean(fversion) || '';
-      if (!semver.valid(c)) {
-        throw new Error(`Invalid Buildx version "${fversion}".`);
-      }
-      toolPath = await this.fetchBinary(fversion);
+    const c = semver.clean(fversion) || '';
+    if (!semver.valid(c)) {
+      throw new Error(`Invalid Buildx version "${fversion}".`);
     }
-    core.debug(`Install.download toolPath: ${toolPath}`);
 
-    return toolPath;
+    const installCache = new InstallCache('buildx-dl-bin', fversion);
+
+    const cacheFoundPath = await installCache.find();
+    if (cacheFoundPath) {
+      core.info(`Buildx binary found in ${cacheFoundPath}`);
+      return cacheFoundPath;
+    }
+
+    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', fversion, this.filename(fversion));
+    core.info(`Downloading ${downloadURL}`);
+
+    const htcDownloadPath = await tc.downloadTool(downloadURL);
+    core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
+
+    const cacheSavePath = await installCache.save(htcDownloadPath);
+    core.info(`Cached to ${cacheSavePath}`);
+    return cacheSavePath;
   }
 
+  /*
+   * Build buildx binary from source
+   * @param gitContext git repo context
+   * @returns path to the buildx binary
+   */
   public async build(gitContext: string): Promise<string> {
     // eslint-disable-next-line prefer-const
     let [repo, ref] = gitContext.split('#');
@@ -77,35 +98,42 @@ export class Install {
     }
     core.debug(`Install.build: tool version spec ${vspec}`);
 
-    let toolPath: string;
-    toolPath = tc.find('buildx', vspec);
-    if (!toolPath) {
-      const outputDir = path.join(Context.tmpDir(), 'build-cache');
-      const buildCmd = await this.buildCommand(gitContext, outputDir);
-      toolPath = await Exec.getExecOutput(buildCmd.command, buildCmd.args, {
-        ignoreReturnCode: true
-      }).then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          throw new Error(`build failed with: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
-        }
-        return tc.cacheFile(`${outputDir}/buildx`, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec, this.platform());
-      });
+    const installCache = new InstallCache('buildx-build-bin', vspec);
+
+    const cacheFoundPath = await installCache.find();
+    if (cacheFoundPath) {
+      core.info(`Buildx binary found in ${cacheFoundPath}`);
+      return cacheFoundPath;
     }
 
-    return toolPath;
+    const outputDir = path.join(Context.tmpDir(), 'buildx-build-cache');
+    const buildCmd = await this.buildCommand(gitContext, outputDir);
+
+    const buildBinPath = await Exec.getExecOutput(buildCmd.command, buildCmd.args, {
+      ignoreReturnCode: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(`build failed with: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+      }
+      return `${outputDir}/buildx`;
+    });
+
+    const cacheSavePath = await installCache.save(buildBinPath);
+    core.info(`Cached to ${cacheSavePath}`);
+    return cacheSavePath;
   }
 
-  public async installStandalone(toolPath: string, dest?: string): Promise<string> {
+  public async installStandalone(binPath: string, dest?: string): Promise<string> {
     core.info('Standalone mode');
     dest = dest || Context.tmpDir();
-    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
-    const binDir = path.join(dest, 'bin');
+
+    const binDir = path.join(dest, 'buildx-bin-standalone');
     if (!fs.existsSync(binDir)) {
       fs.mkdirSync(binDir, {recursive: true});
     }
-    const filename: string = os.platform() == 'win32' ? 'buildx.exe' : 'buildx';
-    const buildxPath: string = path.join(binDir, filename);
-    fs.copyFileSync(toolBinPath, buildxPath);
+    const binName: string = os.platform() == 'win32' ? 'buildx.exe' : 'buildx';
+    const buildxPath: string = path.join(binDir, binName);
+    fs.copyFileSync(binPath, buildxPath);
 
     core.info('Fixing perms');
     fs.chmodSync(buildxPath, '0755');
@@ -117,17 +145,17 @@ export class Install {
     return buildxPath;
   }
 
-  public async installPlugin(toolPath: string, dest?: string): Promise<string> {
+  public async installPlugin(binPath: string, dest?: string): Promise<string> {
     core.info('Docker plugin mode');
     dest = dest || Docker.configDir;
-    const toolBinPath = path.join(toolPath, os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
+
     const pluginsDir: string = path.join(dest, 'cli-plugins');
     if (!fs.existsSync(pluginsDir)) {
       fs.mkdirSync(pluginsDir, {recursive: true});
     }
-    const filename: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-    const pluginPath: string = path.join(pluginsDir, filename);
-    fs.copyFileSync(toolBinPath, pluginPath);
+    const binName: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+    const pluginPath: string = path.join(pluginsDir, binName);
+    fs.copyFileSync(binPath, pluginPath);
 
     core.info('Fixing perms');
     fs.chmodSync(pluginPath, '0755');
@@ -173,21 +201,6 @@ export class Install {
     return standalone;
   }
 
-  private async fetchBinary(version: string): Promise<string> {
-    const targetFile: string = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, this.filename(version));
-    core.info(`Downloading ${downloadURL}`);
-    const downloadPath = await tc.downloadTool(downloadURL);
-    core.debug(`Install.fetchBinary downloadPath: ${downloadPath}`);
-    return await tc.cacheFile(downloadPath, targetFile, 'buildx', version, this.platform());
-  }
-
-  private platform(): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const arm_version = (process.config.variables as any).arm_version;
-    return `${os.platform()}-${os.arch()}${arm_version ? 'v' + arm_version : ''}`;
-  }
-
   private filename(version: string): string {
     let arch: string;
     switch (os.arch()) {
@@ -229,5 +242,76 @@ export class Install {
       throw new Error(`Cannot find Buildx release ${version} in ${url}`);
     }
     return releases[version];
+  }
+}
+
+class InstallCache {
+  private readonly htcName: string;
+  private readonly htcVersion: string;
+  private readonly ghaCacheKey: string;
+  private readonly cacheDir: string;
+  private readonly cacheFile: string;
+  private readonly cachePath: string;
+
+  constructor(htcName: string, htcVersion: string) {
+    this.htcName = htcName;
+    this.htcVersion = htcVersion;
+    this.ghaCacheKey = util.format('%s-%s-%s', this.htcName, this.htcVersion, this.platform());
+    this.cacheDir = path.join(Buildx.configDir, '.bin', htcVersion, this.platform());
+    this.cacheFile = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+    this.cachePath = path.join(this.cacheDir, this.cacheFile);
+    if (!fs.existsSync(this.cacheDir)) {
+      fs.mkdirSync(this.cacheDir, {recursive: true});
+    }
+  }
+
+  public async save(file: string): Promise<string> {
+    core.debug(`InstallCache.save ${file}`);
+    const cachePath = this.copyToCache(file);
+
+    const htcPath = await tc.cacheDir(this.cacheDir, this.htcName, this.htcVersion, this.platform());
+    core.debug(`InstallCache.save cached to hosted tool cache ${htcPath}`);
+
+    if (cache.isFeatureAvailable()) {
+      core.debug(`InstallCache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
+      await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+    }
+
+    return cachePath;
+  }
+
+  public async find(): Promise<string> {
+    let htcPath = tc.find(this.htcName, this.htcVersion, this.platform());
+    if (htcPath) {
+      core.info(`Restored from hosted tool cache ${htcPath}`);
+      return this.copyToCache(`${htcPath}/${this.cacheFile}`);
+    }
+
+    if (cache.isFeatureAvailable()) {
+      core.debug(`GitHub Actions cache feature available`);
+      if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
+        core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
+        htcPath = await tc.cacheDir(this.cacheDir, this.htcName, this.htcVersion, this.platform());
+        core.info(`Restored to hosted tool cache ${htcPath}`);
+        return this.copyToCache(`${htcPath}/${this.cacheFile}`);
+      }
+    } else {
+      core.info(`GitHub Actions cache feature not available`);
+    }
+
+    return '';
+  }
+
+  private copyToCache(file: string): string {
+    core.debug(`Copying ${file} to ${this.cachePath}`);
+    fs.copyFileSync(file, this.cachePath);
+    fs.chmodSync(this.cachePath, '0755');
+    return this.cachePath;
+  }
+
+  private platform(): string {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const arm_version = (process.config.variables as any).arm_version;
+    return `${os.platform()}-${os.arch()}${arm_version ? 'v' + arm_version : ''}`;
   }
 }
