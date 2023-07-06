@@ -111,4 +111,26 @@ export class Util {
     }
     return false;
   }
+
+  public static trimPrefix(str: string, suffix: string): string {
+    if (!str || !suffix) {
+      return str;
+    }
+    const index = str.indexOf(suffix);
+    if (index !== 0) {
+      return str;
+    }
+    return str.substring(suffix.length);
+  }
+
+  public static trimSuffix(str: string, suffix: string): string {
+    if (!str || !suffix) {
+      return str;
+    }
+    const index = str.lastIndexOf(suffix);
+    if (index === -1 || index + suffix.length !== str.length) {
+      return str;
+    }
+    return str.substring(0, index);
+  }
 }

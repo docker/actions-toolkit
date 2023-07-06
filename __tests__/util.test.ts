@@ -232,6 +232,41 @@ describe('isValidRef', () => {
   });
 });
 
+describe('trimPrefix', () => {
+  test.each([
+    ['', 'abc', ''],
+    ['abc', 'a', 'bc'],
+    ['abc', 'ab', 'c'],
+    ['abc', '', 'abc'],
+    ['abc', '', 'abc'],
+    ['abc', 'd', 'abc'],
+    ['abc', 'abc', ''],
+    ['abc', 'abcd', 'abc'],
+    ['abcdabc', 'abc', 'dabc'],
+    ['abcabc', 'abc', 'abc'],
+    ['abcdabc', 'd', 'abcdabc']
+  ])('given %p', async (str, prefix, expected) => {
+    expect(Util.trimPrefix(str, prefix)).toEqual(expected);
+  });
+});
+
+describe('trimSuffix', () => {
+  test.each([
+    ['', 'abc', ''],
+    ['abc', 'c', 'ab'],
+    ['abc', '', 'abc'],
+    ['abc', 'bc', 'a'],
+    ['abc', 'abc', ''],
+    ['abc', 'abcd', 'abc'],
+    ['abc', 'aabc', 'abc'],
+    ['abcdabc', 'abc', 'abcd'],
+    ['abcabc', 'abc', 'abc'],
+    ['abcdabc', 'd', 'abcdabc']
+  ])('given %p', async (str, suffix, expected) => {
+    expect(Util.trimSuffix(str, suffix)).toEqual(expected);
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
