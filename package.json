@@ -57,7 +57,7 @@
     "csv-parse": "^5.4.0",
     "handlebars": "^4.7.7",
     "jwt-decode": "^3.1.2",
-    "semver": "^7.5.3",
+    "semver": "^7.5.4",
     "tmp": "^0.2.1"
   },
   "devDependencies": {
