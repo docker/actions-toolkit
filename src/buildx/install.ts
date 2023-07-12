@@ -177,7 +177,7 @@ export class Install {
       throw new Error(`Neither buildx standalone or plugin have been found to build from ref ${gitContext}`);
     }
 
-    const args = ['build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outputDir}`];
+    const args = ['build', '--target', 'binaries', '--platform', 'local', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outputDir}`];
     if (process.env.GIT_AUTH_TOKEN) {
       args.push('--secret', 'id=GIT_AUTH_TOKEN');
     }
