@@ -19,3 +19,10 @@ export interface Cert {
   cert?: string;
   key?: string;
 }
+
+export interface DownloadVersion {
+  key: string;
+  version: string;
+  downloadURL: string;
+  releasesURL: string;
+}

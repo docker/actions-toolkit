@@ -88,12 +88,6 @@ describe('download', () => {
     },
     100000
   );
-
-  it('returns latest buildx GitHub release', async () => {
-    const release = await Install.getRelease('latest');
-    expect(release).not.toBeNull();
-    expect(release?.tag_name).not.toEqual('');
-  });
 });
 
 describe('build', () => {
@@ -116,30 +110,72 @@ describe('build', () => {
   }, 100000);
 });
 
+describe('getDownloadVersion', () => {
+  it('returns official latest download version', async () => {
+    const version = await Install.getDownloadVersion('latest');
+    expect(version.key).toEqual('official');
+    expect(version.version).toEqual('latest');
+    expect(version.downloadURL).toEqual('https://github.com/docker/buildx/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json');
+  });
+
+  it('returns official v0.10.1 download version', async () => {
+    const version = await Install.getDownloadVersion('v0.10.1');
+    expect(version.key).toEqual('official');
+    expect(version.version).toEqual('v0.10.1');
+    expect(version.downloadURL).toEqual('https://github.com/docker/buildx/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json');
+  });
+
+  it('returns lab latest download version', async () => {
+    const version = await Install.getDownloadVersion('lab:latest');
+    expect(version.key).toEqual('lab');
+    expect(version.version).toEqual('latest');
+    expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+  });
+
+  it('returns lab v0.11.2-desktop.2 download version', async () => {
+    const version = await Install.getDownloadVersion('lab:v0.11.2-desktop.2');
+    expect(version.key).toEqual('lab');
+    expect(version.version).toEqual('v0.11.2-desktop.2');
+    expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+  });
+
+  it('unknown repo', async () => {
+    await expect(Install.getDownloadVersion('foo:bar')).rejects.toThrow(new Error('Cannot find buildx version for foo:bar'));
+  });
+});
+
 describe('getRelease', () => {
-  it('returns latest buildx GitHub release', async () => {
-    const release = await Install.getRelease('latest');
+  it('returns latest official GitHub release', async () => {
+    const version = await Install.getDownloadVersion('latest');
+    const release = await Install.getRelease(version);
     expect(release).not.toBeNull();
     expect(release?.tag_name).not.toEqual('');
   });
 
-  it('returns v0.10.1 buildx GitHub release', async () => {
-    const release = await Install.getRelease('v0.10.1');
+  it('returns v0.10.1 official GitHub release', async () => {
+    const version = await Install.getDownloadVersion('v0.10.1');
+    const release = await Install.getRelease(version);
     expect(release).not.toBeNull();
     expect(release?.id).toEqual(90346950);
     expect(release?.tag_name).toEqual('v0.10.1');
     expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.10.1');
   });
 
-  it('returns v0.2.2 buildx GitHub release', async () => {
-    const release = await Install.getRelease('v0.2.2');
+  it('returns v0.11.2-desktop.2 lab GitHub release', async () => {
+    const version = await Install.getDownloadVersion('lab:v0.11.2-desktop.2');
+    const release = await Install.getRelease(version);
     expect(release).not.toBeNull();
-    expect(release?.id).toEqual(17671545);
-    expect(release?.tag_name).toEqual('v0.2.2');
-    expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.2.2');
+    expect(release?.id).toEqual(118213369);
+    expect(release?.tag_name).toEqual('v0.11.2-desktop.2');
+    expect(release?.html_url).toEqual('https://github.com/docker/buildx-desktop/releases/tag/v0.11.2-desktop.2');
   });
 
   it('unknown release', async () => {
-    await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
+    const version = await Install.getDownloadVersion('foo');
+    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
   });
 });
