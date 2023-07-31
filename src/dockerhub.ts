@@ -15,113 +15,202 @@
  */
 
 import * as core from '@actions/core';
-import * as httpm from '@actions/http-client';
-import {HttpCodes} from '@actions/http-client';
+import {HttpClient, HttpClientResponse, HttpCodes} from '@actions/http-client';
+import {GetRepositoryTagsRequest, GetRepositoryTagsResponse, GetRepositoryRequest, GetTokenResponse, RepositoryResponse, UpdateRepoDescriptionRequest} from './types/dockerhub';
 
-import {RepositoryRequest, RepositoryResponse, RepositoryTagsRequest, RepositoryTagsResponse, TokenRequest, TokenResponse, UpdateRepoDescriptionRequest} from './types/dockerhub';
+const apiBaseUrl = 'https://hub.docker.com/v2';
+const userAgent = 'docker/actions-toolkit';
+const baseHeaders = {
+  'Content-Type': 'application/json'
+};
 
-export interface DockerHubOpts {
-  credentials: TokenRequest;
+export interface DockerHubClientOptions {
+  username?: string;
+  password?: string;
+  accessToken?: string;
 }
 
-const apiBaseURL = 'https://hub.docker.com';
-const loginURL = `${apiBaseURL}/v2/users/login?refresh_token=true`;
-const repositoriesURL = `${apiBaseURL}/v2/repositories/`;
+/*
+ * A client for interacting with the Docker REST API. Not to be mixed with the
+ * engine API.
+ */
+export class DockerHubClient {
+  readonly client: HttpClient;
 
-export class DockerHub {
-  private readonly opts: DockerHubOpts;
-  private readonly httpc: httpm.HttpClient;
-
-  private constructor(opts: DockerHubOpts, httpc: httpm.HttpClient) {
-    this.opts = opts;
-    this.httpc = httpc;
+  private constructor(client: HttpClient) {
+    this.client = client;
   }
 
-  public static async build(opts: DockerHubOpts): Promise<DockerHub> {
-    return new DockerHub(
-      opts,
-      new httpm.HttpClient('docker-actions-toolkit', [], {
+  /*
+   * Returns a new DockerApiClient using a username and password/PAT or an
+   * already retrieved access token.
+   */
+  public static async new(opts: DockerHubClientOptions): Promise<DockerHubClient> {
+    const {username, password, accessToken} = opts;
+
+    // If accessToken is defined, create client and return.
+    if ((accessToken ?? '').trim() != '') {
+      const client = new HttpClient(userAgent, [], {
         headers: {
-          Authorization: `JWT ${await DockerHub.login(opts.credentials)}`,
-          'Content-Type': 'application/json'
+          ...baseHeaders,
+          Authorization: `Bearer ${accessToken}`
         }
-      })
-    );
-  }
+      });
 
-  public async getRepositoryTags(req: RepositoryTagsRequest): Promise<RepositoryTagsResponse> {
-    const url = new URL(`${repositoriesURL}${req.namespace}/${req.name}/tags`);
-    if (req.page) {
-      url.searchParams.append('page', req.page.toString());
+      return new DockerHubClient(client);
     }
-    if (req.page_size) {
-      url.searchParams.append('page_size', req.page_size.toString());
+
+    if (!username) {
+      throw new Error('DockerApiClient.new - opts.username is required');
     }
-    const resp: httpm.HttpClientResponse = await this.httpc.get(url.toString());
-    return <RepositoryTagsResponse>JSON.parse(await DockerHub.handleResponse(resp));
-  }
 
-  public async getRepositoryAllTags(req: RepositoryTagsRequest): Promise<RepositoryTagsResponse> {
-    const tags: RepositoryTagsResponse = await this.getRepositoryTags(req);
-    while (tags.next) {
-      const nextURL = new URL(tags.next);
-      const pageNumber = Number(nextURL.searchParams.get('page'));
-      const pageSize = Number(nextURL.searchParams.get('page_size')) || undefined;
-      const nextTags = await this.getRepositoryTags({
-        namespace: req.namespace,
-        name: req.name,
-        page: pageNumber,
-        page_size: pageSize || req.page_size
-      } as RepositoryTagsRequest);
-      tags.results.push(...nextTags.results);
-      tags.next = nextTags.next;
+    if (!password) {
+      throw new Error('DockerApiClient.new - opts.password is required');
     }
-    return tags;
-  }
 
-  public async getRepository(req: RepositoryRequest): Promise<RepositoryResponse> {
-    const resp: httpm.HttpClientResponse = await this.httpc.get(`${repositoriesURL}${req.namespace}/${req.name}`);
-    return <RepositoryResponse>JSON.parse(await DockerHub.handleResponse(resp));
-  }
-
-  public async updateRepoDescription(req: UpdateRepoDescriptionRequest): Promise<RepositoryResponse> {
-    const body = {
-      full_description: req.full_description
-    };
-    if (req.description) {
-      body['description'] = req.description;
-    }
-    const resp: httpm.HttpClientResponse = await this.httpc.patch(`${repositoriesURL}${req.namespace}/${req.name}`, JSON.stringify(body));
-    return <RepositoryResponse>JSON.parse(await DockerHub.handleResponse(resp));
-  }
-
-  private static async login(req: TokenRequest): Promise<string> {
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit', [], {
+    // Log in and set client based on response
+    const token = await DockerHubClient.getAccessToken(username, password);
+    const client = new HttpClient(userAgent, [], {
       headers: {
-        'Content-Type': 'application/json'
+        ...baseHeaders,
+        Authorization: `Bearer ${token}`
       }
     });
-    const resp: httpm.HttpClientResponse = await http.post(loginURL, JSON.stringify(req));
-    const tokenResp = <TokenResponse>JSON.parse(await DockerHub.handleResponse(resp));
-    core.setSecret(`${tokenResp.token}`);
-    return `${tokenResp.token}`;
+
+    return new DockerHubClient(client);
   }
 
-  private static async handleResponse(resp: httpm.HttpClientResponse): Promise<string> {
-    const body = await resp.readBody();
-    resp.message.statusCode = resp.message.statusCode || HttpCodes.InternalServerError;
-    if (resp.message.statusCode < 200 || resp.message.statusCode >= 300) {
-      if (resp.message.statusCode == HttpCodes.Unauthorized) {
-        throw new Error(`Docker Hub API: operation not permitted`);
-      }
-      const errResp = <Record<string, string>>JSON.parse(body);
-      for (const k of ['message', 'detail', 'error']) {
-        if (errResp[k]) {
-          throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}: ${errResp[k]}`);
-        }
-      }
-      throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}`);
+  /*
+   * Returns an access token using the username and password/PAT supplied.
+   */
+  public static async getAccessToken(username: string, password: string): Promise<string> {
+    const url = `${apiBaseUrl}/users/login`;
+    const client = new HttpClient(userAgent, [], {headers: baseHeaders});
+
+    if ((username ?? '').trim() == '') {
+      throw new Error('DockerApiClient.getAccessToken - username is required');
     }
-    return body;
+
+    if ((password ?? '').trim() == '') {
+      throw new Error('DockerApiClient.getAccessToken - password is required');
+    }
+
+    const rawResp = await client.post(
+      url,
+      JSON.stringify({
+        username,
+        password
+      })
+    );
+
+    const {token} = await handleResponse<GetTokenResponse>(rawResp);
+    core.setSecret(token);
+    return token;
   }
+
+  /*
+   * Returns a repository by namespace and name.
+   */
+  public async getRepository(req: GetRepositoryRequest): Promise<RepositoryResponse> {
+    validateRepoParts(req);
+
+    const url = `${apiBaseUrl}/repositories/${req.namespace}/${req.name}`;
+
+    const rawResp = await this.client.get(url);
+    return handleResponse<RepositoryResponse>(rawResp);
+  }
+
+  /*
+   * Returns repository tags by namespace and name. This is a paged call.
+   */
+  public async getRepositoryTags(req: GetRepositoryTagsRequest): Promise<GetRepositoryTagsResponse> {
+    validateRepoParts(req);
+
+    const url = new URL(`${apiBaseUrl}/repositories/${req.namespace}/${req.name}/tags`);
+
+    if (req.page !== undefined && req.page > 0) {
+      url.searchParams.append('page', req.page.toString());
+    }
+
+    if (req.page_size !== undefined && req.page_size > 0) {
+      url.searchParams.append('page_size', req.page_size.toString());
+    }
+
+    const rawResp = await this.client.get(url.toString());
+    return handleResponse<GetRepositoryTagsResponse>(rawResp);
+  }
+
+  /*
+   * Updates a repository's descriptions and returns the details.
+   */
+  public async updateRepositoryDescription(req: UpdateRepoDescriptionRequest): Promise<RepositoryResponse> {
+    validateRepoParts(req);
+
+    req.full_description = req.full_description ?? '';
+
+    if (req.full_description.trim() === '' && !req.allow_empty_full_description) {
+      throw new Error(`DockerApiClient.updateRepositoryDescription - req.full_description is empty and req.allow_empty_full_description is false`);
+    }
+
+    const body: Record<string, string> = {
+      full_description: req.full_description
+    };
+
+    if ((req.description ?? '').trim() != '') {
+      body['description'] = req.description as string;
+    }
+
+    try {
+      const rawResp = await this.client.patch(`${apiBaseUrl}/repositories/${req.namespace}/${req.name}`, JSON.stringify(body));
+
+      return handleResponse<RepositoryResponse>(rawResp);
+    } catch (e) {
+      throw new Error(`DockerApiClient.updateRepositoryTags - ${e}`);
+    }
+  }
+}
+
+export interface RepoParts {
+  namespace: string;
+  name: string;
+}
+
+export function validateRepoParts(val: RepoParts) {
+  val = val ?? {
+    namespace: '',
+    name: ''
+  };
+  val.namespace = val.namespace ?? '';
+  val.name = val.name ?? '';
+
+  if (val.namespace.trim() == '') {
+    throw new Error('req.namespace is required');
+  }
+
+  if (val.name.trim() == '') {
+    throw new Error('req.name is required');
+  }
+}
+
+async function handleResponse<T>(response: HttpClientResponse): Promise<T> {
+  const body = await response.readBody();
+
+  // Default the status code to internal.
+  const statusCode = response.message.statusCode ?? HttpCodes.InternalServerError;
+
+  if (statusCode < 200 || statusCode >= 400) {
+    const errResp = JSON.parse(body) as Record<string, string>;
+
+    for (const k of ['message', 'detail', 'error']) {
+      // We have a couple different props that can come back. Check the known
+      // ones.
+      if (errResp[k]) {
+        throw new Error(`docker api request failed: ${statusCode} ${errResp[k]}`);
+      }
+    }
+
+    throw new Error(`docker api request failed: ${statusCode} ${body}`);
+  }
+
+  return JSON.parse(body) as T;
 }

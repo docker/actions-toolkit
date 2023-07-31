@@ -279,7 +279,11 @@ export class Install {
 
   private async tearDownLinux(): Promise<void> {
     await core.group('Docker daemon logs', async () => {
-      core.info(fs.readFileSync(path.join(this.runDir, 'dockerd.log'), {encoding: 'utf8'}));
+      core.info(
+        fs.readFileSync(path.join(this.runDir, 'dockerd.log'), {
+          encoding: 'utf8'
+        })
+      );
     });
     await core.group('Stopping Docker daemon', async () => {
       await Exec.exec('sudo', ['kill', fs.readFileSync(path.join(this.runDir, 'docker.pid')).toString().trim()]);

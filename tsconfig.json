@@ -12,7 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
-    "useUnknownInCatchVariables": false,
+    "useUnknownInCatchVariables": false
   },
   "exclude": [
     "./__mocks__/**/*",

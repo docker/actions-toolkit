@@ -157,8 +157,12 @@ export class Install {
   }
 
   private async buildCommand(gitContext: string, outputDir: string): Promise<{args: Array<string>; command: string}> {
-    const buildxStandaloneFound = await new Buildx({standalone: true}).isAvailable();
-    const buildxPluginFound = await new Buildx({standalone: false}).isAvailable();
+    const buildxStandaloneFound = await new Buildx({
+      standalone: true
+    }).isAvailable();
+    const buildxPluginFound = await new Buildx({
+      standalone: false
+    }).isAvailable();
 
     let buildStandalone = false;
     if ((await this.isStandalone()) && buildxStandaloneFound) {

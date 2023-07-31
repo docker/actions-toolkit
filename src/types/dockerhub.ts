@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-export interface TokenRequest {
+export interface GetTokenRequest {
   username: string;
   password: string;
 }
 
-export interface TokenResponse {
+export interface GetTokenResponse {
   token: string;
-  detail: string;
+  detail?: string;
 }
 
-export interface RepositoryRequest {
+export interface GetRepositoryRequest {
   namespace: string;
   name: string;
 }
@@ -58,17 +58,17 @@ export interface RepositoryResponse {
   content_types: Array<string>;
 }
 
-export interface RepositoryTagsRequest {
+export interface GetRepositoryTagsRequest {
   namespace: string;
   name: string;
   page?: number;
   page_size?: number;
 }
 
-export interface RepositoryTagsResponse {
+export interface GetRepositoryTagsResponse {
   count: number;
   next?: string;
-  previous?: string;
+  previous?: string | null;
   results: Array<RepositoryTagsResult>;
 }
 
@@ -76,7 +76,7 @@ export interface RepositoryTagsResult {
   creator: number;
   id: number;
   images: Array<RepositoryTagsResultImage>;
-  last_updated: Date;
+  last_updated: string;
   last_updater: number;
   last_updater_username: string;
   name: string;
@@ -84,25 +84,25 @@ export interface RepositoryTagsResult {
   full_size: number;
   v2: boolean;
   tag_status: string;
-  tag_last_pulled: Date;
-  tag_last_pushed: Date;
+  tag_last_pulled: string;
+  tag_last_pushed: string;
   media_type: string;
   content_type: string;
-  digest: string;
+  digest?: string;
 }
 
 export interface RepositoryTagsResultImage {
   architecture: string;
   features: string;
-  variant?: string;
+  variant?: string | null;
   digest: string;
   os: string;
   os_features: string;
-  os_version?: string;
+  os_version?: string | null;
   size: number;
   status: string;
-  last_pulled: Date;
-  last_pushed: Date;
+  last_pulled: string;
+  last_pushed: string;
 }
 
 export interface UpdateRepoDescriptionRequest {
@@ -110,4 +110,5 @@ export interface UpdateRepoDescriptionRequest {
   namespace: string;
   description?: string;
   full_description: string;
+  allow_empty_full_description: boolean;
 }
