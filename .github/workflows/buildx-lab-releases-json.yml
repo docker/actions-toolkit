@@ -1,0 +1,58 @@
+name: buildx-lab-releases-json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths-ignore:
+      - '.github/*-releases.json'
+
+jobs:
+  generate:
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@6dc31870ca6c4f8489bf5a408ab38fae60f47eec
+    with:
+      repository: docker/buildx-desktop
+      artifact_name: buildx-lab-releases-json
+      filename: buildx-lab-releases.json
+    secrets: inherit
+
+  open-pr:
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'pull_request'
+    needs:
+      - generate
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Download
+        uses: actions/download-artifact@v3
+        with:
+          name: buildx-lab-releases-json
+          path: .github
+      -
+        name: Commit changes
+        run: |
+          git add -A .
+      -
+        name: Create PR
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
+        with:
+          base: main
+          branch: bot/buildx-lab-releases-json
+          commit-message: "github: update .github/buildx-lab-releases.json"
+          signoff: true
+          delete-branch: true
+          title: "Update `.github/buildx-lab-releases.json`"
+          body: |
+            Update `.github/buildx-lab-releases.json` to keep in sync with [https://github.com/docker/buildx-desktop](https://github.com/docker/buildx-desktop).
+          draft: false
