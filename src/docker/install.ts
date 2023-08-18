@@ -207,7 +207,8 @@ export class Install {
             });
         },
         {
-          retries: 5
+          retries: 10,
+          minTimeout: 1000
         }
       );
       core.info(`Docker daemon started started successfully`);
