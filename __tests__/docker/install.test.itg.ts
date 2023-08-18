@@ -26,7 +26,7 @@ const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 describe('install', () => {
   jest.retryTimes(2, {logErrorsBeforeRetry: true});
   // prettier-ignore
-  test.each(['v23.0.0'])(
+  test.each(['v24.0.5'])(
     'install docker %s', async (version) => {
       await expect((async () => {
         const install = new Install({
@@ -40,5 +40,5 @@ describe('install', () => {
         await Docker.printInfo();
         await install.tearDown();
       })()).resolves.not.toThrow();
-    });
+    }, 100000);
 });
