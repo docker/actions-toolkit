@@ -311,13 +311,17 @@ export class Install {
       core.info(fs.readFileSync(path.join(this.runDir, 'dockerd.log'), {encoding: 'utf8'}));
     });
     await core.group('Stopping Docker daemon', async () => {
-      await Exec.exec('sudo', ['kill', fs.readFileSync(path.join(this.runDir, 'docker.pid')).toString().trim()]);
+      await Exec.exec('sudo', ['kill', '-s', 'SIGTERM', fs.readFileSync(path.join(this.runDir, 'docker.pid')).toString().trim()]);
+      await Util.sleep(5);
     });
     await core.group('Removing Docker context', async () => {
       await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
     });
     await core.group(`Cleaning up runDir`, async () => {
-      await Exec.exec('sudo', ['rm', '-rf', this.runDir]);
+      await Exec.exec('sudo', ['rm', '-rf', this.runDir], {
+        ignoreReturnCode: true,
+        failOnStdErr: false
+      });
     });
   }
 

@@ -133,4 +133,8 @@ export class Util {
     }
     return str.substring(0, index);
   }
+
+  public static sleep(seconds: number) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  }
 }
