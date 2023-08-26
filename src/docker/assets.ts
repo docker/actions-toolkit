@@ -72,6 +72,7 @@ mkdir -p "$RUNDIR"
   echo "Starting dockerd"
   set -x
   exec dockerd \\
+    --debug \\
     --host="$DOCKER_HOST" \\
     --exec-root="$RUNDIR/execroot" \\
     --data-root="$RUNDIR/data" \\
