@@ -15,7 +15,7 @@
  */
 
 import path from 'path';
-import {jest, describe, expect, test} from '@jest/globals';
+import {jest, describe, expect, test, beforeEach, afterEach} from '@jest/globals';
 
 import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
@@ -24,7 +24,17 @@ import {Docker} from '../../src/docker/docker';
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 
 describe('install', () => {
-  jest.retryTimes(2, {logErrorsBeforeRetry: true});
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      SIGN_QEMU_BINARY: '1'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
   // prettier-ignore
   test.each(['v24.0.5'])(
     'install docker %s', async (version) => {
@@ -40,5 +50,5 @@ describe('install', () => {
         await Docker.printInfo();
         await install.tearDown();
       })()).resolves.not.toThrow();
-    }, 100000);
+    }, 600000);
 });

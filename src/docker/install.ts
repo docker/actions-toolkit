@@ -29,7 +29,7 @@ import * as tc from '@actions/tool-cache';
 import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
-import {colimaYamlData, dockerServiceLogsPs1, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
+import {colimaYamlData, dockerServiceLogsPs1, qemuEntitlements, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
@@ -147,6 +147,21 @@ export class Install {
       core.info(colimaCfg);
     });
 
+    const qemuArch = await Install.qemuArch();
+    await core.group('QEMU version', async () => {
+      await Exec.exec(`qemu-system-${qemuArch} --version`);
+    });
+
+    // https://github.com/abiosoft/colima/issues/786#issuecomment-1693629650
+    if (process.env.SIGN_QEMU_BINARY === '1') {
+      await core.group('Signing QEMU binary with entitlements', async () => {
+        const qemuEntitlementsFile = path.join(Context.tmpDir(), 'qemu-entitlements.xml');
+        core.info(`Writing entitlements to ${qemuEntitlementsFile}`);
+        fs.writeFileSync(qemuEntitlementsFile, qemuEntitlements);
+        await Exec.exec(`codesign --sign - --entitlements ${qemuEntitlementsFile} --force /usr/local/bin/qemu-system-${qemuArch}`);
+      });
+    }
+
     // colima is already started on the runner so env var added in download
     // method is not expanded to the running process.
     const envs = Object.assign({}, process.env, {
@@ -154,8 +169,17 @@ export class Install {
     }) as {
       [key: string]: string;
     };
+
     await core.group('Starting colima', async () => {
-      await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+      try {
+        await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+      } catch (e) {
+        const haStderrLog = path.join(os.homedir(), '.lima', 'colima', 'ha.stderr.log');
+        if (fs.existsSync(haStderrLog)) {
+          core.info(`Printing debug logs (${haStderrLog}):\n${fs.readFileSync(haStderrLog, {encoding: 'utf8'})}`);
+        }
+        throw e;
+      }
     });
 
     await core.group('Create Docker context', async () => {
@@ -367,6 +391,20 @@ export class Install {
         core.debug(`docker.Install.colimaAvailable error: ${error}`);
         return false;
       });
+  }
+
+  private static async qemuArch(): Promise<string> {
+    switch (os.arch()) {
+      case 'x64': {
+        return 'x86_64';
+      }
+      case 'arm64': {
+        return 'aarch64';
+      }
+      default: {
+        return os.arch();
+      }
+    }
   }
 
   public static async getRelease(version: string): Promise<GitHubRelease> {
