@@ -207,6 +207,7 @@ export class Install {
         }
       });
       proc.unref();
+      const retries = 20;
       await retry(
         async bail => {
           await Exec.getExecOutput(`docker version`, undefined, {
@@ -231,8 +232,11 @@ export class Install {
             });
         },
         {
-          retries: 10,
-          minTimeout: 1000
+          retries: retries,
+          minTimeout: 1000,
+          onRetry: (err, i) => {
+            core.info(`${err}. Retrying (${i}/${retries})...`);
+          }
         }
       );
       core.info(`Docker daemon started started successfully`);
