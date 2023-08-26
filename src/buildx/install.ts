@@ -32,6 +32,7 @@ import {Docker} from '../docker/docker';
 import {Git} from '../git';
 import {Util} from '../util';
 
+import {DownloadVersion} from '../types/buildx';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
@@ -50,7 +51,10 @@ export class Install {
    * @param version semver version or latest
    * @returns path to the buildx binary
    */
-  public async download(version: string): Promise<string> {
+  public async download(v: string): Promise<string> {
+    const version: DownloadVersion = await Install.getDownloadVersion(v);
+    core.debug(`Install.download version: ${version.version}`);
+
     const release: GitHubRelease = await Install.getRelease(version);
     core.debug(`Install.download release tag name: ${release.tag_name}`);
 
@@ -62,7 +66,7 @@ export class Install {
       throw new Error(`Invalid Buildx version "${vspec}".`);
     }
 
-    const installCache = new InstallCache('buildx-dl-bin', vspec);
+    const installCache = new InstallCache(version.key != 'official' ? `buildx-dl-bin-${version.key}` : 'buildx-dl-bin', vspec);
 
     const cacheFoundPath = await installCache.find();
     if (cacheFoundPath) {
@@ -70,7 +74,7 @@ export class Install {
       return cacheFoundPath;
     }
 
-    const downloadURL = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', vspec, this.filename(vspec));
+    const downloadURL = util.format(version.downloadURL, vspec, this.filename(vspec));
     core.info(`Downloading ${downloadURL}`);
 
     const htcDownloadPath = await tc.downloadTool(downloadURL);
@@ -253,20 +257,48 @@ export class Install {
     return hash;
   }
 
-  public static async getRelease(version: string): Promise<GitHubRelease> {
-    const url = `https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json`;
+  public static async getDownloadVersion(v: string): Promise<DownloadVersion> {
+    let [repoKey, version] = v.split(':');
+    if (!version) {
+      version = repoKey;
+      repoKey = 'official';
+    }
+    switch (repoKey) {
+      case 'official': {
+        return {
+          key: repoKey,
+          version: version,
+          downloadURL: 'https://github.com/docker/buildx/releases/download/v%s/%s',
+          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'
+        };
+      }
+      case 'lab': {
+        return {
+          key: repoKey,
+          version: version,
+          downloadURL: 'https://github.com/docker/buildx-desktop/releases/download/v%s/%s',
+          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json'
+        };
+      }
+      default: {
+        throw new Error(`Cannot find buildx version for ${v}`);
+      }
+    }
+  }
+
+  public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(url);
+    const resp: httpm.HttpClientResponse = await http.get(version.releasesURL);
     const body = await resp.readBody();
     const statusCode = resp.message.statusCode || 500;
     if (statusCode >= 400) {
-      throw new Error(`Failed to get Buildx release ${version} from ${url} with status code ${statusCode}: ${body}`);
+      throw new Error(`Failed to get Buildx releases from ${version.releasesURL} with status code ${statusCode}: ${body}`);
     }
     const releases = <Record<string, GitHubRelease>>JSON.parse(body);
-    if (!releases[version]) {
-      throw new Error(`Cannot find Buildx release ${version} in ${url}`);
+    if (!releases[version.version]) {
+      throw new Error(`Cannot find Buildx release ${version.version} in ${version.releasesURL}`);
     }
-    return releases[version];
+    return releases[version.version];
   }
 }
 
