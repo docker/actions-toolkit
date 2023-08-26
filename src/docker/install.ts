@@ -155,7 +155,15 @@ export class Install {
       [key: string]: string;
     };
     await core.group('Starting colima', async () => {
-      await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+      try {
+        await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+      } catch (e) {
+        const haStderrLog = path.join(os.homedir(), '.lima', 'colima', 'ha.stderr.log');
+        if (fs.existsSync(haStderrLog)) {
+          core.info(`Printing debug logs (${haStderrLog}):\n${fs.readFileSync(haStderrLog, {encoding: 'utf8'})}`);
+        }
+        throw e;
+      }
     });
 
     await core.group('Create Docker context', async () => {
