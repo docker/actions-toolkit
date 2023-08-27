@@ -29,7 +29,20 @@ describe('install', () => {
     jest.resetModules();
     process.env = {
       ...originalEnv,
-      SIGN_QEMU_BINARY: '1'
+      SIGN_QEMU_BINARY: '1',
+      COLIMA_CONFIG: `
+cpu: 1
+memory: 1
+disk: 12
+mounts:
+  - location: ~/secrets
+    writable: false
+  - location: ~/projects
+    writable: true
+env:
+  FOO: bar
+  BAZ: qux
+`
     };
   });
   afterEach(() => {

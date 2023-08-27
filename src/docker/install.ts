@@ -140,20 +140,49 @@ export class Install {
       });
     }
 
-    await core.group('Creating colima config', async () => {
-      let daemonConfig = yaml.dump({docker: {}});
-      if (this.daemonConfig) {
-        daemonConfig = yaml.dump(yaml.load(JSON.stringify({docker: JSON.parse(this.daemonConfig)})));
-      }
-      const colimaCfg = handlebars.compile(colimaYamlData)({
-        hostArch: Install.platformArch(),
-        dockerVersion: this._version,
-        dockerChannel: this.channel,
-        daemonConfig: daemonConfig
+    let colimaDaemonConfig = {};
+    if (this.daemonConfig) {
+      colimaDaemonConfig = JSON.parse(this.daemonConfig);
+    }
+
+    let colimaConfig, colimaConfigStr;
+    await core.group('Generate colima config', async () => {
+      colimaConfigStr = handlebars.compile(colimaYamlData)({
+        daemonConfig: yaml.dump(yaml.load(JSON.stringify({docker: colimaDaemonConfig}))),
+        dockerBinHostArch: Install.platformArch(),
+        dockerBinVersion: this._version,
+        dockerBinChannel: this.channel
       });
+      core.info(colimaConfigStr);
+      colimaConfig = yaml.load(colimaConfigStr);
+    });
+
+    if (process.env.COLIMA_CONFIG && process.env.COLIMA_CONFIG_FILE) {
+      throw new Error(`Cannot set both COLIMA_CONFIG and COLIMA_CONFIG_FILE`);
+    }
+
+    let colimaEnvConfig;
+    if (process.env.COLIMA_CONFIG) {
+      colimaEnvConfig = yaml.load(process.env.COLIMA_CONFIG);
+      await core.group('COLIMA_CONFIG env var set', async () => {
+        core.info(yaml.dump(colimaEnvConfig));
+      });
+    }
+    if (process.env.COLIMA_CONFIG_FILE) {
+      colimaEnvConfig = yaml.load(fs.readFileSync(process.env.COLIMA_CONFIG_FILE, {encoding: 'utf8'}));
+      await core.group('COLIMA_CONFIG_FILE env var set', async () => {
+        core.info(yaml.dump(colimaEnvConfig));
+      });
+    }
+
+    await core.group('Creating colima config', async () => {
+      if (colimaEnvConfig) {
+        colimaConfig = Object.assign(colimaConfig, colimaEnvConfig);
+      }
+      colimaConfigStr = yaml.dump(colimaConfig);
       core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
-      fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
-      core.info(colimaCfg);
+      fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaConfigStr);
+      core.info(colimaConfigStr);
     });
 
     const qemuArch = await Install.qemuArch();
