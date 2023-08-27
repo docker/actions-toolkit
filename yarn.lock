@@ -982,7 +982,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.56.0
     async-retry: ^1.3.3
     cpy-cli: ^4.2.0
-    csv-parse: ^5.4.0
+    csv-parse: ^5.5.0
     dotenv: ^16.0.3
     eslint: ^8.36.0
     eslint-config-prettier: ^8.8.0
@@ -2885,10 +2885,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-parse@npm:*, csv-parse@npm:^5.4.0":
+"csv-parse@npm:*":
   version: 5.4.0
   resolution: "csv-parse@npm:5.4.0"
   checksum: e9c2f23953f628849c476adeb9f500e9c03fcfe98fea7b732366e3c2ed0b07a5e67f32ca12a0132db6eb71601c080b4935b5921296db3625a597e24caa16f633
+  languageName: node
+  linkType: hard
+
+"csv-parse@npm:^5.5.0":
+  version: 5.5.0
+  resolution: "csv-parse@npm:5.5.0"
+  checksum: a9cc73a332debdabe9658c532e7668c626c06616113b650fb2e063f3a1451d45a48080c1942a680e8ddeaf1665efef49f126e655c54c19e025d70cccc002ff4d
   languageName: node
   linkType: hard
 
