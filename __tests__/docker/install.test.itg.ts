@@ -36,13 +36,14 @@ describe('install', () => {
     process.env = originalEnv;
   });
   // prettier-ignore
-  test.each(['v24.0.5'])(
+  test.each(['v24.0.4'])(
     'install docker %s', async (version) => {
       await expect((async () => {
         const install = new Install({
           version: version,
           runDir: tmpDir,
-          contextName: 'foo'
+          contextName: 'foo',
+          daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
         });
         await install.download();
         await install.install();
