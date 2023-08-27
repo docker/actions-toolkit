@@ -17,10 +17,6 @@
 import fs from 'fs';
 import {Context} from '../context';
 
-export const setupDockerLinuxSh = (): string => {
-  return get('docker-setup-linux.sh', setupDockerLinuxShData, '0755');
-};
-
 export const setupDockerWinPs1 = (): string => {
   return get('docker-setup-win.ps1', setupDockerWinPs1Data);
 };
@@ -45,43 +41,6 @@ const get = (filename: string, data: string, mode?: string): string => {
   return assetPath;
 };
 
-export const setupDockerLinuxShData = `
-#!/usr/bin/env bash
-
-set -eu
-
-: "\${TOOLDIR=}"
-: "\${RUNDIR=}"
-: "\${DOCKER_HOST=}"
-
-export PATH="$TOOLDIR::$PATH"
-
-if [ -z "$DOCKER_HOST" ]; then
-  echo >&2 'error: DOCKER_HOST required'
-  false
-fi
-
-if ! command -v dockerd &> /dev/null; then
-  echo >&2 'error: dockerd missing from PATH'
-  false
-fi
-
-mkdir -p "$RUNDIR"
-
-(
-  echo "Starting dockerd"
-  set -x
-  exec dockerd \\
-    --debug \\
-    --host="$DOCKER_HOST" \\
-    --exec-root="$RUNDIR/execroot" \\
-    --data-root="$RUNDIR/data" \\
-    --pidfile="$RUNDIR/docker.pid" \\
-    --userland-proxy=false \\
-    2>&1 | tee "$RUNDIR/dockerd.log"
-) &
-`;
-
 export const setupDockerWinPs1Data = `
 [CmdletBinding()]
 param(
@@ -92,7 +51,10 @@ param(
     [string]$RunDir,
 
     [Parameter(Mandatory = $true)]
-    [string]$DockerHost)
+    [string]$DockerHost,
+
+    [Parameter(Mandatory = $false)]
+    [string]$DaemonConfig)
 
 $pwver = (Get-ItemProperty -Path HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine -Name 'PowerShellVersion').PowerShellVersion
 Write-Host "PowerShell version: $pwver"
@@ -119,6 +81,12 @@ if (Get-Service docker -ErrorAction SilentlyContinue) {
 
 $env:DOCKER_HOST = $DockerHost
 Write-Host "DOCKER_HOST: $env:DOCKER_HOST"
+
+if ($DaemonConfig) {
+  Write-Host "Writing Docker daemon config"
+  New-Item -ItemType Directory -Force -Path "$env:ProgramData\\Docker\\config"
+  $DaemonConfig | Out-File -FilePath "$env:ProgramData\\Docker\\config\\daemon.json"
+}
 
 Write-Host "Creating service"
 New-Item -ItemType Directory "$RunDir\\moby-root" -ErrorAction SilentlyContinue | Out-Null
@@ -246,7 +214,7 @@ forwardAgent: false
 #
 # Colima default behaviour: buildkit enabled
 # Default: {}
-docker: {}
+{{daemonConfig}}
 
 # Virtual Machine type (qemu, vz)
 # NOTE: this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.

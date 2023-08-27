@@ -19,6 +19,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
+import yaml from 'js-yaml';
 import * as handlebars from 'handlebars';
 import * as util from 'util';
 import * as core from '@actions/core';
@@ -29,7 +30,7 @@ import * as tc from '@actions/tool-cache';
 import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
-import {colimaYamlData, dockerServiceLogsPs1, qemuEntitlements, setupDockerLinuxSh, setupDockerWinPs1} from './assets';
+import {colimaYamlData, dockerServiceLogsPs1, qemuEntitlements, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
@@ -37,6 +38,7 @@ export interface InstallOpts {
   channel?: string;
   runDir: string;
   contextName?: string;
+  daemonConfig?: string;
 }
 
 export class Install {
@@ -44,6 +46,7 @@ export class Install {
   private readonly version: string;
   private readonly channel: string;
   private readonly contextName: string;
+  private readonly daemonConfig?: string;
   private _version: string | undefined;
   private _toolDir: string | undefined;
 
@@ -52,6 +55,7 @@ export class Install {
     this.version = opts.version || 'latest';
     this.channel = opts.channel || 'stable';
     this.contextName = opts.contextName || 'setup-docker-action';
+    this.daemonConfig = opts.daemonConfig;
   }
 
   get toolDir(): string {
@@ -137,10 +141,15 @@ export class Install {
     }
 
     await core.group('Creating colima config', async () => {
+      let daemonConfig = yaml.dump({docker: {}});
+      if (this.daemonConfig) {
+        daemonConfig = yaml.dump(yaml.load(JSON.stringify({docker: JSON.parse(this.daemonConfig)})));
+      }
       const colimaCfg = handlebars.compile(colimaYamlData)({
         hostArch: Install.platformArch(),
         dockerVersion: this._version,
-        dockerChannel: this.channel
+        dockerChannel: this.channel,
+        daemonConfig: daemonConfig
       });
       core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
       fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
@@ -192,44 +201,65 @@ export class Install {
     const dockerHost = `unix://${path.join(this.runDir, 'docker.sock')}`;
     await io.mkdirP(this.runDir);
 
+    const daemonConfigPath = path.join(this.runDir, 'daemon.json');
+    await fs.writeFileSync(daemonConfigPath, '{}');
+
+    let daemonConfig = undefined;
+    const daemonConfigDefaultPath = '/etc/docker/daemon.json';
+    if (fs.existsSync(daemonConfigDefaultPath)) {
+      await core.group('Default Docker daemon config found', async () => {
+        core.info(JSON.stringify(JSON.parse(fs.readFileSync(daemonConfigDefaultPath, {encoding: 'utf8'})), null, 2));
+      });
+      daemonConfig = JSON.parse(fs.readFileSync(daemonConfigDefaultPath, {encoding: 'utf8'}));
+    }
+    if (this.daemonConfig) {
+      daemonConfig = Object.assign(daemonConfig || {}, JSON.parse(this.daemonConfig));
+    }
+
+    if (daemonConfig) {
+      const daemonConfigStr = JSON.stringify(daemonConfig, null, 2);
+      await core.group('Writing Docker daemon config', async () => {
+        fs.writeFileSync(daemonConfigPath, daemonConfigStr);
+        core.info(daemonConfigStr);
+      });
+    }
+
     await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
-      const proc = await child_process.spawn(`sudo -E ${bashPath} ${setupDockerLinuxSh()}`, [], {
-        detached: true,
-        shell: true,
-        stdio: ['ignore', process.stdout, process.stderr],
-        env: Object.assign({}, process.env, {
-          TOOLDIR: this.toolDir,
-          RUNDIR: this.runDir,
-          DOCKER_HOST: dockerHost
-        }) as {
-          [key: string]: string;
+      const cmd = `${this.toolDir}/dockerd --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid" --userland-proxy=false`;
+      core.info(`[command] ${cmd}`); // https://github.com/actions/toolkit/blob/3d652d3133965f63309e4b2e1c8852cdbdcb3833/packages/exec/src/toolrunner.ts#L47
+      const proc = await child_process.spawn(
+        // We can't use Exec.exec here because we need to detach the process to
+        // avoid killing it when the action finishes running. Even if detached,
+        // we also need to run dockerd in a subshell and unref the process so
+        // GitHub Action doesn't wait for it to finish.
+        `sudo -E ${bashPath} << EOF
+( ${cmd} 2>&1 | tee "${this.runDir}/dockerd.log" ) &
+EOF`,
+        [],
+        {
+          detached: true,
+          shell: true,
+          stdio: ['ignore', process.stdout, process.stderr]
         }
-      });
+      );
       proc.unref();
-      const retries = 20;
+      await Util.sleep(3);
+      const retries = 10;
       await retry(
         async bail => {
-          await Exec.getExecOutput(`docker version`, undefined, {
-            ignoreReturnCode: true,
-            silent: true,
-            env: Object.assign({}, process.env, {
-              DOCKER_HOST: dockerHost
-            }) as {
-              [key: string]: string;
-            }
-          })
-            .then(res => {
-              if (res.stderr.length > 0 && res.exitCode != 0) {
-                bail(new Error(res.stderr));
-                return false;
+          try {
+            await Exec.getExecOutput(`docker version`, undefined, {
+              silent: true,
+              env: Object.assign({}, process.env, {
+                DOCKER_HOST: dockerHost
+              }) as {
+                [key: string]: string;
               }
-              return res.exitCode == 0;
-            })
-            .catch(error => {
-              bail(error);
-              return false;
             });
+          } catch (e) {
+            bail(e);
+          }
         },
         {
           retries: retries,
@@ -251,11 +281,32 @@ export class Install {
   private async installWindows(): Promise<void> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
+    let daemonConfig = undefined;
+    const daemonConfigPath = path.join(this.runDir, 'daemon.json');
+    if (fs.existsSync(daemonConfigPath)) {
+      await core.group('Default Docker daemon config found', async () => {
+        core.info(JSON.stringify(JSON.parse(fs.readFileSync(daemonConfigPath, {encoding: 'utf8'})), null, 2));
+      });
+      daemonConfig = JSON.parse(fs.readFileSync(daemonConfigPath, {encoding: 'utf8'}));
+    }
+    if (this.daemonConfig) {
+      daemonConfig = Object.assign(daemonConfig || {}, JSON.parse(this.daemonConfig));
+    }
+
+    let daemonConfigStr = '{}';
+    if (daemonConfig) {
+      daemonConfigStr = JSON.stringify(daemonConfig, null, 2);
+      await core.group('Docker daemon config', async () => {
+        core.info(daemonConfigStr);
+      });
+    }
+
     await core.group('Install Docker daemon service', async () => {
       const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
         ToolDir: this.toolDir,
         RunDir: this.runDir,
-        DockerHost: dockerHost
+        DockerHost: dockerHost,
+        DaemonConfig: daemonConfigStr
       });
       await Exec.exec(setupCmd.command, setupCmd.args);
       const logCmd = await Util.powershellCommand(dockerServiceLogsPs1());
