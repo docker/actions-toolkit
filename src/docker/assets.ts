@@ -269,7 +269,11 @@ layer: false
 # Default: []
 provision:
   - mode: system
-    script: mkdir -p /tmp/docker-bins && cd /tmp/docker-bins && wget -qO- "https://download.docker.com/linux/static/{{dockerBinChannel}}/{{dockerBinHostArch}}/docker-{{dockerBinVersion}}.tgz" | tar xvz --strip 1 && mv -f /tmp/docker-bins/* /usr/bin/
+    script: |
+      mkdir -p /tmp/docker-bins
+      cd /tmp/docker-bins
+      wget -qO- "https://download.docker.com/linux/static/{{dockerBinChannel}}/{{dockerBinHostArch}}/docker-{{dockerBinVersion}}.tgz" | tar xvz --strip 1
+      mv -f /tmp/docker-bins/* /usr/bin/
 
 # Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
 # SSH config will still be generated in ~/.colima/ssh_config regardless.

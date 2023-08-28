@@ -31,9 +31,7 @@ describe('install', () => {
       ...originalEnv,
       SIGN_QEMU_BINARY: '1',
       COLIMA_CONFIG: `
-cpu: 1
-memory: 1
-disk: 12
+disk: 16
 mounts:
   - location: ~/secrets
     writable: false
