@@ -141,15 +141,15 @@ export class Install {
     }
 
     await core.group('Creating colima config', async () => {
-      let daemonConfig = yaml.dump({docker: {}});
+      let colimaDaemonConfig = {};
       if (this.daemonConfig) {
-        daemonConfig = yaml.dump(yaml.load(JSON.stringify({docker: JSON.parse(this.daemonConfig)})));
+        colimaDaemonConfig = JSON.parse(this.daemonConfig);
       }
       const colimaCfg = handlebars.compile(colimaYamlData)({
-        hostArch: Install.platformArch(),
-        dockerVersion: this._version,
-        dockerChannel: this.channel,
-        daemonConfig: daemonConfig
+        daemonConfig: yaml.dump(yaml.load(JSON.stringify({docker: colimaDaemonConfig}))),
+        dockerBinVersion: this._version,
+        dockerBinChannel: this.channel,
+        dockerBinArch: Install.platformArch()
       });
       core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
       fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
@@ -180,8 +180,12 @@ export class Install {
     };
 
     await core.group('Starting colima', async () => {
+      const colimaStartArgs = ['start', '--very-verbose'];
+      if (process.env.COLIMA_START_ARGS) {
+        colimaStartArgs.push(process.env.COLIMA_START_ARGS);
+      }
       try {
-        await Exec.exec('colima', ['start', '--very-verbose'], {env: envs});
+        await Exec.exec(`colima ${colimaStartArgs.join(' ')}`, [], {env: envs});
       } catch (e) {
         const haStderrLog = path.join(os.homedir(), '.lima', 'colima', 'ha.stderr.log');
         if (fs.existsSync(haStderrLog)) {

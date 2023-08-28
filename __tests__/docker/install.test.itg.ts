@@ -29,7 +29,8 @@ describe('install', () => {
     jest.resetModules();
     process.env = {
       ...originalEnv,
-      SIGN_QEMU_BINARY: '1'
+      SIGN_QEMU_BINARY: '1',
+      COLIMA_START_ARGS: '--cpu 4 --memory 8 --disk 32 --dns 1.1.1.1 --dns 8.8.8.8 --dns-host example.com=1.2.3.4'
     };
   });
   afterEach(() => {
