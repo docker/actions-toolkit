@@ -222,7 +222,7 @@ forwardAgent: false
 # vz is macOS virtualization framework and requires macOS 13
 #
 # Default: qemu
-vmType: qemu
+vmType: {{vmType}}
 
 # Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
 #
@@ -234,7 +234,7 @@ vmType: qemu
 # of concurrent reads or writes).
 #
 # Default: virtiofs (for vz), sshfs (for qemu)
-mountType: 9p
+mountType: {{mountType}}
 
 # The CPU type for the virtual machine (requires vmType \`qemu\`).
 # Options available for host emulation can be checked with: \`qemu-system-$(arch) -cpu help\`.

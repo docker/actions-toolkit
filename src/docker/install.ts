@@ -21,6 +21,7 @@ import path from 'path';
 import retry from 'async-retry';
 import yaml from 'js-yaml';
 import * as handlebars from 'handlebars';
+import * as semver from 'semver';
 import * as util from 'util';
 import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
@@ -134,10 +135,32 @@ export class Install {
     await io.mkdirP(colimaDir);
     const dockerHost = `unix://${colimaDir}/docker.sock`;
 
+    let macosVersion = '12.0.0'; // fallback to a version requiring QEMU with colima
+    await core.group('macOS version', async () => {
+      macosVersion = await Exec.getExecOutput(`sw_vers`, ['-productVersion'], {
+        ignoreReturnCode: true,
+        silent: true
+      }).then(res => {
+        if (res.exitCode == 0 && res.stdout.length > 0) {
+          return res.stdout.trim();
+        }
+        core.info(`sw_vers failed to get macOS version. Using ${macosVersion} as fallback.`);
+        return macosVersion;
+      });
+      core.info(macosVersion);
+    });
+
     if (!(await Install.colimaInstalled())) {
       await core.group('Installing colima', async () => {
         await Exec.exec('brew', ['install', 'colima']);
       });
+    }
+
+    let colimaVmType = 'vz';
+    let colimaMountType = 'virtiofs';
+    if (semver.satisfies(macosVersion, '<13.0.0')) {
+      colimaVmType = 'qemu';
+      colimaMountType = '9p';
     }
 
     await core.group('Creating colima config', async () => {
@@ -146,6 +169,8 @@ export class Install {
         colimaDaemonConfig = JSON.parse(this.daemonConfig);
       }
       const colimaCfg = handlebars.compile(colimaYamlData)({
+        vmType: colimaVmType,
+        mountType: colimaMountType,
         daemonConfig: yaml.dump(yaml.load(JSON.stringify({docker: colimaDaemonConfig}))),
         dockerBinVersion: this._version,
         dockerBinChannel: this.channel,
