@@ -16,6 +16,7 @@
 
 import * as child_process from 'child_process';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
@@ -184,13 +185,27 @@ export class Install {
       if (process.env.COLIMA_START_ARGS) {
         colimaStartArgs.push(process.env.COLIMA_START_ARGS);
       }
+      let colimaStartTimeout = 600; // 10 minutes
+      if (process.env.COLIMA_START_TIMEOUT) {
+        colimaStartTimeout = parseInt(process.env.COLIMA_START_TIMEOUT);
+      }
       try {
-        await Exec.exec(`colima ${colimaStartArgs.join(' ')}`, [], {env: envs});
+        const execp = Exec.exec(`colima ${colimaStartArgs.join(' ')}`, [], {env: envs});
+        const timeoutp = new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`Execution timed out after ${colimaStartTimeout * 1000} seconds. You can increase the timeout with the COLIMA_START_TIMEOUT environment variable.`));
+          }, colimaStartTimeout * 1000);
+        });
+        await Promise.race([execp, timeoutp]);
       } catch (e) {
-        const haStderrLog = path.join(os.homedir(), '.lima', 'colima', 'ha.stderr.log');
-        if (fs.existsSync(haStderrLog)) {
-          core.info(`Printing debug logs (${haStderrLog}):\n${fs.readFileSync(haStderrLog, {encoding: 'utf8'})}`);
-        }
+        const limaColimaDir = path.join(os.homedir(), '.lima', 'colima');
+        const files = await fsPromises.readdir(limaColimaDir);
+        files
+          .filter(f => path.extname(f) === '.log')
+          .forEach(f => {
+            const logfile = path.join(limaColimaDir, f);
+            core.info(`### (${logfile}):\n${fs.readFileSync(logfile, {encoding: 'utf8'})}`);
+          });
         throw e;
       }
     });
