@@ -16,6 +16,7 @@
 
 import * as child_process from 'child_process';
 import fs from 'fs';
+import fsp from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
@@ -187,10 +188,23 @@ export class Install {
       try {
         await Exec.exec(`colima ${colimaStartArgs.join(' ')}`, [], {env: envs});
       } catch (e) {
-        const haStderrLog = path.join(os.homedir(), '.lima', 'colima', 'ha.stderr.log');
-        if (fs.existsSync(haStderrLog)) {
-          core.info(`Printing debug logs (${haStderrLog}):\n${fs.readFileSync(haStderrLog, {encoding: 'utf8'})}`);
-        }
+        const limaColimaDir = path.join(os.homedir(), '.lima', 'colima');
+        fsp
+          .readdir(limaColimaDir)
+          .then(files => {
+            files
+              .filter(f => path.extname(f) === '.log')
+              .forEach(f => {
+                const logfile = path.join(limaColimaDir, f);
+                const logcontent = fs.readFileSync(logfile, {encoding: 'utf8'}).trim();
+                if (logcontent.length > 0) {
+                  core.info(`### ${logfile}:\n${logcontent}`);
+                }
+              });
+          })
+          .catch(() => {
+            // ignore
+          });
         throw e;
       }
     });
