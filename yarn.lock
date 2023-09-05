@@ -975,7 +975,7 @@ __metadata:
     "@octokit/plugin-rest-endpoint-methods": ^7.2.3
     "@types/csv-parse": ^1.2.2
     "@types/js-yaml": ^4.0.5
-    "@types/node": ^16.18.21
+    "@types/node": ^20.5.9
     "@types/semver": ^7.5.0
     "@types/tmp": ^0.2.3
     "@typescript-eslint/eslint-plugin": ^5.56.0
@@ -1879,10 +1879,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.18.21":
-  version: 16.18.21
-  resolution: "@types/node@npm:16.18.21"
-  checksum: 152e7976f30b4e599d37e5a92a0c62dbe0751a63dab1aef44a0c2db940fa6f79a23be9783886b6afe34aa20485679c6bdd7b787b304fdbb05e72326c95d2b255
+"@types/node@npm:^20.5.9":
+  version: 20.5.9
+  resolution: "@types/node@npm:20.5.9"
+  checksum: 717490e94131722144878b4ca1a963ede1673bb8f2ef78c2f5b50b918df6dc9b35e7f8283e5c2a7a9f137730f7c08dc6228e53d4494a94c9ee16881e6ce6caed
   languageName: node
   linkType: hard
 
