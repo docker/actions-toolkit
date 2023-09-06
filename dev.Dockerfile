@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG NODE_VERSION=16
+ARG NODE_VERSION=20
 ARG DOCKER_VERSION=24.0.5
 ARG BUILDX_VERSION=0.11.2
 
