@@ -15,8 +15,8 @@
 # limitations under the License.
 
 ARG NODE_VERSION=16
-ARG DOCKER_VERSION=20.10.22
-ARG BUILDX_VERSION=0.10.0
+ARG DOCKER_VERSION=24.0.5
+ARG BUILDX_VERSION=0.11.2
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
