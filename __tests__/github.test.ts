@@ -111,7 +111,10 @@ describe('actionsRuntimeToken', () => {
     }).toThrow();
   });
   it('fixture', async () => {
-    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
+    process.env.ACTIONS_RUNTIME_TOKEN = fs
+      .readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt'))
+      .toString()
+      .trim();
     const runtimeToken = GitHub.actionsRuntimeToken;
     expect(runtimeToken?.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
     expect(runtimeToken?.iss).toEqual('vstoken.actions.githubusercontent.com');
@@ -139,7 +142,10 @@ describe('printActionsRuntimeTokenACs', () => {
   });
   it('refs/heads/master', async () => {
     const infoSpy = jest.spyOn(core, 'info');
-    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt')).toString().trim();
+    process.env.ACTIONS_RUNTIME_TOKEN = fs
+      .readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt'))
+      .toString()
+      .trim();
     await GitHub.printActionsRuntimeTokenACs();
     expect(infoSpy).toHaveBeenCalledTimes(1);
     expect(infoSpy).toHaveBeenCalledWith(`refs/heads/master: read/write`);
