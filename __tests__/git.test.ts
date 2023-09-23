@@ -34,6 +34,9 @@ describe('context', () => {
         case 'git show --format=%H HEAD --quiet --':
           result = 'test-sha';
           break;
+        case 'git branch --show-current':
+          result = 'test';
+          break;
         case 'git symbolic-ref HEAD':
           result = 'refs/heads/test';
           break;
@@ -90,17 +93,76 @@ describe('remoteURL', () => {
 });
 
 describe('ref', () => {
-  it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
-    try {
-      await Git.ref();
-    } catch (err) {
-      // noop
-    }
-    expect(execSpy).toHaveBeenCalledWith(`git`, ['symbolic-ref', 'HEAD'], {
-      silent: true,
-      ignoreReturnCode: true
+  it('returns mocked ref', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = 'test';
+          break;
+        case 'git symbolic-ref HEAD':
+          result = 'refs/heads/test';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
     });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/test');
+  });
+
+  it('returns mocked detached tag ref', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD, tag: 8.0.0';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/tags/8.0.0');
+  });
+
+  it('returns mocked detached branch ref', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD, origin/test, test';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/test');
   });
 });
 

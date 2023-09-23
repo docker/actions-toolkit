@@ -89,13 +89,12 @@ export class Git {
   }
 
   public static async ref(): Promise<string> {
-    return await Git.exec(['symbolic-ref', 'HEAD']).catch(() => {
-      // if it fails (for example in a detached HEAD state), falls back to
-      // using git tag or describe to get the exact matching tag name.
-      return Git.tag().then(tag => {
-        return `refs/tags/${tag}`;
-      });
-    });
+    const isHeadDetached = await Git.isHeadDetached();
+    if (isHeadDetached) {
+      return await Git.getDetachedRef();
+    }
+
+    return await Git.exec(['symbolic-ref', 'HEAD']);
   }
 
   public static async fullCommit(): Promise<string> {
@@ -113,6 +112,37 @@ export class Git {
       }
       return tags.split('\n')[0];
     });
+  }
+
+  private static async isHeadDetached(): Promise<boolean> {
+    return await Git.exec(['branch', '--show-current']).then(res => {
+      return res.length == 0;
+    });
+  }
+
+  private static async getDetachedRef(): Promise<string> {
+    const res = await Git.exec(['show', '-s', '--pretty=%D']);
+
+    const refMatch = res.match(/^HEAD, (.*)$/);
+
+    if (!refMatch) {
+      throw new Error(`Cannot find detached HEAD ref in "${res}"`);
+    }
+
+    const ref = refMatch[1].trim();
+
+    // Tag refs are formatted as "tag: <tagname>"
+    if (ref.startsWith('tag: ')) {
+      return `refs/tags/${ref.split(':')[1].trim()}`;
+    }
+
+    // Otherwise, it's a branch "<origin>/<branch-name>, <branch-name>"
+    const branchMatch = ref.match(/^[^/]+\/[^/]+, (.+)$/);
+    if (branchMatch) {
+      return `refs/heads/${branchMatch[1].trim()}`;
+    }
+
+    throw new Error(`Unsupported detached HEAD ref in "${res}"`);
   }
 
   private static async exec(args: string[] = []): Promise<string> {
