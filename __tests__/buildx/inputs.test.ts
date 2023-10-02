@@ -186,7 +186,7 @@ describe('resolveBuildSecret', () => {
   ])('given %p key and %p env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
     try {
       const secret = Inputs.resolveBuildSecretEnv(kvp);
-      expect(secret).toEqual(`id=${exKey},env="${exValue}"`);
+      expect(secret).toEqual(`id=${exKey},env=${exValue}`);
     } catch (e) {
       // eslint-disable-next-line jest/no-conditional-expect
       expect(e.message).toEqual(error?.message);

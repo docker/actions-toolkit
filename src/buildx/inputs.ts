@@ -85,7 +85,7 @@ export class Inputs {
   public static resolveBuildSecretEnv(kvp: string): string {
     const [key, value] = parseKvp(kvp);
 
-    return `id=${key},env="${value}"`;
+    return `id=${key},env=${value}`;
   }
 
   public static resolveBuildSecret(kvp: string, file: boolean): string {
