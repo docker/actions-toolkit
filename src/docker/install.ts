@@ -436,6 +436,9 @@ EOF`,
       case 'ppc64': {
         return 'ppc64le';
       }
+      case 'arm64': {
+        return 'aarch64';
+      }
       case 'arm': {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const arm_version = (process.config.variables as any).arm_version;
