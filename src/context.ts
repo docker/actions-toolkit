@@ -23,7 +23,17 @@ import * as github from '@actions/github';
 import {GitHub} from './github';
 
 export class Context {
-  private static readonly _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
+  private static readonly _tmpDir = fs.mkdtempSync(path.join(Context._tryCreateDirctory(process.env.RUNNER_TEMP) || os.tmpdir(), 'docker-actions-toolkit-'));
+
+  private static _tryCreateDirctory(directoryPath: string | undefined): string | undefined {
+    if (directoryPath !== undefined) {
+      const createdPath = fs.mkdirSync(directoryPath, {recursive: true});
+      if (createdPath !== directoryPath) {
+        return undefined;
+      }
+    }
+    return directoryPath;
+  }
 
   public static tmpDir(): string {
     return Context._tmpDir;
