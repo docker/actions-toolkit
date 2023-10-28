@@ -18,7 +18,7 @@ import {GitHub as Octokit} from '@actions/github/lib/utils';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Context} from '@actions/github/lib/context';
-import jwt_decode from 'jwt-decode';
+import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo} from './types/github';
 
@@ -51,7 +51,7 @@ export class GitHub {
 
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
     const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
-    return token ? jwt_decode<GitHubActionsRuntimeToken>(token) : undefined;
+    return token ? (jwtDecode<JwtPayload>(token) as GitHubActionsRuntimeToken) : undefined;
   }
 
   public static async printActionsRuntimeTokenACs() {
