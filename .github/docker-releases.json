@@ -1,8 +1,14 @@
 {
   "latest": {
-    "id": 120021175,
-    "tag_name": "v24.0.6",
-    "html_url": "https://github.com/moby/moby/releases/tag/v24.0.6",
+    "id": 126933125,
+    "tag_name": "v24.0.7",
+    "html_url": "https://github.com/moby/moby/releases/tag/v24.0.7",
+    "assets": []
+  },
+  "v24.0.7": {
+    "id": 126933125,
+    "tag_name": "v24.0.7",
+    "html_url": "https://github.com/moby/moby/releases/tag/v24.0.7",
     "assets": []
   },
   "v23.0.7": {
