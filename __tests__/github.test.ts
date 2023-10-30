@@ -138,7 +138,7 @@ describe('printActionsRuntimeTokenACs', () => {
   });
   it('malformed', async () => {
     process.env.ACTIONS_RUNTIME_TOKEN = 'foo';
-    await expect(GitHub.printActionsRuntimeTokenACs()).rejects.toThrow(new Error("Cannot parse GitHub Actions Runtime Token: Invalid token specified: Cannot read properties of undefined (reading 'replace')"));
+    await expect(GitHub.printActionsRuntimeTokenACs()).rejects.toThrow(new Error('Cannot parse GitHub Actions Runtime Token: Invalid token specified: missing part #2'));
   });
   it('refs/heads/master', async () => {
     const infoSpy = jest.spyOn(core, 'info');
