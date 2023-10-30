@@ -145,7 +145,7 @@ export class Builder {
           if (value.includes('*')) {
             for (const platform of value.split(', ')) {
               if (platform.includes('*')) {
-                platforms.push(platform.replace('*', ''));
+                platforms.push(platform.replace(/\*/g, ''));
               }
             }
           } else {
