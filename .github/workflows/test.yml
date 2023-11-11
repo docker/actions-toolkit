@@ -13,6 +13,9 @@ on:
     paths-ignore:
       - '.github/*-releases.json'
 
+env:
+  NODE_VERSION: "20"
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -46,7 +49,7 @@ jobs:
         name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
       -
         name: Install
@@ -90,7 +93,7 @@ jobs:
         name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
       -
         name: Install
