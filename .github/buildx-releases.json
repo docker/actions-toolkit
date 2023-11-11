@@ -914,24 +914,6 @@
       "https://github.com/docker/buildx/releases/download/v0.6.0/buildx-v0.6.0.windows-arm64.exe"
     ]
   },
-  "v0.6.0-rc1": {
-    "id": 46230351,
-    "tag_name": "v0.6.0-rc1",
-    "html_url": "https://github.com/docker/buildx/releases/tag/v0.6.0-rc1",
-    "assets": [
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.darwin-amd64",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.darwin-arm64",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-amd64",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-arm-v6",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-arm-v7",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-arm64",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-ppc64le",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-riscv64",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.linux-s390x",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.windows-amd64.exe",
-      "https://github.com/docker/buildx/releases/download/v0.6.0-rc1/buildx-v0.6.0-rc1.windows-arm64.exe"
-    ]
-  },
   "v0.5.1": {
     "id": 35276550,
     "tag_name": "v0.5.1",
