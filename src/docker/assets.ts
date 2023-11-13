@@ -187,12 +187,6 @@ network:
   dnsHosts:
     host.docker.internal: host.lima.internal
 
-  # Network driver to use (slirp, gvproxy), (requires vmType \`qemu\`)
-  #   - slirp is the default user mode networking provided by Qemu
-  #   - gvproxy is an alternative to VPNKit based on gVisor https://github.com/containers/gvisor-tap-vsock
-  # Default: gvproxy
-  driver: gvproxy
-
 # Forward the host's SSH agent to the virtual machine.
 # Default: false
 forwardAgent: false
@@ -241,14 +235,6 @@ mountType: 9p
 # Instructions are also supported by appending to the cpu type e.g. "qemu64,+ssse3".
 # Default: host
 cpuType: host
-
-# For a more general purpose virtual machine, Ubuntu container is optionally provided
-# as a layer on the virtual machine.
-# The underlying virtual machine is still accessible via \`colima ssh --layer=false\` or running \`colima\` in
-# the Ubuntu session.
-#
-# Default: false
-layer: false
 
 # Custom provision scripts for the virtual machine.
 # Provisioning scripts are executed on startup and therefore needs to be idempotent.
