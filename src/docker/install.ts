@@ -362,7 +362,11 @@ EOF`,
 
   private async tearDownDarwin(): Promise<void> {
     await core.group('Docker daemon logs', async () => {
-      await Exec.exec('colima', ['exec', '--', 'cat', '/var/log/docker.log']);
+      await Exec.exec('colima', ['exec', '--', 'cat', '/var/log/docker.log']).catch(async () => {
+        await Exec.exec('colima', ['exec', '--', 'sudo', 'journalctl', '-u', 'docker.service', '-l', '--no-pager']).catch(() => {
+          core.warning(`Failed to get Docker daemon logs`);
+        });
+      });
     });
     await core.group('Stopping colima', async () => {
       await Exec.exec('colima', ['stop', '--very-verbose']);

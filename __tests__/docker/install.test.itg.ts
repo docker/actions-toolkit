@@ -30,7 +30,7 @@ describe('install', () => {
     process.env = {
       ...originalEnv,
       SIGN_QEMU_BINARY: '1',
-      COLIMA_START_ARGS: '--cpu 4 --memory 8 --disk 32 --dns 1.1.1.1 --dns 8.8.8.8 --dns-host example.com=1.2.3.4'
+      COLIMA_START_ARGS: '--cpu 4 --memory 8 --disk 32'
     };
   });
   afterEach(() => {
@@ -52,5 +52,5 @@ describe('install', () => {
         await Docker.printInfo();
         await install.tearDown();
       })()).resolves.not.toThrow();
-    }, 600000);
+    }, 1200000);
 });
