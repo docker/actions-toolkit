@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import path from 'path';
 import {jest, describe, expect, test, beforeEach, afterEach} from '@jest/globals';
+import path from 'path';
+import * as core from '@actions/core';
 
 import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
@@ -46,10 +47,16 @@ describe('install', () => {
           contextName: 'foo',
           daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
         });
-        await install.download();
+        await core.group('Downloading docker', async () => {
+          await install.download();
+        });
         await install.install();
-        await Docker.printVersion();
-        await Docker.printInfo();
+        await core.group('Docker version', async () => {
+          await Docker.printVersion();
+        });
+        await core.group('Docker info', async () => {
+          await Docker.printInfo();
+        });
         await install.tearDown();
       })()).resolves.not.toThrow();
     }, 1200000);

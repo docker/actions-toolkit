@@ -256,7 +256,13 @@ cpuType: host
 provision:
   - mode: system
     script: |
-      wget -qO- "https://download.docker.com/linux/static/{{dockerBinChannel}}/{{dockerBinArch}}/docker-{{dockerBinVersion}}.tgz" | tar xvz --strip 1 -C /usr/bin/
+      if [ -f ~/.install-docker ]; then
+        exit 0
+      fi
+      if [ -f /etc/alpine-release ]; then
+        wget -qO- "https://download.docker.com/linux/static/{{dockerBinChannel}}/{{dockerBinArch}}/docker-{{dockerBinVersion}}.tgz" | tar xvz --strip 1 -C /usr/bin/
+      fi
+      touch ~/.install-docker
 
 # Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
 # SSH config will still be generated in ~/.colima/ssh_config regardless.
@@ -286,7 +292,9 @@ mounts: []
 #   ANOTHER_KEY: another value
 #
 # Default: {}
-env: {}
+env:
+  DOCKER_INSTALL_CHANNEL: {{dockerBinChannel}}
+  DOCKER_INSTALL_VERSION: {{dockerBinVersion}}
 `;
 
 export const qemuEntitlements = `
