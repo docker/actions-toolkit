@@ -135,9 +135,16 @@ export class Install {
     await io.mkdirP(colimaDir);
     const dockerHost = `unix://${colimaDir}/docker.sock`;
 
+    // avoid brew to upgrade unrelated packages.
+    let envs = Object.assign({}, process.env, {
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
+    }) as {
+      [key: string]: string;
+    };
+
     if (!(await Install.colimaInstalled())) {
       await core.group('Installing colima', async () => {
-        await Exec.exec('brew', ['install', 'colima']);
+        await Exec.exec('brew', ['install', 'colima'], {env: envs});
       });
     }
 
@@ -174,7 +181,7 @@ export class Install {
 
     // colima is already started on the runner so env var added in download
     // method is not expanded to the running process.
-    const envs = Object.assign({}, process.env, {
+    envs = Object.assign({}, envs, {
       PATH: `${this.toolDir}:${process.env.PATH}`
     }) as {
       [key: string]: string;
