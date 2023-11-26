@@ -20,7 +20,6 @@ import fsp from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
-import yaml from 'js-yaml';
 import * as handlebars from 'handlebars';
 import * as util from 'util';
 import * as core from '@actions/core';
@@ -31,7 +30,7 @@ import * as tc from '@actions/tool-cache';
 import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
-import {colimaYamlData, dockerServiceLogsPs1, qemuEntitlements, setupDockerWinPs1} from './assets';
+import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
@@ -50,6 +49,8 @@ export class Install {
   private readonly daemonConfig?: string;
   private _version: string | undefined;
   private _toolDir: string | undefined;
+
+  private readonly limaInstanceName = 'docker-actions-toolkit';
 
   constructor(opts: InstallOpts) {
     this.runDir = opts.runDir;
@@ -131,30 +132,33 @@ export class Install {
   }
 
   private async installDarwin(): Promise<void> {
-    const colimaDir = path.join(os.homedir(), '.colima', 'default'); // TODO: create a custom colima profile to avoid overlap with other actions
-    await io.mkdirP(colimaDir);
-    const dockerHost = `unix://${colimaDir}/docker.sock`;
+    const limaDir = path.join(os.homedir(), '.lima', this.limaInstanceName);
+    await io.mkdirP(limaDir);
+    const dockerHost = `unix://${limaDir}/docker.sock`;
 
-    if (!(await Install.colimaInstalled())) {
-      await core.group('Installing colima', async () => {
-        await Exec.exec('brew', ['install', 'colima']);
+    if (!(await Install.limaInstalled())) {
+      await core.group('Installing lima', async () => {
+        await Exec.exec('brew', ['install', 'lima']);
       });
     }
 
-    await core.group('Creating colima config', async () => {
-      let colimaDaemonConfig = {};
+    await core.group('Creating lima config', async () => {
+      let limaDaemonConfig = {};
       if (this.daemonConfig) {
-        colimaDaemonConfig = JSON.parse(this.daemonConfig);
+        limaDaemonConfig = JSON.parse(this.daemonConfig);
       }
-      const colimaCfg = handlebars.compile(colimaYamlData)({
-        daemonConfig: yaml.dump(yaml.load(JSON.stringify({docker: colimaDaemonConfig}))),
-        dockerBinVersion: this._version,
-        dockerBinChannel: this.channel,
-        dockerBinArch: Install.platformArch()
+      handlebars.registerHelper('stringify', function (obj) {
+        return new handlebars.SafeString(JSON.stringify(obj));
       });
-      core.info(`Writing colima config to ${path.join(colimaDir, 'colima.yaml')}`);
-      fs.writeFileSync(path.join(colimaDir, 'colima.yaml'), colimaCfg);
-      core.info(colimaCfg);
+      const limaCfg = handlebars.compile(limaYamlData)({
+        daemonConfig: limaDaemonConfig,
+        dockerSock: `${limaDir}/docker.sock`,
+        dockerBinVersion: this._version,
+        dockerBinChannel: this.channel
+      });
+      core.info(`Writing lima config to ${path.join(limaDir, 'lima.yaml')}`);
+      fs.writeFileSync(path.join(limaDir, 'lima.yaml'), limaCfg);
+      core.info(limaCfg);
     });
 
     const qemuArch = await Install.qemuArch();
@@ -162,17 +166,7 @@ export class Install {
       await Exec.exec(`qemu-system-${qemuArch} --version`);
     });
 
-    // https://github.com/abiosoft/colima/issues/786#issuecomment-1693629650
-    if (process.env.SIGN_QEMU_BINARY === '1') {
-      await core.group('Signing QEMU binary with entitlements', async () => {
-        const qemuEntitlementsFile = path.join(Context.tmpDir(), 'qemu-entitlements.xml');
-        core.info(`Writing entitlements to ${qemuEntitlementsFile}`);
-        fs.writeFileSync(qemuEntitlementsFile, qemuEntitlements);
-        await Exec.exec(`codesign --sign - --entitlements ${qemuEntitlementsFile} --force /usr/local/bin/qemu-system-${qemuArch}`);
-      });
-    }
-
-    // colima is already started on the runner so env var added in download
+    // lima might already be started on the runner so env var added in download
     // method is not expanded to the running process.
     const envs = Object.assign({}, process.env, {
       PATH: `${this.toolDir}:${process.env.PATH}`
@@ -180,22 +174,21 @@ export class Install {
       [key: string]: string;
     };
 
-    await core.group('Starting colima', async () => {
-      const colimaStartArgs = ['start', '--very-verbose'];
-      if (process.env.COLIMA_START_ARGS) {
-        colimaStartArgs.push(process.env.COLIMA_START_ARGS);
+    await core.group('Starting lima instance', async () => {
+      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`, '--tty=false'];
+      if (process.env.LIMA_START_ARGS) {
+        limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
       try {
-        await Exec.exec(`colima ${colimaStartArgs.join(' ')}`, [], {env: envs});
+        await Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs});
       } catch (e) {
-        const limaColimaDir = path.join(os.homedir(), '.lima', 'colima');
         fsp
-          .readdir(limaColimaDir)
+          .readdir(limaDir)
           .then(files => {
             files
               .filter(f => path.extname(f) === '.log')
               .forEach(f => {
-                const logfile = path.join(limaColimaDir, f);
+                const logfile = path.join(limaDir, f);
                 const logcontent = fs.readFileSync(logfile, {encoding: 'utf8'}).trim();
                 if (logcontent.length > 0) {
                   core.info(`### ${logfile}:\n${logcontent}`);
@@ -362,14 +355,15 @@ EOF`,
 
   private async tearDownDarwin(): Promise<void> {
     await core.group('Docker daemon logs', async () => {
-      await Exec.exec('colima', ['exec', '--', 'cat', '/var/log/docker.log']).catch(async () => {
-        await Exec.exec('colima', ['exec', '--', 'sudo', 'journalctl', '-u', 'docker.service', '-l', '--no-pager']).catch(() => {
-          core.warning(`Failed to get Docker daemon logs`);
-        });
+      await Exec.exec('limactl', ['shell', '--tty=false', this.limaInstanceName, 'sudo', 'journalctl', '-u', 'docker.service', '-l', '--no-pager']).catch(() => {
+        core.warning(`Failed to get Docker daemon logs`);
       });
     });
-    await core.group('Stopping colima', async () => {
-      await Exec.exec('colima', ['stop', '--very-verbose']);
+    await core.group('Stopping lima instance', async () => {
+      await Exec.exec('limactl', ['stop', '--tty=false', this.limaInstanceName, '--force']);
+    });
+    await core.group('Removing lima instance', async () => {
+      await Exec.exec('limactl', ['delete', '--tty=false', this.limaInstanceName, '--force']);
     });
     await core.group('Removing Docker context', async () => {
       await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
@@ -464,15 +458,15 @@ EOF`,
     }
   }
 
-  private static async colimaInstalled(): Promise<boolean> {
+  private static async limaInstalled(): Promise<boolean> {
     return await io
-      .which('colima', true)
+      .which('lima', true)
       .then(res => {
-        core.debug(`docker.Install.colimaAvailable ok: ${res}`);
+        core.debug(`docker.Install.limaAvailable ok: ${res}`);
         return true;
       })
       .catch(error => {
-        core.debug(`docker.Install.colimaAvailable error: ${error}`);
+        core.debug(`docker.Install.limaAvailable error: ${error}`);
         return false;
       });
   }
