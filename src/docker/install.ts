@@ -136,9 +136,16 @@ export class Install {
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
 
+    // avoid brew to upgrade unrelated packages.
+    let envs = Object.assign({}, process.env, {
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
+    }) as {
+      [key: string]: string;
+    };
+
     if (!(await Install.limaInstalled())) {
       await core.group('Installing lima', async () => {
-        await Exec.exec('brew', ['install', 'lima']);
+        await Exec.exec('brew', ['install', 'lima'], {env: envs});
       });
     }
 
@@ -168,7 +175,7 @@ export class Install {
 
     // lima might already be started on the runner so env var added in download
     // method is not expanded to the running process.
-    const envs = Object.assign({}, process.env, {
+    envs = Object.assign({}, envs, {
       PATH: `${this.toolDir}:${process.env.PATH}`
     }) as {
       [key: string]: string;
