@@ -29,8 +29,7 @@ describe('install', () => {
     jest.resetModules();
     process.env = {
       ...originalEnv,
-      SIGN_QEMU_BINARY: '1',
-      COLIMA_START_ARGS: '--cpu 4 --memory 8 --disk 32'
+      LIMA_START_ARGS: '--cpus 4 --memory 8'
     };
   });
   afterEach(() => {

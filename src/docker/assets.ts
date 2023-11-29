@@ -25,8 +25,8 @@ export const dockerServiceLogsPs1 = (): string => {
   return get('docker-service-logs.ps1', dockerServiceLogsPs1Data);
 };
 
-export const colimaYaml = (): string => {
-  return get('colima.yaml', colimaYamlData);
+export const limaYaml = (): string => {
+  return get('lima.yaml', limaYamlData);
 };
 
 const get = (filename: string, data: string, mode?: string): string => {
@@ -128,174 +128,122 @@ Get-WinEvent -ea SilentlyContinue \`
     ForEach-Object {"$($_.TimeCreated.ToUniversalTime().ToString("o")) [$($_.LevelDisplayName)] $($_.Message)"}
 `;
 
-export const colimaYamlData = `
-# Number of CPUs to be allocated to the virtual machine.
-# Default: 2
-cpu: 2
-
-# Size of the disk in GiB to be allocated to the virtual machine.
-# NOTE: changing this has no effect after the virtual machine has been created.
-# Default: 60
-disk: 60
-
-# Size of the memory in GiB to be allocated to the virtual machine.
-# Default: 2
-memory: 2
-
-# Architecture of the virtual machine (x86_64, aarch64, host).
-# Default: host
-arch: host
-
-# Container runtime to be used (docker, containerd).
-# Default: docker
-runtime: docker
-
-# Kubernetes configuration for the virtual machine.
-kubernetes:
-  enabled: false
-
-# Auto-activate on the Host for client access.
-# Setting to true does the following on startup
-#  - sets as active Docker context (for Docker runtime).
-#  - sets as active Kubernetes context (if Kubernetes is enabled).
-# Default: true
-autoActivate: false
-
-# Network configurations for the virtual machine.
-network:
-  # Assign reachable IP address to the virtual machine.
-  # NOTE: this is currently macOS only and ignored on Linux.
-  # Default: false
-  address: false
-
-  # Custom DNS resolvers for the virtual machine.
-  #
-  # EXAMPLE
-  # dns: [8.8.8.8, 1.1.1.1]
-  #
-  # Default: []
-  dns: []
-
-  # DNS hostnames to resolve to custom targets using the internal resolver.
-  # This setting has no effect if a custom DNS resolver list is supplied above.
-  # It does not configure the /etc/hosts files of any machine or container.
-  # The value can be an IP address or another host.
-  #
-  # EXAMPLE
-  # dnsHosts:
-  #   example.com: 1.2.3.4
-  dnsHosts:
-    host.docker.internal: host.lima.internal
-
-# Forward the host's SSH agent to the virtual machine.
-# Default: false
-forwardAgent: false
-
-# Docker daemon configuration that maps directly to daemon.json.
-# https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file.
-# NOTE: some settings may affect Colima's ability to start docker. e.g. \`hosts\`.
-#
-# EXAMPLE - disable buildkit
-# docker:
-#   features:
-#     buildkit: false
-#
-# EXAMPLE - add insecure registries
-# docker:
-#   insecure-registries:
-#     - myregistry.com:5000
-#     - host.docker.internal:5000
-#
-# Colima default behaviour: buildkit enabled
-# Default: {}
-{{daemonConfig}}
-
-# Virtual Machine type (qemu, vz)
-# NOTE: this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
-#
-# vz is macOS virtualization framework and requires macOS 13
-#
-# Default: qemu
+export const limaYamlData = `
+# VM type: "qemu" or "vz" (on macOS 13 and later).
+# The vmType can be specified only on creating the instance.
+# The vmType of existing instances cannot be changed.
+# Builtin default: "qemu"
 vmType: qemu
 
-# Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
-#
-# virtiofs is limited to macOS and vmType \`vz\`. It is the fastest of the options.
-#
-# 9p is the recommended and the most stable option for vmType \`qemu\`.
-#
-# sshfs is faster than 9p but the least reliable of the options (when there are lots
-# of concurrent reads or writes).
-#
-# Default: virtiofs (for vz), sshfs (for qemu)
-mountType: 9p
+# OS: "Linux".
+# Builtin default: "Linux"
+os: null
 
-# The CPU type for the virtual machine (requires vmType \`qemu\`).
-# Options available for host emulation can be checked with: \`qemu-system-$(arch) -cpu help\`.
-# Instructions are also supported by appending to the cpu type e.g. "qemu64,+ssse3".
-# Default: host
-cpuType: host
+# Arch: "default", "x86_64", "aarch64".
+# Builtin default: "default" (corresponds to the host architecture)
+arch: null
 
-# Custom provision scripts for the virtual machine.
-# Provisioning scripts are executed on startup and therefore needs to be idempotent.
-#
-# EXAMPLE - script exected as root
-# provision:
-#   - mode: system
-#     script: apk add htop vim
-#
-# EXAMPLE - script exected as user
-# provision:
-#   - mode: user
-#     script: |
-#       [ -f ~/.provision ] && exit 0;
-#       echo provisioning as $USER...
-#       touch ~/.provision
-#
-# Default: []
+images:
+- location: "https://cloud-images.ubuntu.com/releases/22.04/release-20231026/ubuntu-22.04-server-cloudimg-amd64.img"
+  arch: "x86_64"
+  digest: "sha256:054db2d88c454bb0ad8dfd8883955e3946b57d2b0bf0d023f3ade3c93cdd14e5"
+- location: "https://cloud-images.ubuntu.com/releases/22.04/release-20231026/ubuntu-22.04-server-cloudimg-arm64.img"
+  arch: "aarch64"
+  digest: "sha256:eafa7742ce5ff109222ea313d31ea366d587b4e89b900b11d8285ae775dfe8c3"
+
+# CPUs
+# Builtin default: min(4, host CPU cores)
+cpus: null
+
+# Memory size
+# Builtin default: min("4GiB", half of host memory)
+memory: null
+
+# Disk size
+# Builtin default: "100GiB"
+disk: 60GiB
+
+# Expose host directories to the guest, the mount point might be accessible from all UIDs in the guest
+# Builtin default: null (Mount nothing)
+# This file: Mount the home as read-only, /tmp/lima as writable
+mounts:
+- location: "~"
+- location: "/tmp/lima"
+  writable: true
+
+# Mount type for above mounts, such as "reverse-sshfs" (from sshocker), "9p" (EXPERIMENTAL, from QEMU’s virtio-9p-pci, aka virtfs),
+# or "virtiofs" (EXPERIMENTAL, needs \`vmType: vz\`)
+# Builtin default: "reverse-sshfs" (for QEMU), "virtiofs" (for vz)
+mountType: null
+
+containerd:
+  system: false
+  user: false
+
 provision:
-  - mode: system
-    script: |
-      wget -qO- "https://download.docker.com/linux/static/{{dockerBinChannel}}/{{dockerBinArch}}/docker-{{dockerBinVersion}}.tgz" | tar xvz --strip 1 -C /usr/bin/
+- mode: system
+  # This script defines the host.docker.internal hostname when hostResolver is disabled.
+  # It is also needed for lima 0.8.2 and earlier, which does not support hostResolver.hosts.
+  # Names defined in /etc/hosts inside the VM are not resolved inside containers when
+  # using the hostResolver; use hostResolver.hosts instead (requires lima 0.8.3 or later).
+  script: |
+    #!/bin/sh
+    sed -i 's/host.lima.internal.*/host.lima.internal host.docker.internal/' /etc/hosts
+- mode: system
+  script: |
+    #!/bin/sh
+    apt-get install -f -y iptables
+- mode: system
+  script: |
+    #!/bin/bash
+    set -eux -o pipefail
+    command -v docker >/dev/null 2>&1 && exit 0
+    if [ ! -e /etc/systemd/system/docker.socket.d/override.conf ]; then
+      mkdir -p /etc/systemd/system/docker.socket.d
+      # Alternatively we could just add the user to the "docker" group, but that requires restarting the user session
+      cat <<-EOF >/etc/systemd/system/docker.socket.d/override.conf
+      [Socket]
+      SocketUser=\${LIMA_CIDATA_USER}
+    EOF
+    fi
+    if [ ! -e /etc/docker/daemon.json ]; then
+      mkdir -p /etc/docker
+      cat <<-EOF >/etc/docker/daemon.json
+      {{stringify daemonConfig}}
+    EOF
+    fi
+    export DEBIAN_FRONTEND=noninteractive
+    curl -fsSL https://get.docker.com | sh -s -- --channel {{dockerBinChannel}} --version {{dockerBinVersion}}
 
-# Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
-# SSH config will still be generated in ~/.colima/ssh_config regardless.
-# Default: true
-sshConfig: false
+probes:
+- script: |
+    #!/bin/bash
+    set -eux -o pipefail
+    if ! timeout 30s bash -c "until command -v docker >/dev/null 2>&1; do sleep 3; done"; then
+      echo >&2 "docker is not installed yet"
+      exit 1
+    fi
+    if ! timeout 30s bash -c "until pgrep dockerd; do sleep 3; done"; then
+      echo >&2 "dockerd is not running"
+      exit 1
+    fi
+  hint: See "/var/log/cloud-init-output.log". in the guest
 
-# Configure volume mounts for the virtual machine.
-# Colima mounts user's home directory by default to provide a familiar
-# user experience.
-#
-# EXAMPLE
-# mounts:
-#   - location: ~/secrets
-#     writable: false
-#   - location: ~/projects
-#     writable: true
-#
-# Colima default behaviour: $HOME and /tmp/colima are mounted as writable.
-# Default: []
-mounts: []
+hostResolver:
+  # hostResolver.hosts requires lima 0.8.3 or later. Names defined here will also
+  # resolve inside containers, and not just inside the VM itself.
+  hosts:
+    host.docker.internal: host.lima.internal
 
-# Environment variables for the virtual machine.
-#
-# EXAMPLE
-# env:
-#   KEY: value
-#   ANOTHER_KEY: another value
-#
-# Default: {}
-env: {}
-`;
+portForwards:
+- guestSocket: "/var/run/docker.sock"
+  hostSocket: "{{dockerSock}}"
 
-export const qemuEntitlements = `
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>com.apple.security.hypervisor</key>
-    <true/>
-</dict>
-</plist>
+audio:
+  # EXPERIMENTAL
+  # QEMU audiodev, e.g., "none", "coreaudio", "pa", "alsa", "oss".
+  # VZ driver, use "vz" as device name
+  # Choosing "none" will mute the audio output, and not play any sound.
+  # Builtin default: ""
+  device: none
 `;
