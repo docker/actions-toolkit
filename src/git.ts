@@ -123,13 +123,14 @@ export class Git {
   private static async getDetachedRef(): Promise<string> {
     const res = await Git.exec(['show', '-s', '--pretty=%D']);
 
-    const refMatch = res.match(/^HEAD, (.*)$/);
+    // Can be "HEAD, <tagname>" or "grafted, HEAD, <tagname>"
+    const refMatch = res.match(/^(grafted, )?HEAD, (.*)$/);
 
-    if (!refMatch) {
+    if (!refMatch || !refMatch[2]) {
       throw new Error(`Cannot find detached HEAD ref in "${res}"`);
     }
 
-    const ref = refMatch[1].trim();
+    const ref = refMatch[2].trim();
 
     // Tag refs are formatted as "tag: <tagname>"
     if (ref.startsWith('tag: ')) {
