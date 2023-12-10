@@ -19,22 +19,24 @@ import * as core from '@actions/core';
 import * as io from '@actions/io';
 import {parse} from 'csv-parse/sync';
 
-export interface InputListOpts {
+export interface ListOpts {
   ignoreComma?: boolean;
   comment?: string;
   quote?: string | boolean | Buffer | null;
 }
 
 export class Util {
-  public static getInputList(name: string, opts?: InputListOpts): string[] {
-    const res: Array<string> = [];
+  public static getInputList(name: string, opts?: ListOpts): string[] {
+    return this.getList(core.getInput(name), opts);
+  }
 
-    const items = core.getInput(name);
-    if (items == '') {
+  public static getList(input: string, opts?: ListOpts): string[] {
+    const res: Array<string> = [];
+    if (input == '') {
       return res;
     }
 
-    const records = parse(items, {
+    const records = parse(input, {
       columns: false,
       relaxQuotes: true,
       comment: opts?.comment,

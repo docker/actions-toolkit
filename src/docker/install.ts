@@ -41,6 +41,12 @@ export interface InstallOpts {
   daemonConfig?: string;
 }
 
+interface LimaImage {
+  location: string;
+  arch: string;
+  digest?: string;
+}
+
 export class Install {
   private readonly runDir: string;
   private readonly version: string;
@@ -163,6 +169,7 @@ export class Install {
         return new handlebars.SafeString(JSON.stringify(obj));
       });
       const limaCfg = handlebars.compile(limaYamlData)({
+        customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
         dockerBinVersion: this._version,
@@ -511,5 +518,26 @@ EOF`,
       throw new Error(`Cannot find Docker release ${version} in ${url}`);
     }
     return releases[version];
+  }
+
+  public static limaCustomImages(): LimaImage[] {
+    const res: LimaImage[] = [];
+    const env = process.env.LIMA_IMAGES;
+    if (!env) {
+      return res;
+    }
+    for (const input of Util.getList(env, {ignoreComma: true, comment: '#'})) {
+      const archIndex = input.indexOf(':');
+      const arch = input.substring(0, archIndex).trim();
+      const digestIndex = input.indexOf('@');
+      const location = input.substring(archIndex + 1, digestIndex !== -1 ? digestIndex : undefined).trim();
+      const digest = digestIndex !== -1 ? input.substring(digestIndex + 1).trim() : '';
+      res.push({
+        location: location,
+        arch: arch,
+        digest: digest
+      });
+    }
+    return res;
   }
 }

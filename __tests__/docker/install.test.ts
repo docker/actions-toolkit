@@ -71,3 +71,32 @@ describe('getRelease', () => {
     await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Docker release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json'));
   });
 });
+
+describe('limaImage', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      LIMA_IMAGES: `x86_64:https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-23.10-server-cloudimg-amd64.img@sha256:f6529be56da3429a56e4f5ef202bf4958201bc63f8541e478caa6e8eb712e635
+aarch64:https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-23.10-server-cloudimg-arm64.img`
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('returns custom images', async () => {
+    expect(Install.limaCustomImages()).toEqual([
+      {
+        location: 'https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-23.10-server-cloudimg-amd64.img',
+        arch: 'x86_64',
+        digest: 'sha256:f6529be56da3429a56e4f5ef202bf4958201bc63f8541e478caa6e8eb712e635'
+      },
+      {
+        location: 'https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-23.10-server-cloudimg-arm64.img',
+        arch: 'aarch64',
+        digest: ''
+      }
+    ]);
+  });
+});
