@@ -150,6 +150,10 @@ export class Install {
       });
     }
 
+    await core.group('Lima version', async () => {
+      await Exec.exec('lima', ['--version'], {env: envs});
+    });
+
     await core.group('Creating lima config', async () => {
       let limaDaemonConfig = {};
       if (this.daemonConfig) {
@@ -183,7 +187,7 @@ export class Install {
     };
 
     await core.group('Starting lima instance', async () => {
-      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`, '--tty=false'];
+      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`];
       if (process.env.LIMA_START_ARGS) {
         limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
