@@ -136,8 +136,9 @@ export class Install {
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
 
-    // avoid brew to upgrade unrelated packages.
+    // avoid brew to auto update and upgrade unrelated packages.
     let envs = Object.assign({}, process.env, {
+      HOMEBREW_NO_AUTO_UPDATE: '1',
       HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
     }) as {
       [key: string]: string;
