@@ -144,6 +144,11 @@ os: null
 arch: null
 
 images:
+{{#each customImages}}
+- location: "{{location}}"
+  arch: "{{arch}}"
+  digest: "{{digest}}"
+{{/each}}
 - location: "https://cloud-images.ubuntu.com/releases/22.04/release-20231026/ubuntu-22.04-server-cloudimg-amd64.img"
   arch: "x86_64"
   digest: "sha256:054db2d88c454bb0ad8dfd8883955e3946b57d2b0bf0d023f3ade3c93cdd14e5"

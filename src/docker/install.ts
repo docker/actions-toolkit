@@ -41,6 +41,12 @@ export interface InstallOpts {
   daemonConfig?: string;
 }
 
+interface LimaImage {
+  location: string;
+  arch: string;
+  digest?: string;
+}
+
 export class Install {
   private readonly runDir: string;
   private readonly version: string;
@@ -136,8 +142,9 @@ export class Install {
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
 
-    // avoid brew to upgrade unrelated packages.
+    // avoid brew to auto update and upgrade unrelated packages.
     let envs = Object.assign({}, process.env, {
+      HOMEBREW_NO_AUTO_UPDATE: '1',
       HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
     }) as {
       [key: string]: string;
@@ -149,6 +156,10 @@ export class Install {
       });
     }
 
+    await core.group('Lima version', async () => {
+      await Exec.exec('lima', ['--version'], {env: envs});
+    });
+
     await core.group('Creating lima config', async () => {
       let limaDaemonConfig = {};
       if (this.daemonConfig) {
@@ -158,6 +169,7 @@ export class Install {
         return new handlebars.SafeString(JSON.stringify(obj));
       });
       const limaCfg = handlebars.compile(limaYamlData)({
+        customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
         dockerBinVersion: this._version,
@@ -182,7 +194,7 @@ export class Install {
     };
 
     await core.group('Starting lima instance', async () => {
-      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`, '--tty=false'];
+      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`];
       if (process.env.LIMA_START_ARGS) {
         limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
@@ -506,5 +518,26 @@ EOF`,
       throw new Error(`Cannot find Docker release ${version} in ${url}`);
     }
     return releases[version];
+  }
+
+  public static limaCustomImages(): LimaImage[] {
+    const res: LimaImage[] = [];
+    const env = process.env.LIMA_IMAGES;
+    if (!env) {
+      return res;
+    }
+    for (const input of Util.getList(env, {ignoreComma: true, comment: '#'})) {
+      const archIndex = input.indexOf(':');
+      const arch = input.substring(0, archIndex).trim();
+      const digestIndex = input.indexOf('@');
+      const location = input.substring(archIndex + 1, digestIndex !== -1 ? digestIndex : undefined).trim();
+      const digest = digestIndex !== -1 ? input.substring(digestIndex + 1).trim() : '';
+      res.push({
+        location: location,
+        arch: arch,
+        digest: digest
+      });
+    }
+    return res;
   }
 }
