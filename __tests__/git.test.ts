@@ -165,6 +165,30 @@ describe('ref', () => {
     expect(ref).toEqual('refs/tags/8.0.0');
   });
 
+  it('returns mocked detached pull request merge ref (shallow clone)', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'grafted, HEAD, pull/221/merge';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/pull/221/merge');
+  });
+
   it('should throws an error when detached HEAD ref is not supported', async () => {
     jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;

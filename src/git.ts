@@ -137,10 +137,16 @@ export class Git {
       return `refs/tags/${ref.split(':')[1].trim()}`;
     }
 
-    // Otherwise, it's a branch "<origin>/<branch-name>, <branch-name>"
+    // Branch refs are formatted as "<origin>/<branch-name>, <branch-name>"
     const branchMatch = ref.match(/^[^/]+\/[^/]+, (.+)$/);
     if (branchMatch) {
       return `refs/heads/${branchMatch[1].trim()}`;
+    }
+
+    // Pull request merge refs are formatted as "pull/<number>/<state>"
+    const prMatch = ref.match(/^pull\/\d+\/(head|merge)$/);
+    if (prMatch) {
+      return `refs/${ref}`;
     }
 
     throw new Error(`Unsupported detached HEAD ref in "${res}"`);
