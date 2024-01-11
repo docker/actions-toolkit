@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "@actions/cache@npm:3.2.2"
+"@actions/cache@npm:^3.2.3":
+  version: 3.2.3
+  resolution: "@actions/cache@npm:3.2.3"
   dependencies:
     "@actions/core": ^1.10.0
     "@actions/exec": ^1.0.1
@@ -24,9 +24,9 @@ __metadata:
     "@azure/abort-controller": ^1.1.0
     "@azure/ms-rest-js": ^2.6.0
     "@azure/storage-blob": ^12.13.0
-    semver: ^6.1.0
+    semver: ^6.3.1
     uuid: ^3.3.3
-  checksum: 1dc43a66596b98a7d4ad9f3a3e92b24186e28a42486fac311c7f99c2883d0387a6078d76b31c5ca3af30bb2b929c6f8e5f352e315bcce4fb9cae5d5f2f1f5fad
+  checksum: 7eb475c7606d6704f5a66c0ecea1e8762dd7c799d12e888a02bb9dc51c8cebafe79788c160a2bb3aedf78640a859b7c8ea85a61ac1eea3b46916051445b339f3
   languageName: node
   linkType: hard
 
@@ -1039,7 +1039,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
-    "@actions/cache": ^3.2.2
+    "@actions/cache": ^3.2.3
     "@actions/core": ^1.10.1
     "@actions/exec": ^1.1.1
     "@actions/github": ^6.0.0
