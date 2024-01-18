@@ -5,6 +5,12 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v24.0.7",
     "assets": []
   },
+  "v25.0.0-rc.3": {
+    "id": 137464931,
+    "tag_name": "v25.0.0-rc.3",
+    "html_url": "https://github.com/moby/moby/releases/tag/v25.0.0-rc.3",
+    "assets": []
+  },
   "v25.0.0-rc.2": {
     "id": 136912066,
     "tag_name": "v25.0.0-rc.2",
