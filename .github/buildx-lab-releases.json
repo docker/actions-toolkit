@@ -45,7 +45,6 @@
     "tag_name": "v0.12.1-desktop.3",
     "html_url": "https://github.com/docker/buildx-desktop/releases/tag/v0.12.1-desktop.3",
     "assets": [
-      "https://github.com/docker/buildx-desktop/releases/download/v0.12.1-desktop.3/buildx-private.rb",
       "https://github.com/docker/buildx-desktop/releases/download/v0.12.1-desktop.3/buildx-v0.12.1-desktop.3.darwin-amd64",
       "https://github.com/docker/buildx-desktop/releases/download/v0.12.1-desktop.3/buildx-v0.12.1-desktop.3.darwin-amd64.provenance.json",
       "https://github.com/docker/buildx-desktop/releases/download/v0.12.1-desktop.3/buildx-v0.12.1-desktop.3.darwin-amd64.sbom.json",
