@@ -545,84 +545,6 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0",
     "assets": []
   },
-  "v1.13.0-rc7": {
-    "id": 5157693,
-    "tag_name": "v1.13.0-rc7",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc7",
-    "assets": []
-  },
-  "v1.13.0-rc6": {
-    "id": 5135134,
-    "tag_name": "v1.13.0-rc6",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc6",
-    "assets": []
-  },
-  "v1.12.6": {
-    "id": 5123890,
-    "tag_name": "v1.12.6",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.6",
-    "assets": []
-  },
-  "v1.13.0-rc5": {
-    "id": 5080578,
-    "tag_name": "v1.13.0-rc5",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc5",
-    "assets": []
-  },
-  "v1.13.0-rc4": {
-    "id": 4948866,
-    "tag_name": "v1.13.0-rc4",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc4",
-    "assets": []
-  },
-  "v1.12.5": {
-    "id": 4938198,
-    "tag_name": "v1.12.5",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.5",
-    "assets": []
-  },
-  "v1.12.5-rc1": {
-    "id": 4926422,
-    "tag_name": "v1.12.5-rc1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.5-rc1",
-    "assets": []
-  },
-  "v1.12.4": {
-    "id": 4901878,
-    "tag_name": "v1.12.4",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.4",
-    "assets": []
-  },
-  "v1.12.4-rc1": {
-    "id": 4863914,
-    "tag_name": "v1.12.4-rc1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.4-rc1",
-    "assets": []
-  },
-  "v1.13.0-rc3": {
-    "id": 4840704,
-    "tag_name": "v1.13.0-rc3",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc3",
-    "assets": []
-  },
-  "v1.13.0-rc2": {
-    "id": 4744761,
-    "tag_name": "v1.13.0-rc2",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc2",
-    "assets": []
-  },
-  "v1.13.0-rc1": {
-    "id": 4641203,
-    "tag_name": "v1.13.0-rc1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.13.0-rc1",
-    "assets": []
-  },
-  "v1.12.3": {
-    "id": 4495222,
-    "tag_name": "v1.12.3",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.12.3",
-    "assets": []
-  },
   "v1.12.3-rc1": {
     "id": 4481016,
     "tag_name": "v1.12.3-rc1",
@@ -749,12 +671,6 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v1.11.0-rc4",
     "assets": []
   },
-  "v1.11.0-rc3": {
-    "id": 2937939,
-    "tag_name": "v1.11.0-rc3",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.11.0-rc3",
-    "assets": []
-  },
   "v1.11.0-rc2": {
     "id": 2890861,
     "tag_name": "v1.11.0-rc2",
@@ -765,12 +681,6 @@
     "id": 2875983,
     "tag_name": "v1.11.0-rc1",
     "html_url": "https://github.com/moby/moby/releases/tag/v1.11.0-rc1",
-    "assets": []
-  },
-  "v1.10.3": {
-    "id": 2788494,
-    "tag_name": "v1.10.3",
-    "html_url": "https://github.com/moby/moby/releases/tag/v1.10.3",
     "assets": []
   },
   "v1.10.3-rc2": {
@@ -813,6 +723,18 @@
     "id": 2555659,
     "tag_name": "v1.10.0",
     "html_url": "https://github.com/moby/moby/releases/tag/v1.10.0",
+    "assets": []
+  },
+  "v1.11.0-rc3": {
+    "id": 2937939,
+    "tag_name": "v1.11.0-rc3",
+    "html_url": "https://github.com/moby/moby/releases/tag/v1.11.0-rc3",
+    "assets": []
+  },
+  "v1.10.3": {
+    "id": 2788494,
+    "tag_name": "v1.10.3",
+    "html_url": "https://github.com/moby/moby/releases/tag/v1.10.3",
     "assets": []
   },
   "v1.10.0-rc4": {
