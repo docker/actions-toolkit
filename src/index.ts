@@ -15,6 +15,7 @@
  */
 
 import * as core from '@actions/core';
+import * as cache from '@actions/cache';
 
 const isPost = !!process.env['STATE_isPost'];
 if (!isPost) {
@@ -36,7 +37,22 @@ export async function run(main: () => Promise<void>, post?: () => Promise<void>)
     } catch (e) {
       core.setFailed(e.message);
     }
-  } else if (post) {
-    await post();
+  } else {
+    if (post) {
+      await post();
+    }
+
+    // Post-step, cache any created files.
+    let cacheObj = {dir: '', key: ''};
+    try {
+      cacheObj = JSON.parse(core.getState('post-save-cache'));
+    } catch (e) {
+      // do nothing
+    }
+    if (cacheObj && cacheObj.dir && cacheObj.key) {
+      core.info(`Cache dir: ${cacheObj.dir}`);
+      core.info(`Cache with the key: ${cacheObj.key}`);
+      await cache.saveCache([cacheObj.dir], cacheObj.key);
+    }
   }
 }

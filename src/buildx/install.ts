@@ -330,8 +330,8 @@ class InstallCache {
     core.debug(`InstallCache.save cached to hosted tool cache ${htcPath}`);
 
     if (cache.isFeatureAvailable()) {
-      core.debug(`InstallCache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
-      await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+      core.debug(`InstallCache.save sending ${this.ghaCacheKey} to cache in post-action`);
+      core.saveState('post-save-cache', JSON.stringify({dir: this.cacheDir, key: this.ghaCacheKey}));
     }
 
     return cachePath;
