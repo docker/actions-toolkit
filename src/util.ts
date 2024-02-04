@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import crypto from 'crypto';
 import fs from 'fs';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
@@ -138,5 +139,9 @@ export class Util {
 
   public static sleep(seconds: number) {
     return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  }
+
+  public static hash(input: string): string {
+    return crypto.createHash('sha256').update(input).digest('hex');
   }
 }

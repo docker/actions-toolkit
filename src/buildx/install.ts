@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
-import * as cache from '@actions/cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
 import {Buildx} from './buildx';
+import {Cache} from '../cache';
 import {Context} from '../context';
 import {Exec} from '../exec';
 import {Docker} from '../docker/docker';
@@ -66,7 +65,12 @@ export class Install {
       throw new Error(`Invalid Buildx version "${vspec}".`);
     }
 
-    const installCache = new InstallCache(version.key != 'official' ? `buildx-dl-bin-${version.key}` : 'buildx-dl-bin', vspec);
+    const installCache = new Cache({
+      htcName: version.key != 'official' ? `buildx-dl-bin-${version.key}` : 'buildx-dl-bin',
+      htcVersion: vspec,
+      baseCacheDir: path.join(Buildx.configDir, '.bin'),
+      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx'
+    });
 
     const cacheFoundPath = await installCache.find();
     if (cacheFoundPath) {
@@ -94,7 +98,12 @@ export class Install {
     const vspec = await this.vspec(gitContext);
     core.debug(`Install.build vspec: ${vspec}`);
 
-    const installCache = new InstallCache('buildx-build-bin', vspec);
+    const installCache = new Cache({
+      htcName: 'buildx-build-bin',
+      htcVersion: vspec,
+      baseCacheDir: path.join(Buildx.configDir, '.bin'),
+      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx'
+    });
 
     const cacheFoundPath = await installCache.find();
     if (cacheFoundPath) {
@@ -252,7 +261,7 @@ export class Install {
 
     const [owner, repo] = baseURL.substring('https://github.com/'.length).split('/');
     const key = `${owner}/${Util.trimSuffix(repo, '.git')}/${sha}`;
-    const hash = crypto.createHash('sha256').update(key).digest('hex');
+    const hash = Util.hash(key);
     core.info(`Use ${hash} version spec cache key for ${key}`);
     return hash;
   }
@@ -299,76 +308,5 @@ export class Install {
       throw new Error(`Cannot find Buildx release ${version.version} in ${version.releasesURL}`);
     }
     return releases[version.version];
-  }
-}
-
-class InstallCache {
-  private readonly htcName: string;
-  private readonly htcVersion: string;
-  private readonly ghaCacheKey: string;
-  private readonly cacheDir: string;
-  private readonly cacheFile: string;
-  private readonly cachePath: string;
-
-  constructor(htcName: string, htcVersion: string) {
-    this.htcName = htcName;
-    this.htcVersion = htcVersion;
-    this.ghaCacheKey = util.format('%s-%s-%s', this.htcName, this.htcVersion, this.platform());
-    this.cacheDir = path.join(Buildx.configDir, '.bin', htcVersion, this.platform());
-    this.cacheFile = os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-    this.cachePath = path.join(this.cacheDir, this.cacheFile);
-    if (!fs.existsSync(this.cacheDir)) {
-      fs.mkdirSync(this.cacheDir, {recursive: true});
-    }
-  }
-
-  public async save(file: string): Promise<string> {
-    core.debug(`InstallCache.save ${file}`);
-    const cachePath = this.copyToCache(file);
-
-    const htcPath = await tc.cacheDir(this.cacheDir, this.htcName, this.htcVersion, this.platform());
-    core.debug(`InstallCache.save cached to hosted tool cache ${htcPath}`);
-
-    if (cache.isFeatureAvailable()) {
-      core.debug(`InstallCache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
-      await cache.saveCache([this.cacheDir], this.ghaCacheKey);
-    }
-
-    return cachePath;
-  }
-
-  public async find(): Promise<string> {
-    let htcPath = tc.find(this.htcName, this.htcVersion, this.platform());
-    if (htcPath) {
-      core.info(`Restored from hosted tool cache ${htcPath}`);
-      return this.copyToCache(`${htcPath}/${this.cacheFile}`);
-    }
-
-    if (cache.isFeatureAvailable()) {
-      core.debug(`GitHub Actions cache feature available`);
-      if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
-        core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
-        htcPath = await tc.cacheDir(this.cacheDir, this.htcName, this.htcVersion, this.platform());
-        core.info(`Restored to hosted tool cache ${htcPath}`);
-        return this.copyToCache(`${htcPath}/${this.cacheFile}`);
-      }
-    } else {
-      core.info(`GitHub Actions cache feature not available`);
-    }
-
-    return '';
-  }
-
-  private copyToCache(file: string): string {
-    core.debug(`Copying ${file} to ${this.cachePath}`);
-    fs.copyFileSync(file, this.cachePath);
-    fs.chmodSync(this.cachePath, '0755');
-    return this.cachePath;
-  }
-
-  private platform(): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const arm_version = (process.config.variables as any).arm_version;
-    return `${os.platform()}-${os.arch()}${arm_version ? 'v' + arm_version : ''}`;
   }
 }
