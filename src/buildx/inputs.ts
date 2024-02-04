@@ -20,6 +20,7 @@ import * as core from '@actions/core';
 import {parse} from 'csv-parse/sync';
 
 import {Context} from '../context';
+import {GitHub} from '../github';
 
 const parseKvp = (kvp: string): [string, string] => {
   const delimiterIndex = kvp.indexOf('=');
@@ -111,7 +112,7 @@ export class Inputs {
       return input;
     }
     try {
-      return core.getBooleanInput(name) ? `builder-id=${Context.provenanceBuilderID()}` : 'false';
+      return core.getBooleanInput(name) ? `builder-id=${GitHub.workflowRunURL}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
       return Inputs.resolveProvenanceAttrs(input);
@@ -120,7 +121,7 @@ export class Inputs {
 
   public static resolveProvenanceAttrs(input: string): string {
     if (!input) {
-      return `builder-id=${Context.provenanceBuilderID()}`;
+      return `builder-id=${GitHub.workflowRunURL}`;
     }
     // parse attributes from input
     const fields = parse(input, {
@@ -138,7 +139,7 @@ export class Inputs {
       }
     }
     // if not add builder-id attribute
-    return `${input},builder-id=${Context.provenanceBuilderID()}`;
+    return `${input},builder-id=${GitHub.workflowRunURL}`;
   }
 
   public static hasLocalExporter(exporters: string[]): boolean {

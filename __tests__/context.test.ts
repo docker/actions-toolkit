@@ -55,9 +55,3 @@ describe('gitContext', () => {
     expect(Context.gitContext()).toEqual('https://github.com/docker/actions-toolkit.git#refs/heads/master');
   });
 });
-
-describe('provenanceBuilderID', () => {
-  it('returns 123', async () => {
-    expect(Context.provenanceBuilderID()).toEqual('https://github.com/docker/actions-toolkit/actions/runs/123');
-  });
-});

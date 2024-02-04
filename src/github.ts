@@ -49,6 +49,10 @@ export class GitHub {
     return process.env.GITHUB_API_URL || 'https://api.github.com';
   }
 
+  static get workflowRunURL(): string {
+    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
+  }
+
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
     const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
     return token ? (jwtDecode<JwtPayload>(token) as GitHubActionsRuntimeToken) : undefined;

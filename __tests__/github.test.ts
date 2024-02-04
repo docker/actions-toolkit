@@ -89,6 +89,12 @@ describe('apiURL', () => {
   });
 });
 
+describe('workflowRunURL', () => {
+  it('returns 123', async () => {
+    expect(GitHub.workflowRunURL).toEqual('https://github.com/docker/actions-toolkit/actions/runs/123');
+  });
+});
+
 describe('actionsRuntimeToken', () => {
   const originalEnv = process.env;
   beforeEach(() => {
