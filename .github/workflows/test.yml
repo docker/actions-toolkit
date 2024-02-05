@@ -88,6 +88,12 @@ jobs:
             test: buildx/bake.test.itg.ts
           - os: windows-latest
             test: buildx/bake.test.itg.ts
+          - os: macos-13
+            test: buildx/install.test.itg.ts
+          - os: macos-latest
+            test: buildx/install.test.itg.ts
+          - os: windows-latest
+            test: buildx/install.test.itg.ts
     steps:
       -
         name: Checkout
