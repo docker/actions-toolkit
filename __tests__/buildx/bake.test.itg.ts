@@ -23,7 +23,7 @@ import {BakeDefinition} from '../../src/types/bake';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 
-const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.imageOS && process.env.imageOS.startsWith('ubuntu')) ? describe : describe.skip;
+const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
 beforeEach(() => {
   jest.clearAllMocks();

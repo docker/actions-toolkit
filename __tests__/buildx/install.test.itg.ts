@@ -19,7 +19,7 @@ import * as fs from 'fs';
 
 import {Install} from '../../src/buildx/install';
 
-const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.imageOS && process.env.imageOS.startsWith('ubuntu')) ? describe : describe.skip;
+const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
 maybe('download', () => {
   // prettier-ignore
