@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 actions-toolkit authors
+ * Copyright 2024 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-module.exports = {
-  clearMocks: true,
-  testEnvironment: 'node',
-  moduleFileExtensions: ['js', 'ts'],
-  setupFiles: ['dotenv/config'],
-  testMatch: ['**/*.test.itg.ts'],
-  testTimeout: 1800000, // 30 minutes
-  transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
-  moduleNameMapper: {
-    '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
-  },
-  testResultsProcessor: './__tests__/testResultsProcessor.ts',
-  verbose: false
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs');
+
+module.exports = results => {
+  const allSkipped = results.testResults.every(result => {
+    return result.skipped;
+  });
+  if (allSkipped) {
+    console.log('All tests were skipped!');
+    // create an empty file to signal that all tests were skipped for CI
+    fs.closeSync(fs.openSync('./coverage/allSkipped.txt', 'w'));
+  }
+  return results;
 };

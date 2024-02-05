@@ -43,5 +43,6 @@ module.exports = {
   },
   collectCoverageFrom: ['src/**/{!(index.ts),}.ts'],
   coveragePathIgnorePatterns: ['lib/', 'node_modules/', '__mocks__/', '__tests__/'],
+  testResultsProcessor: './__tests__/testResultsProcessor.ts',
   verbose: true
 };
