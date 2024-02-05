@@ -267,6 +267,12 @@ describe('trimSuffix', () => {
   });
 });
 
+describe('hash', () => {
+  it('returns 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae', async () => {
+    expect(Util.hash('foo')).toEqual('2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae');
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
