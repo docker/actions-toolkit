@@ -31,8 +31,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: Check coverage
+        run: |
+          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
+            echo "RUN_CODECOV=true" >> $GITHUB_ENV
+          else
+            echo "RUN_CODECOV=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+      -
         name: Upload coverage
         uses: codecov/codecov-action@v3
+        if: env.RUN_CODECOV == 'true'
         with:
           file: ./coverage/clover.xml
           flags: unit
@@ -101,8 +111,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: Check coverage
+        run: |
+          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
+            echo "RUN_CODECOV=true" >> $GITHUB_ENV
+          else
+            echo "RUN_CODECOV=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+      -
         name: Upload coverage
         uses: codecov/codecov-action@v3
+        if: env.RUN_CODECOV == 'true'
         with:
           file: ./coverage/clover.xml
           flags: itg
