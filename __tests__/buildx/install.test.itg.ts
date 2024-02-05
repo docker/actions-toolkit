@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {describe, expect, test} from '@jest/globals';
 import * as fs from 'fs';
-import * as path from 'path';
 
-import {Bake} from '../../src/buildx/bake';
-import {BakeDefinition} from '../../src/types/bake';
-
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+import {Install} from '../../src/buildx/install';
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.imageOS && process.env.imageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-maybe('parseDefinitions', () => {
+maybe('download', () => {
   // prettier-ignore
-  test.each([
-    [
-      ['https://github.com/docker/buildx.git#v0.10.4'],
-      ['binaries-cross'],
-      path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
-    ]
-  ])('given %p', async (sources: string[], targets: string[], out: string) => {
-    const bake = new Bake();
-    const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
-    expect(await bake.parseDefinitions(sources, targets)).toEqual(expectedDef);
-  });
+  test.each(['latest'])(
+    'install docker %s', async (version) => {
+      await expect((async () => {
+        const install = new Install({
+          standalone: true
+        });
+        const toolPath = await install.download(version);
+        if (!fs.existsSync(toolPath)) {
+          throw new Error('toolPath does not exist');
+        }
+        const binPath = await install.installStandalone(toolPath);
+        if (!fs.existsSync(binPath)) {
+          throw new Error('binPath does not exist');
+        }
+      })()).resolves.not.toThrow();
+    }, 60000);
 });

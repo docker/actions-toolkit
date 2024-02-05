@@ -81,13 +81,6 @@ jobs:
           - macos-13
           - macos-latest
           - windows-latest
-        exclude:
-          - os: macos-13
-            test: buildx/bake.test.itg.ts
-          - os: macos-latest
-            test: buildx/bake.test.itg.ts
-          - os: windows-latest
-            test: buildx/bake.test.itg.ts
     steps:
       -
         name: Checkout
@@ -103,7 +96,8 @@ jobs:
         run: yarn install
       -
         name: Test
-        run: yarn test:itg-coverage --runTestsByPath __tests__/${{ matrix.test }} --coverageDirectory=./coverage
+        run: |
+          yarn test:itg-coverage --runTestsByPath __tests__/${{ matrix.test }} --coverageDirectory=./coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
