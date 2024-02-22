@@ -46,6 +46,7 @@ jobs:
         with:
           file: ./coverage/clover.xml
           flags: unit
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   prepare-itg:
     runs-on: ubuntu-latest
@@ -126,3 +127,4 @@ jobs:
         with:
           file: ./coverage/clover.xml
           flags: itg
+          token: ${{ secrets.CODECOV_TOKEN }}
