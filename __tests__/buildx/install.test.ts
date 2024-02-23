@@ -67,6 +67,17 @@ describe('download', () => {
     expect(fs.existsSync(toolPath)).toBe(true);
   });
 
+  // prettier-ignore
+  test.each([
+    ['v0.11.2'],
+    ['v0.12.0'],
+  ])(
+  'acquires %p of buildx without cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version, true);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  });
+
   // TODO: add tests for arm
   // prettier-ignore
   test.each([
