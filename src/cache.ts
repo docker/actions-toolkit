@@ -27,17 +27,20 @@ export interface CacheOpts {
   htcVersion: string;
   baseCacheDir: string;
   cacheFile: string;
+  ghaNoCache?: boolean;
 }
 
 export class Cache {
   private readonly opts: CacheOpts;
   private readonly ghaCacheKey: string;
+  private readonly ghaNoCache?: boolean;
   private readonly cacheDir: string;
   private readonly cachePath: string;
 
   constructor(opts: CacheOpts) {
     this.opts = opts;
     this.ghaCacheKey = util.format('%s-%s-%s', this.opts.htcName, this.opts.htcVersion, this.platform());
+    this.ghaNoCache = this.opts.ghaNoCache;
     this.cacheDir = path.join(this.opts.baseCacheDir, this.opts.htcVersion, this.platform());
     this.cachePath = path.join(this.cacheDir, this.opts.cacheFile);
     if (!fs.existsSync(this.cacheDir)) {
@@ -52,7 +55,7 @@ export class Cache {
     const htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
     core.debug(`Cache.save cached to hosted tool cache ${htcPath}`);
 
-    if (cache.isFeatureAvailable()) {
+    if (!this.ghaNoCache && cache.isFeatureAvailable()) {
       core.debug(`Cache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
       await cache.saveCache([this.cacheDir], this.ghaCacheKey);
     }
@@ -67,7 +70,7 @@ export class Cache {
       return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
     }
 
-    if (cache.isFeatureAvailable()) {
+    if (!this.ghaNoCache && cache.isFeatureAvailable()) {
       core.debug(`GitHub Actions cache feature available`);
       if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
         core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
@@ -75,6 +78,8 @@ export class Cache {
         core.info(`Restored to hosted tool cache ${htcPath}`);
         return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
       }
+    } else if (this.ghaNoCache) {
+      core.info(`GitHub Actions cache disabled`);
     } else {
       core.info(`GitHub Actions cache feature not available`);
     }

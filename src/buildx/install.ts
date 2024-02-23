@@ -47,10 +47,11 @@ export class Install {
 
   /*
    * Download buildx binary from GitHub release
-   * @param version semver version or latest
+   * @param v: version semver version or latest
+   * @param ghaNoCache: disable binary caching in GitHub Actions cache backend
    * @returns path to the buildx binary
    */
-  public async download(v: string): Promise<string> {
+  public async download(v: string, ghaNoCache?: boolean): Promise<string> {
     const version: DownloadVersion = await Install.getDownloadVersion(v);
     core.debug(`Install.download version: ${version.version}`);
 
@@ -69,7 +70,8 @@ export class Install {
       htcName: version.key != 'official' ? `buildx-dl-bin-${version.key}` : 'buildx-dl-bin',
       htcVersion: vspec,
       baseCacheDir: path.join(Buildx.configDir, '.bin'),
-      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx'
+      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx',
+      ghaNoCache: ghaNoCache
     });
 
     const cacheFoundPath = await installCache.find();
@@ -91,10 +93,11 @@ export class Install {
 
   /*
    * Build buildx binary from source
-   * @param gitContext git repo context
+   * @param gitContext: git repo context
+   * @param ghaNoCache: disable binary caching in GitHub Actions cache backend
    * @returns path to the buildx binary
    */
-  public async build(gitContext: string): Promise<string> {
+  public async build(gitContext: string, ghaNoCache?: boolean): Promise<string> {
     const vspec = await this.vspec(gitContext);
     core.debug(`Install.build vspec: ${vspec}`);
 
@@ -102,7 +105,8 @@ export class Install {
       htcName: 'buildx-build-bin',
       htcVersion: vspec,
       baseCacheDir: path.join(Buildx.configDir, '.bin'),
-      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx'
+      cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx',
+      ghaNoCache: ghaNoCache
     });
 
     const cacheFoundPath = await installCache.find();
