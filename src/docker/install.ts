@@ -111,7 +111,7 @@ export class Install {
     return tooldir;
   }
 
-  public async install(): Promise<void> {
+  public async install(): Promise<string> {
     if (!this.toolDir) {
       throw new Error('toolDir must be set. Run download first.');
     }
@@ -120,16 +120,13 @@ export class Install {
     }
     switch (os.platform()) {
       case 'darwin': {
-        await this.installDarwin();
-        break;
+        return await this.installDarwin();
       }
       case 'linux': {
-        await this.installLinux();
-        break;
+        return await this.installLinux();
       }
       case 'win32': {
-        await this.installWindows();
-        break;
+        return await this.installWindows();
       }
       default: {
         throw new Error(`Unsupported platform: ${os.platform()}`);
@@ -137,7 +134,7 @@ export class Install {
     }
   }
 
-  private async installDarwin(): Promise<void> {
+  private async installDarwin(): Promise<string> {
     const limaDir = path.join(os.homedir(), '.lima', this.limaInstanceName);
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
@@ -225,9 +222,11 @@ export class Install {
       await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
       await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
+
+    return dockerHost;
   }
 
-  private async installLinux(): Promise<void> {
+  private async installLinux(): Promise<string> {
     const dockerHost = `unix://${path.join(this.runDir, 'docker.sock')}`;
     await io.mkdirP(this.runDir);
 
@@ -306,9 +305,11 @@ EOF`,
       await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
       await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
+
+    return dockerHost;
   }
 
-  private async installWindows(): Promise<void> {
+  private async installWindows(): Promise<string> {
     const dockerHost = 'npipe:////./pipe/setup_docker_action';
 
     let daemonConfig = undefined;
@@ -347,6 +348,8 @@ EOF`,
       await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
       await Exec.exec('docker', ['context', 'use', this.contextName]);
     });
+
+    return dockerHost;
   }
 
   public async tearDown(): Promise<void> {
