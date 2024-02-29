@@ -1047,7 +1047,7 @@ __metadata:
     "@actions/io": ^1.1.3
     "@actions/tool-cache": ^2.0.1
     "@octokit/core": ^5.1.0
-    "@octokit/plugin-rest-endpoint-methods": ^10.4.0
+    "@octokit/plugin-rest-endpoint-methods": ^11.0.1
     "@types/csv-parse": ^1.2.2
     "@types/js-yaml": ^4.0.5
     "@types/node": ^20.5.9
@@ -1703,14 +1703,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-rest-endpoint-methods@npm:^10.4.0":
-  version: 10.4.0
-  resolution: "@octokit/plugin-rest-endpoint-methods@npm:10.4.0"
+"@octokit/plugin-rest-endpoint-methods@npm:^11.0.1":
+  version: 11.0.1
+  resolution: "@octokit/plugin-rest-endpoint-methods@npm:11.0.1"
   dependencies:
     "@octokit/types": ^12.6.0
   peerDependencies:
-    "@octokit/core": ">=5"
-  checksum: 8ee155825c7ea1dd2991a50d5b3f205988b8ea19af4bebbd91c55bb7b78c4e2215956d578671496a4a86df19ff2d5405ce37ee35c9c6c188dc9a199c045c30be
+    "@octokit/core": ">=6"
+  checksum: 0926222da62b0bd11b3d341c666a80083b892eff0ebd2a759818bc0bde20993bbf86933ed95ff262b450abfce96ae68abf19ad172b63af105ee2b01a8477f9bc
   languageName: node
   linkType: hard
 
