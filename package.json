@@ -59,7 +59,7 @@
     "handlebars": "^4.7.8",
     "jwt-decode": "^4.0.0",
     "semver": "^7.5.4",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.2"
   },
   "devDependencies": {
     "@types/csv-parse": "^1.2.2",
