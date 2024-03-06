@@ -191,6 +191,12 @@ ccccccccc`,
       'FOO=bar'
     ]);
   });
+
+  it('keep quotes', async () => {
+    const output = `type=image,"name=ghcr.io/nginxinc/nginx-unprivileged,docker.io/nginxinc/nginx-unprivileged",push-by-digest=true,name-canonical=true,push=true`;
+    setInput('outputs', output);
+    expect(Util.getInputList('outputs', {ignoreComma: true, quote: false})).toEqual([output]);
+  });
 });
 
 describe('asyncForEach', () => {
