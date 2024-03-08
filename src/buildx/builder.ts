@@ -149,6 +149,10 @@ export class Builder {
           currentNode.platforms = platforms.join(',');
           break;
         }
+        case lkey == 'features':
+          parsingType = 'features';
+          currentNode.features = {};
+          break;
         case lkey == 'labels':
           parsingType = 'label';
           currentNode.labels = {};
@@ -162,6 +166,11 @@ export class Builder {
           break;
         default: {
           switch (parsingType || '') {
+            case 'features': {
+              currentNode.features = currentNode.features || {};
+              currentNode.features[key.trim()] = Boolean(value);
+              break;
+            }
             case 'label': {
               currentNode.labels = currentNode.labels || {};
               currentNode.labels[key.trim()] = value;

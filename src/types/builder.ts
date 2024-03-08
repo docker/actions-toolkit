@@ -32,6 +32,7 @@ export interface Node {
 export interface NodeInfo extends Node {
   status?: string;
   buildkit?: string;
+  features?: Record<string, boolean>;
   labels?: Record<string, string>;
   gcPolicy?: Array<GCPolicy>;
 }

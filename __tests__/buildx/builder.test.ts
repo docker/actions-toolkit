@@ -415,6 +415,12 @@ describe('parseInspect', () => {
            "name": "builder0",
            "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6",
            "status": "running",
+           "features": {
+             "Cache export": true,
+             "Docker exporter": true,
+             "Multi-platform build": true,
+             "OCI exporter": true,
+           },
            "labels": {
              "org.mobyproject.buildkit.worker.executor": "oci",
              "org.mobyproject.buildkit.worker.hostname": "docker-desktop",
