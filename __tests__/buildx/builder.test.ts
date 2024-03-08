@@ -393,7 +393,65 @@ describe('parseInspect', () => {
           }
         ],
       }
-    ]
+    ],
+    [
+     'inspect11.txt',
+     {
+       "name": "builder",
+       "driver": "docker-container",
+       "lastActivity": new Date("2024-03-01T14:25:03.000Z"),
+       "nodes": [
+         {
+           "buildkit": "37657a1",
+           "buildkitd-flags": "--debug --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host --allow-insecure-entitlement=network.host",
+           "driver-opts": [
+             "env.JAEGER_TRACE=localhost:6831",
+             "image=moby/buildkit:master",
+             "network=host",
+             "env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760",
+             "env.BUILDKIT_STEP_LOG_MAX_SPEED=10485760",
+           ],
+           "endpoint": "unix:///var/run/docker.sock",
+           "name": "builder0",
+           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6",
+           "status": "running",
+           "labels": {
+             "org.mobyproject.buildkit.worker.executor": "oci",
+             "org.mobyproject.buildkit.worker.hostname": "docker-desktop",
+             "org.mobyproject.buildkit.worker.network": "host",
+             "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+             "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+             "org.mobyproject.buildkit.worker.snapshotter": "overlayfs",
+           },
+           "gcPolicy": [
+             {
+               "all": false,
+               "filter": [
+                 "type==source.local",
+                 "type==exec.cachemount",
+                 "type==source.git.checkout"
+               ],
+               "keepDuration": "48h0m0s",
+               "keepBytes": "488.3MiB",
+             },
+             {
+               "all": false,
+               "keepDuration": "1440h0m0s",
+               "keepBytes": "94.06GiB",
+             },
+             {
+               "all": false,
+               "keepBytes": "94.06GiB",
+             },
+             {
+               "all": true,
+               "keepBytes": "94.06GiB",
+             }
+           ]
+         }
+       ]
+     }
+    ],
   ])('given %p', async (inspectFile, expected) => {
     expect(await Builder.parseInspect(fs.readFileSync(path.join(fixturesDir, inspectFile)).toString())).toEqual(expected);
   });
