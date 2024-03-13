@@ -89,7 +89,7 @@ jobs:
         test: ${{ fromJson(needs.prepare-itg.outputs.matrix) }}
         os:
           - ubuntu-latest
-          - macos-13
+          #- macos-13  # https://github.com/docker/actions-toolkit/issues/279
           - macos-latest
           - windows-latest
     steps:
