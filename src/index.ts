@@ -16,6 +16,8 @@
 
 import * as core from '@actions/core';
 
+import {Cache} from './cache';
+
 const isPost = !!process.env['STATE_isPost'];
 if (!isPost) {
   core.saveState('isPost', 'true');
@@ -36,7 +38,10 @@ export async function run(main: () => Promise<void>, post?: () => Promise<void>)
     } catch (e) {
       core.setFailed(e.message);
     }
-  } else if (post) {
-    await post();
+  } else {
+    if (post) {
+      await post();
+    }
+    await Cache.post();
   }
 }
