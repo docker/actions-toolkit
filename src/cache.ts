@@ -103,7 +103,7 @@ export class Cache {
   public static async post(): Promise<CachePostState | undefined> {
     const state = core.getState(Cache.POST_CACHE_KEY);
     if (!state) {
-      core.debug(`Cache.post no state`);
+      core.info(`State not set`);
       return Promise.resolve(undefined);
     }
     let cacheState: CachePostState;

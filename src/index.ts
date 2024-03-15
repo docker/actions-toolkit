@@ -42,6 +42,8 @@ export async function run(main: () => Promise<void>, post?: () => Promise<void>)
     if (post) {
       await post();
     }
-    await Cache.post();
+    await core.group(`Post cache`, async () => {
+      await Cache.post();
+    });
   }
 }
