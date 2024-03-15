@@ -30,12 +30,19 @@ export interface CacheOpts {
   ghaNoCache?: boolean;
 }
 
+export interface CachePostState {
+  dir: string;
+  key: string;
+}
+
 export class Cache {
   private readonly opts: CacheOpts;
   private readonly ghaCacheKey: string;
   private readonly ghaNoCache?: boolean;
   private readonly cacheDir: string;
   private readonly cachePath: string;
+
+  private static readonly POST_CACHE_KEY = 'postCache';
 
   constructor(opts: CacheOpts) {
     this.opts = opts;
@@ -56,8 +63,14 @@ export class Cache {
     core.debug(`Cache.save cached to hosted tool cache ${htcPath}`);
 
     if (!this.ghaNoCache && cache.isFeatureAvailable()) {
-      core.debug(`Cache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
-      await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+      core.debug(`Cache.save sending ${this.ghaCacheKey} to post state`);
+      core.saveState(
+        Cache.POST_CACHE_KEY,
+        JSON.stringify({
+          dir: this.cacheDir,
+          key: this.ghaCacheKey
+        } as CachePostState)
+      );
     }
 
     return cachePath;
@@ -75,7 +88,7 @@ export class Cache {
       if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
         core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
         htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
-        core.info(`Restored to hosted tool cache ${htcPath}`);
+        core.info(`Cached to hosted tool cache ${htcPath}`);
         return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
       }
     } else if (this.ghaNoCache) {
@@ -85,6 +98,26 @@ export class Cache {
     }
 
     return '';
+  }
+
+  public static async post(): Promise<CachePostState | undefined> {
+    const state = core.getState(Cache.POST_CACHE_KEY);
+    if (!state) {
+      core.debug(`Cache.post no state`);
+      return Promise.resolve(undefined);
+    }
+    let cacheState: CachePostState;
+    try {
+      cacheState = <CachePostState>JSON.parse(state);
+    } catch (e) {
+      throw new Error(`Failed to parse cache post state: ${e}`);
+    }
+    if (!cacheState.dir || !cacheState.key) {
+      throw new Error(`Invalid cache post state: ${state}`);
+    }
+    core.info(`Caching ${cacheState.key} to GitHub Actions cache`);
+    await cache.saveCache([cacheState.dir], cacheState.key);
+    return cacheState;
   }
 
   private copyToCache(file: string): string {
