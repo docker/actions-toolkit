@@ -93,7 +93,10 @@ describe('getInputList', () => {
 
   it('do not escape surrounding quotes', async () => {
     setInput('driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`);
-    const res = Util.getInputList('driver-opts', {ignoreComma: true, quote: false});
+    const res = Util.getInputList('driver-opts', {
+      ignoreComma: true,
+      quote: false
+    });
     expect(res).toEqual(['"env.no_proxy=localhost,127.0.0.1,.mydomain"']);
   });
 
@@ -163,7 +166,9 @@ FOO=bar`
   });
 
   it('large multiline values', async () => {
-    const pgp = fs.readFileSync(path.join(__dirname, 'fixtures', 'pgp.txt'), {encoding: 'utf-8'});
+    const pgp = fs.readFileSync(path.join(__dirname, 'fixtures', 'pgp.txt'), {
+      encoding: 'utf-8'
+    });
     setInput(
       'secrets',
       `"GPG_KEY=${pgp}"
