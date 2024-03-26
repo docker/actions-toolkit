@@ -244,6 +244,41 @@ describe('hasDockerExporter', () => {
   });
 });
 
+describe('hasAttestationType', () => {
+  // prettier-ignore
+  test.each([
+    ['type=provenance,mode=min', 'provenance', true],
+    ['type=sbom,true', 'sbom', true],
+    ['type=foo,bar', 'provenance', false],
+  ])('given %p for %p returns %p', async (attrs: string, name: string, expected: boolean) => {
+    expect(Inputs.hasAttestationType(name, attrs)).toEqual(expected);
+  });
+});
+
+describe('resolveAttestationAttrs', () => {
+  // prettier-ignore
+  test.each([
+    [
+      'type=provenance,mode=min',
+      'type=provenance,mode=min'
+    ],
+    [
+      'type=provenance,true',
+      'type=provenance,disabled=false'
+    ],
+    [
+      'type=provenance,false',
+      'type=provenance,disabled=true'
+    ],
+    [
+      '',
+      ''
+    ],
+  ])('given %p', async (input: string, expected: string) => {
+    expect(Inputs.resolveAttestationAttrs(input)).toEqual(expected);
+  });
+});
+
 describe('hasGitAuthTokenSecret', () => {
   // prettier-ignore
   test.each([

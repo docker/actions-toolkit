@@ -21,6 +21,7 @@ import {parse} from 'csv-parse/sync';
 
 import {Context} from '../context';
 import {GitHub} from '../github';
+import {Util} from '../util';
 
 const parseKvp = (kvp: string): [string, string] => {
   const delimiterIndex = kvp.indexOf('=');
@@ -174,6 +175,45 @@ export class Inputs {
       }
     }
     return false;
+  }
+
+  public static hasAttestationType(name: string, attrs: string): boolean {
+    const records = parse(attrs, {
+      delimiter: ',',
+      trim: true,
+      columns: false,
+      relaxColumnCount: true
+    });
+    for (const record of records) {
+      for (const [key, value] of record.map((chunk: string) => chunk.split('=').map(item => item.trim()))) {
+        if (key == 'type' && value == name) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public static resolveAttestationAttrs(attrs: string): string {
+    const records = parse(attrs, {
+      delimiter: ',',
+      trim: true,
+      columns: false,
+      relaxColumnCount: true
+    });
+    const res: Array<string> = [];
+    for (const record of records) {
+      for (const attr of record) {
+        try {
+          // https://github.com/docker/buildx/blob/8abef5908705e49f7ba88ef8c957e1127b597a2a/util/buildflags/attests.go#L13-L21
+          const v = Util.parseBool(attr);
+          res.push(`disabled=${!v}`);
+        } catch (err) {
+          res.push(attr);
+        }
+      }
+    }
+    return res.join(',');
   }
 
   public static hasGitAuthTokenSecret(secrets: string[]): boolean {

@@ -144,4 +144,26 @@ export class Util {
   public static hash(input: string): string {
     return crypto.createHash('sha256').update(input).digest('hex');
   }
+
+  // https://github.com/golang/go/blob/f6b93a4c358b28b350dd8fe1780c1f78e520c09c/src/strconv/atob.go#L7-L18
+  public static parseBool(str: string): boolean {
+    switch (str) {
+      case '1':
+      case 't':
+      case 'T':
+      case 'true':
+      case 'TRUE':
+      case 'True':
+        return true;
+      case '0':
+      case 'f':
+      case 'F':
+      case 'false':
+      case 'FALSE':
+      case 'False':
+        return false;
+      default:
+        throw new Error(`parseBool syntax error: ${str}`);
+    }
+  }
 }
