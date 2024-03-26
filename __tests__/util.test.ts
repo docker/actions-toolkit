@@ -279,6 +279,36 @@ describe('hash', () => {
   });
 });
 
+// https://github.com/golang/go/blob/f6b93a4c358b28b350dd8fe1780c1f78e520c09c/src/strconv/atob_test.go#L36-L58
+describe('parseBool', () => {
+  [
+    {input: '', expected: false, throwsError: true},
+    {input: 'asdf', expected: false, throwsError: true},
+    {input: '0', expected: false, throwsError: false},
+    {input: 'f', expected: false, throwsError: false},
+    {input: 'F', expected: false, throwsError: false},
+    {input: 'FALSE', expected: false, throwsError: false},
+    {input: 'false', expected: false, throwsError: false},
+    {input: 'False', expected: false, throwsError: false},
+    {input: '1', expected: true, throwsError: false},
+    {input: 't', expected: true, throwsError: false},
+    {input: 'T', expected: true, throwsError: false},
+    {input: 'TRUE', expected: true, throwsError: false},
+    {input: 'true', expected: true, throwsError: false},
+    {input: 'True', expected: true, throwsError: false}
+  ].forEach(({input, expected, throwsError}) => {
+    test(`parseBool("${input}")`, () => {
+      if (throwsError) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(() => Util.parseBool(input)).toThrow();
+      } else {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(Util.parseBool(input)).toBe(expected);
+      }
+    });
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
