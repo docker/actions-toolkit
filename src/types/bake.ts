@@ -39,7 +39,9 @@ export interface Target {
   platforms?: Array<string>;
   pull?: boolean;
   secret?: Array<string>;
+  'shm-size'?: string;
   ssh?: Array<string>;
   tags?: Array<string>;
   target?: string;
+  ulimits?: Array<string>;
 }
