@@ -19,10 +19,23 @@ import {Exec} from '../exec';
 import {Inputs} from './inputs';
 import {Util} from '../util';
 
+import {ExecOptions} from '@actions/exec';
 import {BakeDefinition} from '../types/bake';
 
 export interface BakeOpts {
   buildx?: Buildx;
+}
+
+export interface BakeCmdOpts {
+  files?: Array<string>;
+  load?: boolean;
+  noCache?: boolean;
+  overrides?: Array<string>;
+  provenance?: string;
+  push?: boolean;
+  sbom?: string;
+  source?: string;
+  targets?: Array<string>;
 }
 
 export class Bake {
@@ -32,13 +45,17 @@ export class Bake {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async parseDefinitions(sources: Array<string>, targets?: Array<string>, overrides?: Array<string>, load?: boolean, push?: boolean, workdir?: string): Promise<BakeDefinition> {
+  public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {
+    execOptions = execOptions || {ignoreReturnCode: true};
+    execOptions.ignoreReturnCode = true;
+
     const args = ['bake'];
 
-    let remoteDef;
+    let remoteDef: string | undefined;
     const files: Array<string> = [];
+    const sources = [...(cmdOpts.files || []), cmdOpts.source];
     if (sources) {
-      for (const source of sources.map(v => v.trim())) {
+      for (const source of sources.map(v => (v ? v.trim() : ''))) {
         if (source.length == 0) {
           continue;
         }
@@ -47,7 +64,7 @@ export class Bake {
           continue;
         }
         if (remoteDef) {
-          throw new Error(`Only one remote bake definition is allowed`);
+          throw new Error(`Only one remote bake definition can be defined`);
         }
         remoteDef = source;
       }
@@ -58,29 +75,38 @@ export class Bake {
     for (const file of files) {
       args.push('--file', file);
     }
-    if (overrides) {
-      for (const override of overrides) {
+    if (cmdOpts.overrides) {
+      for (const override of cmdOpts.overrides) {
         args.push('--set', override);
       }
     }
-    if (load) {
+    if (cmdOpts.load) {
       args.push('--load');
     }
-    if (push) {
+    if (cmdOpts.noCache) {
+      args.push('--no-cache');
+    }
+    if (cmdOpts.provenance) {
+      args.push('--provenance', cmdOpts.provenance);
+    }
+    if (cmdOpts.push) {
       args.push('--push');
     }
+    if (cmdOpts.sbom) {
+      args.push('--sbom', cmdOpts.sbom);
+    }
 
-    const printCmd = await this.buildx.getCommand([...args, '--print', ...(targets || [])]);
-    return await Exec.getExecOutput(printCmd.command, printCmd.args, {
-      cwd: workdir,
-      ignoreReturnCode: true,
-      silent: true
-    }).then(res => {
+    const printCmd = await this.buildx.getCommand([...args, '--print', ...(cmdOpts.targets || [])]);
+    return await Exec.getExecOutput(printCmd.command, printCmd.args, execOptions).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
         throw new Error(`cannot parse bake definitions: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
       }
-      return <BakeDefinition>JSON.parse(res.stdout.trim());
+      return Bake.parseDefinition(res.stdout.trim());
     });
+  }
+
+  public static parseDefinition(dt: string): BakeDefinition {
+    return <BakeDefinition>JSON.parse(dt);
   }
 
   public static hasLocalExporter(def: BakeDefinition): boolean {

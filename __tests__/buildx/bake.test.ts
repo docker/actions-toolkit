@@ -19,6 +19,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {Bake} from '../../src/buildx/bake';
+
+import {ExecOptions} from '@actions/exec';
 import {BakeDefinition} from '../../src/types/bake';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
@@ -27,31 +29,38 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('parseDefinitions', () => {
+describe('getDefinition', () => {
   // prettier-ignore
   test.each([
     [
       [path.join(fixturesDir, 'bake-01.hcl')],
       ['validate'],
       [],
+      {silent: true},
       path.join(fixturesDir, 'bake-01-validate.json')
     ],
     [
       [path.join(fixturesDir, 'bake-02.hcl')],
       ['build'],
       [],
+      undefined,
       path.join(fixturesDir, 'bake-02-build.json')
     ],
     [
       [path.join(fixturesDir, 'bake-01.hcl')],
       ['image'],
       ['*.output=type=docker', '*.platform=linux/amd64'],
+      undefined,
       path.join(fixturesDir, 'bake-01-overrides.json')
     ]
-  ])('given %p', async (sources: string[], targets: string[], overrides: string[], out: string) => {
+  ])('given %p', async (files: string[], targets: string[], overrides: string[], execOptions: ExecOptions | undefined, out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
-    expect(await bake.parseDefinitions(sources, targets, overrides)).toEqual(expectedDef);
+    expect(await bake.getDefinition({
+      files: files,
+      targets: targets,
+      overrides: overrides
+    }, execOptions)).toEqual(expectedDef);
   });
 });
 
