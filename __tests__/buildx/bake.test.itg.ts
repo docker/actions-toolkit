@@ -29,17 +29,26 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-maybe('parseDefinitions', () => {
+maybe('getDefinition', () => {
   // prettier-ignore
   test.each([
     [
-      ['https://github.com/docker/buildx.git#v0.10.4'],
+      'https://github.com/docker/buildx.git#v0.10.4',
       ['binaries-cross'],
       path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
+    ],
+    [
+      'https://github.com/docker/test-docker-action.git#remote-private',
+      ['default'],
+      path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
     ]
-  ])('given %p', async (sources: string[], targets: string[], out: string) => {
+  ])('given %p', async (source: string, targets: string[], out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
-    expect(await bake.parseDefinitions(sources, targets)).toEqual(expectedDef);
+    expect(await bake.getDefinition({
+      source: source,
+      targets: targets,
+      githubToken: process.env.GITHUB_TOKEN,
+    })).toEqual(expectedDef);
   });
 });
