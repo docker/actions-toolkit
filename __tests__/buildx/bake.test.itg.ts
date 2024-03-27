@@ -37,12 +37,18 @@ maybe('getDefinition', () => {
       ['binaries-cross'],
       path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
     ],
+    [
+      'https://github.com/docker/test-docker-action.git#remote-private',
+      ['default'],
+      path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
+    ]
   ])('given %p', async (source: string, targets: string[], out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
     expect(await bake.getDefinition({
       source: source,
-      targets: targets
+      targets: targets,
+      githubToken: process.env.GITHUB_TOKEN,
     })).toEqual(expectedDef);
   });
 });

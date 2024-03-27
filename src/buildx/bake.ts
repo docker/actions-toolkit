@@ -36,6 +36,8 @@ export interface BakeCmdOpts {
   sbom?: string;
   source?: string;
   targets?: Array<string>;
+
+  githubToken?: string; // for auth with remote definitions on private repos
 }
 
 export class Bake {
@@ -79,6 +81,10 @@ export class Bake {
       for (const override of cmdOpts.overrides) {
         args.push('--set', override);
       }
+    }
+    if (cmdOpts.githubToken) {
+      const gitAuthTokenSecret = Inputs.resolveBuildSecretString(`GIT_AUTH_TOKEN=${cmdOpts.githubToken}`);
+      args.push('--set', `*.secrets=${gitAuthTokenSecret}`);
     }
     if (cmdOpts.load) {
       args.push('--load');
