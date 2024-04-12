@@ -20,7 +20,10 @@ import path from 'path';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 
+import {Context} from '../context';
+import {Cache} from '../cache';
 import {Exec} from '../exec';
+import {Util} from '../util';
 
 import {ConfigFile} from '../types/docker';
 
@@ -72,5 +75,90 @@ export class Docker {
 
   public static async printInfo(): Promise<void> {
     await Exec.exec('docker', ['info']);
+  }
+
+  public static parseRepoTag(image: string): {repository: string; tag: string} {
+    let sepPos: number;
+    const digestPos = image.indexOf('@');
+    const colonPos = image.lastIndexOf(':');
+    if (digestPos >= 0) {
+      // priority on digest
+      sepPos = digestPos;
+    } else if (colonPos >= 0) {
+      sepPos = colonPos;
+    } else {
+      return {
+        repository: image,
+        tag: 'latest'
+      };
+    }
+    const tag = image.slice(sepPos + 1);
+    if (tag.indexOf('/') === -1) {
+      return {
+        repository: image.slice(0, sepPos),
+        tag: tag
+      };
+    }
+    return {
+      repository: image,
+      tag: 'latest'
+    };
+  }
+
+  public static async pull(image: string, cache?: boolean): Promise<void> {
+    const parsedImage = Docker.parseRepoTag(image);
+    const repoSanitized = parsedImage.repository.replace(/[^a-zA-Z0-9.]+/g, '--');
+    const tagSanitized = parsedImage.tag.replace(/[^a-zA-Z0-9.]+/g, '--');
+
+    const imageCache = new Cache({
+      htcName: repoSanitized,
+      htcVersion: tagSanitized,
+      baseCacheDir: path.join(Docker.configDir, '.cache', 'images', repoSanitized),
+      cacheFile: 'image.tar'
+    });
+
+    let cacheFoundPath: string | undefined;
+    if (cache) {
+      cacheFoundPath = await imageCache.find();
+      if (cacheFoundPath) {
+        core.info(`Image found from cache in ${cacheFoundPath}`);
+        await Exec.getExecOutput(`docker`, ['load', '-i', cacheFoundPath], {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.warning(`Failed to load image from cache: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+          }
+        });
+      }
+    }
+
+    let pulled = true;
+    await Exec.getExecOutput(`docker`, ['pull', image], {
+      ignoreReturnCode: true
+    }).then(res => {
+      pulled = false;
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
+        if (cacheFoundPath) {
+          core.warning(`Failed to pull image, using one from cache: ${err}`);
+        } else {
+          throw new Error(err);
+        }
+      }
+    });
+
+    if (cache && pulled) {
+      const imageTarPath = path.join(Context.tmpDir(), `${Util.hash(image)}.tar`);
+      await Exec.getExecOutput(`docker`, ['save', '-o', imageTarPath, image], {
+        ignoreReturnCode: true
+      }).then(async res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(`Failed to save image: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+        } else {
+          const cachePath = await imageCache.save(imageTarPath);
+          core.info(`Image cached to ${cachePath}`);
+        }
+      });
+    }
   }
 }
