@@ -15,6 +15,7 @@ on:
 
 env:
   NODE_VERSION: "20"
+  BUILDX_VERSION: "v0.14.0-rc1"
 
 jobs:
   test:
@@ -102,6 +103,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
+      -
+        name: Set up Docker Buildx
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: ${{ env.BUILDX_VERSION }}
+          driver: docker
       -
         name: Install
         run: yarn install
