@@ -1,0 +1,11 @@
+{
+  "target": {
+    "default": {
+      "context": "https://github.com/docker/test-docker-action.git#remote-private",
+      "dockerfile": "Dockerfile",
+      "tags": [
+        "foo"
+      ]
+    }
+  }
+}

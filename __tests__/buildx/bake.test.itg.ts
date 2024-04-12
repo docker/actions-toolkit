@@ -35,14 +35,28 @@ maybe('getDefinition', () => {
     [
       'https://github.com/docker/buildx.git#v0.10.4',
       ['binaries-cross'],
-      path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json')
+      path.join(fixturesDir, 'bake-buildx-0.10.4-binaries-cross.json'),
+      false,
     ],
-  ])('given %p', async (source: string, targets: string[], out: string) => {
+    // TODO: uncomment this test case when we have access to the private repo using an access token
+    // [
+    //   'https://github.com/docker/test-docker-action.git#remote-private',
+    //   ['default'],
+    //   path.join(fixturesDir, 'bake-test-docker-action-remote-private.json'),
+    //   true,
+    // ]
+  ])('given %p', async (source: string, targets: string[], out: string, auth) => {
+    const gitAuthToken = process.env.GITHUB_TOKEN || '';
+    if (auth && !gitAuthToken) {
+      console.log(`Git auth token not available, skipping test`);
+      return;
+    }
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
     expect(await bake.getDefinition({
       source: source,
-      targets: targets
+      targets: targets,
+      githubToken: gitAuthToken,
     })).toEqual(expectedDef);
   });
 });

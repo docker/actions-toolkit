@@ -77,24 +77,23 @@ export class Inputs {
   }
 
   public static resolveBuildSecretString(kvp: string): string {
-    return Inputs.resolveBuildSecret(kvp, false);
+    const [key, file] = Inputs.resolveBuildSecret(kvp, false);
+    return `id=${key},src=${file}`;
   }
 
   public static resolveBuildSecretFile(kvp: string): string {
-    return Inputs.resolveBuildSecret(kvp, true);
+    const [key, file] = Inputs.resolveBuildSecret(kvp, true);
+    return `id=${key},src=${file}`;
   }
 
   public static resolveBuildSecretEnv(kvp: string): string {
     const [key, value] = parseKvp(kvp);
-
     return `id=${key},env=${value}`;
   }
 
-  public static resolveBuildSecret(kvp: string, file: boolean): string {
+  public static resolveBuildSecret(kvp: string, file: boolean): [string, string] {
     const [key, _value] = parseKvp(kvp);
-
     let value = _value;
-
     if (file) {
       if (!fs.existsSync(value)) {
         throw new Error(`secret file ${value} not found`);
@@ -103,7 +102,7 @@ export class Inputs {
     }
     const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
     fs.writeFileSync(secretFile, value);
-    return `id=${key},src=${secretFile}`;
+    return [key, secretFile];
   }
 
   public static getProvenanceInput(name: string): string {

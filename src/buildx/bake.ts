@@ -36,6 +36,8 @@ export interface BakeCmdOpts {
   sbom?: string;
   source?: string;
   targets?: Array<string>;
+
+  githubToken?: string; // for auth with remote definitions on private repos
 }
 
 export class Bake {
@@ -48,6 +50,13 @@ export class Bake {
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {
     execOptions = execOptions || {ignoreReturnCode: true};
     execOptions.ignoreReturnCode = true;
+    if (cmdOpts.githubToken) {
+      execOptions.env = Object.assign({}, process.env, {
+        BUILDX_BAKE_GIT_AUTH_TOKEN: cmdOpts.githubToken
+      }) as {
+        [key: string]: string;
+      };
+    }
 
     const args = ['bake'];
 
