@@ -122,32 +122,43 @@ export class Docker {
       cacheFoundPath = await imageCache.find();
       if (cacheFoundPath) {
         core.info(`Image found from cache in ${cacheFoundPath}`);
-        await Exec.getExecOutput(`docker`, ['load', '-i', cacheFoundPath]).catch(e => {
-          core.warning(`Failed to load image from cache: ${e}`);
+        await Exec.getExecOutput(`docker`, ['load', '-i', cacheFoundPath], {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.warning(`Failed to load image from cache: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+          }
         });
       }
     }
 
     let pulled = true;
-    await Exec.getExecOutput(`docker`, ['pull', image]).catch(e => {
+    await Exec.getExecOutput(`docker`, ['pull', image], {
+      ignoreReturnCode: true
+    }).then(res => {
       pulled = false;
-      if (cacheFoundPath) {
-        core.warning(`Failed to pull image, using one from cache: ${e}`);
-      } else {
-        throw new Error(e);
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
+        if (cacheFoundPath) {
+          core.warning(`Failed to pull image, using one from cache: ${err}`);
+        } else {
+          throw new Error(err);
+        }
       }
     });
 
     if (cache && pulled) {
       const imageTarPath = path.join(Context.tmpDir(), `${Util.hash(image)}.tar`);
-      await Exec.getExecOutput(`docker`, ['save', '-o', imageTarPath, image])
-        .then(async () => {
+      await Exec.getExecOutput(`docker`, ['save', '-o', imageTarPath, image], {
+        ignoreReturnCode: true
+      }).then(async res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(`Failed to save image: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+        } else {
           const cachePath = await imageCache.save(imageTarPath);
           core.info(`Image cached to ${cachePath}`);
-        })
-        .catch(e => {
-          core.warning(`Failed to save image: ${e}`);
-        });
+        }
+      });
     }
   }
 }

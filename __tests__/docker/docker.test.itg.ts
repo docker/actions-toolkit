@@ -23,13 +23,34 @@ const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'tr
 maybe('pull', () => {
   // prettier-ignore
   test.each([
-    'busybox',
-    'busybox:1.36',
-    'busybox@sha256:7ae8447f3a7f5bccaa765926f25fc038e425cf1b2be6748727bbea9a13102094'
-  ])(
-    'pulling %s', async (image) => {
-      await expect((async () => {
+    [
+      'busybox',
+      undefined,
+    ],
+    [
+      'busybox:1.36',
+      undefined,
+    ],
+    [
+      'busybox@sha256:7ae8447f3a7f5bccaa765926f25fc038e425cf1b2be6748727bbea9a13102094',
+      undefined,
+    ],
+    [
+      'doesnotexist:foo',
+      `pull access denied for doesnotexist`,
+    ],
+  ])('pulling %p', async (image: string, err: string | undefined) => {
+      try {
         await Docker.pull(image, true);
-      })()).resolves.not.toThrow();
+        if (err !== undefined) {
+          throw new Error('Expected an error to be thrown');
+        }
+      } catch (e) {
+        if (err === undefined) {
+          throw new Error(`Expected no error, but got: ${e.message}`);
+        }
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(e.message).toContain(err);
+      }
     }, 600000);
 });
