@@ -136,8 +136,8 @@ export class Docker {
     await Exec.getExecOutput(`docker`, ['pull', image], {
       ignoreReturnCode: true
     }).then(res => {
-      pulled = false;
       if (res.stderr.length > 0 && res.exitCode != 0) {
+        pulled = false;
         const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
         if (cacheFoundPath) {
           core.warning(`Failed to pull image, using one from cache: ${err}`);
