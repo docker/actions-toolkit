@@ -1,0 +1,109 @@
+{
+  "warnings": [
+    {
+      "ruleName": "SelfConsistentCommandCasing",
+      "description": "Commands should be in consistent casing (all lower or all upper)",
+      "detail": "Command 'frOM' should be consistently cased",
+      "location": {
+        "ranges": [
+          {
+            "start": {
+              "line": 17
+            },
+            "end": {
+              "line": 17
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleName": "SelfConsistentCommandCasing",
+      "description": "Commands should be in consistent casing (all lower or all upper)",
+      "detail": "Command 'cOpy' should be consistently cased",
+      "location": {
+        "ranges": [
+          {
+            "start": {
+              "line": 18
+            },
+            "end": {
+              "line": 18
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ruleName": "SelfConsistentCommandCasing",
+      "description": "Commands should be in consistent casing (all lower or all upper)",
+      "detail": "Command 'COPy' should be consistently cased",
+      "location": {
+        "ranges": [
+          {
+            "start": {
+              "line": 21
+            },
+            "end": {
+              "line": 21
+            }
+          },
+          {
+            "start": {
+              "line": 22
+            },
+            "end": {
+              "line": 22
+            }
+          },
+          {
+            "start": {
+              "line": 23
+            },
+            "end": {
+              "line": 23
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "fileName": "lint.Dockerfile",
+      "language": "Dockerfile",
+      "definition": {
+        "def": [
+          "GsIBChJsb2NhbDovL2RvY2tlcmZpbGUSFAoMbG9jYWwuZGlmZmVyEgRub25lEkcKEWxvY2FsLmZvbGxvd3BhdGhzEjJbImxpbnQuRG9ja2VyZmlsZSIsImxpbnQuRG9ja2VyZmlsZS5kb2NrZXJpZ25vcmUiXRIqCg1sb2NhbC5zZXNzaW9uEhlrMnNldGgzbmkzZm4zaDdnMzRhaDVyeGRjEiEKE2xvY2FsLnNoYXJlZGtleWhpbnQSCmRvY2tlcmZpbGVaAA==",
+          "CkkKR3NoYTI1NjplY2E2OTY3MjczZjQ0MmMyNzBkNjljOWRlZGE0MDgyMzg1MjcyNGFiNWFhYmJkODcxYTM0NzFjZThiMzQ0ZWQx"
+        ],
+        "metadata": {
+          "sha256:7717cebab4f00fa481c309aeeec4b8e0c6b4703ad50927cb3392a8d15cf2e86b": {
+            "caps": {
+              "constraints": true,
+              "meta.description": true,
+              "platform": true
+            }
+          },
+          "sha256:eca6967273f442c270d69c9deda40823852724ab5aabbd871a3471ce8b344ed1": {
+            "description": {
+              "llb.customname": "[internal] load build definition from lint.Dockerfile"
+            },
+            "caps": {
+              "source.local": true,
+              "source.local.followpaths": true,
+              "source.local.sessionid": true,
+              "source.local.sharedkeyhint": true
+            }
+          }
+        },
+        "Source": {
+          "locations": {
+            "sha256:eca6967273f442c270d69c9deda40823852724ab5aabbd871a3471ce8b344ed1": {}
+          }
+        }
+      },
+      "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LkRvY2tlcmZpbGUgXAogIC8K"
+    }
+  ]
+}

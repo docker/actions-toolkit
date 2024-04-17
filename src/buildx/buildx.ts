@@ -22,6 +22,8 @@ import * as semver from 'semver';
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 
+import {ExecOptions} from '@actions/exec';
+import {LintResults} from '../types/buildkit';
 import {Cert} from '../types/buildx';
 
 export interface BuildxOpts {
@@ -167,5 +169,27 @@ export class Buildx {
       return [];
     }
     return driverOpts;
+  }
+
+  public async lint(cmd: string, args: Array<string>, execOptions?: ExecOptions): Promise<LintResults | undefined> {
+    if (!(await this.versionSatisfies('>=0.14.0'))) {
+      core.debug(`Buildx version does not support lint (>=0.14.0)`);
+      return undefined;
+    }
+
+    execOptions = execOptions || {ignoreReturnCode: true};
+    execOptions.ignoreReturnCode = true;
+    execOptions.env = Object.assign({}, execOptions.env || process.env, {
+      BUILDX_EXPERIMENTAL: '1'
+    }) as {
+      [key: string]: string;
+    };
+
+    return await Exec.getExecOutput(cmd, [...args, '--print=lint,format=json,ignorestatus=true'], execOptions).then(execOutput => {
+      if (execOutput.stderr.length > 0 && execOutput.exitCode != 0) {
+        throw new Error(`lint failed with: ${execOutput.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+      }
+      return <LintResults>JSON.parse(execOutput.stdout);
+    });
   }
 }
