@@ -34,3 +34,16 @@ export interface GitHubActionsRuntimeTokenAC {
   Scope: string;
   Permission: number;
 }
+
+export interface UploadArtifactOpts {
+  filename: string;
+  mimeType?: string;
+  retentionDays?: number;
+}
+
+export interface UploadArtifactResponse {
+  id: number;
+  filename: string;
+  size: number;
+  url: string;
+}
