@@ -86,13 +86,6 @@ export class Buildx {
     return ok;
   }
 
-  public async printInspect(name: string): Promise<void> {
-    const cmd = await this.getCommand(['inspect', name]);
-    await Exec.exec(cmd.command, cmd.args, {
-      failOnStdErr: false
-    });
-  }
-
   public async version(): Promise<string> {
     if (this._versionOnce) {
       return this._version;

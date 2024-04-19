@@ -116,21 +116,6 @@ describe('isAvailable', () => {
   });
 });
 
-describe('printInspect', () => {
-  it('prints builder2 instance', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
-    const buildx = new Buildx({
-      standalone: true
-    });
-    await buildx.printInspect('builder2').catch(() => {
-      // noop
-    });
-    expect(execSpy).toHaveBeenCalledWith(`buildx`, ['inspect', 'builder2'], {
-      failOnStdErr: false
-    });
-  });
-});
-
 describe('printVersion', () => {
   it('docker cli', async () => {
     const execSpy = jest.spyOn(Exec, 'exec');
