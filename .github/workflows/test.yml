@@ -132,6 +132,14 @@ jobs:
           version: ${{ env.BUILDX_VERSION }}
           driver: docker
       -
+        name: Set up container builder
+        if: startsWith(matrix.os, 'ubuntu')
+        id: builder
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: ${{ env.BUILDX_VERSION }}
+          use: false
+      -
         name: Install
         run: yarn install
       -
@@ -140,6 +148,7 @@ jobs:
           yarn test:itg-coverage --runTestsByPath __tests__/${{ matrix.test }} --coverageDirectory=./coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CTN_BUILDER_NAME: ${{ steps.builder.outputs.name }}
       -
         name: Check coverage
         run: |
