@@ -16,7 +16,7 @@
 
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
-import {Inputs} from './inputs';
+import {Build} from './build';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
@@ -119,15 +119,15 @@ export class Bake {
   }
 
   public static hasLocalExporter(def: BakeDefinition): boolean {
-    return Inputs.hasExporterType('local', Bake.exporters(def));
+    return Build.hasExporterType('local', Bake.exporters(def));
   }
 
   public static hasTarExporter(def: BakeDefinition): boolean {
-    return Inputs.hasExporterType('tar', Bake.exporters(def));
+    return Build.hasExporterType('tar', Bake.exporters(def));
   }
 
   public static hasDockerExporter(def: BakeDefinition, load?: boolean): boolean {
-    return load || Inputs.hasExporterType('docker', Bake.exporters(def));
+    return load || Build.hasExporterType('docker', Bake.exporters(def));
   }
 
   private static exporters(def: BakeDefinition): Array<string> {
