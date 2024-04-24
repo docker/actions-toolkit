@@ -14,19 +14,65 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as rimraf from 'rimraf';
 
 import {Bake} from '../../src/buildx/bake';
+import {Context} from '../../src/context';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition} from '../../src/types/bake';
+import {BakeDefinition, BakeMetadata} from '../../src/types/bake';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
+const metadata: BakeMetadata = {
+  app: {
+    'buildx.build.ref': 'default/default/7frbdw1fmfozgtqavghowsepk'
+  },
+  db: {
+    'buildx.build.ref': 'default/default/onic7g2axylf56rxetob7qruy'
+  }
+};
+
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, {recursive: true});
+  }
+  return tmpDir;
+});
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+  return tmpName;
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+afterEach(() => {
+  rimraf.sync(tmpDir);
+});
+
+describe('resolveMetadata', () => {
+  it('matches', async () => {
+    const metadataFile = Bake.getMetadataFilePath();
+    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
+    const expected = Bake.resolveMetadata();
+    expect(expected).toEqual(metadata as BakeMetadata);
+  });
+});
+
+describe('resolveRefs', () => {
+  it('matches', async () => {
+    const metadataFile = Bake.getMetadataFilePath();
+    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
+    const expected = Bake.resolveRefs();
+    expect(expected).toEqual(['default/default/7frbdw1fmfozgtqavghowsepk', 'default/default/onic7g2axylf56rxetob7qruy']);
+  });
 });
 
 describe('getDefinition', () => {

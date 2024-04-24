@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {Buildx} from './buildx';
-import {Exec} from '../exec';
+import fs from 'fs';
+import path from 'path';
+
 import {Build} from './build';
+import {Buildx} from './buildx';
+import {Context} from '../context';
+import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition} from '../types/bake';
+import {BakeDefinition, BakeMetadata} from '../types/bake';
 
 export interface BakeOpts {
   buildx?: Buildx;
@@ -45,6 +49,36 @@ export class Bake {
 
   constructor(opts?: BakeOpts) {
     this.buildx = opts?.buildx || new Buildx();
+  }
+
+  public static getMetadataFilePath(): string {
+    return path.join(Context.tmpDir(), 'metadata-file');
+  }
+
+  public static resolveMetadata(): BakeMetadata | undefined {
+    const metadataFile = Bake.getMetadataFilePath();
+    if (!fs.existsSync(metadataFile)) {
+      return undefined;
+    }
+    const content = fs.readFileSync(metadataFile, {encoding: 'utf-8'}).trim();
+    if (content === 'null') {
+      return undefined;
+    }
+    return <BakeMetadata>JSON.parse(content);
+  }
+
+  public static resolveRefs(): Array<string> | undefined {
+    const metadata = Bake.resolveMetadata();
+    if (!metadata) {
+      return undefined;
+    }
+    const refs = new Array<string>();
+    for (const key in metadata) {
+      if ('buildx.build.ref' in metadata[key]) {
+        refs.push(metadata[key]['buildx.build.ref']);
+      }
+    }
+    return refs;
   }
 
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {

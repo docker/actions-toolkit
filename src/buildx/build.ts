@@ -23,25 +23,27 @@ import {Context} from '../context';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
+import {BuildMetadata} from '../types/build';
+
 export class Build {
-  public static getBuildImageIDFilePath(): string {
+  public static getImageIDFilePath(): string {
     return path.join(Context.tmpDir(), 'iidfile');
   }
 
-  public static getBuildMetadataFilePath(): string {
+  public static getMetadataFilePath(): string {
     return path.join(Context.tmpDir(), 'metadata-file');
   }
 
-  public static resolveBuildImageID(): string | undefined {
-    const iidFile = Build.getBuildImageIDFilePath();
+  public static resolveImageID(): string | undefined {
+    const iidFile = Build.getImageIDFilePath();
     if (!fs.existsSync(iidFile)) {
       return undefined;
     }
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
   }
 
-  public static resolveBuildMetadata(): string | undefined {
-    const metadataFile = Build.getBuildMetadataFilePath();
+  public static resolveMetadata(): BuildMetadata | undefined {
+    const metadataFile = Build.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
     }
@@ -49,37 +51,47 @@ export class Build {
     if (content === 'null') {
       return undefined;
     }
-    return content;
+    return <BuildMetadata>JSON.parse(content);
   }
 
-  public static resolveDigest(): string | undefined {
-    const metadata = Build.resolveBuildMetadata();
-    if (metadata === undefined) {
+  public static resolveRef(): string | undefined {
+    const metadata = Build.resolveMetadata();
+    if (!metadata) {
       return undefined;
     }
-    const metadataJSON = JSON.parse(metadata);
-    if (metadataJSON['containerimage.digest']) {
-      return metadataJSON['containerimage.digest'];
+    if ('buildx.build.ref' in metadata) {
+      return metadata['buildx.build.ref'];
     }
     return undefined;
   }
 
-  public static resolveBuildSecretString(kvp: string): string {
-    const [key, file] = Build.resolveBuildSecret(kvp, false);
+  public static resolveDigest(): string | undefined {
+    const metadata = Build.resolveMetadata();
+    if (!metadata) {
+      return undefined;
+    }
+    if ('containerimage.digest' in metadata) {
+      return metadata['containerimage.digest'];
+    }
+    return undefined;
+  }
+
+  public static resolveSecretString(kvp: string): string {
+    const [key, file] = Build.resolveSecret(kvp, false);
     return `id=${key},src=${file}`;
   }
 
-  public static resolveBuildSecretFile(kvp: string): string {
-    const [key, file] = Build.resolveBuildSecret(kvp, true);
+  public static resolveSecretFile(kvp: string): string {
+    const [key, file] = Build.resolveSecret(kvp, true);
     return `id=${key},src=${file}`;
   }
 
-  public static resolveBuildSecretEnv(kvp: string): string {
+  public static resolveSecretEnv(kvp: string): string {
     const [key, value] = Build.parseSecretKvp(kvp);
     return `id=${key},env=${value}`;
   }
 
-  public static resolveBuildSecret(kvp: string, file: boolean): [string, string] {
+  public static resolveSecret(kvp: string, file: boolean): [string, string] {
     const [key, _value] = Build.parseSecretKvp(kvp);
     let value = _value;
     if (file) {
