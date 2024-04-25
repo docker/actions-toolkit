@@ -55,7 +55,7 @@ export class Builder {
     return ok;
   }
 
-  public async inspect(name: string): Promise<BuilderInfo> {
+  public async inspect(name?: string): Promise<BuilderInfo> {
     // always enable debug for inspect command, so we can display additional
     // fields such as features: https://github.com/docker/buildx/pull/1854
     const envs = Object.assign({}, process.env, {
@@ -64,7 +64,12 @@ export class Builder {
       [key: string]: string;
     };
 
-    const cmd = await this.buildx.getCommand(['inspect', name]);
+    const args = ['inspect'];
+    if (name) {
+      args.push(name);
+    }
+
+    const cmd = await this.buildx.getCommand(args);
     return await Exec.getExecOutput(cmd.command, cmd.args, {
       ignoreReturnCode: true,
       silent: true,
