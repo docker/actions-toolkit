@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "target": "ES2022",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "es6",
+    "module": "commonjs",
     "strict": true,
     "declaration": true,
     "sourceMap": true,
