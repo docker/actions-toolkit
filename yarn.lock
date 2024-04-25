@@ -1109,7 +1109,7 @@ __metadata:
     "@actions/tool-cache": ^2.0.1
     "@azure/storage-blob": ^12.15.0
     "@octokit/core": ^5.1.0
-    "@octokit/plugin-rest-endpoint-methods": ^10.4.0
+    "@octokit/plugin-rest-endpoint-methods": ^13.1.1
     "@types/csv-parse": ^1.2.2
     "@types/js-yaml": ^4.0.5
     "@types/node": ^20.5.9
@@ -1789,10 +1789,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/openapi-types@npm:^20.0.0":
-  version: 20.0.0
-  resolution: "@octokit/openapi-types@npm:20.0.0"
-  checksum: 23ff7613750f8b5790a0cbed5a2048728a7909e50d726932831044908357a932c7fc0613fb7b86430a49d31b3d03a180632ea5dd936535bfbc1176391a199e96
+"@octokit/openapi-types@npm:^22.1.0":
+  version: 22.1.0
+  resolution: "@octokit/openapi-types@npm:22.1.0"
+  checksum: 6c3c1ef11fd04be423eb347622a3da063b3847ba4c5e665458bf9461cf3c21a5ddbb16603b65694825537ef28b01ee6e700c37ec2981fb8eac13906b37874bb8
   languageName: node
   linkType: hard
 
@@ -1838,14 +1838,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-rest-endpoint-methods@npm:^10.4.0":
-  version: 10.4.0
-  resolution: "@octokit/plugin-rest-endpoint-methods@npm:10.4.0"
+"@octokit/plugin-rest-endpoint-methods@npm:^13.1.1":
+  version: 13.1.1
+  resolution: "@octokit/plugin-rest-endpoint-methods@npm:13.1.1"
   dependencies:
-    "@octokit/types": ^12.6.0
+    "@octokit/types": ^13.4.1
   peerDependencies:
-    "@octokit/core": ">=5"
-  checksum: 8ee155825c7ea1dd2991a50d5b3f205988b8ea19af4bebbd91c55bb7b78c4e2215956d578671496a4a86df19ff2d5405ce37ee35c9c6c188dc9a199c045c30be
+    "@octokit/core": ">=6"
+  checksum: ec592daa65c0c684db60eb8d78cef3993098281d590341815726177ee4f44a0334361a6a174089c1828ad1f9eb874d15e3f5e92beff0ea241dba2a09dfee8c36
   languageName: node
   linkType: hard
 
@@ -1938,12 +1938,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/types@npm:^12.6.0":
-  version: 12.6.0
-  resolution: "@octokit/types@npm:12.6.0"
+"@octokit/types@npm:^13.4.1":
+  version: 13.4.1
+  resolution: "@octokit/types@npm:13.4.1"
   dependencies:
-    "@octokit/openapi-types": ^20.0.0
-  checksum: 850235f425584499a2266d5c585c1c2462ae11e25c650567142f3342cb9ce589c8c8fed87705811ca93271fd28c68e1fa77b88b67b97015d7b63d269fa46ed05
+    "@octokit/openapi-types": ^22.1.0
+  checksum: d47f42e8c97bd9ce410cbb7ada464f26260ca0147116611e00d9843c4b76fcd963df19d920e35c80e845d057d579f0d4be82ff0b7b7ce5e4dcaae38e012d66cb
   languageName: node
   linkType: hard
 
