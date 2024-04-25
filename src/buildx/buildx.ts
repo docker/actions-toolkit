@@ -22,7 +22,7 @@ import * as semver from 'semver';
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 
-import {Cert} from '../types/buildx';
+import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx';
 
 export interface BuildxOpts {
   standalone?: boolean;
@@ -43,6 +43,14 @@ export class Buildx {
 
   static get configDir(): string {
     return process.env.BUILDX_CONFIG || path.join(Docker.configDir, 'buildx');
+  }
+
+  static get refsDir(): string {
+    return path.join(Buildx.configDir, 'refs');
+  }
+
+  static get refsGroupDir(): string {
+    return path.join(Buildx.refsDir, '__group__');
   }
 
   static get certsDir(): string {
@@ -167,5 +175,47 @@ export class Buildx {
       return [];
     }
     return driverOpts;
+  }
+
+  public static refs(opts: LocalRefsOpts, refs: LocalRefsResponse = {}): LocalRefsResponse {
+    const {dir, builderName, nodeName, since} = opts;
+
+    let dirpath = path.resolve(dir);
+    if (opts.builderName) {
+      dirpath = path.join(dirpath, opts.builderName);
+    }
+    if (opts.nodeName) {
+      dirpath = path.join(dirpath, opts.nodeName);
+    }
+    if (!fs.existsSync(dirpath)) {
+      return refs;
+    }
+
+    const files = fs.readdirSync(dirpath);
+    for (const file of files) {
+      const filePath = path.join(dirpath, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        const nopts: LocalRefsOpts = {...opts};
+        if (!builderName) {
+          if (file === '__group__') {
+            continue;
+          }
+          nopts.builderName = file;
+        } else if (!nodeName) {
+          nopts.nodeName = file;
+        }
+        Buildx.refs(nopts, refs);
+      } else {
+        if (since && stat.mtime < since) {
+          continue;
+        }
+        const localState = <LocalState>JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const ref = `${builderName}/${nodeName}/${file}`;
+        refs[ref] = localState;
+      }
+    }
+
+    return refs;
   }
 }
