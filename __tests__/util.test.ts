@@ -309,6 +309,32 @@ describe('parseBool', () => {
   });
 });
 
+describe('formatFileSize', () => {
+  test('should return "0 Bytes" when given 0 bytes', () => {
+    expect(Util.formatFileSize(0)).toBe('0 Bytes');
+  });
+  test('should format bytes to KB correctly', () => {
+    expect(Util.formatFileSize(1024)).toBe('1 KB');
+    expect(Util.formatFileSize(2048)).toBe('2 KB');
+    expect(Util.formatFileSize(1500)).toBe('1.46 KB');
+  });
+  test('should format bytes to MB correctly', () => {
+    expect(Util.formatFileSize(1024 * 1024)).toBe('1 MB');
+    expect(Util.formatFileSize(2.5 * 1024 * 1024)).toBe('2.5 MB');
+    expect(Util.formatFileSize(3.8 * 1024 * 1024)).toBe('3.8 MB');
+  });
+  test('should format bytes to GB correctly', () => {
+    expect(Util.formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');
+    expect(Util.formatFileSize(2.5 * 1024 * 1024 * 1024)).toBe('2.5 GB');
+    expect(Util.formatFileSize(3.8 * 1024 * 1024 * 1024)).toBe('3.8 GB');
+  });
+  test('should format bytes to TB correctly', () => {
+    expect(Util.formatFileSize(1024 * 1024 * 1024 * 1024)).toBe('1 TB');
+    expect(Util.formatFileSize(2.5 * 1024 * 1024 * 1024 * 1024)).toBe('2.5 TB');
+    expect(Util.formatFileSize(3.8 * 1024 * 1024 * 1024 * 1024)).toBe('3.8 TB');
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
