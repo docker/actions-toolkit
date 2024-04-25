@@ -23,37 +23,27 @@ import {Context} from '../context';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
-const parseKvp = (kvp: string): [string, string] => {
-  const delimiterIndex = kvp.indexOf('=');
-  const key = kvp.substring(0, delimiterIndex);
-  const value = kvp.substring(delimiterIndex + 1);
+import {BuildMetadata} from '../types/build';
 
-  if (key.length == 0 || value.length == 0) {
-    throw new Error(`${kvp} is not a valid secret`);
-  }
-
-  return [key, value];
-};
-
-export class Inputs {
-  public static getBuildImageIDFilePath(): string {
+export class Build {
+  public static getImageIDFilePath(): string {
     return path.join(Context.tmpDir(), 'iidfile');
   }
 
-  public static getBuildMetadataFilePath(): string {
+  public static getMetadataFilePath(): string {
     return path.join(Context.tmpDir(), 'metadata-file');
   }
 
-  public static resolveBuildImageID(): string | undefined {
-    const iidFile = Inputs.getBuildImageIDFilePath();
+  public static resolveImageID(): string | undefined {
+    const iidFile = Build.getImageIDFilePath();
     if (!fs.existsSync(iidFile)) {
       return undefined;
     }
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
   }
 
-  public static resolveBuildMetadata(): string | undefined {
-    const metadataFile = Inputs.getBuildMetadataFilePath();
+  public static resolveMetadata(): BuildMetadata | undefined {
+    const metadataFile = Build.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
     }
@@ -61,38 +51,48 @@ export class Inputs {
     if (content === 'null') {
       return undefined;
     }
-    return content;
+    return <BuildMetadata>JSON.parse(content);
   }
 
-  public static resolveDigest(): string | undefined {
-    const metadata = Inputs.resolveBuildMetadata();
-    if (metadata === undefined) {
+  public static resolveRef(): string | undefined {
+    const metadata = Build.resolveMetadata();
+    if (!metadata) {
       return undefined;
     }
-    const metadataJSON = JSON.parse(metadata);
-    if (metadataJSON['containerimage.digest']) {
-      return metadataJSON['containerimage.digest'];
+    if ('buildx.build.ref' in metadata) {
+      return metadata['buildx.build.ref'];
     }
     return undefined;
   }
 
-  public static resolveBuildSecretString(kvp: string): string {
-    const [key, file] = Inputs.resolveBuildSecret(kvp, false);
+  public static resolveDigest(): string | undefined {
+    const metadata = Build.resolveMetadata();
+    if (!metadata) {
+      return undefined;
+    }
+    if ('containerimage.digest' in metadata) {
+      return metadata['containerimage.digest'];
+    }
+    return undefined;
+  }
+
+  public static resolveSecretString(kvp: string): string {
+    const [key, file] = Build.resolveSecret(kvp, false);
     return `id=${key},src=${file}`;
   }
 
-  public static resolveBuildSecretFile(kvp: string): string {
-    const [key, file] = Inputs.resolveBuildSecret(kvp, true);
+  public static resolveSecretFile(kvp: string): string {
+    const [key, file] = Build.resolveSecret(kvp, true);
     return `id=${key},src=${file}`;
   }
 
-  public static resolveBuildSecretEnv(kvp: string): string {
-    const [key, value] = parseKvp(kvp);
+  public static resolveSecretEnv(kvp: string): string {
+    const [key, value] = Build.parseSecretKvp(kvp);
     return `id=${key},env=${value}`;
   }
 
-  public static resolveBuildSecret(kvp: string, file: boolean): [string, string] {
-    const [key, _value] = parseKvp(kvp);
+  public static resolveSecret(kvp: string, file: boolean): [string, string] {
+    const [key, _value] = Build.parseSecretKvp(kvp);
     let value = _value;
     if (file) {
       if (!fs.existsSync(value)) {
@@ -115,7 +115,7 @@ export class Inputs {
       return core.getBooleanInput(name) ? `builder-id=${GitHub.workflowRunURL}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
-      return Inputs.resolveProvenanceAttrs(input);
+      return Build.resolveProvenanceAttrs(input);
     }
   }
 
@@ -143,15 +143,15 @@ export class Inputs {
   }
 
   public static hasLocalExporter(exporters: string[]): boolean {
-    return Inputs.hasExporterType('local', exporters);
+    return Build.hasExporterType('local', exporters);
   }
 
   public static hasTarExporter(exporters: string[]): boolean {
-    return Inputs.hasExporterType('tar', exporters);
+    return Build.hasExporterType('tar', exporters);
   }
 
   public static hasDockerExporter(exporters: string[], load?: boolean): boolean {
-    return load || Inputs.hasExporterType('docker', exporters);
+    return load || Build.hasExporterType('docker', exporters);
   }
 
   public static hasExporterType(name: string, exporters: string[]): boolean {
@@ -222,5 +222,15 @@ export class Inputs {
       }
     }
     return false;
+  }
+
+  private static parseSecretKvp(kvp: string): [string, string] {
+    const delimiterIndex = kvp.indexOf('=');
+    const key = kvp.substring(0, delimiterIndex);
+    const value = kvp.substring(delimiterIndex + 1);
+    if (key.length == 0 || value.length == 0) {
+      throw new Error(`${kvp} is not a valid secret`);
+    }
+    return [key, value];
   }
 }

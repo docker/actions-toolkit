@@ -20,16 +20,19 @@ import * as path from 'path';
 import * as rimraf from 'rimraf';
 
 import {Context} from '../../src/context';
-import {Inputs} from '../../src/buildx/inputs';
+import {Build} from '../../src/buildx/build';
+
+import {BuildMetadata} from '../../src/types/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
-const metadata = `{
-  "containerimage.config.digest": "sha256:059b68a595b22564a1cbc167af369349fdc2ecc1f7bc092c2235cbf601a795fd",
-  "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
-}`;
+const metadata: BuildMetadata = {
+  'buildx.build.ref': 'default/default/n6ibcp9b2pw108rrz7ywdznvo',
+  'containerimage.config.digest': 'sha256:059b68a595b22564a1cbc167f369349fdc2ecc1f7bc092c2235cbf601a795fd',
+  'containerimage.digest': 'sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c'
+};
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
@@ -50,30 +53,39 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
-describe('resolveBuildImageID', () => {
+describe('resolveImageID', () => {
   it('matches', async () => {
     const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
-    const imageIDFile = Inputs.getBuildImageIDFilePath();
+    const imageIDFile = Build.getImageIDFilePath();
     await fs.writeFileSync(imageIDFile, imageID);
-    const expected = Inputs.resolveBuildImageID();
+    const expected = Build.resolveImageID();
     expect(expected).toEqual(imageID);
   });
 });
 
-describe('resolveBuildMetadata', () => {
+describe('resolveMetadata', () => {
   it('matches', async () => {
-    const metadataFile = Inputs.getBuildMetadataFilePath();
-    await fs.writeFileSync(metadataFile, metadata);
-    const expected = Inputs.resolveBuildMetadata();
+    const metadataFile = Build.getMetadataFilePath();
+    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
+    const expected = Build.resolveMetadata();
     expect(expected).toEqual(metadata);
+  });
+});
+
+describe('resolveRef', () => {
+  it('matches', async () => {
+    const metadataFile = Build.getMetadataFilePath();
+    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
+    const expected = Build.resolveRef();
+    expect(expected).toEqual('default/default/n6ibcp9b2pw108rrz7ywdznvo');
   });
 });
 
 describe('resolveDigest', () => {
   it('matches', async () => {
-    const metadataFile = Inputs.getBuildMetadataFilePath();
-    await fs.writeFileSync(metadataFile, metadata);
-    const expected = Inputs.resolveDigest();
+    const metadataFile = Build.getMetadataFilePath();
+    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
+    const expected = Build.resolveDigest();
     expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
   });
 });
@@ -120,7 +132,7 @@ describe('getProvenanceInput', () => {
     ],
   ])('given input %p', async (input: string, expected: string) => {
     await setInput('provenance', input);
-    expect(Inputs.getProvenanceInput('provenance')).toEqual(expected);
+    expect(Build.getProvenanceInput('provenance')).toEqual(expected);
   });
 });
 
@@ -148,11 +160,11 @@ describe('resolveProvenanceAttrs', () => {
       'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
     ],
   ])('given %p', async (input: string, expected: string) => {
-    expect(Inputs.resolveProvenanceAttrs(input)).toEqual(expected);
+    expect(Build.resolveProvenanceAttrs(input)).toEqual(expected);
   });
 });
 
-describe('resolveBuildSecret', () => {
+describe('resolveSecret', () => {
   test.each([
     ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
     ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', false, 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789', null],
@@ -166,9 +178,9 @@ describe('resolveBuildSecret', () => {
     try {
       let secret: string;
       if (file) {
-        secret = Inputs.resolveBuildSecretFile(kvp);
+        secret = Build.resolveSecretFile(kvp);
       } else {
-        secret = Inputs.resolveBuildSecretString(kvp);
+        secret = Build.resolveSecretString(kvp);
       }
       expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
       expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
@@ -185,7 +197,7 @@ describe('resolveBuildSecret', () => {
     ['FOO=bar=baz', 'FOO', 'bar=baz', null]
   ])('given %p key and %p env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
     try {
-      const secret = Inputs.resolveBuildSecretEnv(kvp);
+      const secret = Build.resolveSecretEnv(kvp);
       expect(secret).toEqual(`id=${exKey},env=${exValue}`);
     } catch (e) {
       // eslint-disable-next-line jest/no-conditional-expect
@@ -206,7 +218,7 @@ describe('hasLocalExporter', () => {
     [['" type= local" , dest=./release-out'], true],
     [['.'], true]
   ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
-    expect(Inputs.hasLocalExporter(exporters)).toEqual(expected);
+    expect(Build.hasLocalExporter(exporters)).toEqual(expected);
   });
 });
 
@@ -222,7 +234,7 @@ describe('hasTarExporter', () => {
     [['" type= local" , dest=./release-out'], false],
     [['.'], false]
   ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
-    expect(Inputs.hasTarExporter(exporters)).toEqual(expected);
+    expect(Build.hasTarExporter(exporters)).toEqual(expected);
   });
 });
 
@@ -240,7 +252,7 @@ describe('hasDockerExporter', () => {
     [['type=docker'], true, true],
     [['.'], true, true],
   ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
-    expect(Inputs.hasDockerExporter(exporters, load)).toEqual(expected);
+    expect(Build.hasDockerExporter(exporters, load)).toEqual(expected);
   });
 });
 
@@ -251,7 +263,7 @@ describe('hasAttestationType', () => {
     ['type=sbom,true', 'sbom', true],
     ['type=foo,bar', 'provenance', false],
   ])('given %p for %p returns %p', async (attrs: string, name: string, expected: boolean) => {
-    expect(Inputs.hasAttestationType(name, attrs)).toEqual(expected);
+    expect(Build.hasAttestationType(name, attrs)).toEqual(expected);
   });
 });
 
@@ -275,7 +287,7 @@ describe('resolveAttestationAttrs', () => {
       ''
     ],
   ])('given %p', async (input: string, expected: string) => {
-    expect(Inputs.resolveAttestationAttrs(input)).toEqual(expected);
+    expect(Build.resolveAttestationAttrs(input)).toEqual(expected);
   });
 });
 
@@ -285,7 +297,7 @@ describe('hasGitAuthTokenSecret', () => {
     [['A_SECRET=abcdef0123456789'], false],
     [['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789'], true],
   ])('given %p secret', async (kvp: Array<string>, expected: boolean) => {
-    expect(Inputs.hasGitAuthTokenSecret(kvp)).toBe(expected);
+    expect(Build.hasGitAuthTokenSecret(kvp)).toBe(expected);
   });
 });
 
