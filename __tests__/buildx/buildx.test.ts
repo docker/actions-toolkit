@@ -26,6 +26,7 @@ import {Exec} from '../../src/exec';
 
 import {Cert} from '../../src/types/buildx';
 
+const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
@@ -250,5 +251,40 @@ describe('resolveCertsDriverOpts', () => {
       const file = expectedFiles[k];
       expect(fs.existsSync(file)).toBe(true);
     }
+  });
+});
+
+describe('refs', () => {
+  it('returns all refs', async () => {
+    const refs = Buildx.refs({
+      dir: path.join(fixturesDir, 'buildx-refs')
+    });
+    expect(Object.keys(refs).length).toEqual(11);
+  });
+  it('returns default builder refs', async () => {
+    const refs = Buildx.refs({
+      dir: path.join(fixturesDir, 'buildx-refs'),
+      builderName: 'default'
+    });
+    expect(Object.keys(refs).length).toEqual(8);
+  });
+  it('returns foo builder refs', async () => {
+    const refs = Buildx.refs({
+      dir: path.join(fixturesDir, 'buildx-refs'),
+      builderName: 'foo'
+    });
+    expect(Object.keys(refs).length).toEqual(3);
+  });
+  it('returns default builder refs since', async () => {
+    const mdate = new Date('2023-09-05T00:00:00Z');
+    fs.utimesSync(path.join(fixturesDir, 'buildx-refs', 'default', 'default', '36dix0eiv9evr61vrwzn32w7q'), mdate, mdate);
+    fs.utimesSync(path.join(fixturesDir, 'buildx-refs', 'default', 'default', '49p5r8und2konke5pmlyzqp3n'), mdate, mdate);
+    fs.utimesSync(path.join(fixturesDir, 'buildx-refs', 'default', 'default', 'a8zqzhhv5yiazm396jobsgdw2'), mdate, mdate);
+    const refs = Buildx.refs({
+      dir: path.join(fixturesDir, 'buildx-refs'),
+      builderName: 'default',
+      since: new Date('2024-01-10T00:00:00Z')
+    });
+    expect(Object.keys(refs).length).toEqual(5);
   });
 });

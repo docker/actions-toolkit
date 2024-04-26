@@ -26,3 +26,21 @@ export interface DownloadVersion {
   downloadURL: string;
   releasesURL: string;
 }
+
+export interface LocalRefsOpts {
+  dir: string;
+  builderName?: string;
+  nodeName?: string;
+  since?: Date;
+}
+
+export interface LocalRefsResponse {
+  [ref: string]: LocalState;
+}
+
+export interface LocalState {
+  Target: string;
+  LocalPath: string;
+  DockerfilePath: string;
+  GroupRef?: string;
+}
