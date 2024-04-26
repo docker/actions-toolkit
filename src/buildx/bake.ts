@@ -46,17 +46,19 @@ export interface BakeCmdOpts {
 
 export class Bake {
   private readonly buildx: Buildx;
+  private readonly metadataFilename: string;
 
   constructor(opts?: BakeOpts) {
     this.buildx = opts?.buildx || new Buildx();
+    this.metadataFilename = `bake-metadata-${Util.generateRandomString()}.json`;
   }
 
-  public static getMetadataFilePath(): string {
-    return path.join(Context.tmpDir(), 'bake-metadata.json');
+  public getMetadataFilePath(): string {
+    return path.join(Context.tmpDir(), this.metadataFilename);
   }
 
-  public static resolveMetadata(): BakeMetadata | undefined {
-    const metadataFile = Bake.getMetadataFilePath();
+  public resolveMetadata(): BakeMetadata | undefined {
+    const metadataFile = this.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
     }
@@ -67,8 +69,8 @@ export class Bake {
     return <BakeMetadata>JSON.parse(content);
   }
 
-  public static resolveRefs(): Array<string> | undefined {
-    const metadata = Bake.resolveMetadata();
+  public resolveRefs(): Array<string> | undefined {
+    const metadata = this.resolveMetadata();
     if (!metadata) {
       return undefined;
     }

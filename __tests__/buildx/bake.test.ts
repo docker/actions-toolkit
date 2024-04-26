@@ -59,19 +59,17 @@ afterEach(() => {
 
 describe('resolveMetadata', () => {
   it('matches', async () => {
-    const metadataFile = Bake.getMetadataFilePath();
-    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
-    const expected = Bake.resolveMetadata();
-    expect(expected).toEqual(metadata as BakeMetadata);
+    const bake = new Bake();
+    await fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
+    expect(bake.resolveMetadata()).toEqual(metadata as BakeMetadata);
   });
 });
 
 describe('resolveRefs', () => {
   it('matches', async () => {
-    const metadataFile = Bake.getMetadataFilePath();
-    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
-    const expected = Bake.resolveRefs();
-    expect(expected).toEqual(['default/default/7frbdw1fmfozgtqavghowsepk', 'default/default/onic7g2axylf56rxetob7qruy']);
+    const bake = new Bake();
+    await fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
+    expect(bake.resolveRefs()).toEqual(['default/default/7frbdw1fmfozgtqavghowsepk', 'default/default/onic7g2axylf56rxetob7qruy']);
   });
 });
 
