@@ -174,4 +174,9 @@ export class Util {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
+
+  public static generateRandomString(length = 10) {
+    const bytes = crypto.randomBytes(Math.ceil(length / 2));
+    return bytes.toString('hex').slice(0, length);
+  }
 }

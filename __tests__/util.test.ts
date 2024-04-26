@@ -335,6 +335,22 @@ describe('formatFileSize', () => {
   });
 });
 
+describe('generateRandomString', () => {
+  it('should generate a random string of default length 10', async () => {
+    const res = Util.generateRandomString();
+    expect(typeof res).toBe('string');
+    expect(res.length).toBe(10);
+    expect(/^[0-9a-f]+$/i.test(res)).toBe(true);
+  });
+  it('should generate a random string of specified length', async () => {
+    const length = 15;
+    const res = Util.generateRandomString(length);
+    expect(typeof res).toBe('string');
+    expect(res.length).toBe(15);
+    expect(/^[0-9a-f]+$/i.test(res)).toBe(true);
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
