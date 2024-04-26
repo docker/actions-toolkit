@@ -19,31 +19,46 @@ import path from 'path';
 import * as core from '@actions/core';
 import {parse} from 'csv-parse/sync';
 
+import {Buildx} from './buildx';
 import {Context} from '../context';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
 import {BuildMetadata} from '../types/build';
 
+export interface BuildOpts {
+  buildx?: Buildx;
+}
+
 export class Build {
-  public static getImageIDFilePath(): string {
-    return path.join(Context.tmpDir(), 'iidfile');
+  private readonly buildx: Buildx;
+  private readonly iidFilename: string;
+  private readonly metadataFilename: string;
+
+  constructor(opts?: BuildOpts) {
+    this.buildx = opts?.buildx || new Buildx();
+    this.iidFilename = `build-iidfile-${Util.generateRandomString()}.txt`;
+    this.metadataFilename = `build-metadata-${Util.generateRandomString()}.json`;
   }
 
-  public static getMetadataFilePath(): string {
-    return path.join(Context.tmpDir(), 'metadata-file');
+  public getImageIDFilePath(): string {
+    return path.join(Context.tmpDir(), this.iidFilename);
   }
 
-  public static resolveImageID(): string | undefined {
-    const iidFile = Build.getImageIDFilePath();
+  public resolveImageID(): string | undefined {
+    const iidFile = this.getImageIDFilePath();
     if (!fs.existsSync(iidFile)) {
       return undefined;
     }
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
   }
 
-  public static resolveMetadata(): BuildMetadata | undefined {
-    const metadataFile = Build.getMetadataFilePath();
+  public getMetadataFilePath(): string {
+    return path.join(Context.tmpDir(), this.metadataFilename);
+  }
+
+  public resolveMetadata(): BuildMetadata | undefined {
+    const metadataFile = this.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
     }
@@ -54,10 +69,12 @@ export class Build {
     return <BuildMetadata>JSON.parse(content);
   }
 
-  public static resolveRef(): string | undefined {
-    const metadata = Build.resolveMetadata();
+  public resolveRef(metadata?: BuildMetadata): string | undefined {
     if (!metadata) {
-      return undefined;
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
     }
     if ('buildx.build.ref' in metadata) {
       return metadata['buildx.build.ref'];
@@ -65,10 +82,12 @@ export class Build {
     return undefined;
   }
 
-  public static resolveDigest(): string | undefined {
-    const metadata = Build.resolveMetadata();
+  public resolveDigest(metadata?: BuildMetadata): string | undefined {
     if (!metadata) {
-      return undefined;
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
     }
     if ('containerimage.digest' in metadata) {
       return metadata['containerimage.digest'];

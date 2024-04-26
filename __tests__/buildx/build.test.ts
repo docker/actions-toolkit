@@ -56,37 +56,33 @@ afterEach(() => {
 describe('resolveImageID', () => {
   it('matches', async () => {
     const imageID = 'sha256:bfb45ab72e46908183546477a08f8867fc40cebadd00af54b071b097aed127a9';
-    const imageIDFile = Build.getImageIDFilePath();
-    await fs.writeFileSync(imageIDFile, imageID);
-    const expected = Build.resolveImageID();
-    expect(expected).toEqual(imageID);
+    const build = new Build();
+    await fs.writeFileSync(build.getImageIDFilePath(), imageID);
+    expect(build.resolveImageID()).toEqual(imageID);
   });
 });
 
 describe('resolveMetadata', () => {
   it('matches', async () => {
-    const metadataFile = Build.getMetadataFilePath();
-    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
-    const expected = Build.resolveMetadata();
-    expect(expected).toEqual(metadata);
+    const build = new Build();
+    await fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
+    expect(build.resolveMetadata()).toEqual(metadata);
   });
 });
 
 describe('resolveRef', () => {
   it('matches', async () => {
-    const metadataFile = Build.getMetadataFilePath();
-    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
-    const expected = Build.resolveRef();
-    expect(expected).toEqual('default/default/n6ibcp9b2pw108rrz7ywdznvo');
+    const build = new Build();
+    await fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
+    expect(build.resolveRef()).toEqual('default/default/n6ibcp9b2pw108rrz7ywdznvo');
   });
 });
 
 describe('resolveDigest', () => {
   it('matches', async () => {
-    const metadataFile = Build.getMetadataFilePath();
-    await fs.writeFileSync(metadataFile, JSON.stringify(metadata));
-    const expected = Build.resolveDigest();
-    expect(expected).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
+    const build = new Build();
+    await fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
+    expect(build.resolveDigest()).toEqual('sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c');
   });
 });
 
