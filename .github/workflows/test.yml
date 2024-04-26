@@ -58,6 +58,11 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
+        name: Enable corepack
+        run: |
+          corepack enable
+          yarn --version
+      -
         name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -101,6 +106,18 @@ jobs:
       -
         name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
+      -
+        # FIXME: Needs to setup node twice on Windows due to a bug with runner
+        name: Setup Node
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      -
+        name: Enable corepack
+        run: |
+          corepack enable
+          yarn --version
       -
         name: Setup Node
         uses: actions/setup-node@v4
