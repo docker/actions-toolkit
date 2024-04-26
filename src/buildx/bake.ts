@@ -52,7 +52,7 @@ export class Bake {
   }
 
   public static getMetadataFilePath(): string {
-    return path.join(Context.tmpDir(), 'metadata-file');
+    return path.join(Context.tmpDir(), 'bake-metadata.json');
   }
 
   public static resolveMetadata(): BakeMetadata | undefined {

@@ -27,11 +27,7 @@ import {BuildMetadata} from '../types/build';
 
 export class Build {
   public static getImageIDFilePath(): string {
-    return path.join(Context.tmpDir(), 'iidfile');
-  }
-
-  public static getMetadataFilePath(): string {
-    return path.join(Context.tmpDir(), 'metadata-file');
+    return path.join(Context.tmpDir(), 'build-iidfile.txt');
   }
 
   public static resolveImageID(): string | undefined {
@@ -40,6 +36,10 @@ export class Build {
       return undefined;
     }
     return fs.readFileSync(iidFile, {encoding: 'utf-8'}).trim();
+  }
+
+  public static getMetadataFilePath(): string {
+    return path.join(Context.tmpDir(), 'build-metadata.json');
   }
 
   public static resolveMetadata(): BuildMetadata | undefined {
