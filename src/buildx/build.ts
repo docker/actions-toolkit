@@ -69,10 +69,12 @@ export class Build {
     return <BuildMetadata>JSON.parse(content);
   }
 
-  public resolveRef(): string | undefined {
-    const metadata = this.resolveMetadata();
+  public resolveRef(metadata?: BuildMetadata): string | undefined {
     if (!metadata) {
-      return undefined;
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
     }
     if ('buildx.build.ref' in metadata) {
       return metadata['buildx.build.ref'];
@@ -80,10 +82,12 @@ export class Build {
     return undefined;
   }
 
-  public resolveDigest(): string | undefined {
-    const metadata = this.resolveMetadata();
+  public resolveDigest(metadata?: BuildMetadata): string | undefined {
     if (!metadata) {
-      return undefined;
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
     }
     if ('containerimage.digest' in metadata) {
       return metadata['containerimage.digest'];

@@ -69,10 +69,12 @@ export class Bake {
     return <BakeMetadata>JSON.parse(content);
   }
 
-  public resolveRefs(): Array<string> | undefined {
-    const metadata = this.resolveMetadata();
+  public resolveRefs(metadata?: BakeMetadata): Array<string> | undefined {
     if (!metadata) {
-      return undefined;
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
     }
     const refs = new Array<string>();
     for (const key in metadata) {
