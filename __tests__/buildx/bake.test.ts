@@ -60,7 +60,7 @@ afterEach(() => {
 describe('resolveMetadata', () => {
   it('matches', async () => {
     const bake = new Bake();
-    await fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
+    fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
     expect(bake.resolveMetadata()).toEqual(metadata as BakeMetadata);
   });
 });
@@ -68,7 +68,7 @@ describe('resolveMetadata', () => {
 describe('resolveRefs', () => {
   it('matches', async () => {
     const bake = new Bake();
-    await fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
+    fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
     expect(bake.resolveRefs()).toEqual(['default/default/7frbdw1fmfozgtqavghowsepk', 'default/default/onic7g2axylf56rxetob7qruy']);
   });
 });
