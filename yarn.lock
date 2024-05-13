@@ -333,6 +333,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/storage-blob@npm:^12.18.0":
+  version: 12.18.0
+  resolution: "@azure/storage-blob@npm:12.18.0"
+  dependencies:
+    "@azure/abort-controller": ^1.0.0
+    "@azure/core-http": ^3.0.0
+    "@azure/core-lro": ^2.2.0
+    "@azure/core-paging": ^1.1.1
+    "@azure/core-tracing": 1.0.0-preview.13
+    "@azure/logger": ^1.0.0
+    events: ^3.0.0
+    tslib: ^2.2.0
+  checksum: 57806b12d89fef90d679a1626f0f6e80b411ac7c587508ac6c39c663ae40357c1f42ffebe5df15d5c46b13d150428bf742e93a8993487ed9c824872593575c2d
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.14.5":
   version: 7.14.5
   resolution: "@babel/code-frame@npm:7.14.5"
@@ -1107,7 +1123,7 @@ __metadata:
     "@actions/http-client": ^2.2.1
     "@actions/io": ^1.1.3
     "@actions/tool-cache": ^2.0.1
-    "@azure/storage-blob": ^12.15.0
+    "@azure/storage-blob": ^12.18.0
     "@octokit/core": ^5.1.0
     "@octokit/plugin-rest-endpoint-methods": ^10.4.0
     "@types/csv-parse": ^1.2.2
