@@ -16,6 +16,8 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
+import jsyaml from 'js-yaml';
+import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
@@ -23,6 +25,7 @@ import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
 import * as core from '@actions/core';
+import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
@@ -30,7 +33,9 @@ import {TransferProgressEvent} from '@azure/core-http';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
-import {GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
+import {Util} from './util';
+
+import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
 
 export interface GitHubOpts {
   token?: string;
@@ -189,5 +194,85 @@ export class GitHub {
       size: uploadByteCount,
       url: artifactURL
     };
+  }
+
+  public static async writeBuildSummary(opts: BuildSummaryOpts): Promise<void> {
+    // can't use original core.summary.addLink due to the need to make
+    // EOL optional
+    const addLink = function (text: string, url: string, addEOL = false): string {
+      return `<a href="${url}">${text}</a>` + (addEOL ? os.EOL : '');
+    };
+
+    const refsSize = Object.keys(opts.exportRes.refs).length;
+
+    // prettier-ignore
+    const sum = core.summary
+      .addHeading('Docker Build summary', 1)
+      .addRaw(`<p>`)
+        .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
+        .addBreak()
+        .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
+        .addRaw(addLink('Learn more', 'https://docs.docker.com/go/build-summary/'))
+      .addRaw('</p>')
+      .addRaw(`<p>`)
+        .addRaw(`:arrow_down: ${addLink(`<strong>${opts.uploadRes.filename}</strong>`, opts.uploadRes.url)} (${Util.formatFileSize(opts.uploadRes.size)})`)
+        .addBreak()
+        .addRaw(`This file includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>.`)
+      .addRaw(`</p>`)
+      .addRaw(`<p>`)
+        .addRaw(`Find this useful? `)
+        .addRaw(addLink('Let us know', 'https://docs.docker.com/feedback/gha-build-summary'))
+      .addRaw('</p>');
+
+    sum.addHeading('Preview', 2);
+
+    const summaryTableData: Array<Array<SummaryTableCell>> = [
+      [
+        {header: true, data: 'ID'},
+        {header: true, data: 'Name'},
+        {header: true, data: 'Status'},
+        {header: true, data: 'Cached'},
+        {header: true, data: 'Duration'}
+      ]
+    ];
+    let summaryError: string | undefined;
+    for (const ref in opts.exportRes.summaries) {
+      if (Object.prototype.hasOwnProperty.call(opts.exportRes.summaries, ref)) {
+        const summary = opts.exportRes.summaries[ref];
+        // prettier-ignore
+        summaryTableData.push([
+          {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
+          {data: `<strong>${summary.name}</strong>`},
+          {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
+          {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
+          {data: summary.duration}
+        ]);
+        if (summary.error) {
+          summaryError = summary.error;
+        }
+      }
+    }
+    sum.addTable([...summaryTableData]);
+    if (summaryError) {
+      sum.addHeading('Error', 4);
+      sum.addCodeBlock(summaryError, 'text');
+    }
+
+    if (opts.inputs) {
+      sum.addHeading('Build inputs', 2).addCodeBlock(
+        jsyaml.dump(opts.inputs, {
+          indent: 2,
+          lineWidth: -1
+        }),
+        'yaml'
+      );
+    }
+
+    if (opts.bakeDefinition) {
+      sum.addHeading('Bake definition', 2).addCodeBlock(JSON.stringify(opts.bakeDefinition, null, 2), 'json');
+    }
+
+    core.info(`Writing summary`);
+    await sum.addSeparator().write();
   }
 }

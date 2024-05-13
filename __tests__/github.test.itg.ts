@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import fs from 'fs';
 import * as path from 'path';
 
+import {Buildx} from '../src/buildx/buildx';
+import {Bake} from '../src/buildx/bake';
+import {Build} from '../src/buildx/build';
+import {Exec} from '../src/exec';
 import {GitHub} from '../src/github';
+import {History} from '../src/buildx/history';
 
 const fixturesDir = path.join(__dirname, 'fixtures');
+
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'github-jest');
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
@@ -37,5 +46,151 @@ maybe('uploadArtifact', () => {
     expect(res).toBeDefined();
     console.log('uploadArtifactResponse', res);
     expect(res?.url).toBeDefined();
+  });
+});
+
+maybe('writeBuildSummary', () => {
+  // prettier-ignore
+  test.each([
+    [
+      "single",
+      [
+        'build',
+        '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+        fixturesDir
+      ],
+    ],
+    [
+      "multiplatform",
+      [
+        'build',
+        '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+        '--platform', 'linux/amd64,linux/arm64',
+        fixturesDir
+      ],
+    ]
+  ])('write build summary %p', async (_, bargs) => {
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          ...bargs,
+          '--metadata-file', build.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = build.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRef = build.resolveRef(metadata);
+    expect(buildRef).toBeDefined();
+
+    const history = new History({buildx: buildx});
+    const exportRes = await history.export({
+      refs: [buildRef ?? '']
+    });
+    expect(exportRes).toBeDefined();
+    expect(exportRes?.dockerbuildFilename).toBeDefined();
+    expect(exportRes?.dockerbuildSize).toBeDefined();
+    expect(exportRes?.summaries).toBeDefined();
+
+    const uploadRes = await GitHub.uploadArtifact({
+      filename: exportRes?.dockerbuildFilename,
+      mimeType: 'application/gzip',
+      retentionDays: 1
+    });
+    expect(uploadRes).toBeDefined();
+    expect(uploadRes?.url).toBeDefined();
+
+    await GitHub.writeBuildSummary({
+      exportRes: exportRes,
+      uploadRes: uploadRes,
+      inputs: {
+        context: fixturesDir,
+        file: path.join(fixturesDir, 'hello.Dockerfile')
+      }
+    });
+  });
+
+  // prettier-ignore
+  test.each([
+    [
+      'single',
+      [
+        'bake',
+        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
+        'hello'
+      ],
+    ],
+    [
+      'group',
+      [
+        'bake',
+        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
+        'hello-all'
+      ],
+    ],
+    [
+      'matrix',
+      [
+        'bake',
+        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
+        'hello-matrix'
+      ],
+    ]
+  ])('write bake summary %p', async (_, bargs) => {
+    const buildx = new Buildx();
+    const bake = new Bake({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          ...bargs,
+          '--metadata-file', bake.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args, {
+          cwd: fixturesDir
+        });
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = bake.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRefs = bake.resolveRefs(metadata);
+    expect(buildRefs).toBeDefined();
+
+    const history = new History({buildx: buildx});
+    const exportRes = await history.export({
+      refs: buildRefs ?? []
+    });
+    expect(exportRes).toBeDefined();
+    expect(exportRes?.dockerbuildFilename).toBeDefined();
+    expect(exportRes?.dockerbuildSize).toBeDefined();
+    expect(exportRes?.summaries).toBeDefined();
+
+    const uploadRes = await GitHub.uploadArtifact({
+      filename: exportRes?.dockerbuildFilename,
+      mimeType: 'application/gzip',
+      retentionDays: 1
+    });
+    expect(uploadRes).toBeDefined();
+    expect(uploadRes?.url).toBeDefined();
+
+    await GitHub.writeBuildSummary({
+      exportRes: exportRes,
+      uploadRes: uploadRes,
+      inputs: {
+        files: path.join(fixturesDir, 'hello-bake.hcl')
+      }
+    });
   });
 });
