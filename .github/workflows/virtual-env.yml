@@ -21,6 +21,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - ubuntu-24.04
           - ubuntu-22.04
           - ubuntu-20.04
     steps:
@@ -42,7 +43,7 @@ jobs:
       -
         name: Docker daemon conf
         run: |
-          cat /etc/docker/daemon.json
+          cat /etc/docker/daemon.json || true
       -
         name: Docker info
         run: docker info
