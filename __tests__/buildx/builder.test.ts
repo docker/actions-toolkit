@@ -21,7 +21,7 @@ import * as path from 'path';
 import {Builder} from '../../src/buildx/builder';
 import {Exec} from '../../src/exec';
 
-import {BuilderInfo} from '../../src/types/builder';
+import {BuilderInfo} from '../../src/types/buildx/builder';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 

@@ -24,7 +24,7 @@ import {Context} from '../context';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
-import {BuildMetadata} from '../types/build';
+import {BuildMetadata} from '../types/buildx/build';
 
 export interface BuildOpts {
   buildx?: Buildx;

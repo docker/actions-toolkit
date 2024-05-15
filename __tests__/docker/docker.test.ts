@@ -24,7 +24,7 @@ import * as rimraf from 'rimraf';
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
-import {ConfigFile} from '../../src/types/docker';
+import {ConfigFile} from '../../src/types/docker/docker';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 

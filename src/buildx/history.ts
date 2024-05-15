@@ -27,7 +27,7 @@ import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
 
-import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/history';
+import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/buildx/history';
 
 export interface HistoryOpts {
   buildx?: Buildx;

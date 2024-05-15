@@ -24,7 +24,7 @@ import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
 import {Exec} from '../../src/exec';
 
-import {Cert} from '../../src/types/buildx';
+import {Cert} from '../../src/types/buildx/buildx';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore

@@ -22,7 +22,7 @@ import * as rimraf from 'rimraf';
 import {Context} from '../../src/context';
 import {Build} from '../../src/buildx/build';
 
-import {BuildMetadata} from '../../src/types/build';
+import {BuildMetadata} from '../../src/types/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
