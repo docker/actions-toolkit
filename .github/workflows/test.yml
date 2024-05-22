@@ -15,7 +15,7 @@ on:
 
 env:
   NODE_VERSION: "20"
-  BUILDX_VERSION: "v0.14.0"
+  BUILDX_VERSION: "v0.14.1"
 
 jobs:
   test:
