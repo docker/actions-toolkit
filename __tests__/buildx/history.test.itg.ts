@@ -86,6 +86,7 @@ maybe('exportBuild', () => {
     expect(exportRes?.dockerbuildFilename).toBeDefined();
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
+    expect(exportRes?.summaries).toBeDefined();
   });
 
   // prettier-ignore
@@ -147,5 +148,6 @@ maybe('exportBuild', () => {
     expect(exportRes?.dockerbuildFilename).toBeDefined();
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
+    expect(exportRes?.summaries).toBeDefined();
   });
 });

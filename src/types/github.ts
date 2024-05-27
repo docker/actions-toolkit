@@ -17,6 +17,9 @@
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
+import {BakeDefinition} from './bake';
+import {ExportRecordResponse} from './history';
+
 export interface GitHubRelease {
   id: number;
   tag_name: string;
@@ -46,4 +49,12 @@ export interface UploadArtifactResponse {
   filename: string;
   size: number;
   url: string;
+}
+
+export interface BuildSummaryOpts {
+  exportRes: ExportRecordResponse;
+  uploadRes: UploadArtifactResponse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  inputs?: any;
+  bakeDefinition?: BakeDefinition;
 }

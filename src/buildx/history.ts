@@ -27,7 +27,7 @@ import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
 
-import {ExportRecordOpts, ExportRecordResponse} from '../types/history';
+import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/history';
 
 export interface HistoryOpts {
   buildx?: Buildx;
@@ -95,6 +95,7 @@ export class History {
     buildxDialStdioProc.stdout.pipe(fs.createWriteStream(buildxOutFifoPath));
 
     const tmpDockerbuildFilename = path.join(outDir, 'rec.dockerbuild');
+    const summaryFilename = path.join(outDir, 'summary.json');
 
     await new Promise<void>((resolve, reject) => {
       const ebargs: Array<string> = ['--ref-state-dir=/buildx-refs', `--node=${builderName}/${nodeName}`];
@@ -145,9 +146,14 @@ export class History {
     fs.renameSync(tmpDockerbuildFilename, dockerbuildPath);
     const dockerbuildStats = fs.statSync(dockerbuildPath);
 
+    core.info(`Parsing ${summaryFilename}`);
+    fs.statSync(summaryFilename);
+    const summaries = <Summaries>JSON.parse(fs.readFileSync(summaryFilename, {encoding: 'utf-8'}));
+
     return {
       dockerbuildFilename: dockerbuildPath,
       dockerbuildSize: dockerbuildStats.size,
+      summaries: summaries,
       builderName: builderName,
       nodeName: nodeName,
       refs: refs

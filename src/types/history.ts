@@ -22,7 +22,23 @@ export interface ExportRecordOpts {
 export interface ExportRecordResponse {
   dockerbuildFilename: string;
   dockerbuildSize: number;
+  summaries: Summaries;
   builderName: string;
   nodeName: string;
   refs: Array<string>;
+}
+
+export interface Summaries {
+  [ref: string]: RecordSummary;
+}
+
+export interface RecordSummary {
+  name: string;
+  status: string;
+  duration: string;
+  numCachedSteps: number;
+  numTotalSteps: number;
+  numCompletedSteps: number;
+  frontendAttrs: Record<string, string>;
+  error?: string;
 }
