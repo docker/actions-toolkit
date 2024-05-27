@@ -100,7 +100,7 @@ describe('getProvenanceInput', () => {
   test.each([
     [
       'true',
-      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
     [
       'false',
@@ -108,11 +108,11 @@ describe('getProvenanceInput', () => {
     ],
     [
       'mode=min',
-      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
     [
       'mode=max',
-      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
     [
       'builder-id=foo',
@@ -137,11 +137,11 @@ describe('resolveProvenanceAttrs', () => {
   test.each([
     [
       'mode=min',
-      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'mode=min,builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
     [
       'mode=max',
-      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'mode=max,builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
     [
       'builder-id=foo',
@@ -153,7 +153,7 @@ describe('resolveProvenanceAttrs', () => {
     ],
     [
       '',
-      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/123'
+      'builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
   ])('given %p', async (input: string, expected: string) => {
     expect(Build.resolveProvenanceAttrs(input)).toEqual(expected);
