@@ -22,7 +22,7 @@ import * as semver from 'semver';
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 
-import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx';
+import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx/buildx';
 
 export interface BuildxOpts {
   standalone?: boolean;

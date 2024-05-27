@@ -17,8 +17,8 @@
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
-import {BakeDefinition} from './bake';
-import {ExportRecordResponse} from './history';
+import {BakeDefinition} from './buildx/bake';
+import {ExportRecordResponse} from './buildx/history';
 
 export interface GitHubRelease {
   id: number;

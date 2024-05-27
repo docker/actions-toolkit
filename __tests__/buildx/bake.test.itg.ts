@@ -19,7 +19,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {Bake} from '../../src/buildx/bake';
-import {BakeDefinition} from '../../src/types/bake';
+import {BakeDefinition} from '../../src/types/buildx/bake';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 

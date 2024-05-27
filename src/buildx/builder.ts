@@ -19,7 +19,7 @@ import * as core from '@actions/core';
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
-import {BuilderInfo, GCPolicy, NodeInfo} from '../types/builder';
+import {BuilderInfo, GCPolicy, NodeInfo} from '../types/buildx/builder';
 
 export interface BuilderOpts {
   buildx?: Buildx;

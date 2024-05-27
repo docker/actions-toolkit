@@ -24,7 +24,7 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, BakeMetadata} from '../types/bake';
+import {BakeDefinition, BakeMetadata} from '../types/buildx/bake';
 
 export interface BakeOpts {
   buildx?: Buildx;

@@ -23,7 +23,7 @@ import {Bake} from '../../src/buildx/bake';
 import {Context} from '../../src/context';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, BakeMetadata} from '../../src/types/bake';
+import {BakeDefinition, BakeMetadata} from '../../src/types/buildx/bake';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore

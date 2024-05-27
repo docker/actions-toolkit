@@ -22,7 +22,7 @@ import {Builder} from '../buildx/builder';
 import {Config} from './config';
 import {Exec} from '../exec';
 
-import {BuilderInfo, NodeInfo} from '../types/builder';
+import {BuilderInfo, NodeInfo} from '../types/buildx/builder';
 
 export interface BuildKitOpts {
   buildx?: Buildx;

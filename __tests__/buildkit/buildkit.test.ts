@@ -19,7 +19,7 @@ import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import {BuildKit} from '../../src/buildkit/buildkit';
 import {Builder} from '../../src/buildx/builder';
 
-import {BuilderInfo} from '../../src/types/builder';
+import {BuilderInfo} from '../../src/types/buildx/builder';
 
 beforeEach(() => {
   jest.clearAllMocks();

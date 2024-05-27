@@ -25,7 +25,7 @@ import {Cache} from '../cache';
 import {Exec} from '../exec';
 import {Util} from '../util';
 
-import {ConfigFile} from '../types/docker';
+import {ConfigFile} from '../types/docker/docker';
 
 export class Docker {
   static get configDir(): string {

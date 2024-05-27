@@ -31,7 +31,7 @@ import {Docker} from '../docker/docker';
 import {Git} from '../git';
 import {Util} from '../util';
 
-import {DownloadVersion} from '../types/buildx';
+import {DownloadVersion} from '../types/buildx/buildx';
 import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
