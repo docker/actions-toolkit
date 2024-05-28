@@ -22,7 +22,8 @@ export const context = {
     repo: 'actions-toolkit'
   },
   ref: 'refs/heads/master',
-  runId: 123,
+  runId: 2188748038,
+  runNumber: 15,
   payload: {
     after: '860c1904a1ce19322e91ac35af1ab07466440c37',
     base_ref: null,

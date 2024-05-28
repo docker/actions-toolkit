@@ -90,8 +90,8 @@ describe('apiURL', () => {
 });
 
 describe('workflowRunURL', () => {
-  it('returns 123', async () => {
-    expect(GitHub.workflowRunURL).toEqual('https://github.com/docker/actions-toolkit/actions/runs/123');
+  it('returns 2188748038', async () => {
+    expect(GitHub.workflowRunURL).toEqual('https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2');
   });
 });
 

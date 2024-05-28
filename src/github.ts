@@ -65,7 +65,9 @@ export class GitHub {
   }
 
   static get workflowRunURL(): string {
-    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
+    const runID = process.env.GITHUB_RUN_ID || github.context.runId;
+    const runAttempt = process.env.GITHUB_RUN_ATTEMPT || 1;
+    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${runID}/attempts/${runAttempt}`;
   }
 
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
