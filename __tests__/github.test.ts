@@ -32,7 +32,7 @@ jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRe
 });
 
 describe('repoData', () => {
-  it('returns GitHub repository', async () => {
+  it('returns GitHub repo data', async () => {
     const github = new GitHub();
     expect((await github.repoData()).name).toEqual('Hello-World');
   });
@@ -86,6 +86,12 @@ describe('apiURL', () => {
   });
   it('returns from env', async () => {
     expect(GitHub.apiURL).toEqual('https://bar.github.com');
+  });
+});
+
+describe('repository', () => {
+  it('returns GitHub repository', async () => {
+    expect(GitHub.repository).toEqual('docker/actions-toolkit');
   });
 });
 
