@@ -14,7 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM busybox
+FROM busybox AS build
 ARG NAME=foo
 ARG TARGETPLATFORM
-RUN echo "Hello $NAME from $TARGETPLATFORM"
+RUN echo "Hello $NAME from $TARGETPLATFORM" > foo
+
+FROM scratch
+COPY --from=build /foo /
