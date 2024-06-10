@@ -253,6 +253,12 @@ export class Install {
       });
     }
 
+    const envs = Object.assign({}, process.env, {
+      PATH: `${this.toolDir}:${process.env.PATH}`
+    }) as {
+      [key: string]: string;
+    };
+
     await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
       const cmd = `${this.toolDir}/dockerd --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid" --userland-proxy=false`;
@@ -262,11 +268,12 @@ export class Install {
         // avoid killing it when the action finishes running. Even if detached,
         // we also need to run dockerd in a subshell and unref the process so
         // GitHub Action doesn't wait for it to finish.
-        `sudo -E ${bashPath} << EOF
+        `sudo env "PATH=$PATH" ${bashPath} << EOF
 ( ${cmd} 2>&1 | tee "${this.runDir}/dockerd.log" ) &
 EOF`,
         [],
         {
+          env: envs,
           detached: true,
           shell: true,
           stdio: ['ignore', process.stdout, process.stderr]
@@ -280,7 +287,7 @@ EOF`,
           try {
             await Exec.getExecOutput(`docker version`, undefined, {
               silent: true,
-              env: Object.assign({}, process.env, {
+              env: Object.assign({}, envs, {
                 DOCKER_HOST: dockerHost
               }) as {
                 [key: string]: string;

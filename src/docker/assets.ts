@@ -79,6 +79,9 @@ if (Get-Service docker -ErrorAction SilentlyContinue) {
   Write-Host "Service removed"
 }
 
+$env:Path = "$ToolDir;" + [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+Write-Host "Path: $env:Path"
+
 $env:DOCKER_HOST = $DockerHost
 Write-Host "DOCKER_HOST: $env:DOCKER_HOST"
 

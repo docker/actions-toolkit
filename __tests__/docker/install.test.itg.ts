@@ -19,6 +19,7 @@ import {jest, describe, expect, test, beforeEach, afterEach} from '@jest/globals
 
 import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
+import {Exec} from '../../src/exec';
 
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
@@ -38,8 +39,19 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
     process.env = originalEnv;
   });
   // prettier-ignore
-  test.each(['v24.0.4'])(
+  test.each(['v26.1.4'])(
     'install docker %s', async (version) => {
+      if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
+        // Remove containerd first on ubuntu runners to make sure it takes
+        // ones packaged with docker
+        await Exec.exec('sudo', ['apt-get', 'remove', '-y', 'containerd.io'], {
+          env: Object.assign({}, process.env, {
+            DEBIAN_FRONTEND: 'noninteractive'
+          }) as {
+            [key: string]: string;
+          }
+        });
+      }
       await expect((async () => {
         const install = new Install({
           version: version,
