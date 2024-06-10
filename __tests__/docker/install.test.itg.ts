@@ -39,7 +39,7 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
     process.env = originalEnv;
   });
   // prettier-ignore
-  test.each(['v24.0.4'])(
+  test.each(['v26.1.4'])(
     'install docker %s', async (version) => {
       if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
         // Remove containerd first on ubuntu runners to make sure it takes
