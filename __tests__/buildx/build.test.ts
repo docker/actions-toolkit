@@ -202,6 +202,54 @@ describe('resolveSecret', () => {
   });
 });
 
+describe('resolveCacheToAttrs', () => {
+  // prettier-ignore
+  test.each([
+    [
+      '',
+      undefined,
+      ''
+    ],
+    [
+      'user/app:cache',
+      undefined,
+      'user/app:cache'
+    ],
+    [
+      'type=inline',
+      undefined,
+      'type=inline'
+    ],
+    [
+      'type=gha',
+      undefined,
+      'type=gha,repository=docker/actions-toolkit',
+    ],
+    [
+      'type=gha,mode=max',
+      undefined,
+      'type=gha,mode=max,repository=docker/actions-toolkit',
+    ],
+    [
+      'type=gha,mode=max',
+      'abcd1234',
+      'type=gha,mode=max,repository=docker/actions-toolkit,ghtoken=abcd1234',
+    ],
+    [
+      'type=gha,repository=foo/bar,mode=max',
+      undefined,
+      'type=gha,repository=foo/bar,mode=max',
+    ],
+    [
+      'type=gha,repository=foo/bar,mode=max',
+      'abcd1234',
+      'type=gha,repository=foo/bar,mode=max,ghtoken=abcd1234',
+    ],
+  ])('given %p', async (input: string, githubToken: string | undefined, expected: string) => {
+    expect(Build.resolveCacheToAttrs(input, githubToken)).toEqual(expected);
+  });
+});
+
 describe('hasLocalExporter', () => {
   // prettier-ignore
   test.each([

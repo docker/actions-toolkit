@@ -64,10 +64,14 @@ export class GitHub {
     return process.env.GITHUB_API_URL || 'https://api.github.com';
   }
 
+  static get repository(): string {
+    return `${github.context.repo.owner}/${github.context.repo.repo}`;
+  }
+
   static get workflowRunURL(): string {
     const runID = process.env.GITHUB_RUN_ID || github.context.runId;
     const runAttempt = process.env.GITHUB_RUN_ATTEMPT || 1;
-    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${runID}/attempts/${runAttempt}`;
+    return `${GitHub.serverURL}/${GitHub.repository}/actions/runs/${runID}/attempts/${runAttempt}`;
   }
 
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {

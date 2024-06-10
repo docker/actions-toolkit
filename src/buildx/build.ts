@@ -161,6 +161,45 @@ export class Build {
     return `${input},builder-id=${GitHub.workflowRunURL}`;
   }
 
+  public static resolveCacheToAttrs(input: string, githubToken?: string): string {
+    if (!input) {
+      return input;
+    }
+
+    let cacheType = 'registry';
+    let ghaCacheRepository = '';
+    let ghaCacheGHToken = '';
+
+    const fields = parse(input, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+    for (const field of fields) {
+      const parts = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map(item => item.trim());
+      if (parts[0] === 'type') {
+        cacheType = parts[1];
+      } else if (parts[0] === 'repository') {
+        ghaCacheRepository = parts[1];
+      } else if (parts[0] === 'ghtoken') {
+        ghaCacheGHToken = parts[1];
+      }
+    }
+
+    if (cacheType === 'gha') {
+      if (!ghaCacheRepository) {
+        input = `${input},repository=${GitHub.repository}`;
+      }
+      if (!ghaCacheGHToken && githubToken) {
+        input = `${input},ghtoken=${githubToken}`;
+      }
+    }
+
+    return input;
+  }
+
   public static hasLocalExporter(exporters: string[]): boolean {
     return Build.hasExporterType('local', exporters);
   }
