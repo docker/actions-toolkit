@@ -31,6 +31,12 @@ describe('getInputList', () => {
     expect(res).toEqual(['bar']);
   });
 
+  it('empty correctly', async () => {
+    setInput('foo', '');
+    const res = Util.getInputList('foo');
+    expect(res).toEqual([]);
+  });
+
   it('multiline correctly', async () => {
     setInput('foo', 'bar\nbaz');
     const res = Util.getInputList('foo');
