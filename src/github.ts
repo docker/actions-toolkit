@@ -68,10 +68,10 @@ export class GitHub {
     return `${github.context.repo.owner}/${github.context.repo.repo}`;
   }
 
-  static get workflowRunURL(): string {
-    const runID = process.env.GITHUB_RUN_ID || github.context.runId;
-    const runAttempt = process.env.GITHUB_RUN_ATTEMPT || 1;
-    return `${GitHub.serverURL}/${GitHub.repository}/actions/runs/${runID}/attempts/${runAttempt}`;
+  public static workflowRunURL(setAttempts?: boolean): string {
+    // TODO: runAttempt is not yet part of github.context but will be in a
+    //  future release of @actions/github package: https://github.com/actions/toolkit/commit/faa425440f86f9c16587a19dfb59491253a2c92a
+    return `${GitHub.serverURL}/${GitHub.repository}/actions/runs/${github.context.runId}${setAttempts ? `/attempts/${process.env.GITHUB_RUN_ATTEMPT || 1}` : ''}`;
   }
 
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
@@ -191,7 +191,7 @@ export class GitHub {
     const artifactId = BigInt(finalizeArtifactResp.artifactId);
     core.info(`Artifact successfully finalized (${artifactId})`);
 
-    const artifactURL = `${GitHub.workflowRunURL}/artifacts/${artifactId}`;
+    const artifactURL = `${GitHub.workflowRunURL()}/artifacts/${artifactId}`;
     core.info(`Artifact download URL: ${artifactURL}`);
 
     return {

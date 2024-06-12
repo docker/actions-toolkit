@@ -131,7 +131,7 @@ export class Build {
       return input;
     }
     try {
-      return core.getBooleanInput(name) ? `builder-id=${GitHub.workflowRunURL}` : 'false';
+      return core.getBooleanInput(name) ? `builder-id=${GitHub.workflowRunURL(true)}` : 'false';
     } catch (err) {
       // not a valid boolean, so we assume it's a string
       return Build.resolveProvenanceAttrs(input);
@@ -140,7 +140,7 @@ export class Build {
 
   public static resolveProvenanceAttrs(input: string): string {
     if (!input) {
-      return `builder-id=${GitHub.workflowRunURL}`;
+      return `builder-id=${GitHub.workflowRunURL(true)}`;
     }
     // parse attributes from input
     const fields = parse(input, {
@@ -158,7 +158,7 @@ export class Build {
       }
     }
     // if not add builder-id attribute
-    return `${input},builder-id=${GitHub.workflowRunURL}`;
+    return `${input},builder-id=${GitHub.workflowRunURL(true)}`;
   }
 
   public static resolveCacheToAttrs(input: string, githubToken?: string): string {

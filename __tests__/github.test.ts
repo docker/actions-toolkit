@@ -97,7 +97,10 @@ describe('repository', () => {
 
 describe('workflowRunURL', () => {
   it('returns 2188748038', async () => {
-    expect(GitHub.workflowRunURL).toEqual('https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2');
+    expect(GitHub.workflowRunURL()).toEqual('https://github.com/docker/actions-toolkit/actions/runs/2188748038');
+  });
+  it('returns 2188748038 with attempts 2', async () => {
+    expect(GitHub.workflowRunURL(true)).toEqual('https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2');
   });
 });
 
