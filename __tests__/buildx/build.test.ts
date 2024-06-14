@@ -22,17 +22,11 @@ import * as rimraf from 'rimraf';
 import {Context} from '../../src/context';
 import {Build} from '../../src/buildx/build';
 
-import {BuildMetadata} from '../../src/types/buildx/build';
-
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
-const metadata: BuildMetadata = {
-  'buildx.build.ref': 'default/default/n6ibcp9b2pw108rrz7ywdznvo',
-  'containerimage.config.digest': 'sha256:059b68a595b22564a1cbc167f369349fdc2ecc1f7bc092c2235cbf601a795fd',
-  'containerimage.digest': 'sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c'
-};
+const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata.json'), 'utf-8'));
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
@@ -75,6 +69,18 @@ describe('resolveRef', () => {
     const build = new Build();
     fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
     expect(build.resolveRef()).toEqual('default/default/n6ibcp9b2pw108rrz7ywdznvo');
+  });
+});
+
+describe('resolveProvenance', () => {
+  it('matches', async () => {
+    const build = new Build();
+    fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
+    const provenance = build.resolveProvenance();
+    expect(provenance).toBeDefined();
+    expect(provenance?.buildType).toEqual('https://mobyproject.org/buildkit@v1');
+    expect(provenance?.materials).toBeDefined();
+    expect(provenance?.materials?.length).toEqual(2);
   });
 });
 

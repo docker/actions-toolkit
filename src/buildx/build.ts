@@ -25,6 +25,7 @@ import {GitHub} from '../github';
 import {Util} from '../util';
 
 import {BuildMetadata} from '../types/buildx/build';
+import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance';
 
 export interface BuildOpts {
   buildx?: Buildx;
@@ -78,6 +79,19 @@ export class Build {
     }
     if ('buildx.build.ref' in metadata) {
       return metadata['buildx.build.ref'];
+    }
+    return undefined;
+  }
+
+  public resolveProvenance(metadata?: BuildMetadata): ProvenancePredicate | undefined {
+    if (!metadata) {
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
+    }
+    if ('buildx.build.provenance' in metadata) {
+      return metadata['buildx.build.provenance'] as ProvenancePredicate;
     }
     return undefined;
   }

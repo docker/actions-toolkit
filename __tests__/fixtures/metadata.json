@@ -1,0 +1,45 @@
+{
+  "buildx.build.provenance": {
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/docker/dockerfile-upstream@master",
+        "digest": {
+          "sha256": "70433342168dafa34d11bd7236c3c3fcf448b90539733281711050808f32e835"
+        }
+      },
+      {
+        "uri": "pkg:docker/busybox@latest?platform=linux%2Famd64",
+        "digest": {
+          "sha256": "9ae97d36d26566ff84e8893c64a6dc4fe8ca6d1144bf5b87b2b85a32def253c7"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "entryPoint": "Dockerfile"
+      },
+      "parameters": {
+        "frontend": "gateway.v0",
+        "args": {
+          "cmdline": "docker/dockerfile-upstream:master",
+          "source": "docker/dockerfile-upstream:master"
+        },
+        "locals": [
+          {
+            "name": "context"
+          },
+          {
+            "name": "dockerfile"
+          }
+        ]
+      },
+      "environment": {
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "default/default/n6ibcp9b2pw108rrz7ywdznvo",
+  "containerimage.config.digest": "sha256:059b68a595b22564a1cbc167f369349fdc2ecc1f7bc092c2235cbf601a795fd",
+  "containerimage.digest": "sha256:b09b9482c72371486bb2c1d2c2a2633ed1d0b8389e12c8d52b9e052725c0c83c"
+}
