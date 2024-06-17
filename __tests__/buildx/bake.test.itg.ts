@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {describe, expect, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -24,10 +24,6 @@ import {BakeDefinition} from '../../src/types/buildx/bake';
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 maybe('getDefinition', () => {
   // prettier-ignore

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {describe, expect, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -30,10 +30,6 @@ const fixturesDir = path.join(__dirname, '..', 'fixtures');
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-history-jest');
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 maybe('exportBuild', () => {
   // prettier-ignore
