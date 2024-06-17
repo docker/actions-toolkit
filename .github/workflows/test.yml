@@ -149,6 +149,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CTN_BUILDER_NAME: ${{ steps.builder.outputs.name }}
+          TEST_FOR_SUMMARY: ${{ secrets.TEST_FOR_SUMMARY }}
       -
         name: Check coverage
         run: |
