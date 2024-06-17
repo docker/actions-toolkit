@@ -15,11 +15,8 @@
  */
 
 import {describe, expect, jest, it, beforeEach} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
-
-import {DockerHub} from '../src/dockerhub';
-import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
+import {DockerHubClient, validateRepoParts} from '../src/dockerhub';
+import {GetRepositoryTagsResponse, RepositoryResponse} from '../src/types/dockerhub';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -27,95 +24,165 @@ beforeEach(() => {
 
 import repoInfoFixture from './fixtures/dockerhub-repoinfo.json';
 import repoTagsFixture from './fixtures/dockerhub-repotags.json';
-import repoAllTagsFixture from './fixtures/dockerhub-repoalltags.json';
+
+describe('validateRepoParts', () => {
+  it('should error if namespace is missing', () => {
+    expect(() => validateRepoParts({name: '', namespace: ''})).toThrow('req.namespace is required');
+  });
+
+  it('should error if name is missing', () => {
+    expect(() =>
+      validateRepoParts({
+        name: '',
+        namespace: 'testnamespace'
+      })
+    ).toThrow('req.name is required');
+  });
+
+  it('should pass', () => {
+    expect(() =>
+      validateRepoParts({
+        namespace: 'testnamespace',
+        name: 'testname'
+      })
+    ).not.toThrow();
+  });
+});
+
+describe('DockerApiClient', () => {
+  describe('new', () => {
+    it('should error with invalid options', async () => {
+      await expect(
+        DockerHubClient.new({
+          username: ''
+        })
+      ).rejects.toThrow('DockerApiClient.new - opts.username is required');
+
+      await expect(
+        DockerHubClient.new({
+          username: 'dockeruser'
+        })
+      ).rejects.toThrow('DockerApiClient.new - opts.password is required');
+    });
+
+    it('should return an instance', async () => {
+      await expect(
+        DockerHubClient.new({
+          accessToken: 'myaccesstoken'
+        })
+      ).resolves.toBeInstanceOf(DockerHubClient);
+
+      jest.spyOn(DockerHubClient, 'getAccessToken').mockImplementationOnce(async () => {
+        return 'myaccesstoken';
+      });
+
+      await expect(
+        DockerHubClient.new({
+          username: 'dockeruser',
+          password: 'dockerpassword'
+        })
+      ).resolves.toBeInstanceOf(DockerHubClient);
+    });
+  });
+
+  describe('getAccessToken', () => {
+    it('should error with missing username', async () => {
+      await expect(DockerHubClient.getAccessToken('', '')).rejects.toThrow('DockerApiClient.getAccessToken - username is required');
+    });
+
+    it('should error with missing password', async () => {
+      await expect(DockerHubClient.getAccessToken('dockeruser', '')).rejects.toThrow('DockerApiClient.getAccessToken - password is required');
+    });
+
+    it('should return a token', async () => {
+      jest.spyOn(DockerHubClient, 'getAccessToken').mockImplementationOnce(async () => {
+        return 'myaccesstoken';
+      });
+
+      await expect(DockerHubClient.getAccessToken('mydockeruser', 'mydockerpassword')).resolves.toBe('myaccesstoken');
+    });
+  });
+});
 
 describe('getRepository', () => {
-  it('returns repo info', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepository').mockImplementation((): Promise<RepositoryResponse> => {
-      return <Promise<RepositoryResponse>>(repoInfoFixture as unknown);
+  it('should return repo info', async () => {
+    const client = await DockerHubClient.new({
+      accessToken: 'myaccesstoken'
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
-    const dockerhub = await DockerHub.build({
-      credentials: {
-        username: 'foo',
-        password: '0123456-7890-0000-1111-222222222'
-      }
+
+    jest.spyOn(client, 'getRepository').mockImplementationOnce(async (): Promise<RepositoryResponse> => {
+      return repoInfoFixture;
     });
-    const repoinfo = await dockerhub.getRepository({
-      namespace: 'foo',
-      name: 'bar'
-    });
-    expect(repoinfo.namespace).toEqual('foo');
-    expect(repoinfo.name).toEqual('bar');
-    expect(repoinfo.repository_type).toEqual('image');
+
+    await expect(
+      client.getRepository({
+        name: 'myreponame',
+        namespace: 'myusername'
+      })
+    ).resolves.toEqual(repoInfoFixture);
   });
 });
 
 describe('getRepositoryTags', () => {
-  it('return repo tags', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepositoryTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
-      return <Promise<RepositoryTagsResponse>>(repoTagsFixture as unknown);
+  it('should return repo tags', async () => {
+    const client = await DockerHubClient.new({
+      accessToken: 'myaccesstoken'
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
-    const dockerhub = await DockerHub.build({
-      credentials: {
-        username: 'foo',
-        password: '0123456-7890-0000-1111-222222222'
-      }
+
+    jest.spyOn(client, 'getRepositoryTags').mockImplementationOnce(async (): Promise<GetRepositoryTagsResponse> => {
+      return repoTagsFixture;
     });
-    const resp = await dockerhub.getRepositoryTags({
-      namespace: 'crazymax',
-      name: 'diun'
-    });
-    expect(resp.count).toBeGreaterThan(0);
-    expect(resp.next).not.toBeNull();
-    expect(resp.results.length).toBeGreaterThan(0);
-    expect(resp.results[0].last_updater_username).toEqual('crazymax');
+
+    await expect(
+      client.getRepositoryTags({
+        name: 'myreponame',
+        namespace: 'myusername'
+      })
+    ).resolves.toEqual(repoTagsFixture);
   });
 });
 
-describe('getRepositoryAllTags', () => {
-  it('return repo all tags', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepositoryAllTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
-      return <Promise<RepositoryTagsResponse>>(repoAllTagsFixture as unknown);
-    });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
-    const dockerhub = await DockerHub.build({
-      credentials: {
-        username: 'foo',
-        password: '0123456-7890-0000-1111-222222222'
-      }
-    });
-    const resp = await dockerhub.getRepositoryAllTags({
-      namespace: 'crazymax',
-      name: 'diun'
-    });
-    expect(resp.count).toBeGreaterThan(0);
-    expect(resp.next).toBeNull();
-    expect(resp.results.length).toBeGreaterThan(0);
-    expect(resp.results[0].last_updater_username).toEqual('crazymax');
-  });
-});
+describe('updateRepositoryDescription', () => {
+  let client: DockerHubClient;
 
-describe('updateRepoDescription', () => {
-  it.skip('set repo description', async () => {
-    const dockerhub = await DockerHub.build({
-      credentials: {
-        username: 'foo',
-        password: 'bar'
-      }
+  beforeEach(async () => {
+    client = await DockerHubClient.new({
+      accessToken: 'myaccesstoken'
     });
-    const resp = await dockerhub.updateRepoDescription({
-      namespace: 'crazymax',
-      name: 'test-toolkit',
-      description: 'Hello-World',
-      full_description: fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf-8')
+  });
+
+  it('should error if empty full description', async () => {
+    await expect(
+      client.updateRepositoryDescription({
+        allow_empty_full_description: false,
+        full_description: '',
+        name: 'myreponame',
+        namespace: 'myusername'
+      })
+    ).rejects.toThrow('DockerApiClient.updateRepositoryDescription - req.full_description is empty and req.allow_empty_full_description is false');
+  });
+
+  it('should set repository description', async () => {
+    jest.spyOn(client, 'updateRepositoryDescription').mockImplementation(async (): Promise<RepositoryResponse> => {
+      return repoInfoFixture;
     });
-    expect(resp.namespace).toEqual('foo');
-    expect(resp.name).toEqual('bar');
-    expect(resp.description).toEqual('Hello-World');
+
+    await expect(
+      client.updateRepositoryDescription({
+        allow_empty_full_description: true,
+        full_description: '',
+        name: 'myreponame',
+        namespace: 'myusername'
+      })
+    ).resolves.toEqual(repoInfoFixture);
+
+    await expect(
+      client.updateRepositoryDescription({
+        allow_empty_full_description: true,
+        full_description: '',
+        name: 'myreponame',
+        namespace: 'myusername'
+      })
+    ).resolves.toEqual(repoInfoFixture);
   });
 });
