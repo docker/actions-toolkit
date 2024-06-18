@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -24,10 +24,6 @@ import {Exec} from '../../src/exec';
 import {BuilderInfo} from '../../src/types/buildx/builder';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {

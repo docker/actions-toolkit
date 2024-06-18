@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, test} from '@jest/globals';
 import fs from 'fs';
 import * as path from 'path';
 
@@ -31,10 +31,6 @@ const fixturesDir = path.join(__dirname, 'fixtures');
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'github-jest');
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 maybe('uploadArtifact', () => {
   it('uploads an artifact', async () => {

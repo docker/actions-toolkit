@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, jest, test, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
@@ -36,10 +36,6 @@ jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
 
 jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
-});
-
-beforeEach(() => {
-  jest.clearAllMocks();
 });
 
 afterEach(() => {

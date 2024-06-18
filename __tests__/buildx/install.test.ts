@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, it, jest, test, afterEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
@@ -24,10 +24,6 @@ import {Install} from '../../src/buildx/install';
 
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 afterEach(function () {
   rimraf.sync(tmpDir);

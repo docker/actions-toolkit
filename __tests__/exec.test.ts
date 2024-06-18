@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {describe, expect, it, jest} from '@jest/globals';
 
 import {Exec} from '../src/exec';
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 describe('exec', () => {
   it('returns docker version', async () => {

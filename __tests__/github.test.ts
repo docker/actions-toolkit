@@ -22,10 +22,6 @@ import * as core from '@actions/core';
 import {GitHub} from '../src/github';
 import {GitHubRepo} from '../src/types/github';
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 import repoFixture from './fixtures/github-repo.json';
 jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
   return <Promise<GitHubRepo>>(repoFixture as unknown);
