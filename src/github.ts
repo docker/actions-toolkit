@@ -237,7 +237,7 @@ export class GitHub {
         .addRaw(addLink('Learn more', 'https://docs.docker.com/go/build-summary/'))
       .addRaw('</p>')
       .addRaw(`<p>`)
-        .addRaw(`:arrow_down: ${addLink(`<strong>${opts.uploadRes.filename}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)})`)
+        .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)})`)
         .addBreak()
         .addRaw(`This file includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>.`)
       .addRaw(`</p>`)
@@ -264,7 +264,7 @@ export class GitHub {
         // prettier-ignore
         summaryTableData.push([
           {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
-          {data: `<strong>${summary.name}</strong>`},
+          {data: `<strong>${Util.stringToUnicodeEntities(summary.name)}</strong>`},
           {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
           {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
           {data: summary.duration}
