@@ -42,10 +42,6 @@ jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 afterEach(() => {
   rimraf.sync(tmpDir);
 });

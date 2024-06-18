@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it, beforeEach} from '@jest/globals';
+import {describe, expect, jest, it} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import {DockerHub} from '../src/dockerhub';
 import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 import repoInfoFixture from './fixtures/dockerhub-repoinfo.json';
 import repoTagsFixture from './fixtures/dockerhub-repotags.json';

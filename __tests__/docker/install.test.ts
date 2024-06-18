@@ -25,10 +25,6 @@ import {Install} from '../../src/docker/install';
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 afterEach(function () {
   rimraf.sync(tmpDir);
 });

@@ -21,7 +21,6 @@ import {Exec} from '../src/exec';
 import {ExecOutput} from '@actions/exec';
 
 beforeEach(() => {
-  jest.clearAllMocks();
   jest.restoreAllMocks();
 });
 

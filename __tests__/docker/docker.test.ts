@@ -31,10 +31,6 @@ const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-jest');
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 afterEach(function () {
   rimraf.sync(tmpDir);
 });

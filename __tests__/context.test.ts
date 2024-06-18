@@ -17,7 +17,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
-import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, jest, it, afterEach} from '@jest/globals';
 
 import {Context} from '../src/context';
 
@@ -34,10 +34,6 @@ jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
 
 jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
-});
-
-beforeEach(() => {
-  jest.clearAllMocks();
 });
 
 afterEach(() => {

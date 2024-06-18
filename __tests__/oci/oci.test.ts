@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {afterEach, describe, expect, test} from '@jest/globals';
 import * as fs from 'fs';
 import path from 'path';
 import * as rimraf from 'rimraf';
@@ -25,10 +25,6 @@ const fixturesDir = path.join(__dirname, '..', 'fixtures');
 
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-jest');
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 afterEach(function () {
   rimraf.sync(tmpDir);
