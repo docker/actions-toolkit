@@ -249,3 +249,40 @@ maybe('writeBuildSummary', () => {
     });
   });
 });
+
+maybe('annotateBuildWarnings', () => {
+  it('annoate lint issues', async () => {
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build',
+          '-f', path.join(fixturesDir, 'lint.Dockerfile'),
+          fixturesDir,
+          '--metadata-file', build.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args, {
+          env: Object.assign({}, process.env, {
+            BUILDX_METADATA_WARNINGS: 'true'
+          }) as {
+            [key: string]: string;
+          }
+        });
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = build.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRef = build.resolveRef(metadata);
+    expect(buildRef).toBeDefined();
+    const buildWarnings = build.resolveWarnings(metadata);
+    expect(buildWarnings).toBeDefined();
+
+    await GitHub.annotateBuildWarnings(path.join(fixturesDir, 'lint.Dockerfile'), buildWarnings);
+  });
+});
