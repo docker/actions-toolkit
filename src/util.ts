@@ -179,4 +179,10 @@ export class Util {
     const bytes = crypto.randomBytes(Math.ceil(length / 2));
     return bytes.toString('hex').slice(0, length);
   }
+
+  public static stringToUnicodeEntities(str: string) {
+    return Array.from(str)
+      .map(char => `&#x${char.charCodeAt(0).toString(16)};`)
+      .join('');
+  }
 }

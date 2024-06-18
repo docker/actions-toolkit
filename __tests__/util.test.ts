@@ -353,6 +353,33 @@ describe('generateRandomString', () => {
   });
 });
 
+describe('stringToUnicodeEntities', () => {
+  it('should convert a string to Unicode entities', () => {
+    const input = 'Hello, World!';
+    const expected = '&#x48;&#x65;&#x6c;&#x6c;&#x6f;&#x2c;&#x20;&#x57;&#x6f;&#x72;&#x6c;&#x64;&#x21;';
+    const result = Util.stringToUnicodeEntities(input);
+    expect(result).toEqual(expected);
+  });
+  it('should handle an empty string', () => {
+    const input = '';
+    const expected = '';
+    const result = Util.stringToUnicodeEntities(input);
+    expect(result).toEqual(expected);
+  });
+  it('should handle special characters', () => {
+    const input = '@#^&*()';
+    const expected = '&#x40;&#x23;&#x5e;&#x26;&#x2a;&#x28;&#x29;';
+    const result = Util.stringToUnicodeEntities(input);
+    expect(result).toEqual(expected);
+  });
+  it('should handle non-English characters', () => {
+    const input = 'こんにちは';
+    const expected = '&#x3053;&#x3093;&#x306b;&#x3061;&#x306f;';
+    const result = Util.stringToUnicodeEntities(input);
+    expect(result).toEqual(expected);
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;

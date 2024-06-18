@@ -68,10 +68,18 @@ export class GitHub {
     return `${github.context.repo.owner}/${github.context.repo.repo}`;
   }
 
-  public static workflowRunURL(setAttempts?: boolean): string {
+  static get runId(): number {
+    return process.env.GITHUB_RUN_ID ? +process.env.GITHUB_RUN_ID : github.context.runId;
+  }
+
+  static get runAttempt(): number {
     // TODO: runAttempt is not yet part of github.context but will be in a
     //  future release of @actions/github package: https://github.com/actions/toolkit/commit/faa425440f86f9c16587a19dfb59491253a2c92a
-    return `${GitHub.serverURL}/${GitHub.repository}/actions/runs/${github.context.runId}${setAttempts ? `/attempts/${process.env.GITHUB_RUN_ATTEMPT || 1}` : ''}`;
+    return process.env.GITHUB_RUN_ATTEMPT ? +process.env.GITHUB_RUN_ATTEMPT : 1;
+  }
+
+  public static workflowRunURL(setAttempts?: boolean): string {
+    return `${GitHub.serverURL}/${GitHub.repository}/actions/runs/${GitHub.runId}${setAttempts ? `/attempts/${GitHub.runAttempt}` : ''}`;
   }
 
   static get actionsRuntimeToken(): GitHubActionsRuntimeToken | undefined {
@@ -211,6 +219,14 @@ export class GitHub {
 
     const refsSize = Object.keys(opts.exportRes.refs).length;
 
+    // we just need the last two parts of the URL as they are always relative
+    // to the workflow run URL otherwise URL could be broken if GitHub
+    // repository name is part of a secret value used in the workflow. e.g.:
+    //  artifact: https://github.com/docker/actions-toolkit/actions/runs/9552208295/artifacts/1609622746
+    //  workflow: https://github.com/docker/actions-toolkit/actions/runs/9552208295
+    // https://github.com/docker/actions-toolkit/issues/367
+    const artifactRelativeURL = `./${GitHub.runId}/${opts.uploadRes.url.split('/').slice(-2).join('/')}`;
+
     // prettier-ignore
     const sum = core.summary
       .addHeading('Docker Build summary', 1)
@@ -221,7 +237,7 @@ export class GitHub {
         .addRaw(addLink('Learn more', 'https://docs.docker.com/go/build-summary/'))
       .addRaw('</p>')
       .addRaw(`<p>`)
-        .addRaw(`:arrow_down: ${addLink(`<strong>${opts.uploadRes.filename}</strong>`, opts.uploadRes.url)} (${Util.formatFileSize(opts.uploadRes.size)})`)
+        .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)})`)
         .addBreak()
         .addRaw(`This file includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>.`)
       .addRaw(`</p>`)
@@ -248,7 +264,7 @@ export class GitHub {
         // prettier-ignore
         summaryTableData.push([
           {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
-          {data: `<strong>${summary.name}</strong>`},
+          {data: `<strong>${Util.stringToUnicodeEntities(summary.name)}</strong>`},
           {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
           {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
           {data: summary.duration}
