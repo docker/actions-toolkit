@@ -49,6 +49,9 @@ export class History {
     if (!(await Docker.isAvailable())) {
       throw new Error('Docker is required to export a build record');
     }
+    if (!(await this.buildx.versionSatisfies('>=0.13.0'))) {
+      throw new Error('Buildx >= 0.13.0 is required to export a build record');
+    }
 
     let builderName: string = '';
     let nodeName: string = '';
