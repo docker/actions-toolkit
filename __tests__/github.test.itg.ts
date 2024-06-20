@@ -118,29 +118,20 @@ maybe('writeBuildSummary', () => {
   test.each([
     [
       'single',
-      [
-        'bake',
-        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
-        'hello'
-      ],
+      path.join(fixturesDir, 'hello-bake.hcl'),
+      'hello'
     ],
     [
       'group',
-      [
-        'bake',
-        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
-        'hello-all'
-      ],
+      path.join(fixturesDir, 'hello-bake.hcl'),
+      'hello-all'
     ],
     [
       'matrix',
-      [
-        'bake',
-        '-f', path.join(fixturesDir, 'hello-bake.hcl'),
-        'hello-matrix'
-      ],
+      path.join(fixturesDir, 'hello-bake.hcl'),
+      'hello-matrix'
     ]
-  ])('write bake summary %p', async (_, bargs) => {
+  ])('write bake summary %p', async (_, file, target) => {
     const buildx = new Buildx();
     const bake = new Bake({buildx: buildx});
 
@@ -150,7 +141,9 @@ maybe('writeBuildSummary', () => {
         // prettier-ignore
         const buildCmd = await buildx.getCommand([
           '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
-          ...bargs,
+          'bake',
+          '-f', file,
+          target,
           '--metadata-file', bake.getMetadataFilePath()
         ]);
         await Exec.exec(buildCmd.command, buildCmd.args, {
@@ -158,6 +151,16 @@ maybe('writeBuildSummary', () => {
         });
       })()
     ).resolves.not.toThrow();
+
+    const definition = await bake.getDefinition(
+      {
+        files: [file],
+        targets: [target],
+      },
+      {
+        cwd: fixturesDir
+      }
+    );
 
     const metadata = bake.resolveMetadata();
     expect(metadata).toBeDefined();
@@ -186,6 +189,62 @@ maybe('writeBuildSummary', () => {
       uploadRes: uploadRes,
       inputs: {
         files: path.join(fixturesDir, 'hello-bake.hcl')
+      },
+      bakeDefinition: definition
+    });
+  });
+
+  it('fails with dockerfile syntax issue', async () => {
+    const startedTime = new Date();
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build',
+          '-f', path.join(fixturesDir, 'hello-err.Dockerfile'),
+          fixturesDir,
+          '--metadata-file', build.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).rejects.toThrow();
+
+    const refs = Buildx.refs({
+      dir: Buildx.refsDir,
+      builderName: process.env.CTN_BUILDER_NAME ?? 'default',
+      since: startedTime
+    });
+    expect(refs).toBeDefined();
+    expect(Object.keys(refs).length).toBeGreaterThan(0);
+
+    const history = new History({buildx: buildx});
+    const exportRes = await history.export({
+      refs: [Object.keys(refs)[0] ?? '']
+    });
+    expect(exportRes).toBeDefined();
+    expect(exportRes?.dockerbuildFilename).toBeDefined();
+    expect(exportRes?.dockerbuildSize).toBeDefined();
+    expect(exportRes?.summaries).toBeDefined();
+
+    const uploadRes = await GitHub.uploadArtifact({
+      filename: exportRes?.dockerbuildFilename,
+      mimeType: 'application/gzip',
+      retentionDays: 1
+    });
+    expect(uploadRes).toBeDefined();
+    expect(uploadRes?.url).toBeDefined();
+
+    await GitHub.writeBuildSummary({
+      exportRes: exportRes,
+      uploadRes: uploadRes,
+      inputs: {
+        context: fixturesDir,
+        file: path.join(fixturesDir, 'hello-err.Dockerfile')
       }
     });
   });

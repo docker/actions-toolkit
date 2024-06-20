@@ -185,4 +185,8 @@ export class Util {
       .map(char => `&#x${char.charCodeAt(0).toString(16)};`)
       .join('');
   }
+
+  public static countLines(input: string): number {
+    return input.split(/\r\n|\r|\n/).length;
+  }
 }

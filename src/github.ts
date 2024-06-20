@@ -229,7 +229,7 @@ export class GitHub {
 
     // prettier-ignore
     const sum = core.summary
-      .addHeading('Docker Build summary', 1)
+      .addHeading('Docker Build summary', 2)
       .addRaw(`<p>`)
         .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
         .addBreak()
@@ -246,8 +246,8 @@ export class GitHub {
         .addRaw(addLink('Let us know', 'https://docs.docker.com/feedback/gha-build-summary'))
       .addRaw('</p>');
 
-    sum.addHeading('Preview', 2);
-
+    // Preview
+    sum.addRaw(`<strong>Preview</strong>`).addBreak().addRaw('<p>');
     const summaryTableData: Array<Array<SummaryTableCell>> = [
       [
         {header: true, data: 'ID'},
@@ -257,7 +257,7 @@ export class GitHub {
         {header: true, data: 'Duration'}
       ]
     ];
-    let summaryError: string | undefined;
+    let buildError: string | undefined;
     for (const ref in opts.exportRes.summaries) {
       if (Object.prototype.hasOwnProperty.call(opts.exportRes.summaries, ref)) {
         const summary = opts.exportRes.summaries[ref];
@@ -270,28 +270,53 @@ export class GitHub {
           {data: summary.duration}
         ]);
         if (summary.error) {
-          summaryError = summary.error;
+          buildError = summary.error;
         }
       }
     }
     sum.addTable([...summaryTableData]);
-    if (summaryError) {
-      sum.addHeading('Error', 4);
-      sum.addCodeBlock(summaryError, 'text');
+    sum.addRaw(`</p>`);
+
+    // Build error
+    if (buildError) {
+      sum.addRaw(`<blockquote>`);
+      if (Util.countLines(buildError) > 10) {
+        // prettier-ignore
+        sum
+          .addRaw(`<details><summary><strong>Error</strong></summary>`)
+            .addCodeBlock(buildError, 'text')
+          .addRaw(`</details>`);
+      } else {
+        // prettier-ignore
+        sum
+          .addRaw(`<strong>Error</strong>`)
+          .addBreak()
+          .addRaw(`<p>`)
+            .addCodeBlock(buildError, 'text')
+          .addRaw(`</p>`);
+      }
+      sum.addRaw(`</blockquote>`);
     }
 
+    // Build inputs
     if (opts.inputs) {
-      sum.addHeading('Build inputs', 2).addCodeBlock(
-        jsyaml.dump(opts.inputs, {
-          indent: 2,
-          lineWidth: -1
-        }),
-        'yaml'
-      );
+      // prettier-ignore
+      sum.addRaw(`<details><summary><strong>Build inputs</strong></summary>`)
+        .addCodeBlock(
+          jsyaml.dump(opts.inputs, {
+            indent: 2,
+            lineWidth: -1
+          }), 'yaml'
+        )
+        .addRaw(`</details>`);
     }
 
+    // Bake definition
     if (opts.bakeDefinition) {
-      sum.addHeading('Bake definition', 2).addCodeBlock(JSON.stringify(opts.bakeDefinition, null, 2), 'json');
+      // prettier-ignore
+      sum.addRaw(`<details><summary><strong>Bake definition</strong></summary>`)
+        .addCodeBlock(JSON.stringify(opts.bakeDefinition, null, 2), 'json')
+        .addRaw(`</details>`);
     }
 
     core.info(`Writing summary`);
