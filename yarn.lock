@@ -1112,6 +1112,7 @@ __metadata:
     "@octokit/plugin-rest-endpoint-methods": ^10.4.0
     "@types/csv-parse": ^1.2.2
     "@types/gunzip-maybe": ^1.4.2
+    "@types/he": ^1.2.3
     "@types/js-yaml": ^4.0.9
     "@types/node": ^20.12.10
     "@types/semver": ^7.5.8
@@ -1129,6 +1130,7 @@ __metadata:
     eslint-plugin-prettier: ^5.1.3
     gunzip-maybe: ^1.4.2
     handlebars: ^4.7.8
+    he: ^1.2.0
     jest: ^29.7.0
     js-yaml: ^4.1.0
     jwt-decode: ^4.0.0
@@ -2172,6 +2174,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 9be931d6b74ea4e28f2682e3aac6c242448128c6e06bee2e5758e8747ef51f231c46f11e27783092530f81c51f0a5ce6f87217e92e7e80b55e7132c7538e5f3e
+  languageName: node
+  linkType: hard
+
+"@types/he@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@types/he@npm:1.2.3"
+  checksum: e77851c73dd7b9902d92fe0118a26246a7f3676a3a1c6eb1408305187ef73b57c22550b1435946b983267f961d935554d5d0e1b458416932552f31e763e1aa41
   languageName: node
   linkType: hard
 
@@ -4920,6 +4929,15 @@ __metadata:
   dependencies:
     function-bind: ^1.1.2
   checksum: e8516f776a15149ca6c6ed2ae3110c417a00b62260e222590e54aa367cbcd6ed99122020b37b7fbdf05748df57b265e70095d7bf35a47660587619b15ffb93db
+  languageName: node
+  linkType: hard
+
+"he@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "he@npm:1.2.0"
+  bin:
+    he: bin/he
+  checksum: 3d4d6babccccd79c5c5a3f929a68af33360d6445587d628087f39a965079d84f18ce9c3d3f917ee1e3978916fc833bb8b29377c3b403f919426f91bc6965e7a7
   languageName: node
   linkType: hard
 

@@ -16,6 +16,7 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
+import he from 'he';
 import jsyaml from 'js-yaml';
 import os from 'os';
 import path from 'path';
@@ -284,7 +285,7 @@ export class GitHub {
         // prettier-ignore
         sum
           .addRaw(`<details><summary><strong>Error</strong></summary>`)
-            .addCodeBlock(buildError, 'text')
+            .addCodeBlock(he.encode(buildError), 'text')
           .addRaw(`</details>`);
       } else {
         // prettier-ignore
@@ -292,7 +293,7 @@ export class GitHub {
           .addRaw(`<strong>Error</strong>`)
           .addBreak()
           .addRaw(`<p>`)
-            .addCodeBlock(buildError, 'text')
+            .addCodeBlock(he.encode(buildError), 'text')
           .addRaw(`</p>`);
       }
       sum.addRaw(`</blockquote>`);
