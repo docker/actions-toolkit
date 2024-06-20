@@ -12,8 +12,8 @@ on:
     branches:
       - 'main'
   pull_request:
-    paths-ignore:
-      - '.github/*-releases.json'
+    paths:
+      - '.github/workflows/buildx-releases-json.yml'
 
 jobs:
   generate:
