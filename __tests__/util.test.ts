@@ -380,6 +380,42 @@ describe('stringToUnicodeEntities', () => {
   });
 });
 
+describe('countLines', () => {
+  it('counts total number of lines correctly', () => {
+    const text = `This
+
+is
+a
+sample
+
+text
+with
+multiple
+lines`;
+
+    const result = Util.countLines(text);
+    expect(result).toEqual(10); // Including empty lines
+  });
+  it('handles edge case with empty string', () => {
+    const text = '';
+
+    const result = Util.countLines(text);
+    expect(result).toEqual(1); // Empty string should have 1 line
+  });
+  it('handles edge case with single line', () => {
+    const text = 'Single line text';
+
+    const result = Util.countLines(text);
+    expect(result).toEqual(1); // Single line should have 1 line
+  });
+  it('handles multiple types of line breaks', () => {
+    const text = `Line 1\r\nLine 2\rLine 3\nLine 4`;
+
+    const result = Util.countLines(text);
+    expect(result).toEqual(4); // Different line break types should be counted correctly
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
