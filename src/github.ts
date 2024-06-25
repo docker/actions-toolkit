@@ -22,6 +22,7 @@ import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
+import {isGhes} from '@actions/artifact/lib/internal/shared/config';
 import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util';
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
@@ -122,6 +123,10 @@ export class GitHub {
   }
 
   public static async uploadArtifact(opts: UploadArtifactOpts): Promise<UploadArtifactResponse> {
+    if (isGhes()) {
+      throw new Error('@actions/artifact v2.0.0+ is currently not supported on GHES.');
+    }
+
     const artifactName = path.basename(opts.filename);
     const backendIds = getBackendIdsFromToken();
     const artifactClient = internalArtifactTwirpClient();
