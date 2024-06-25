@@ -240,7 +240,7 @@ export class GitHub {
         .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
         .addBreak()
         .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
-        .addRaw(addLink('Learn more', 'https://docs.docker.com/go/build-summary/'))
+        .addRaw(addLink('Learn more', 'https://www.docker.com/blog/new-beta-feature-deep-dive-into-github-actions-docker-builds-with-docker-desktop/?utm_source=github&utm_medium=actions'))
       .addRaw('</p>')
       .addRaw(`<p>`)
         .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)})`)
