@@ -253,7 +253,7 @@ export class GitHub {
       .addRaw('</p>');
 
     // Preview
-    sum.addRaw(`<strong>Preview</strong>`).addBreak().addRaw('<p>');
+    sum.addRaw('<p>');
     const summaryTableData: Array<Array<SummaryTableCell>> = [
       [
         {header: true, data: 'ID'},
