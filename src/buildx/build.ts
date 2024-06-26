@@ -25,6 +25,7 @@ import {GitHub} from '../github';
 import {Util} from '../util';
 
 import {BuildMetadata} from '../types/buildx/build';
+import {VertexWarning} from '../types/buildkit/client';
 import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance';
 
 export interface BuildOpts {
@@ -92,6 +93,19 @@ export class Build {
     }
     if ('buildx.build.provenance' in metadata) {
       return metadata['buildx.build.provenance'] as ProvenancePredicate;
+    }
+    return undefined;
+  }
+
+  public resolveWarnings(metadata?: BuildMetadata): Array<VertexWarning> | undefined {
+    if (!metadata) {
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
+    }
+    if ('buildx.build.warnings' in metadata) {
+      return metadata['buildx.build.warnings'] as Array<VertexWarning>;
     }
     return undefined;
   }

@@ -80,6 +80,16 @@ describe('resolveProvenance', () => {
   });
 });
 
+describe('resolveWarnings', () => {
+  it('matches', async () => {
+    const build = new Build();
+    fs.writeFileSync(build.getMetadataFilePath(), JSON.stringify(metadata));
+    const warnings = build.resolveWarnings();
+    expect(warnings).toBeDefined();
+    expect(warnings?.length).toEqual(3);
+  });
+});
+
 describe('resolveDigest', () => {
   it('matches', async () => {
     const build = new Build();
