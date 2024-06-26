@@ -16,6 +16,7 @@ on:
 env:
   NODE_VERSION: "20"
   BUILDX_VERSION: "v0.15.1"
+  BUILDKIT_IMAGE: "moby/buildkit:v0.14.1"
 
 jobs:
   test:
@@ -138,6 +139,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           version: ${{ env.BUILDX_VERSION }}
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
           use: false
       -
         name: Install
