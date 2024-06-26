@@ -100,8 +100,11 @@ export class History {
     const tmpDockerbuildFilename = path.join(outDir, 'rec.dockerbuild');
     const summaryFilename = path.join(outDir, 'summary.json');
 
-    await new Promise<void>((resolve, reject) => {
-      const ebargs: Array<string> = ['--ref-state-dir=/buildx-refs', `--node=${builderName}/${nodeName}`];
+    const exportBuild = async (resolve, reject) => {
+      const ebargs: Array<string> = [`--output=/out`, `--node=${builderName}/${nodeName}`];
+      if (fs.existsSync(Buildx.refsDir)) {
+        ebargs.push('--ref-state-dir=/buildx-refs');
+      }
       for (const ref of refs) {
         ebargs.push(`--ref=${ref}`);
       }
@@ -111,32 +114,70 @@ export class History {
       if (typeof process.getgid === 'function') {
         ebargs.push(`--gid=${process.getgid()}`);
       }
+
       // prettier-ignore
-      const dockerRunProc = History.spawn('docker', [
-        'run', '--rm', '-i',
-        '-v', `${Buildx.refsDir}:/buildx-refs`,
-        '-v', `${outDir}:/out`,
+      const ctnExportBuildID = await Exec.getExecOutput(`docker`, [
+        'create', '-i',
         opts.image || History.EXPORT_TOOL_IMAGE,
         ...ebargs
-      ]);
-      fs.createReadStream(buildxOutFifoPath).pipe(dockerRunProc.stdin);
-      dockerRunProc.stdout.pipe(fs.createWriteStream(buildxInFifoPath));
-      dockerRunProc.on('close', code => {
-        if (code === 0) {
-          if (!fs.existsSync(tmpDockerbuildFilename)) {
-            reject(new Error(`Failed to export build record: ${tmpDockerbuildFilename} not found`));
-          } else {
-            resolve();
-          }
-        } else {
-          reject(new Error(`Process "docker run" exited with code ${code}`));
+      ], {
+        ignoreReturnCode: true
+      }).then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          reject(new Error(`Error executing "docker create": ${res.stderr.trim()}`));
         }
+        core.info(`Export build container created with ID "${res.stdout.trim()}"`);
+        return res.stdout.trim();
       });
-      dockerRunProc.on('error', err => {
-        core.error(`Error executing buildx dial-stdio: ${err}`);
-        reject(err);
-      });
-    }).catch(err => {
+
+      try {
+        if (fs.existsSync(Buildx.refsDir)) {
+          await Exec.getExecOutput(`docker`, ['cp', Buildx.refsDir, `${ctnExportBuildID}:/buildx-refs`], {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              reject(new Error(`Error executing "docker cp": ${res.stderr.trim()}`));
+            }
+          });
+        }
+
+        const dockerStartProc = History.spawn('docker', ['start', '-a', ctnExportBuildID]);
+        fs.createReadStream(buildxOutFifoPath).pipe(dockerStartProc.stdin);
+        dockerStartProc.stdout.pipe(fs.createWriteStream(buildxInFifoPath));
+        dockerStartProc.on('close', async code => {
+          if (code === 0) {
+            await Exec.getExecOutput(`docker`, ['cp', `${ctnExportBuildID}:/out`, outDir], {
+              ignoreReturnCode: true
+            }).then(res => {
+              if (res.stderr.length > 0 && res.exitCode != 0) {
+                reject(new Error(`Error executing "docker cp": ${res.stderr.trim()}`));
+              }
+            });
+            if (!fs.existsSync(tmpDockerbuildFilename)) {
+              reject(new Error(`Failed to export build record: ${tmpDockerbuildFilename} not found`));
+            } else {
+              resolve();
+            }
+          } else {
+            reject(new Error(`Process "docker start" exited with code ${code}`));
+          }
+        });
+        dockerStartProc.on('error', err => {
+          core.error(`Error executing "docker start": ${err}`);
+          reject(err);
+        });
+      } finally {
+        await Exec.getExecOutput(`docker`, ['rm', '-f', ctnExportBuildID], {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            reject(new Error(`Error executing "docker rm": ${res.stderr.trim()}`));
+          }
+        });
+      }
+    };
+
+    await new Promise<void>(exportBuild).catch(err => {
       throw err;
     });
 
