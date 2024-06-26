@@ -243,9 +243,7 @@ export class GitHub {
         .addRaw(addLink('Learn more', 'https://docs.docker.com/go/build-summary/'))
       .addRaw('</p>')
       .addRaw(`<p>`)
-        .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)})`)
-        .addBreak()
-        .addRaw(`This file includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>.`)
+        .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)} - includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>)`)
       .addRaw(`</p>`)
       .addRaw(`<p>`)
         .addRaw(`Find this useful? `)
@@ -253,7 +251,7 @@ export class GitHub {
       .addRaw('</p>');
 
     // Preview
-    sum.addRaw(`<strong>Preview</strong>`).addBreak().addRaw('<p>');
+    sum.addRaw('<p>');
     const summaryTableData: Array<Array<SummaryTableCell>> = [
       [
         {header: true, data: 'ID'},
