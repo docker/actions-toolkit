@@ -15,7 +15,7 @@ on:
 
 env:
   NODE_VERSION: "20"
-  BUILDX_VERSION: "v0.15.1"
+  BUILDX_VERSION: "https://github.com/docker/buildx.git#d8c9ebde1fdcf659f1fa3efa6ccc27a28b0f1564"  # https://github.com/docker/buildx/pull/2551
   BUILDKIT_IMAGE: "moby/buildkit:v0.14.1"
 
 jobs:

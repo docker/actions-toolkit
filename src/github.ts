@@ -37,6 +37,7 @@ import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {Util} from './util';
 
+import {VertexWarning} from './types/buildkit/client';
 import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
 
 export interface GitHubOpts {
@@ -325,5 +326,40 @@ export class GitHub {
 
     core.info(`Writing summary`);
     await sum.addSeparator().write();
+  }
+
+  public static async annotateBuildWarnings(source: string, warnings?: Array<VertexWarning>): Promise<void> {
+    (warnings ?? []).forEach(warning => {
+      if (!warning.detail || !warning.short) {
+        return;
+      }
+      const title = warning.detail.map(encoded => atob(encoded)).join(' ');
+      let message = atob(warning.short).replace(/\s\(line \d+\)$/, '');
+      if (warning.url) {
+        // https://github.com/docker/buildx/blob/d8c9ebde1fdcf659f1fa3efa6ccc27a28b0f1564/commands/build.go#L854
+        message += `\nMore info: ${warning.url}`;
+      }
+
+      // GitHub annotations don't clearly show ranges of lines, so we'll just
+      // show the first line
+      const startLine = warning.range && warning.range.length > 0 ? warning.range[0]?.start.line : undefined;
+
+      // TODO: When GitHub annotations support showing ranges properly, we can use this code
+      // let startLine: number | undefined, endLine: number | undefined;
+      // for (const range of warning.range ?? []) {
+      //   if (range.start.line && (!startLine || range.start.line < startLine)) {
+      //     startLine = range.start.line;
+      //   }
+      //   if (range.end.line && (!endLine || range.end.line > endLine)) {
+      //     endLine = range.end.line;
+      //   }
+      // }
+
+      core.warning(message, {
+        title: title,
+        file: source,
+        startLine: startLine
+      });
+    });
   }
 }
