@@ -26,8 +26,18 @@ import {Context} from '../context';
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
+import {OCI} from '../oci/oci';
 
-import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/buildx/history';
+import {ExportRecordOpts, ExportRecordResponse, LoadRecordOpts, Summaries} from '../types/buildx/history';
+import {Index} from '../types/oci';
+import {MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from '../types/oci/mediatype';
+import {Archive} from '../types/oci/oci';
+import {BuildRecord} from '../types/buildx/buildx';
+import {Descriptor} from '../types/oci/descriptor';
+import {MEDIATYPE_PAYLOAD as MEDIATYPE_INTOTO_PAYLOAD, MEDIATYPE_PREDICATE} from '../types/intoto/intoto';
+import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance';
+import {ANNOTATION_REF_KEY, MEDIATYPE_HISTORY_RECORD_V0, MEDIATYPE_SOLVE_STATUS_V0} from '../types/buildkit/buildkit';
+import {SolveStatus} from '../types/buildkit/client';
 
 export interface HistoryOpts {
   buildx?: Buildx;
@@ -40,6 +50,80 @@ export class History {
 
   constructor(opts?: HistoryOpts) {
     this.buildx = opts?.buildx || new Buildx();
+  }
+
+  public static async load(opts: LoadRecordOpts): Promise<Record<string, BuildRecord>> {
+    const ociArchive = await OCI.loadArchive({
+      file: opts.file
+    });
+    return History.readRecords(ociArchive.root.index, ociArchive);
+  }
+
+  private static readRecords(index: Index, archive: Archive): Record<string, BuildRecord> {
+    const res: Record<string, BuildRecord> = {};
+    index.manifests.forEach(desc => {
+      switch (desc.mediaType) {
+        case MEDIATYPE_IMAGE_MANIFEST_V1: {
+          const record = History.readRecord(desc, archive);
+          res[record.Ref] = record;
+          break;
+        }
+        case MEDIATYPE_IMAGE_INDEX_V1: {
+          if (!Object.prototype.hasOwnProperty.call(archive.indexes, desc.digest)) {
+            throw new Error(`Missing index: ${desc.digest}`);
+          }
+          const records = History.readRecords(archive.indexes[desc.digest], archive);
+          for (const ref in records) {
+            if (!Object.prototype.hasOwnProperty.call(records, ref)) {
+              continue;
+            }
+            res[ref] = records[ref];
+          }
+          break;
+        }
+      }
+    });
+    return res;
+  }
+
+  private static readRecord(desc: Descriptor, archive: Archive): BuildRecord {
+    if (!Object.prototype.hasOwnProperty.call(archive.manifests, desc.digest)) {
+      throw new Error(`Missing manifest: ${desc.digest}`);
+    }
+    const manifest = archive.manifests[desc.digest];
+    if (manifest.config.mediaType !== MEDIATYPE_HISTORY_RECORD_V0) {
+      throw new Error(`Unexpected config media type: ${manifest.config.mediaType}`);
+    }
+    if (!Object.prototype.hasOwnProperty.call(archive.blobs, manifest.config.digest)) {
+      throw new Error(`Missing config blob: ${manifest.config.digest}`);
+    }
+    const record = <BuildRecord>JSON.parse(archive.blobs[manifest.config.digest]);
+    if (manifest.annotations && ANNOTATION_REF_KEY in manifest.annotations) {
+      if (record.Ref !== manifest.annotations[ANNOTATION_REF_KEY]) {
+        throw new Error(`Mismatched ref ${desc.digest}: ${record.Ref} != ${manifest.annotations[ANNOTATION_REF_KEY]}`);
+      }
+    }
+    manifest.layers.forEach(layer => {
+      switch (layer.mediaType) {
+        case MEDIATYPE_SOLVE_STATUS_V0: {
+          if (!Object.prototype.hasOwnProperty.call(archive.blobs, layer.digest)) {
+            throw new Error(`Missing blob: ${layer.digest}`);
+          }
+          record.solveStatus = <SolveStatus>JSON.parse(archive.blobs[layer.digest]);
+          break;
+        }
+        case MEDIATYPE_INTOTO_PAYLOAD: {
+          if (!Object.prototype.hasOwnProperty.call(archive.blobs, layer.digest)) {
+            throw new Error(`Missing blob: ${layer.digest}`);
+          }
+          if (layer.annotations && MEDIATYPE_PREDICATE in layer.annotations && layer.annotations[MEDIATYPE_PREDICATE].startsWith('https://slsa.dev/provenance/')) {
+            record.provenance = <ProvenancePredicate>JSON.parse(archive.blobs[layer.digest]);
+          }
+          break;
+        }
+      }
+    });
+    return record;
   }
 
   public async export(opts: ExportRecordOpts): Promise<ExportRecordResponse> {
