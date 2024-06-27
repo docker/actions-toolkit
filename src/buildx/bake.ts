@@ -24,7 +24,9 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, BakeMetadata} from '../types/buildx/bake';
+import {VertexWarning} from '../types/buildkit/client';
+import {BuildMetadata} from '../types/buildx/build';
+import {BakeDefinition} from '../types/buildx/bake';
 
 export interface BakeOpts {
   buildx?: Buildx;
@@ -57,7 +59,7 @@ export class Bake {
     return path.join(Context.tmpDir(), this.metadataFilename);
   }
 
-  public resolveMetadata(): BakeMetadata | undefined {
+  public resolveMetadata(): BuildMetadata | undefined {
     const metadataFile = this.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
@@ -66,10 +68,10 @@ export class Bake {
     if (content === 'null') {
       return undefined;
     }
-    return <BakeMetadata>JSON.parse(content);
+    return <BuildMetadata>JSON.parse(content);
   }
 
-  public resolveRefs(metadata?: BakeMetadata): Array<string> | undefined {
+  public resolveRefs(metadata?: BuildMetadata): Array<string> | undefined {
     if (!metadata) {
       metadata = this.resolveMetadata();
       if (!metadata) {
@@ -83,6 +85,19 @@ export class Bake {
       }
     }
     return refs;
+  }
+
+  public resolveWarnings(metadata?: BuildMetadata): Array<VertexWarning> | undefined {
+    if (!metadata) {
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
+    }
+    if ('buildx.build.warnings' in metadata) {
+      return metadata['buildx.build.warnings'] as Array<VertexWarning>;
+    }
+    return undefined;
   }
 
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {

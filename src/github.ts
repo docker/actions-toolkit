@@ -328,7 +328,7 @@ export class GitHub {
     await sum.addSeparator().write();
   }
 
-  public static async annotateBuildWarnings(source: string, warnings?: Array<VertexWarning>): Promise<void> {
+  public static async annotateBuildWarnings(warnings?: Array<VertexWarning>): Promise<void> {
     (warnings ?? []).forEach(warning => {
       if (!warning.detail || !warning.short) {
         return;
@@ -357,7 +357,7 @@ export class GitHub {
 
       core.warning(message, {
         title: title,
-        file: source,
+        // file: source,
         startLine: startLine
       });
     });

@@ -19,10 +19,6 @@ export interface BakeDefinition {
   target: Record<string, Target>;
 }
 
-export interface BakeMetadata {
-  [target: string]: Record<string, string>;
-}
-
 export interface Group {
   targets: Array<string>;
 }
