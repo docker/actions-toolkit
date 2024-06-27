@@ -251,7 +251,7 @@ maybe('writeBuildSummary', () => {
 });
 
 maybe('annotateBuildWarnings', () => {
-  it('annoate lint issues', async () => {
+  it('with build', async () => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -283,6 +283,43 @@ maybe('annotateBuildWarnings', () => {
     const buildWarnings = build.resolveWarnings(metadata);
     expect(buildWarnings).toBeDefined();
 
-    await GitHub.annotateBuildWarnings(path.join(fixturesDir, 'lint.Dockerfile'), buildWarnings);
+    await GitHub.annotateBuildWarnings(buildWarnings);
+  });
+
+  it('with bake', async () => {
+    const buildx = new Buildx();
+    const bake = new Bake({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'bake',
+          '-f', path.join(fixturesDir, 'lint.hcl'),
+          '--metadata-file', bake.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args, {
+          cwd: fixturesDir,
+          env: Object.assign({}, process.env, {
+            BUILDX_METADATA_WARNINGS: 'true'
+          }) as {
+            [key: string]: string;
+          }
+        });
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = bake.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRefs = bake.resolveRefs(metadata);
+    expect(buildRefs).toBeDefined();
+    expect(buildRefs?.length).toEqual(3);
+    const buildWarnings = bake.resolveWarnings(metadata);
+    expect(buildWarnings).toBeDefined();
+    console.log('buildWarnings', JSON.stringify(buildWarnings, null, 2));
+
+    await GitHub.annotateBuildWarnings(buildWarnings);
   });
 });
