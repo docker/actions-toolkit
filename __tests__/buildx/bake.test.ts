@@ -23,13 +23,14 @@ import {Bake} from '../../src/buildx/bake';
 import {Context} from '../../src/context';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, BakeMetadata} from '../../src/types/buildx/bake';
+import {BakeDefinition} from '../../src/types/buildx/bake';
+import {BuildMetadata} from '../../src/types/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
 const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
-const metadata: BakeMetadata = {
+const metadata: BuildMetadata = {
   app: {
     'buildx.build.ref': 'default/default/7frbdw1fmfozgtqavghowsepk'
   },
@@ -57,7 +58,7 @@ describe('resolveMetadata', () => {
   it('matches', async () => {
     const bake = new Bake();
     fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
-    expect(bake.resolveMetadata()).toEqual(metadata as BakeMetadata);
+    expect(bake.resolveMetadata()).toEqual(metadata as BuildMetadata);
   });
 });
 

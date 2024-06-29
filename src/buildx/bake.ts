@@ -24,7 +24,8 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, BakeMetadata} from '../types/buildx/bake';
+import {BakeDefinition} from '../types/buildx/bake';
+import {BuildMetadata} from '../types/buildx/build';
 
 export interface BakeOpts {
   buildx?: Buildx;
@@ -57,7 +58,7 @@ export class Bake {
     return path.join(Context.tmpDir(), this.metadataFilename);
   }
 
-  public resolveMetadata(): BakeMetadata | undefined {
+  public resolveMetadata(): BuildMetadata | undefined {
     const metadataFile = this.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
       return undefined;
@@ -66,10 +67,10 @@ export class Bake {
     if (content === 'null') {
       return undefined;
     }
-    return <BakeMetadata>JSON.parse(content);
+    return <BuildMetadata>JSON.parse(content);
   }
 
-  public resolveRefs(metadata?: BakeMetadata): Array<string> | undefined {
+  public resolveRefs(metadata?: BuildMetadata): Array<string> | undefined {
     if (!metadata) {
       metadata = this.resolveMetadata();
       if (!metadata) {
