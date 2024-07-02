@@ -53,7 +53,7 @@ export interface UploadArtifactResponse {
 
 export interface BuildSummaryOpts {
   exportRes: ExportRecordResponse;
-  uploadRes: UploadArtifactResponse;
+  uploadRes?: UploadArtifactResponse;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs?: any;
   bakeDefinition?: BakeDefinition;

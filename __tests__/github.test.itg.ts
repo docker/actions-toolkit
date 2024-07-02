@@ -248,6 +248,52 @@ maybe('writeBuildSummary', () => {
       }
     });
   });
+
+  it('without build record', async () => {
+    const startedTime = new Date();
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build',
+          '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+          fixturesDir,
+          '--metadata-file', build.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).resolves.not.toThrow();
+
+    const refs = Buildx.refs({
+      dir: Buildx.refsDir,
+      builderName: process.env.CTN_BUILDER_NAME ?? 'default',
+      since: startedTime
+    });
+    expect(refs).toBeDefined();
+    expect(Object.keys(refs).length).toBeGreaterThan(0);
+
+    const history = new History({buildx: buildx});
+    const exportRes = await history.export({
+      refs: [Object.keys(refs)[0] ?? '']
+    });
+    expect(exportRes).toBeDefined();
+    expect(exportRes?.dockerbuildFilename).toBeDefined();
+    expect(exportRes?.dockerbuildSize).toBeDefined();
+    expect(exportRes?.summaries).toBeDefined();
+
+    await GitHub.writeBuildSummary({
+      exportRes: exportRes,
+      inputs: {
+        context: fixturesDir,
+        file: path.join(fixturesDir, 'hello.Dockerfile')
+      }
+    });
+  });
 });
 
 maybe('annotateBuildWarnings', () => {
