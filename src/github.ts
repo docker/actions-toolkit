@@ -22,7 +22,6 @@ import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
-import {isGhes} from '@actions/artifact/lib/internal/shared/config';
 import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util';
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
@@ -65,6 +64,14 @@ export class GitHub {
 
   static get apiURL(): string {
     return process.env.GITHUB_API_URL || 'https://api.github.com';
+  }
+
+  static get isGHES(): boolean {
+    const serverURL = new URL(GitHub.serverURL);
+    const hostname = serverURL.hostname.trimEnd().toUpperCase();
+    const isGitHubHost = hostname === 'GITHUB.COM';
+    const isGHESHost = hostname.endsWith('.GHE.COM') || hostname.endsWith('.GHE.LOCALHOST');
+    return !isGitHubHost && !isGHESHost;
   }
 
   static get repository(): string {
@@ -124,7 +131,7 @@ export class GitHub {
   }
 
   public static async uploadArtifact(opts: UploadArtifactOpts): Promise<UploadArtifactResponse> {
-    if (isGhes()) {
+    if (GitHub.isGHES) {
       throw new Error('@actions/artifact v2.0.0+ is currently not supported on GHES.');
     }
 
