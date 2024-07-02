@@ -16,9 +16,9 @@
 
 import {ChildProcessByStdio, spawn} from 'child_process';
 import fs from 'fs';
-import {Readable, Writable} from 'node:stream';
 import os from 'os';
 import path from 'path';
+import {Readable, Writable} from 'stream';
 import * as core from '@actions/core';
 
 import {Buildx} from './buildx';
@@ -92,14 +92,29 @@ export class History {
     });
     await Exec.exec('mkfifo', [buildxOutFifoPath]);
 
-    const buildxCmd = await this.buildx.getCommand(['--builder', builderName, 'dial-stdio']);
-    const buildxDialStdioProc = History.spawn(buildxCmd.command, buildxCmd.args);
+    const buildxDialStdioCmd = await this.buildx.getCommand(['--builder', builderName, 'dial-stdio']);
+    core.info(`[command]${buildxDialStdioCmd.command} ${buildxDialStdioCmd.args.join(' ')}`);
+    const buildxDialStdioProc = spawn(buildxDialStdioCmd.command, buildxDialStdioCmd.args, {
+      stdio: ['pipe', 'pipe', 'inherit'],
+      detached: true
+    });
+    let buildxDialStdioKilled = false;
     fs.createReadStream(buildxInFifoPath).pipe(buildxDialStdioProc.stdin);
     buildxDialStdioProc.stdout.pipe(fs.createWriteStream(buildxOutFifoPath));
+    buildxDialStdioProc.on('exit', (code, signal) => {
+      buildxDialStdioKilled = true;
+      if (signal) {
+        core.info(`Process "buildx dial-stdio" was killed with signal ${signal}`);
+      } else {
+        core.info(`Process "buildx dial-stdio" exited with code ${code}`);
+      }
+    });
 
     const tmpDockerbuildFilename = path.join(outDir, 'rec.dockerbuild');
     const summaryFilename = path.join(outDir, 'summary.json');
 
+    let dockerRunProc: ChildProcessByStdio<Writable, Readable, null> | undefined;
+    let dockerRunProcKilled = false;
     await new Promise<void>((resolve, reject) => {
       const ebargs: Array<string> = ['--ref-state-dir=/buildx-refs', `--node=${builderName}/${nodeName}`];
       for (const ref of refs) {
@@ -112,13 +127,17 @@ export class History {
         ebargs.push(`--gid=${process.getgid()}`);
       }
       // prettier-ignore
-      const dockerRunProc = History.spawn('docker', [
+      const dockerRunArgs = [
         'run', '--rm', '-i',
         '-v', `${Buildx.refsDir}:/buildx-refs`,
         '-v', `${outDir}:/out`,
         opts.image || History.EXPORT_TOOL_IMAGE,
         ...ebargs
-      ]);
+      ]
+      core.info(`[command]docker ${dockerRunArgs.join(' ')}`);
+      dockerRunProc = spawn('docker', dockerRunArgs, {
+        stdio: ['pipe', 'pipe', 'inherit']
+      });
       fs.createReadStream(buildxOutFifoPath).pipe(dockerRunProc.stdin);
       dockerRunProc.stdout.pipe(fs.createWriteStream(buildxInFifoPath));
       dockerRunProc.on('close', code => {
@@ -129,16 +148,35 @@ export class History {
             resolve();
           }
         } else {
-          reject(new Error(`Process "docker run" exited with code ${code}`));
+          reject(new Error(`Process "docker run" closed with code ${code}`));
         }
       });
       dockerRunProc.on('error', err => {
-        core.error(`Error executing buildx dial-stdio: ${err}`);
+        core.error(`Error executing "docker run": ${err}`);
         reject(err);
       });
-    }).catch(err => {
-      throw err;
-    });
+      dockerRunProc.on('exit', (code, signal) => {
+        dockerRunProcKilled = true;
+        if (signal) {
+          core.info(`Process "docker run" was killed with signal ${signal}`);
+        } else {
+          core.info(`Process "docker run" exited with code ${code}`);
+        }
+      });
+    })
+      .catch(err => {
+        throw err;
+      })
+      .finally(() => {
+        if (buildxDialStdioProc && !buildxDialStdioKilled) {
+          core.debug('Force terminating "buildx dial-stdio" process');
+          buildxDialStdioProc.kill('SIGKILL');
+        }
+        if (dockerRunProc && !dockerRunProcKilled) {
+          core.debug('Force terminating "docker run" process');
+          dockerRunProc.kill('SIGKILL');
+        }
+      });
 
     let dockerbuildFilename = `${GitHub.context.repo.owner}~${GitHub.context.repo.repo}~${refs[0].substring(0, 6).toUpperCase()}`;
     if (refs.length > 1) {
@@ -161,12 +199,5 @@ export class History {
       nodeName: nodeName,
       refs: refs
     };
-  }
-
-  private static spawn(command: string, args?: ReadonlyArray<string>): ChildProcessByStdio<Writable, Readable, null> {
-    core.info(`[command]${command}${args ? ` ${args.join(' ')}` : ''}`);
-    return spawn(command, args || [], {
-      stdio: ['pipe', 'pipe', 'inherit']
-    });
   }
 }
