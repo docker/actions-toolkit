@@ -83,7 +83,7 @@ export class Bake {
         refs.push(metadata[key]['buildx.build.ref']);
       }
     }
-    return refs;
+    return refs.length > 0 ? refs : undefined;
   }
 
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {
