@@ -85,6 +85,28 @@ describe('apiURL', () => {
   });
 });
 
+describe('isGHES', () => {
+  afterEach(() => {
+    process.env.GITHUB_SERVER_URL = '';
+  });
+  it('should return false when the request domain is github.com', () => {
+    process.env.GITHUB_SERVER_URL = 'https://github.com';
+    expect(GitHub.isGHES).toBe(false);
+  });
+  it('should return false when the request domain ends with ghe.com', () => {
+    process.env.GITHUB_SERVER_URL = 'https://my.domain.ghe.com';
+    expect(GitHub.isGHES).toBe(false);
+  });
+  it('should return false when the request domain ends with ghe.localhost', () => {
+    process.env.GITHUB_SERVER_URL = 'https://my.domain.ghe.localhost';
+    expect(GitHub.isGHES).toBe(false);
+  });
+  it('should return true when the request domain is specific to an enterprise', () => {
+    process.env.GITHUB_SERVER_URL = 'https://my-enterprise.github.com';
+    expect(GitHub.isGHES).toBe(true);
+  });
+});
+
 describe('repository', () => {
   it('returns GitHub repository', async () => {
     expect(GitHub.repository).toEqual('docker/actions-toolkit');
