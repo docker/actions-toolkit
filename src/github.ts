@@ -226,18 +226,19 @@ export class GitHub {
 
     const refsSize = Object.keys(opts.exportRes.refs).length;
 
-    // we just need the last two parts of the URL as they are always relative
-    // to the workflow run URL otherwise URL could be broken if GitHub
-    // repository name is part of a secret value used in the workflow. e.g.:
-    //  artifact: https://github.com/docker/actions-toolkit/actions/runs/9552208295/artifacts/1609622746
-    //  workflow: https://github.com/docker/actions-toolkit/actions/runs/9552208295
-    // https://github.com/docker/actions-toolkit/issues/367
-    const artifactRelativeURL = `./${GitHub.runId}/${opts.uploadRes.url.split('/').slice(-2).join('/')}`;
+    const sum = core.summary.addHeading('Docker Build summary', 2);
 
-    // prettier-ignore
-    const sum = core.summary
-      .addHeading('Docker Build summary', 2)
-      .addRaw(`<p>`)
+    if (opts.uploadRes) {
+      // we just need the last two parts of the URL as they are always relative
+      // to the workflow run URL otherwise URL could be broken if GitHub
+      // repository name is part of a secret value used in the workflow. e.g.:
+      //  artifact: https://github.com/docker/actions-toolkit/actions/runs/9552208295/artifacts/1609622746
+      //  workflow: https://github.com/docker/actions-toolkit/actions/runs/9552208295
+      // https://github.com/docker/actions-toolkit/issues/367
+      const artifactRelativeURL = `./${GitHub.runId}/${opts.uploadRes.url.split('/').slice(-2).join('/')}`;
+
+      // prettier-ignore
+      sum.addRaw(`<p>`)
         .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
         .addBreak()
         .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
@@ -245,11 +246,19 @@ export class GitHub {
       .addRaw('</p>')
       .addRaw(`<p>`)
         .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)} - includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>)`)
-      .addRaw(`</p>`)
-      .addRaw(`<p>`)
-        .addRaw(`Find this useful? `)
-        .addRaw(addLink('Let us know', 'https://docs.docker.com/feedback/gha-build-summary'))
-      .addRaw('</p>');
+      .addRaw(`</p>`);
+    } else {
+      // prettier-ignore
+      sum.addRaw(`<p>`)
+        .addRaw(`The following table provides a brief summary of your build.`)
+        .addBreak()
+        .addRaw(`For a detailed look at the build, including timing, dependencies, results, logs, traces, and other information, consider enabling the export of the build record so you can import it into Docker Desktop's Builds view. `)
+        .addRaw(addLink('Learn more', 'https://www.docker.com/blog/new-beta-feature-deep-dive-into-github-actions-docker-builds-with-docker-desktop/?utm_source=github&utm_medium=actions'))
+      .addRaw(`</p>`);
+    }
+
+    // Feedback survey
+    sum.addRaw(`<p>`).addRaw(`Find this useful? `).addRaw(addLink('Let us know', 'https://docs.docker.com/feedback/gha-build-summary')).addRaw('</p>');
 
     // Preview
     sum.addRaw('<p>');
