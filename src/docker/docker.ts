@@ -25,7 +25,7 @@ import {Cache} from '../cache';
 import {Exec} from '../exec';
 import {Util} from '../util';
 
-import {ConfigFile} from '../types/docker/docker';
+import {ConfigFile, ContextInfo} from '../types/docker/docker';
 
 export class Docker {
   static get configDir(): string {
@@ -66,6 +66,22 @@ export class Docker {
         throw new Error(res.stderr);
       }
       return res.stdout.trim();
+    });
+  }
+
+  public static async contextInspect(name?: string): Promise<ContextInfo> {
+    const args = ['context', 'inspect', '--format=json'];
+    if (name) {
+      args.push(name);
+    }
+    return await Exec.getExecOutput(`docker`, args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return (<Array<ContextInfo>>JSON.parse(res.stdout.trim()))[0];
     });
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {describe, expect, it, test} from '@jest/globals';
 
 import {Docker} from '../../src/docker/docker';
 
@@ -53,4 +53,15 @@ maybe('pull', () => {
         expect(e.message).toContain(err);
       }
     }, 600000);
+});
+
+maybe('contextInspect', () => {
+  it('inspect default context', async () => {
+    const contextInfo = await Docker.contextInspect();
+    expect(contextInfo).toBeDefined();
+    console.log('contextInfo', contextInfo);
+    expect(contextInfo?.Name).toBeDefined();
+    expect(contextInfo?.Endpoints).toBeDefined();
+    expect(Object.keys(contextInfo?.Endpoints).length).toBeGreaterThan(0);
+  });
 });
