@@ -16,6 +16,7 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
+import path from 'path';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import {parse} from 'csv-parse/sync';
@@ -188,5 +189,11 @@ export class Util {
 
   public static countLines(input: string): number {
     return input.split(/\r\n|\r|\n/).length;
+  }
+
+  public static isPathRelativeTo(parentPath: string, childPath: string): boolean {
+    const rpp = path.resolve(parentPath);
+    const rcp = path.resolve(childPath);
+    return rcp.startsWith(rpp.endsWith(path.sep) ? rpp : `${rpp}${path.sep}`);
   }
 }
