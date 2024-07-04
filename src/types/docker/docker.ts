@@ -64,3 +64,33 @@ export interface AuthConfig {
   identitytoken?: string;
   registrytoken?: string;
 }
+
+export interface ContextInfo {
+  Name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Metadata: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Endpoints: Record<string, EndpointInfo>;
+  TLSMaterial: Record<string, Array<string>>;
+  Storage: StorageInfo;
+}
+
+export interface EndpointInfo {
+  Host?: string;
+  SkipVerify: boolean;
+  TLSData?: TLSData;
+}
+
+export interface TLSData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CA: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Key: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Cert: any;
+}
+
+export interface StorageInfo {
+  MetadataPath: string;
+  TLSPath: string;
+}
