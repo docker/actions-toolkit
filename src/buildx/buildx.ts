@@ -203,10 +203,10 @@ export class Buildx {
           url = url.replace('http:/', 'http://');
         }
         if (url.startsWith('ssh:/') && !url.startsWith('ssh://')) {
-          url = url.replace('https:/', 'ssh://');
+          url = url.replace('ssh:/', 'ssh://');
         }
         if (url.startsWith('git:/') && !url.startsWith('git://')) {
-          url = url.replace('https:/', 'git://');
+          url = url.replace('git:/', 'git://');
         }
         return [url, trimed, true];
       }
