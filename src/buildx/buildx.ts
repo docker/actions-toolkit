@@ -177,12 +177,12 @@ export class Buildx {
     return driverOpts;
   }
 
-  public static localState(dir: string, ref: string): LocalState {
+  public static localState(ref: string, dir?: string): LocalState {
     const [builderName, nodeName, id] = ref.split('/');
     if (!builderName || !nodeName || !id) {
       throw new Error(`Invalid build reference: ${ref}`);
     }
-    const lsPath = path.join(dir, builderName, nodeName, id);
+    const lsPath = path.join(dir || Buildx.refsDir, builderName, nodeName, id);
     if (!fs.existsSync(lsPath)) {
       throw new Error(`Local state not found in ${lsPath}`);
     }

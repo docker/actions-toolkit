@@ -303,7 +303,7 @@ describe('localState', () => {
       } as LocalState,
     ]
   ])('given %p', async (ref: string, expected: LocalState) => {
-    const localState = Buildx.localState(path.join(fixturesDir, 'buildx-refs'), ref);
+    const localState = Buildx.localState(ref, path.join(fixturesDir, 'buildx-refs'));
     expect(localState).toEqual(expected);
   });
 });
