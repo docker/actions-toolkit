@@ -19,10 +19,16 @@ import path from 'path';
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
+import {Git} from '../buildkit/git';
 import {Docker} from '../docker/docker';
+import {GitHub} from '../github';
 import {Exec} from '../exec';
+import {Util} from '../util';
 
+import {VertexWarning} from '../types/buildkit/client';
+import {GitURL} from '../types/buildkit/git';
 import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx/buildx';
+import {GitHubAnnotation} from '../types/github';
 
 export interface BuildxOpts {
   standalone?: boolean;
@@ -265,5 +271,152 @@ export class Buildx {
     }
 
     return refs;
+  }
+
+  public static async convertWarningsToGitHubAnnotations(warnings: Array<VertexWarning>, buildRefs: Array<string>, refsDir?: string): Promise<Array<GitHubAnnotation> | undefined> {
+    if (warnings.length === 0) {
+      return;
+    }
+    const fnGitURL = function (inp: string): GitURL | undefined {
+      try {
+        return Git.parseURL(inp);
+      } catch (e) {
+        // noop
+      }
+    };
+    const fnLocalState = function (ref: string): LocalState | undefined {
+      try {
+        return Buildx.localState(ref, refsDir);
+      } catch (e) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations(${ref}): local state not found: ${e.message}`);
+      }
+    };
+
+    interface Dockerfile {
+      path: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      content?: any;
+      remote?: boolean;
+    }
+
+    const dockerfiles: Array<Dockerfile> = [];
+    for (const ref of buildRefs) {
+      const ls = fnLocalState(ref);
+      if (!ls) {
+        continue;
+      }
+
+      if (ls.DockerfilePath == '-') {
+        // exclude dockerfile from stdin
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations(${ref}): skipping stdin Dockerfile`);
+        continue;
+      } else if (ls.DockerfilePath == '') {
+        ls.DockerfilePath = 'Dockerfile';
+      }
+
+      const gitURL = fnGitURL(ls.LocalPath);
+      if (gitURL) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations(${ref}): git context detected: ${ls.LocalPath}`);
+        const remoteHost = gitURL.host.replace(/:.*/, '');
+        if (remoteHost !== 'github.com' && !remoteHost.endsWith('.ghe.com')) {
+          // we only support running actions on GitHub for now
+          // we might add support for GitLab in the future
+          core.debug(`Buildx.convertWarningsToGitHubAnnotations(${ref}): not a GitHub repo: ${remoteHost}`);
+          continue;
+        }
+        // if repository matches then we can link to the Dockerfile
+        const remoteRepo = gitURL.path.replace(/^\//, '').replace(/\.git$/, '');
+        if (remoteRepo !== GitHub.repository) {
+          core.debug(`Buildx.convertWarningsToGitHubAnnotations(${ref}): not same GitHub repo: ${remoteRepo} != ${GitHub.repository}`);
+          continue;
+        }
+        dockerfiles.push({
+          path: ls.DockerfilePath, // dockerfile path is always relative for a git context
+          remote: true
+        });
+        continue;
+      }
+
+      if (!fs.existsSync(ls.DockerfilePath)) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations: Dockerfile not found from localstate ref ${ref}: ${ls.DockerfilePath}`);
+        continue;
+      }
+
+      const workspaceDir = GitHub.workspace;
+      // only treat dockerfile path relative to GitHub actions workspace dir
+      if (Util.isPathRelativeTo(workspaceDir, ls.DockerfilePath)) {
+        dockerfiles.push({
+          path: path.relative(workspaceDir, ls.DockerfilePath),
+          content: btoa(fs.readFileSync(ls.DockerfilePath, {encoding: 'utf-8'}))
+        });
+      } else {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations: skipping Dockerfile outside of workspace: ${ls.DockerfilePath}`);
+      }
+    }
+
+    if (dockerfiles.length === 0) {
+      core.debug(`Buildx.convertWarningsToGitHubAnnotations: no Dockerfiles found`);
+      return;
+    }
+    core.debug(`Buildx.convertWarningsToGitHubAnnotations: found ${dockerfiles.length} Dockerfiles: ${JSON.stringify(dockerfiles, null, 2)}`);
+
+    const annotations: Array<GitHubAnnotation> = [];
+    for (const warning of warnings) {
+      if (!warning.detail || !warning.short) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations: skipping warning without detail or short`);
+        continue;
+      }
+
+      const warningSourceFilename = warning.sourceInfo?.filename;
+      const warningSourceData = warning.sourceInfo?.data;
+      if (!warningSourceFilename || !warningSourceData) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations: skipping warning without source info filename or data`);
+        continue;
+      }
+
+      const title = warning.detail.map(encoded => atob(encoded)).join(' ');
+      let message = atob(warning.short).replace(/\s\(line \d+\)$/, '');
+      if (warning.url) {
+        // https://github.com/docker/buildx/blob/d8c9ebde1fdcf659f1fa3efa6ccc27a28b0f1564/commands/build.go#L854
+        message += `\nMore info: ${warning.url}`;
+      }
+
+      // GitHub's annotations don't clearly show ranges of lines, so we'll just
+      // show the first line: https://github.com/orgs/community/discussions/129899
+      const startLine = warning.range && warning.range.length > 0 ? warning.range[0]?.start.line : undefined;
+
+      // TODO: When GitHub's annotations support showing ranges properly, we can use this code
+      // let startLine: number | undefined, endLine: number | undefined;
+      // for (const range of warning.range ?? []) {
+      //   if (range.start.line && (!startLine || range.start.line < startLine)) {
+      //     startLine = range.start.line;
+      //   }
+      //   if (range.end.line && (!endLine || range.end.line > endLine)) {
+      //     endLine = range.end.line;
+      //   }
+      // }
+
+      let annotated = false;
+      for (const dockerfile of dockerfiles) {
+        // a valid dockerfile path and content is required to match the warning
+        // source info or always assume it's valid if this is a remote git
+        // context as we can't read the content of the Dockerfile in this case.
+        if (dockerfile.remote || (dockerfile.path.endsWith(warningSourceFilename) && dockerfile.content === warningSourceData)) {
+          annotations.push({
+            title: title,
+            message: message,
+            file: dockerfile.path,
+            startLine: startLine
+          });
+          annotated = true;
+          break;
+        }
+      }
+      if (!annotated) {
+        core.debug(`Buildx.convertWarningsToGitHubAnnotations: skipping warning without matching Dockerfile ${warningSourceFilename}: ${title}`);
+      }
+    }
+
+    return annotations;
   }
 }

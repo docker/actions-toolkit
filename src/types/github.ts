@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AnnotationProperties} from '@actions/core';
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
@@ -36,6 +37,10 @@ export interface GitHubActionsRuntimeToken extends JwtPayload {
 export interface GitHubActionsRuntimeTokenAC {
   Scope: string;
   Permission: number;
+}
+
+export interface GitHubAnnotation extends AnnotationProperties {
+  message: string;
 }
 
 export interface UploadArtifactOpts {
