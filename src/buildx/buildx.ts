@@ -177,6 +177,54 @@ export class Buildx {
     return driverOpts;
   }
 
+  public static localState(dir: string, ref: string): LocalState {
+    const [builderName, nodeName, id] = ref.split('/');
+    if (!builderName || !nodeName || !id) {
+      throw new Error(`Invalid build reference: ${ref}`);
+    }
+    const lsPath = path.join(dir, builderName, nodeName, id);
+    if (!fs.existsSync(lsPath)) {
+      throw new Error(`Local state not found in ${lsPath}`);
+    }
+    return Buildx.fixLocalState(<LocalState>JSON.parse(fs.readFileSync(lsPath, 'utf8')));
+  }
+
+  // https://github.com/docker/buildx/pull/2560
+  private static fixLocalState(ls: LocalState): LocalState {
+    const fnTrimToValidContext = function (inp: string): [string, string, boolean] {
+      const match = inp.match(/(.*)(https?:\/{1,2}\S+|ssh:\/\/\S+|git:\/\/\S+)/i);
+      if (match && match.length == 3) {
+        const trimed = match[1];
+        let url = match[2];
+        if (url.startsWith('https:/') && !url.startsWith('https://')) {
+          url = url.replace('https:/', 'https://');
+        }
+        if (url.startsWith('http:/') && !url.startsWith('http://')) {
+          url = url.replace('http:/', 'http://');
+        }
+        if (url.startsWith('ssh:/') && !url.startsWith('ssh://')) {
+          url = url.replace('https:/', 'ssh://');
+        }
+        if (url.startsWith('git:/') && !url.startsWith('git://')) {
+          url = url.replace('https:/', 'git://');
+        }
+        return [url, trimed, true];
+      }
+      return [inp, '', false];
+    };
+
+    const [contextPath, trimedPath, isURL] = fnTrimToValidContext(ls.LocalPath);
+    if (isURL) {
+      ls.LocalPath = contextPath;
+      if (ls.DockerfilePath.indexOf(trimedPath) === 0) {
+        ls.DockerfilePath = ls.DockerfilePath.substring(trimedPath.length);
+      }
+    }
+    ls.LocalPath = ls.LocalPath.endsWith('/-') ? '-' : ls.LocalPath;
+    ls.DockerfilePath = ls.DockerfilePath.endsWith('/-') ? '-' : ls.DockerfilePath;
+    return ls;
+  }
+
   public static refs(opts: LocalRefsOpts, refs: LocalRefsResponse = {}): LocalRefsResponse {
     const {dir, builderName, nodeName, since} = opts;
 
@@ -210,7 +258,7 @@ export class Buildx {
         if (since && stat.mtime < since) {
           continue;
         }
-        const localState = <LocalState>JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const localState = Buildx.fixLocalState(<LocalState>JSON.parse(fs.readFileSync(filePath, 'utf8')));
         const ref = `${builderName}/${nodeName}/${file}`;
         refs[ref] = localState;
       }

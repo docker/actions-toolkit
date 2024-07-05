@@ -24,7 +24,7 @@ import {Buildx} from '../../src/buildx/buildx';
 import {Context} from '../../src/context';
 import {Exec} from '../../src/exec';
 
-import {Cert} from '../../src/types/buildx/buildx';
+import {Cert, LocalState} from '../../src/types/buildx/buildx';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
@@ -250,19 +250,70 @@ describe('resolveCertsDriverOpts', () => {
   });
 });
 
+describe('localState', () => {
+  // prettier-ignore
+  test.each([
+    [
+      'default/default/ij71n3ubmhck85d03zdvye5nr',
+      {
+        LocalPath: '/home/crazymax/github/docker_org/buildx',
+        DockerfilePath: '/home/crazymax/github/docker_org/buildx/Dockerfile'
+      } as LocalState,
+    ],
+    [
+      'default/default/7pnnqpgacnqq98oa1a1h5sz6t',
+      {
+        LocalPath: 'https://github.com/docker/actions-toolkit.git#:__tests__/fixtures',
+        DockerfilePath: 'hello.Dockerfile'
+      } as LocalState,
+    ],
+    [
+      'default/default/84p2qpgacnqq98oa1a1h5sz6t',
+      {
+        LocalPath: 'https://github.com/docker/actions-toolkit.git#:__tests__/fixtures',
+        DockerfilePath: '-'
+      } as LocalState,
+    ],
+    [
+      'default/default/a5s9rlg9cnqq98oa1a1h5sz6t',
+      {
+        LocalPath: '-',
+        DockerfilePath: ''
+      } as LocalState,
+    ],
+    [
+      'default/default/aav2ix4nw5eky66fw045dkylr',
+      {
+        LocalPath: 'https://github.com/docker/buildx.git',
+        DockerfilePath: ''
+      } as LocalState,
+    ],
+    [
+      'default/default/w38vcd5fo5cfvfyig77qjec0v',
+      {
+        LocalPath: '/home/crazy/hello',
+        DockerfilePath: '-'
+      } as LocalState,
+    ]
+  ])('given %p', async (ref: string, expected: LocalState) => {
+    const localState = Buildx.localState(path.join(fixturesDir, 'buildx-refs'), ref);
+    expect(localState).toEqual(expected);
+  });
+});
+
 describe('refs', () => {
   it('returns all refs', async () => {
     const refs = Buildx.refs({
       dir: path.join(fixturesDir, 'buildx-refs')
     });
-    expect(Object.keys(refs).length).toEqual(11);
+    expect(Object.keys(refs).length).toEqual(16);
   });
   it('returns default builder refs', async () => {
     const refs = Buildx.refs({
       dir: path.join(fixturesDir, 'buildx-refs'),
       builderName: 'default'
     });
-    expect(Object.keys(refs).length).toEqual(8);
+    expect(Object.keys(refs).length).toEqual(13);
   });
   it('returns foo builder refs', async () => {
     const refs = Buildx.refs({
@@ -281,6 +332,6 @@ describe('refs', () => {
       builderName: 'default',
       since: new Date('2024-01-10T00:00:00Z')
     });
-    expect(Object.keys(refs).length).toEqual(5);
+    expect(Object.keys(refs).length).toEqual(10);
   });
 });
