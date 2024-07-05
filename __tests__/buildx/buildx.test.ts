@@ -289,6 +289,13 @@ describe('localState', () => {
       } as LocalState,
     ],
     [
+      'default/default/dfsz8r57a98zf789pmlyzqp3n',
+      {
+        LocalPath: 'https://github.com/docker/actions-toolkit.git#:__tests__/fixtures',
+        DockerfilePath: 'hello.Dockerfile'
+      } as LocalState,
+    ],
+    [
       'default/default/w38vcd5fo5cfvfyig77qjec0v',
       {
         LocalPath: '/home/crazy/hello',
@@ -306,14 +313,14 @@ describe('refs', () => {
     const refs = Buildx.refs({
       dir: path.join(fixturesDir, 'buildx-refs')
     });
-    expect(Object.keys(refs).length).toEqual(16);
+    expect(Object.keys(refs).length).toEqual(17);
   });
   it('returns default builder refs', async () => {
     const refs = Buildx.refs({
       dir: path.join(fixturesDir, 'buildx-refs'),
       builderName: 'default'
     });
-    expect(Object.keys(refs).length).toEqual(13);
+    expect(Object.keys(refs).length).toEqual(14);
   });
   it('returns foo builder refs', async () => {
     const refs = Buildx.refs({
@@ -332,6 +339,6 @@ describe('refs', () => {
       builderName: 'default',
       since: new Date('2024-01-10T00:00:00Z')
     });
-    expect(Object.keys(refs).length).toEqual(10);
+    expect(Object.keys(refs).length).toEqual(11);
   });
 });
