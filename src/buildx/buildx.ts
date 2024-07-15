@@ -192,7 +192,7 @@ export class Buildx {
   // https://github.com/docker/buildx/pull/2560
   private static fixLocalState(ls: LocalState): LocalState {
     const fnTrimToValidContext = function (inp: string): [string, string, boolean] {
-      const match = inp.match(/(.*)(https?:\/{1,2}\S+|ssh:\/\/\S+|git:\/\/\S+)/i);
+      const match = inp.match(/(.*)(https?:\/{1,2}\S+|ssh:\/{1,2}\S+|git:\/{1,2}\S+)/i);
       if (match && match.length == 3) {
         const trimed = match[1];
         let url = match[2];
