@@ -36,7 +36,8 @@ export interface HistoryOpts {
 export class History {
   private readonly buildx: Buildx;
 
-  private static readonly EXPORT_TOOL_IMAGE: string = 'docker.io/dockereng/export-build:latest';
+  private static readonly EXPORT_BUILD_IMAGE_DEFAULT: string = 'docker.io/dockereng/export-build:latest';
+  private static readonly EXPORT_BUILD_IMAGE_ENV: string = 'DOCKER_BUILD_EXPORT_BUILD_IMAGE';
 
   constructor(opts?: HistoryOpts) {
     this.buildx = opts?.buildx || new Buildx();
@@ -131,7 +132,7 @@ export class History {
         'run', '--rm', '-i',
         '-v', `${Buildx.refsDir}:/buildx-refs`,
         '-v', `${outDir}:/out`,
-        opts.image || History.EXPORT_TOOL_IMAGE,
+        opts.image || process.env[History.EXPORT_BUILD_IMAGE_ENV] || History.EXPORT_BUILD_IMAGE_DEFAULT,
         ...ebargs
       ]
       core.info(`[command]docker ${dockerRunArgs.join(' ')}`);
