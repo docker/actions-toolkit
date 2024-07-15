@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -138,6 +138,55 @@ maybe('exportBuild', () => {
     const history = new History({buildx: buildx});
     const exportRes = await history.export({
       refs: buildRefs ?? []
+    });
+
+    expect(exportRes).toBeDefined();
+    expect(exportRes?.dockerbuildFilename).toBeDefined();
+    expect(exportRes?.dockerbuildSize).toBeDefined();
+    expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
+    expect(exportRes?.summaries).toBeDefined();
+  });
+});
+
+maybe('exportBuild custom image', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      DOCKER_BUILD_EXPORT_BUILD_IMAGE: 'docker.io/dockereng/export-build:0.2.2'
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('with custom image', async () => {
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build', '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+          '--metadata-file', build.getMetadataFilePath(),
+          fixturesDir
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = build.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRef = build.resolveRef(metadata);
+    expect(buildRef).toBeDefined();
+
+    const history = new History({buildx: buildx});
+    const exportRes = await history.export({
+      refs: [buildRef ?? '']
     });
 
     expect(exportRes).toBeDefined();
