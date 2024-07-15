@@ -22,6 +22,7 @@ import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
+import {isGhes} from '@actions/artifact/lib/internal/shared/config';
 import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util';
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
@@ -67,11 +68,9 @@ export class GitHub {
   }
 
   static get isGHES(): boolean {
-    const serverURL = new URL(GitHub.serverURL);
-    const hostname = serverURL.hostname.trimEnd().toUpperCase();
-    const isGitHubHost = hostname === 'GITHUB.COM';
-    const isGHESHost = hostname.endsWith('.GHE.COM') || hostname.endsWith('.GHE.LOCALHOST');
-    return !isGitHubHost && !isGHESHost;
+    // FIXME: we are using the function from GitHub artifact module but should
+    //  be within core module when available.
+    return isGhes();
   }
 
   static get repository(): string {
