@@ -28,6 +28,7 @@ import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
 import {Context} from '../context';
+import {Docker} from './docker';
 import {Exec} from '../exec';
 import {Util} from '../util';
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
@@ -219,8 +220,8 @@ export class Install {
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', this.contextName]);
+      await Docker.exec(['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Docker.exec(['context', 'use', this.contextName]);
     });
 
     return dockerHost;
@@ -309,8 +310,8 @@ EOF`,
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', this.contextName]);
+      await Docker.exec(['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Docker.exec(['context', 'use', this.contextName]);
     });
 
     return dockerHost;
@@ -352,8 +353,8 @@ EOF`,
     });
 
     await core.group('Create Docker context', async () => {
-      await Exec.exec('docker', ['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
-      await Exec.exec('docker', ['context', 'use', this.contextName]);
+      await Docker.exec(['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Docker.exec(['context', 'use', this.contextName]);
     });
 
     return dockerHost;
@@ -395,7 +396,7 @@ EOF`,
       await Exec.exec('limactl', ['delete', '--tty=false', this.limaInstanceName, '--force']);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
+      await Docker.exec(['context', 'rm', '-f', this.contextName]);
     });
     await core.group(`Cleaning up runDir`, async () => {
       await Exec.exec('sudo', ['rm', '-rf', this.runDir]);
@@ -411,7 +412,7 @@ EOF`,
       await Util.sleep(5);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
+      await Docker.exec(['context', 'rm', '-f', this.contextName]);
     });
     await core.group(`Cleaning up runDir`, async () => {
       await Exec.exec('sudo', ['rm', '-rf', this.runDir], {
@@ -427,7 +428,7 @@ EOF`,
       await Exec.exec(logCmd.command, logCmd.args);
     });
     await core.group('Removing Docker context', async () => {
-      await Exec.exec('docker', ['context', 'rm', '-f', this.contextName]);
+      await Docker.exec(['context', 'rm', '-f', this.contextName]);
     });
   }
 

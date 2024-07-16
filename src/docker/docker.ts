@@ -18,6 +18,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
+import {ExecOptions, ExecOutput} from '@actions/exec';
 import * as io from '@actions/io';
 
 import {Context} from '../context';
@@ -53,12 +54,36 @@ export class Docker {
       });
   }
 
+  public static async exec(args?: string[], options?: ExecOptions): Promise<number> {
+    return Exec.exec('docker', args, Docker.execOptions(options));
+  }
+
+  public static async getExecOutput(args?: string[], options?: ExecOptions): Promise<ExecOutput> {
+    return Exec.getExecOutput('docker', args, Docker.execOptions(options));
+  }
+
+  private static execOptions(options?: ExecOptions): ExecOptions {
+    if (!options) {
+      options = {};
+    }
+    if (!options.env) {
+      options.env = Object.assign({}, process.env, {
+        DOCKER_CONTENT_TRUST: 'false'
+      }) as {
+        [key: string]: string;
+      };
+    } else {
+      options.env.DOCKER_CONTENT_TRUST = 'false';
+    }
+    return options;
+  }
+
   public static async context(name?: string): Promise<string> {
     const args = ['context', 'inspect', '--format', '{{.Name}}'];
     if (name) {
       args.push(name);
     }
-    return await Exec.getExecOutput(`docker`, args, {
+    return await Docker.getExecOutput(args, {
       ignoreReturnCode: true,
       silent: true
     }).then(res => {
@@ -74,7 +99,7 @@ export class Docker {
     if (name) {
       args.push(name);
     }
-    return await Exec.getExecOutput(`docker`, args, {
+    return await Docker.getExecOutput(args, {
       ignoreReturnCode: true,
       silent: true
     }).then(res => {
@@ -86,11 +111,11 @@ export class Docker {
   }
 
   public static async printVersion(): Promise<void> {
-    await Exec.exec('docker', ['version']);
+    await Docker.exec(['version']);
   }
 
   public static async printInfo(): Promise<void> {
-    await Exec.exec('docker', ['info']);
+    await Docker.exec(['info']);
   }
 
   public static parseRepoTag(image: string): {repository: string; tag: string} {
@@ -138,7 +163,7 @@ export class Docker {
       cacheFoundPath = await imageCache.find();
       if (cacheFoundPath) {
         core.info(`Image found from cache in ${cacheFoundPath}`);
-        await Exec.getExecOutput(`docker`, ['load', '-i', cacheFoundPath], {
+        await Docker.getExecOutput(['load', '-i', cacheFoundPath], {
           ignoreReturnCode: true
         }).then(res => {
           if (res.stderr.length > 0 && res.exitCode != 0) {
@@ -149,7 +174,7 @@ export class Docker {
     }
 
     let pulled = true;
-    await Exec.getExecOutput(`docker`, ['pull', image], {
+    await Docker.getExecOutput(['pull', image], {
       ignoreReturnCode: true
     }).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
@@ -165,7 +190,7 @@ export class Docker {
 
     if (cache && pulled) {
       const imageTarPath = path.join(Context.tmpDir(), `${Util.hash(image)}.tar`);
-      await Exec.getExecOutput(`docker`, ['save', '-o', imageTarPath, image], {
+      await Docker.getExecOutput(['save', '-o', imageTarPath, image], {
         ignoreReturnCode: true
       }).then(async res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
