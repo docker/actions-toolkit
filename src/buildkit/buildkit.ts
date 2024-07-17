@@ -19,8 +19,8 @@ import * as semver from 'semver';
 
 import {Buildx} from '../buildx/buildx';
 import {Builder} from '../buildx/builder';
+import {Docker} from '../docker/docker';
 import {Config} from './config';
-import {Exec} from '../exec';
 
 import {BuilderInfo, NodeInfo} from '../types/buildx/builder';
 
@@ -51,13 +51,13 @@ export class BuildKit {
 
   private async getVersionWithinImage(nodeName: string): Promise<string> {
     core.debug(`BuildKit.getVersionWithinImage nodeName: ${nodeName}`);
-    return Exec.getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
+    return Docker.getExecOutput(['inspect', '--format', '{{.Config.Image}}', `${Buildx.containerNamePrefix}${nodeName}`], {
       ignoreReturnCode: true,
       silent: true
     }).then(bkitimage => {
       if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
         core.debug(`BuildKit.getVersionWithinImage image: ${bkitimage.stdout.trim()}`);
-        return Exec.getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout.trim(), '--version'], {
+        return Docker.getExecOutput(['run', '--rm', bkitimage.stdout.trim(), '--version'], {
           ignoreReturnCode: true,
           silent: true
         }).then(bkitversion => {

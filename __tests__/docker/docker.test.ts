@@ -22,7 +22,6 @@ import osm = require('os');
 import * as rimraf from 'rimraf';
 
 import {Docker} from '../../src/docker/docker';
-import {Exec} from '../../src/exec';
 
 import {ConfigFile} from '../../src/types/docker/docker';
 
@@ -105,48 +104,132 @@ describe('isAvailable', () => {
   });
 });
 
-describe('context', () => {
-  it('call docker context show', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
-    await Docker.context().catch(() => {
-      // noop
-    });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['context', 'inspect', '--format', '{{.Name}}'], {
+describe('exec', () => {
+  it('returns docker version', async () => {
+    const execSpy = jest.spyOn(Docker, 'exec');
+    await Docker.exec(['version'], {
       ignoreReturnCode: true,
       silent: true
     });
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    expect(Object.keys(callfunc[1]?.env || {}).length).toBeGreaterThan(0);
+    const env = callfunc[1]?.env;
+    expect(env).toHaveProperty('DOCKER_CONTENT_TRUST');
+    expect(env?.DOCKER_CONTENT_TRUST).toBe('false');
+    if (callfunc[1]?.env) {
+      // already checked env
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([
+      ['version'],
+      {
+        ignoreReturnCode: true,
+        silent: true
+      }
+    ]);
+  });
+});
+
+describe('getExecOutput', () => {
+  it('returns docker version', async () => {
+    const execSpy = jest.spyOn(Docker, 'getExecOutput');
+    await Docker.getExecOutput(['version'], {
+      ignoreReturnCode: true,
+      silent: true
+    });
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    expect(Object.keys(callfunc[1]?.env || {}).length).toBeGreaterThan(0);
+    const env = callfunc[1]?.env;
+    expect(env).toHaveProperty('DOCKER_CONTENT_TRUST');
+    expect(env?.DOCKER_CONTENT_TRUST).toBe('false');
+    if (callfunc[1]?.env) {
+      // already checked env
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([
+      ['version'],
+      {
+        ignoreReturnCode: true,
+        silent: true
+      }
+    ]);
+  });
+});
+
+describe('context', () => {
+  it('call docker context show', async () => {
+    const execSpy = jest.spyOn(Docker, 'getExecOutput');
+    await Docker.context().catch(() => {
+      // noop
+    });
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    if (callfunc && callfunc[1]) {
+      // we don't want to check env opt
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([
+      ['context', 'inspect', '--format', '{{.Name}}'],
+      {
+        ignoreReturnCode: true,
+        silent: true
+      }
+    ]);
   });
 });
 
 describe('contextInspect', () => {
   it('call docker context inspect', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = jest.spyOn(Docker, 'getExecOutput');
     await Docker.contextInspect('foo').catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['context', 'inspect', '--format=json', 'foo'], {
-      ignoreReturnCode: true,
-      silent: true
-    });
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    if (callfunc && callfunc[1]) {
+      // we don't want to check env opt
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([
+      ['context', 'inspect', '--format=json', 'foo'],
+      {
+        ignoreReturnCode: true,
+        silent: true
+      }
+    ]);
   });
 });
 
 describe('printVersion', () => {
   it('call docker version', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = jest.spyOn(Docker, 'exec');
     await Docker.printVersion().catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['version']);
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    if (callfunc && callfunc[1]) {
+      // we don't want to check env opt
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([['version']]);
   });
 });
 
 describe('printInfo', () => {
   it('call docker info', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = jest.spyOn(Docker, 'exec');
     await Docker.printInfo().catch(() => {
       // noop
     });
-    expect(execSpy).toHaveBeenCalledWith(`docker`, ['info']);
+    expect(execSpy).toHaveBeenCalledTimes(1);
+    const callfunc = execSpy.mock.calls[0];
+    if (callfunc && callfunc[1]) {
+      // we don't want to check env opt
+      callfunc[1].env = undefined;
+    }
+    expect(callfunc).toEqual([['info']]);
   });
 });

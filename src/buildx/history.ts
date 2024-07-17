@@ -137,7 +137,11 @@ export class History {
       ]
       core.info(`[command]docker ${dockerRunArgs.join(' ')}`);
       dockerRunProc = spawn('docker', dockerRunArgs, {
-        stdio: ['pipe', 'pipe', 'inherit']
+        stdio: ['pipe', 'pipe', 'inherit'],
+        env: {
+          ...process.env,
+          DOCKER_CONTENT_TRUST: 'false'
+        }
       });
       fs.createReadStream(buildxOutFifoPath).pipe(dockerRunProc.stdin);
       dockerRunProc.stdout.pipe(fs.createWriteStream(buildxInFifoPath));
