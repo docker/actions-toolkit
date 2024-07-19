@@ -289,7 +289,8 @@ EOF`,
             await Exec.getExecOutput(`docker version`, undefined, {
               silent: true,
               env: Object.assign({}, envs, {
-                DOCKER_HOST: dockerHost
+                DOCKER_HOST: dockerHost,
+                DOCKER_CONTENT_TRUST: 'false'
               }) as {
                 [key: string]: string;
               }
