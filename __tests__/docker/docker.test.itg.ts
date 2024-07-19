@@ -20,6 +20,12 @@ import {Docker} from '../../src/docker/docker';
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
+maybe('isDaemonRunning', () => {
+  it('checks if daemon is running', async () => {
+    expect(await Docker.isDaemonRunning()).toBe(true);
+  });
+});
+
 maybe('pull', () => {
   // prettier-ignore
   test.each([

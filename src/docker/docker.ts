@@ -54,6 +54,17 @@ export class Docker {
       });
   }
 
+  public static async isDaemonRunning(): Promise<boolean> {
+    try {
+      await Docker.getExecOutput([`version`], {
+        silent: true
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   public static async exec(args?: string[], options?: ExecOptions): Promise<number> {
     return Exec.exec('docker', args, Docker.execOptions(options));
   }
