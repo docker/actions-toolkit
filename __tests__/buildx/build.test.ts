@@ -24,9 +24,9 @@ import {Build} from '../../src/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-build-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
-const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata.json'), 'utf-8'));
+const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-build.json'), 'utf-8'));
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {

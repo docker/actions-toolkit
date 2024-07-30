@@ -26,6 +26,7 @@ import {Util} from '../util';
 import {ExecOptions} from '@actions/exec';
 import {BakeDefinition} from '../types/buildx/bake';
 import {BuildMetadata} from '../types/buildx/build';
+import {VertexWarning} from '../types/buildkit/client';
 
 export interface BakeOpts {
   buildx?: Buildx;
@@ -84,6 +85,19 @@ export class Bake {
       }
     }
     return refs.length > 0 ? refs : undefined;
+  }
+
+  public resolveWarnings(metadata?: BuildMetadata): Array<VertexWarning> | undefined {
+    if (!metadata) {
+      metadata = this.resolveMetadata();
+      if (!metadata) {
+        return undefined;
+      }
+    }
+    if ('buildx.build.warnings' in metadata) {
+      return metadata['buildx.build.warnings'] as Array<VertexWarning>;
+    }
+    return undefined;
   }
 
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {

@@ -1,0 +1,476 @@
+{
+  "buildx.build.warnings": [
+    {
+      "vertex": "sha256:a5ba072453def0016837337b14eac8e587782c88e0f40bef076f63c91aa757b4",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdmck9NJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMTcp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint-other.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvTSBidXN5Ym94IGFTIG5vdHVzZWQKQ09QWSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LW90aGVyLkRvY2tlcmZpbGUgXAogIC8K",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 17
+          },
+          "end": {
+            "line": 17
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:a5ba072453def0016837337b14eac8e587782c88e0f40bef076f63c91aa757b4",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdmcm9NJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMjAp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint-other.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvTSBidXN5Ym94IGFTIG5vdHVzZWQKQ09QWSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LW90aGVyLkRvY2tlcmZpbGUgXAogIC8K",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 20
+          },
+          "end": {
+            "line": 20
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:a5ba072453def0016837337b14eac8e587782c88e0f40bef076f63c91aa757b4",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdDT1B5JyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMjQp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint-other.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvTSBidXN5Ym94IGFTIG5vdHVzZWQKQ09QWSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LW90aGVyLkRvY2tlcmZpbGUgXAogIC8K",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 24
+          },
+          "end": {
+            "line": 24
+          }
+        },
+        {
+          "start": {
+            "line": 25
+          },
+          "end": {
+            "line": 25
+          }
+        },
+        {
+          "start": {
+            "line": 26
+          },
+          "end": {
+            "line": 26
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdmcm9tJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMjAp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 20
+          },
+          "end": {
+            "line": 20
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "TWFpbnRhaW5lckRlcHJlY2F0ZWQ6IE1haW50YWluZXIgaW5zdHJ1Y3Rpb24gaXMgZGVwcmVjYXRlZCBpbiBmYXZvciBvZiB1c2luZyBsYWJlbCAobGluZSAyMSk=",
+      "detail": [
+        "VGhlIE1BSU5UQUlORVIgaW5zdHJ1Y3Rpb24gaXMgZGVwcmVjYXRlZCwgdXNlIGEgbGFiZWwgaW5zdGVhZCB0byBkZWZpbmUgYW4gaW1hZ2UgYXV0aG9y"
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/maintainer-deprecated/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 21
+          },
+          "end": {
+            "line": 21
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "TXVsdGlwbGVJbnN0cnVjdGlvbnNEaXNhbGxvd2VkOiBNdWx0aXBsZSBDTUQgaW5zdHJ1Y3Rpb25zIHNob3VsZCBub3QgYmUgdXNlZCBpbiB0aGUgc2FtZSBzdGFnZSBiZWNhdXNlIG9ubHkgdGhlIGxhc3Qgb25lIHdpbGwgYmUgdXNlZCAobGluZSAyNik=",
+      "detail": [
+        "TXVsdGlwbGUgaW5zdHJ1Y3Rpb25zIG9mIHRoZSBzYW1lIHR5cGUgc2hvdWxkIG5vdCBiZSB1c2VkIGluIHRoZSBzYW1lIHN0YWdl"
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/multiple-instructions-disallowed/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 26
+          },
+          "end": {
+            "line": 26
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "SlNPTkFyZ3NSZWNvbW1lbmRlZDogSlNPTiBhcmd1bWVudHMgcmVjb21tZW5kZWQgZm9yIEVOVFJZUE9JTlQgdG8gcHJldmVudCB1bmludGVuZGVkIGJlaGF2aW9yIHJlbGF0ZWQgdG8gT1Mgc2lnbmFscyAobGluZSAyOCk=",
+      "detail": [
+        "SlNPTiBhcmd1bWVudHMgcmVjb21tZW5kZWQgZm9yIEVOVFJZUE9JTlQvQ01EIHRvIHByZXZlbnQgdW5pbnRlbmRlZCBiZWhhdmlvciByZWxhdGVkIHRvIE9TIHNpZ25hbHM="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/json-args-recommended/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 28
+          },
+          "end": {
+            "line": 28
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:a14452ec03a7f128fb0a1da8c4afdc78175fa9a97ff83ace427b3c39509d459b",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdGUm9NJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMSk=",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "Dockerfile",
+        "data": "RlJvTSBhbHBpbmUKRU5UUllQT0lOVCBbImVjaG8iLCAiaGVsbG8iXQ==",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 1
+          },
+          "end": {
+            "line": 1
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:a5ba072453def0016837337b14eac8e587782c88e0f40bef076f63c91aa757b4",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdmcm9tJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMjMp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint-other.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvTSBidXN5Ym94IGFTIG5vdHVzZWQKQ09QWSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LW90aGVyLkRvY2tlcmZpbGUgXAogIC8K",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 23
+          },
+          "end": {
+            "line": 23
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdmck9NJyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMTcp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 17
+          },
+          "end": {
+            "line": 17
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdjT3B5JyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMTgp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 18
+          },
+          "end": {
+            "line": 18
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:703fee0c090bf71539abdd28ae63eb49ced05ebd6da49db96224888f49db219d",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdDT1B5JyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMjIp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCk1BSU5UQUlORVIgbW9ieUBleGFtcGxlLmNvbQpDT1B5IC0tZnJvbT1iYXNlIFwKICAvbGludC5Eb2NrZXJmaWxlIFwKICAvCgpDTUQgWyAiZWNobyIsICJIZWxsbywgTm9yd2F5ISIgXQpDTUQgWyAiZWNobyIsICJIZWxsbywgU3dlZGVuISIgXQpFTlRSWVBPSU5UIG15LXByb2dyYW0gc3RhcnQK",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 22
+          },
+          "end": {
+            "line": 22
+          }
+        },
+        {
+          "start": {
+            "line": 23
+          },
+          "end": {
+            "line": 23
+          }
+        },
+        {
+          "start": {
+            "line": 24
+          },
+          "end": {
+            "line": 24
+          }
+        }
+      ]
+    },
+    {
+      "vertex": "sha256:a5ba072453def0016837337b14eac8e587782c88e0f40bef076f63c91aa757b4",
+      "level": 1,
+      "short": "Q29uc2lzdGVudEluc3RydWN0aW9uQ2FzaW5nOiBDb21tYW5kICdjT3B5JyBzaG91bGQgbWF0Y2ggdGhlIGNhc2Ugb2YgdGhlIGNvbW1hbmQgbWFqb3JpdHkgKHVwcGVyY2FzZSkgKGxpbmUgMTgp",
+      "detail": [
+        "QWxsIGNvbW1hbmRzIHdpdGhpbiB0aGUgRG9ja2VyZmlsZSBzaG91bGQgdXNlIHRoZSBzYW1lIGNhc2luZyAoZWl0aGVyIHVwcGVyIG9yIGxvd2VyKQ=="
+      ],
+      "url": "https://docs.docker.com/go/dockerfile/rule/consistent-instruction-casing/",
+      "sourceInfo": {
+        "filename": "lint-other.Dockerfile",
+        "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGUtdXBzdHJlYW06bWFzdGVyCgojIENvcHlyaWdodCAyMDI0IGFjdGlvbnMtdG9vbGtpdCBhdXRob3JzCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgoKZnJPTSBidXN5Ym94IGFzIGJhc2UKY09weSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvTSBidXN5Ym94IGFTIG5vdHVzZWQKQ09QWSBsaW50LW90aGVyLkRvY2tlcmZpbGUgLgoKZnJvbSBzY3JhdGNoCkNPUHkgLS1mcm9tPWJhc2UgXAogIC9saW50LW90aGVyLkRvY2tlcmZpbGUgXAogIC8K",
+        "language": "Dockerfile"
+      },
+      "range": [
+        {
+          "start": {
+            "line": 18
+          },
+          "end": {
+            "line": 18
+          }
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "buildx.build.provenance": {
+      "buildType": "https://mobyproject.org/buildkit@v1",
+      "materials": [
+        {
+          "uri": "pkg:docker/docker/dockerfile-upstream@master",
+          "digest": {
+            "sha256": "bcfc291ad4ebc0fb1f53d2b2e4a4f6ba5a6a5df61d8a501aa6edb18f8dec339f"
+          }
+        },
+        {
+          "uri": "pkg:docker/busybox@latest?platform=linux%2Famd64",
+          "digest": {
+            "sha256": "9ae97d36d26566ff84e8893c64a6dc4fe8ca6d1144bf5b87b2b85a32def253c7"
+          }
+        }
+      ],
+      "invocation": {
+        "configSource": {
+          "entryPoint": "lint.Dockerfile"
+        },
+        "parameters": {
+          "frontend": "gateway.v0",
+          "args": {
+            "cmdline": "docker/dockerfile-upstream:master",
+            "source": "docker/dockerfile-upstream:master"
+          },
+          "locals": [
+            {
+              "name": "context"
+            },
+            {
+              "name": "dockerfile"
+            }
+          ]
+        },
+        "environment": {
+          "platform": "linux/amd64"
+        }
+      }
+    },
+    "buildx.build.ref": "default/default/x3tig9yrbzg2bp0ahn840m9hs",
+    "containerimage.config.digest": "sha256:0c1ae53d25e7cad9c1d81de558cdf959dfaf49e32d6918984eae14ae33197c2f",
+    "containerimage.digest": "sha256:0c1ae53d25e7cad9c1d81de558cdf959dfaf49e32d6918984eae14ae33197c2f"
+  },
+  "lint-inline": {
+    "buildx.build.provenance": {
+      "buildType": "https://mobyproject.org/buildkit@v1",
+      "materials": [
+        {
+          "uri": "pkg:docker/alpine@latest?platform=linux%2Famd64",
+          "digest": {
+            "sha256": "94e5f06ff8e3d4441dc3cd8b090ff38dc911bfa8ebdb0dc28395bc98f82f983f"
+          }
+        }
+      ],
+      "invocation": {
+        "configSource": {
+          "entryPoint": "Dockerfile"
+        },
+        "parameters": {
+          "frontend": "dockerfile.v0",
+          "args": {
+            "dockerfilekey": "dockerfile"
+          },
+          "locals": [
+            {
+              "name": "context"
+            },
+            {
+              "name": "dockerfile"
+            }
+          ]
+        },
+        "environment": {
+          "platform": "linux/amd64"
+        }
+      }
+    },
+    "buildx.build.ref": "default/default/f9i6og3j529lrezk83aw9k8fr",
+    "containerimage.config.digest": "sha256:b91f245896946759eb112149602f5638a9263d0ebc3d5e8b46533960494bda32",
+    "containerimage.digest": "sha256:b91f245896946759eb112149602f5638a9263d0ebc3d5e8b46533960494bda32"
+  },
+  "lint-other": {
+    "buildx.build.provenance": {
+      "buildType": "https://mobyproject.org/buildkit@v1",
+      "materials": [
+        {
+          "uri": "pkg:docker/docker/dockerfile-upstream@master",
+          "digest": {
+            "sha256": "bcfc291ad4ebc0fb1f53d2b2e4a4f6ba5a6a5df61d8a501aa6edb18f8dec339f"
+          }
+        },
+        {
+          "uri": "pkg:docker/busybox@latest?platform=linux%2Famd64",
+          "digest": {
+            "sha256": "9ae97d36d26566ff84e8893c64a6dc4fe8ca6d1144bf5b87b2b85a32def253c7"
+          }
+        }
+      ],
+      "invocation": {
+        "configSource": {
+          "entryPoint": "lint-other.Dockerfile"
+        },
+        "parameters": {
+          "frontend": "gateway.v0",
+          "args": {
+            "cmdline": "docker/dockerfile-upstream:master",
+            "source": "docker/dockerfile-upstream:master"
+          },
+          "locals": [
+            {
+              "name": "context"
+            },
+            {
+              "name": "dockerfile"
+            }
+          ]
+        },
+        "environment": {
+          "platform": "linux/amd64"
+        }
+      }
+    },
+    "buildx.build.ref": "default/default/yfq4itxr5kgustkcmp8jr4b9m",
+    "containerimage.config.digest": "sha256:897b83786d8d9158cd652f8ea0d3c8efcd098273d74f6fb9daa6904144a31537",
+    "containerimage.digest": "sha256:897b83786d8d9158cd652f8ea0d3c8efcd098273d74f6fb9daa6904144a31537"
+  }
+}
