@@ -416,6 +416,34 @@ lines`;
   });
 });
 
+describe('isPathRelativeTo', () => {
+  it('should return true for a child path directly inside the parent path', () => {
+    const parentPath = '/home/user/projects';
+    const childPath = '/home/user/projects/subproject';
+    expect(Util.isPathRelativeTo(parentPath, childPath)).toBe(true);
+  });
+  it('should return true for a deeply nested child path inside the parent path', () => {
+    const parentPath = '/home/user';
+    const childPath = '/home/user/projects/subproject/module';
+    expect(Util.isPathRelativeTo(parentPath, childPath)).toBe(true);
+  });
+  it('should return false for a child path outside the parent path', () => {
+    const parentPath = '/home/user/projects';
+    const childPath = '/home/user/otherprojects/subproject';
+    expect(Util.isPathRelativeTo(parentPath, childPath)).toBe(false);
+  });
+  it('should return true for a child path specified with relative segments', () => {
+    const parentPath = '/home/user/projects';
+    const childPath = '/home/user/projects/../projects/subproject';
+    expect(Util.isPathRelativeTo(parentPath, childPath)).toBe(true);
+  });
+  it('should return false when the child path is actually a parent path', () => {
+    const parentPath = '/home/user/projects/subproject';
+    const childPath = '/home/user/projects';
+    expect(Util.isPathRelativeTo(parentPath, childPath)).toBe(false);
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
