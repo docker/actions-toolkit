@@ -15,8 +15,9 @@
  */
 
 import {describe, expect, it} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import * as core from '@actions/core';
 
 import {Buildx} from '../../src/buildx/buildx';
@@ -24,10 +25,8 @@ import {Build} from '../../src/buildx/build';
 import {Bake} from '../../src/buildx/bake';
 import {Exec} from '../../src/exec';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
-
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-buildx-itg-'));
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 

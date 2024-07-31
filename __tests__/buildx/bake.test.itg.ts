@@ -21,7 +21,7 @@ import * as path from 'path';
 import {Bake} from '../../src/buildx/bake';
 import {BakeDefinition} from '../../src/types/buildx/bake';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 

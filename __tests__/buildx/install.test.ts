@@ -15,15 +15,15 @@
  */
 
 import {describe, expect, it, jest, test, afterEach} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install} from '../../src/buildx/install';
 
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-install-'));
 
 afterEach(function () {
   rimraf.sync(tmpDir);

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import path from 'path';
 import {jest, describe, expect, test, beforeEach, afterEach} from '@jest/globals';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 import {Install} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
 
 describe('install', () => {
   const originalEnv = process.env;

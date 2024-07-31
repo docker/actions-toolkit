@@ -15,7 +15,8 @@
  */
 
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
-import * as fs from 'fs';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import * as io from '@actions/io';
 import osm = require('os');
@@ -25,10 +26,8 @@ import {Docker} from '../../src/docker/docker';
 
 import {ConfigFile} from '../../src/types/docker/docker';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
-
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-jest');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-docker-'));
 
 afterEach(function () {
   rimraf.sync(tmpDir);

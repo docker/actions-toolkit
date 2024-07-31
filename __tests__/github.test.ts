@@ -22,7 +22,7 @@ import * as core from '@actions/core';
 import {GitHub} from '../src/github';
 import {GitHubRepo} from '../src/types/github';
 
-import repoFixture from './fixtures/github-repo.json';
+import repoFixture from './.fixtures/github-repo.json';
 jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
   return <Promise<GitHubRepo>>(repoFixture as unknown);
 });
@@ -123,7 +123,7 @@ describe('actionsRuntimeToken', () => {
   });
   it('fixture', async () => {
     process.env.ACTIONS_RUNTIME_TOKEN = fs
-      .readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt'))
+      .readFileSync(path.join(__dirname, '.fixtures', 'runtimeToken.txt'))
       .toString()
       .trim();
     const runtimeToken = GitHub.actionsRuntimeToken;
@@ -154,7 +154,7 @@ describe('printActionsRuntimeTokenACs', () => {
   it('refs/heads/master', async () => {
     const infoSpy = jest.spyOn(core, 'info');
     process.env.ACTIONS_RUNTIME_TOKEN = fs
-      .readFileSync(path.join(__dirname, 'fixtures', 'runtimeToken.txt'))
+      .readFileSync(path.join(__dirname, '.fixtures', 'runtimeToken.txt'))
       .toString()
       .trim();
     await GitHub.printActionsRuntimeTokenACs();

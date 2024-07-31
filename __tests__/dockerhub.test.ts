@@ -21,9 +21,9 @@ import * as path from 'path';
 import {DockerHub} from '../src/dockerhub';
 import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
 
-import repoInfoFixture from './fixtures/dockerhub-repoinfo.json';
-import repoTagsFixture from './fixtures/dockerhub-repotags.json';
-import repoAllTagsFixture from './fixtures/dockerhub-repoalltags.json';
+import repoInfoFixture from './.fixtures/dockerhub-repoinfo.json';
+import repoTagsFixture from './.fixtures/dockerhub-repotags.json';
+import repoAllTagsFixture from './.fixtures/dockerhub-repoalltags.json';
 
 describe('getRepository', () => {
   it('returns repo info', async () => {

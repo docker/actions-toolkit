@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import path from 'path';
 import {describe, expect, it} from '@jest/globals';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 import {Cache} from '../src/cache';
 
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'cache-jest');
-
-const fixturesDir = path.join(__dirname, 'fixtures');
+const fixturesDir = path.join(__dirname, '.fixtures');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'cache-itg-'));
 
 describe('cache', () => {
   it('github-repo', async () => {
