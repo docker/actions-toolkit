@@ -23,7 +23,7 @@ import {Exec} from '../../src/exec';
 
 import {BuilderInfo} from '../../src/types/buildx/builder';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {

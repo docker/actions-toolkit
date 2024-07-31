@@ -165,7 +165,7 @@ FOO=bar`
   });
 
   it('large multiline values', async () => {
-    const pgp = fs.readFileSync(path.join(__dirname, 'fixtures', 'pgp.txt'), {encoding: 'utf-8'});
+    const pgp = fs.readFileSync(path.join(__dirname, '.fixtures', 'pgp.txt'), {encoding: 'utf-8'});
     setInput(
       'secrets',
       `"GPG_KEY=${pgp}"

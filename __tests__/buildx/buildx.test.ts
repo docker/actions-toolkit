@@ -27,7 +27,7 @@ import {Exec} from '../../src/exec';
 
 import {Cert, LocalState} from '../../src/types/buildx/buildx';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-buildx-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 

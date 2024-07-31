@@ -27,7 +27,7 @@ import {ExecOptions} from '@actions/exec';
 import {BakeDefinition} from '../../src/types/buildx/bake';
 import {BuildMetadata} from '../../src/types/buildx/build';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-bake-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-bake.json'), 'utf-8'));

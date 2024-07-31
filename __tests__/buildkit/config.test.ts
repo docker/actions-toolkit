@@ -23,7 +23,7 @@ import * as rimraf from 'rimraf';
 import {BuildKit} from '../../src/buildkit/buildkit';
 import {Context} from '../../src/context';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildkit-config-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 

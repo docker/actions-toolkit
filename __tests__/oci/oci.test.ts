@@ -22,7 +22,7 @@ import * as rimraf from 'rimraf';
 
 import {OCI} from '../../src/oci/oci';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'oci-oci-'));
 
 afterEach(function () {

@@ -21,7 +21,7 @@ import path from 'path';
 
 import {Cache} from '../src/cache';
 
-const fixturesDir = path.join(__dirname, 'fixtures');
+const fixturesDir = path.join(__dirname, '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'cache-itg-'));
 
 describe('cache', () => {

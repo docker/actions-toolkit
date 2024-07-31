@@ -23,7 +23,7 @@ import * as rimraf from 'rimraf';
 import {Context} from '../../src/context';
 import {Build} from '../../src/buildx/build';
 
-const fixturesDir = path.join(__dirname, '..', 'fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-build.json'), 'utf-8'));
