@@ -28,16 +28,9 @@ import {BuildMetadata} from '../../src/types/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
 // prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-inputs-jest');
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-bake-jest');
 const tmpName = path.join(tmpDir, '.tmpname-jest');
-const metadata: BuildMetadata = {
-  app: {
-    'buildx.build.ref': 'default/default/7frbdw1fmfozgtqavghowsepk'
-  },
-  db: {
-    'buildx.build.ref': 'default/default/onic7g2axylf56rxetob7qruy'
-  }
-};
+const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-bake.json'), 'utf-8'));
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
@@ -66,7 +59,17 @@ describe('resolveRefs', () => {
   it('matches', async () => {
     const bake = new Bake();
     fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
-    expect(bake.resolveRefs()).toEqual(['default/default/7frbdw1fmfozgtqavghowsepk', 'default/default/onic7g2axylf56rxetob7qruy']);
+    expect(bake.resolveRefs()).toEqual(['default/default/x3tig9yrbzg2bp0ahn840m9hs', 'default/default/f9i6og3j529lrezk83aw9k8fr', 'default/default/yfq4itxr5kgustkcmp8jr4b9m']);
+  });
+});
+
+describe('resolveWarnings', () => {
+  it('matches', async () => {
+    const bake = new Bake();
+    fs.writeFileSync(bake.getMetadataFilePath(), JSON.stringify(metadata));
+    const warnings = bake.resolveWarnings();
+    expect(warnings).toBeDefined();
+    expect(warnings?.length).toEqual(13);
   });
 });
 

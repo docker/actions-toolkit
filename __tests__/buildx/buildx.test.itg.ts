@@ -21,6 +21,7 @@ import * as core from '@actions/core';
 
 import {Buildx} from '../../src/buildx/buildx';
 import {Build} from '../../src/buildx/build';
+import {Bake} from '../../src/buildx/bake';
 import {Exec} from '../../src/exec';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
@@ -31,7 +32,7 @@ const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
 maybe('convertWarningsToGitHubAnnotations', () => {
-  it('annotate lint issues', async () => {
+  it('build lint issues', async () => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -64,6 +65,48 @@ maybe('convertWarningsToGitHubAnnotations', () => {
     expect(buildWarnings).toBeDefined();
 
     const annotations = await Buildx.convertWarningsToGitHubAnnotations(buildWarnings ?? [], [buildRef ?? '']);
+    expect(annotations).toBeDefined();
+    expect(annotations?.length).toBeGreaterThan(0);
+
+    for (const annotation of annotations ?? []) {
+      core.warning(annotation.message, annotation);
+    }
+  });
+
+  it('bake lint issues', async () => {
+    const buildx = new Buildx();
+    const bake = new Bake({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'bake',
+          '-f', path.join(fixturesDir, 'lint.hcl'),
+          '--metadata-file', bake.getMetadataFilePath()
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args, {
+          cwd: fixturesDir,
+          env: Object.assign({}, process.env, {
+            BUILDX_METADATA_WARNINGS: 'true'
+          }) as {
+            [key: string]: string;
+          }
+        });
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = bake.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRefs = bake.resolveRefs(metadata);
+    expect(buildRefs).toBeDefined();
+    expect(buildRefs?.length).toEqual(3);
+    const buildWarnings = bake.resolveWarnings(metadata);
+    expect(buildWarnings).toBeDefined();
+
+    const annotations = await Buildx.convertWarningsToGitHubAnnotations(buildWarnings ?? [], buildRefs ?? []);
     expect(annotations).toBeDefined();
     expect(annotations?.length).toBeGreaterThan(0);
 
