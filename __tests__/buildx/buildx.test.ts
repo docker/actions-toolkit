@@ -15,8 +15,9 @@
  */
 
 import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
@@ -27,14 +28,11 @@ import {Exec} from '../../src/exec';
 import {Cert, LocalState} from '../../src/types/buildx/buildx';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-buildx-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
+  fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 

@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as rimraf from 'rimraf';
 import {describe, expect, jest, it, afterEach} from '@jest/globals';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import * as rimraf from 'rimraf';
 
 import {Context} from '../src/context';
 
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'context-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'context-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
+  fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 

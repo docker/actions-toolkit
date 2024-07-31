@@ -15,15 +15,15 @@
  */
 
 import {describe, expect, jest, test, beforeEach, afterEach, it} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install} from '../../src/docker/install';
 
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-install-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 
 afterEach(function () {
   rimraf.sync(tmpDir);

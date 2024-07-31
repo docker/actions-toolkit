@@ -15,16 +15,15 @@
  */
 
 import {afterEach, describe, expect, test} from '@jest/globals';
-import * as fs from 'fs';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
 import {OCI} from '../../src/oci/oci';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'docker-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'oci-oci-'));
 
 afterEach(function () {
   rimraf.sync(tmpDir);

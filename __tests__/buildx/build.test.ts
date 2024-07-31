@@ -15,23 +15,21 @@
  */
 
 import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import * as rimraf from 'rimraf';
 
 import {Context} from '../../src/context';
 import {Build} from '../../src/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures');
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'buildx-build-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
 const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-build.json'), 'utf-8'));
 
 jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
+  fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
