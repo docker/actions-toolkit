@@ -17,6 +17,9 @@
 frOM busybox as base
 cOpy lint.Dockerfile .
 
+# some special chars: distroless/python3-debian12のPythonは3.11
+# https://github.com/docker/build-push-action/issues/1204#issuecomment-2274056016
+
 from scratch
 MAINTAINER moby@example.com
 COPy --from=base \
