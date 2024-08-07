@@ -347,7 +347,7 @@ export class Buildx {
       if (Util.isPathRelativeTo(workspaceDir, ls.DockerfilePath)) {
         dockerfiles.push({
           path: path.relative(workspaceDir, ls.DockerfilePath),
-          content: btoa(fs.readFileSync(ls.DockerfilePath, {encoding: 'utf-8'}))
+          content: Buffer.from(fs.readFileSync(ls.DockerfilePath, {encoding: 'utf-8'}), 'utf-8').toString('base64')
         });
       } else {
         core.debug(`Buildx.convertWarningsToGitHubAnnotations: skipping Dockerfile outside of workspace: ${ls.DockerfilePath}`);
