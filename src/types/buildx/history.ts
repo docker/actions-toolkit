@@ -42,3 +42,7 @@ export interface RecordSummary {
   frontendAttrs: Record<string, string>;
   error?: string;
 }
+
+export interface LoadRecordOpts {
+  file: string;
+}

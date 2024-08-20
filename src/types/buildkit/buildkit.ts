@@ -14,5 +14,11 @@
  * limitations under the License.
  */
 
+export const ANNOTATION_REF_KEY = 'vnd.buildkit.history.reference';
+
+export const MEDIATYPE_SOLVE_STATUS_V0 = 'application/vnd.buildkit.solvestatus.v0';
+
+export const MEDIATYPE_HISTORY_RECORD_V0 = 'application/vnd.buildkit.historyrecord.v0';
+
 // https://github.com/moby/buildkit/blob/v0.14.0/solver/llbsolver/history.go#L672
 export const MEDIATYPE_STATUS_V0 = 'application/vnd.buildkit.status.v0';
