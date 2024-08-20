@@ -124,7 +124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/http-client@npm:^2.1.0, @actions/http-client@npm:^2.2.1":
+"@actions/http-client@npm:^2.1.0":
   version: 2.2.1
   resolution: "@actions/http-client@npm:2.2.1"
   dependencies:
@@ -150,6 +150,16 @@ __metadata:
     tunnel: ^0.0.6
     undici: ^5.25.4
   checksum: 075fc21e8c05e865239bfc5cc91ce42aff7ac7877a5828145545cb27c572f74af8f96f90233f3ba2376525a9032bb8eadebd7221c007ce62459b99d5d2362f94
+  languageName: node
+  linkType: hard
+
+"@actions/http-client@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "@actions/http-client@npm:2.2.2"
+  dependencies:
+    tunnel: ^0.0.6
+    undici: ^5.25.4
+  checksum: 56c3d73f0f1650c88f810133c00762aa276fe908bd41619ce72b4b1c4cd4f8149eefb260214bafbbc41281118d0569efb7cee6da676c79b93a133dda7f445257
   languageName: node
   linkType: hard
 
@@ -1104,7 +1114,7 @@ __metadata:
     "@actions/core": ^1.10.1
     "@actions/exec": ^1.1.1
     "@actions/github": ^6.0.0
-    "@actions/http-client": ^2.2.1
+    "@actions/http-client": ^2.2.2
     "@actions/io": ^1.1.3
     "@actions/tool-cache": ^2.0.1
     "@azure/storage-blob": ^12.15.0
