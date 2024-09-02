@@ -8332,12 +8332,12 @@ __metadata:
   linkType: hard
 
 "unzip-stream@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "unzip-stream@npm:0.3.1"
+  version: 0.3.4
+  resolution: "unzip-stream@npm:0.3.4"
   dependencies:
     binary: ^0.3.0
     mkdirp: ^0.5.1
-  checksum: c206ac8e32a5a005fc654875df9ecc5562ff9e3ed36a0c651dca69d7d9a6d9c8bdcfff1a68010d6e9380e9b9315095bb00174558e4c034abb97fe51d2001a776
+  checksum: c2aef528546a26efeedb9f4d86c84ee1d2957aa2866602229d585c60ce420f3df2503a2b32014f372aa51739c06b08903d923a58622c7cc5b477dd307452f9a0
   languageName: node
   linkType: hard
 
