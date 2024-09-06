@@ -33,6 +33,7 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
+import {HubRepository} from '../hubRepository';
 
 export interface InstallOpts {
   version?: string;
@@ -71,7 +72,7 @@ export class Install {
     return this._toolDir || Context.tmpDir();
   }
 
-  public async download(): Promise<string> {
+  async downloadStaticArchive(): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(this.version);
     this._version = release.tag_name.replace(/^v+|v+$/g, '');
     core.debug(`docker.Install.download version: ${this._version}`);
@@ -92,6 +93,26 @@ export class Install {
       extractFolder = path.join(extractFolder, 'docker');
     }
     core.debug(`docker.Install.download extractFolder: ${extractFolder}`);
+    return extractFolder;
+  }
+
+  public async download(): Promise<string> {
+    let extractFolder: string;
+
+    core.info(`Downloading Docker ${this.version} from ${this.channel}`);
+
+    this._version = this.version;
+    if (this.version == 'master') {
+      core.info(`Downloading from moby/moby-bin`);
+      const moby = await HubRepository.build('moby/moby-bin');
+      const cli = await HubRepository.build('dockereng/cli-bin');
+
+      extractFolder = await moby.extractImage(this.version);
+      await cli.extractImage(this.version, extractFolder);
+    } else {
+      core.info(`Downloading from download.docker.com`);
+      extractFolder = await this.downloadStaticArchive();
+    }
 
     core.info('Fixing perms');
     fs.readdir(path.join(extractFolder), function (err, files) {
