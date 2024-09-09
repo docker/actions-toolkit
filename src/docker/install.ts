@@ -594,7 +594,10 @@ EOF`,
     }
     const releases = <Record<string, GitHubRelease>>JSON.parse(body);
     if (!releases[version]) {
-      throw new Error(`Cannot find Docker release ${version} in ${url}`);
+      if (!releases['v' + version]) {
+        throw new Error(`Cannot find Docker release ${version} in ${url}`);
+      }
+      return releases['v' + version];
     }
     return releases[version];
   }
