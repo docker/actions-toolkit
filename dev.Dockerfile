@@ -16,7 +16,7 @@
 
 ARG NODE_VERSION=20
 ARG DOCKER_VERSION=27.2.1
-ARG BUILDX_VERSION=0.17.0
+ARG BUILDX_VERSION=0.17.1
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
