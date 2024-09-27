@@ -45,6 +45,8 @@ export class Context {
     }
     if (github.context.sha && !gitRef.startsWith(`refs/pull/`)) {
       gitRef = github.context.sha;
+    } else if (gitRef.startsWith(`refs/pull/`)) {
+      gitRef = gitRef.replace(/\/merge$/g, '/head');
     }
     return gitRef;
   }
