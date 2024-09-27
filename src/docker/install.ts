@@ -226,8 +226,9 @@ export class Install {
       try {
         const startPromise = new Promise<void>((resolve, reject) => {
           core.info(`Executing: limactl ${limaStartArgs.join(' ')}`);
-          const proc = child_process.spawn(`limactl`, limaStartArgs, {env: envs});
-
+          const proc = child_process.spawn(`limactl ${limaStartArgs.join(' ')}`, {
+            env: envs
+          });
           proc.on('close', code => {
             if (code === 0) {
               core.info('limactl command completed successfully');
