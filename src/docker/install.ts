@@ -218,13 +218,20 @@ export class Install {
     };
 
     await core.group('Starting lima instance', async () => {
-      const limaStartTimeout = process.env.LIMA_START_TIMEOUT ? parseInt(process.env.LIMA_START_TIMEOUT) : 5 * 60 * 1000;
+      const limaStartTimeout = process.env.LIMA_START_TIMEOUT ? parseInt(process.env.LIMA_START_TIMEOUT) : 2 * 60 * 1000;
       const limaStartArgs = ['start', `--name=${this.limaInstanceName}`];
       if (process.env.LIMA_START_ARGS) {
         limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
       try {
-        await Promise.race([Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs}), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout reached')), limaStartTimeout))]);
+        await Promise.race([
+          new Promise<void>((resolve, reject) => {
+            Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs})
+              .then(() => resolve())
+              .catch(reject);
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout reached')), limaStartTimeout))
+        ]);
       } catch (e) {
         fsp
           .readdir(limaDir)
