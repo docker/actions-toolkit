@@ -96,7 +96,8 @@ jobs:
         test: ${{ fromJson(needs.prepare-itg.outputs.matrix) }}
         os:
           - ubuntu-latest
-          #- macos-14  # no virt: https://github.com/docker/actions-toolkit/issues/317
+          - macos-15
+          - macos-14
           - macos-13
           - windows-latest
     steps:
@@ -106,6 +107,11 @@ jobs:
       -
         name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
+      -
+        name: Install corepack
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install corepack
       -
         # FIXME: Needs to setup node twice on Windows due to a bug with runner
         name: Setup Node
