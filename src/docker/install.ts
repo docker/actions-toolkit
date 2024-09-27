@@ -224,26 +224,29 @@ export class Install {
         limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
       try {
-        await Promise.race([
-          new Promise<void>((resolve, reject) => {
-            Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs})
-              .then(() => {
-                core.info('limactl command completed successfully');
-                resolve();
-              })
-              .catch(err => {
-                core.error(`limactl command failed: ${err.message}`);
-                reject(err);
-              });
-          }),
-          new Promise((_, reject) => {
-            setTimeout(() => {
-              core.error('Timeout reached');
-              reject(new Error('Timeout reached'));
-            }, limaStartTimeout);
-          })
-        ]);
+        const startPromise = new Promise<void>((resolve, reject) => {
+          core.info(`Executing: limactl ${limaStartArgs.join(' ')}`);
+          Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs})
+            .then(() => {
+              core.info('limactl command completed successfully');
+              resolve();
+            })
+            .catch(err => {
+              core.error(`limactl command failed: ${err.message}`);
+              reject(err);
+            });
+        });
+
+        const timeoutPromise = new Promise<void>((_, reject) => {
+          setTimeout(() => {
+            core.error('Timeout reached');
+            reject(new Error('Timeout reached'));
+          }, limaStartTimeout);
+        });
+
+        await Promise.race([startPromise, timeoutPromise]);
       } catch (e) {
+        core.error(`Error starting lima instance: ${e.message}`);
         fsp
           .readdir(limaDir)
           .then(files => {
