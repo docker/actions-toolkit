@@ -138,7 +138,7 @@ export const limaYamlData = `
 # The vmType can be specified only on creating the instance.
 # The vmType of existing instances cannot be changed.
 # Builtin default: "qemu"
-vmType: qemu
+vmType: {{vmType}}
 
 # OS: "Linux".
 # Builtin default: "Linux"
@@ -188,7 +188,7 @@ mounts:
 # Mount type for above mounts, such as "reverse-sshfs" (from sshocker), "9p" (EXPERIMENTAL, from QEMU’s virtio-9p-pci, aka virtfs),
 # or "virtiofs" (EXPERIMENTAL, needs \`vmType: vz\`)
 # Builtin default: "reverse-sshfs" (for QEMU), "virtiofs" (for vz)
-mountType: null
+mountType: {{mountType}}
 
 containerd:
   system: false

@@ -21,6 +21,7 @@ import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
 import * as handlebars from 'handlebars';
+import * as semver from 'semver';
 import * as util from 'util';
 import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
@@ -140,6 +141,22 @@ export class Install {
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
 
+    // fallback to a version requiring QEMU with colima
+    let macosVersion = '12.0.0';
+    await core.group('macOS version', async () => {
+      macosVersion = await Exec.getExecOutput(`sw_vers`, ['-productVersion'], {
+        ignoreReturnCode: true,
+        silent: true
+      }).then(res => {
+        if (res.exitCode == 0 && res.stdout.length > 0) {
+          return res.stdout.trim();
+        }
+        core.info(`sw_vers failed to get macOS version. Using ${macosVersion} as fallback.`);
+        return macosVersion;
+      });
+      core.info(macosVersion);
+    });
+
     // avoid brew to auto update and upgrade unrelated packages.
     let envs = Object.assign({}, process.env, {
       HOMEBREW_NO_AUTO_UPDATE: '1',
@@ -158,6 +175,13 @@ export class Install {
       await Exec.exec('lima', ['--version'], {env: envs});
     });
 
+    let limaVmType = 'vz';
+    let limaMountType = 'virtiofs';
+    if (semver.satisfies(macosVersion, '<13.0.0')) {
+      limaVmType = 'qemu';
+      limaMountType = '9p';
+    }
+
     await core.group('Creating lima config', async () => {
       let limaDaemonConfig = {};
       if (this.daemonConfig) {
@@ -167,7 +191,9 @@ export class Install {
         return new handlebars.SafeString(JSON.stringify(obj));
       });
       const limaCfg = handlebars.compile(limaYamlData)({
+        vmType: limaVmType,
         customImages: Install.limaCustomImages(),
+        mountType: limaMountType,
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
         dockerBinVersion: this._version,
