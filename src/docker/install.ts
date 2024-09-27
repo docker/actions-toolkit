@@ -227,10 +227,21 @@ export class Install {
         await Promise.race([
           new Promise<void>((resolve, reject) => {
             Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs})
-              .then(() => resolve())
-              .catch(reject);
+              .then(() => {
+                core.info('limactl command completed successfully');
+                resolve();
+              })
+              .catch(err => {
+                core.error(`limactl command failed: ${err.message}`);
+                reject(err);
+              });
           }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout reached')), limaStartTimeout))
+          new Promise((_, reject) => {
+            setTimeout(() => {
+              core.error('Timeout reached');
+              reject(new Error('Timeout reached'));
+            }, limaStartTimeout);
+          })
         ]);
       } catch (e) {
         fsp
@@ -249,6 +260,7 @@ export class Install {
           .catch(() => {
             // ignore
           });
+        await Exec.exec(`limactl delete ${this.limaInstanceName}`, [], {env: envs});
         throw e;
       }
     });
