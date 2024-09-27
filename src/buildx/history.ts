@@ -84,6 +84,9 @@ export class History {
     core.info(`exporting build record to ${outDir}`);
     fs.mkdirSync(outDir, {recursive: true});
 
+    // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     const buildxInFifoPath = Context.tmpName({
       template: 'buildx-in-XXXXXX.fifo',
       tmpdir: Context.tmpDir()
