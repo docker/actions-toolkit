@@ -31,16 +31,14 @@ describe('install', () => {
     jest.resetModules();
     process.env = {
       ...originalEnv,
-      LIMA_START_ARGS: '--cpus 4 --memory 8',
-      LIMA_IMAGES: `x86_64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-genericcloud-amd64-20231013-1532.qcow2@sha512:6b55e88b027c14da1b55c85a25a9f7069d4560a8fdb2d948c986a585db469728a06d2c528303e34bb62d8b2984def38fd9ddfc00965846ff6e05b01d6e883bfe
-aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-genericcloud-arm64-20231013-1532.qcow2`
+      LIMA_START_ARGS: '--cpus 4 --memory 8'
     };
   });
   afterEach(() => {
     process.env = originalEnv;
   });
   // prettier-ignore
-  test.each(['v26.1.4'])(
+  test.each(['v27.2.1'])(
     'install docker %s', async (version) => {
       if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
         // Remove containerd first on ubuntu runners to make sure it takes
