@@ -226,15 +226,22 @@ export class Install {
       try {
         const startPromise = new Promise<void>((resolve, reject) => {
           core.info(`Executing: limactl ${limaStartArgs.join(' ')}`);
-          Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs})
-            .then(() => {
+          const proc = child_process.spawn(`limactl`, limaStartArgs, {env: envs});
+
+          proc.on('close', code => {
+            if (code === 0) {
               core.info('limactl command completed successfully');
               resolve();
-            })
-            .catch(err => {
-              core.error(`limactl command failed: ${err.message}`);
-              reject(err);
-            });
+            } else {
+              core.error(`limactl command failed with code ${code}`);
+              reject(new Error(`limactl command failed with code ${code}`));
+            }
+          });
+
+          proc.on('error', err => {
+            core.error(`limactl command error: ${err.message}`);
+            reject(err);
+          });
         });
 
         const timeoutPromise = new Promise<void>((_, reject) => {
