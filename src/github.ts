@@ -343,6 +343,6 @@ export class GitHub {
     }
 
     core.info(`Writing summary`);
-    await sum.addSeparator().write();
+    await sum.addSeparator().write({append: true});
   }
 }
