@@ -111,17 +111,21 @@ export class DockerHub {
     const body = await resp.readBody();
     resp.message.statusCode = resp.message.statusCode || HttpCodes.InternalServerError;
     if (resp.message.statusCode < 200 || resp.message.statusCode >= 300) {
-      if (resp.message.statusCode == HttpCodes.Unauthorized) {
-        throw new Error(`Docker Hub API: operation not permitted`);
-      }
-      const errResp = <Record<string, string>>JSON.parse(body);
-      for (const k of ['message', 'detail', 'error']) {
-        if (errResp[k]) {
-          throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}: ${errResp[k]}`);
-        }
-      }
-      throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}`);
+      throw DockerHub.parseError(resp, body);
     }
     return body;
+  }
+
+  public static parseError(resp: httpm.HttpClientResponse, body: string): Error {
+    if (resp.message.statusCode == HttpCodes.Unauthorized) {
+      throw new Error(`Docker Hub API: operation not permitted`);
+    }
+    const errResp = <Record<string, string>>JSON.parse(body);
+    for (const k of ['message', 'detail', 'error']) {
+      if (errResp[k]) {
+        throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}: ${errResp[k]}`);
+      }
+    }
+    throw new Error(`Docker Hub API: bad status code ${resp.message.statusCode}`);
   }
 }

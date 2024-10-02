@@ -33,10 +33,32 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
+import {HubRepository} from '../hubRepository';
+
+export interface InstallSourceImage {
+  type: 'image';
+  tag: string;
+}
+
+export interface InstallSourceArchive {
+  type: 'archive';
+  version: string;
+  channel: string;
+}
+
+export type InstallSource = InstallSourceImage | InstallSourceArchive;
 
 export interface InstallOpts {
+  source?: InstallSource;
+
+  // @deprecated
+  // Use `source = InstallSourceTypeArchive{version: ..., channel: ...}` instead
   version?: string;
+  // @deprecated
+  // Use `source = InstallSourceTypeArchive{version: ..., channel: ...}` instead
   channel?: string;
+
+  // ...
   runDir: string;
   contextName?: string;
   daemonConfig?: string;
@@ -50,8 +72,7 @@ interface LimaImage {
 
 export class Install {
   private readonly runDir: string;
-  private readonly version: string;
-  private readonly channel: string;
+  private readonly source: InstallSource;
   private readonly contextName: string;
   private readonly daemonConfig?: string;
   private _version: string | undefined;
@@ -61,8 +82,11 @@ export class Install {
 
   constructor(opts: InstallOpts) {
     this.runDir = opts.runDir;
-    this.version = opts.version || 'latest';
-    this.channel = opts.channel || 'stable';
+    this.source = opts.source || {
+      type: 'archive',
+      version: opts.version || 'latest',
+      channel: opts.channel || 'stable'
+    };
     this.contextName = opts.contextName || 'setup-docker-action';
     this.daemonConfig = opts.daemonConfig;
   }
@@ -71,12 +95,12 @@ export class Install {
     return this._toolDir || Context.tmpDir();
   }
 
-  public async download(): Promise<string> {
-    const release: GitHubRelease = await Install.getRelease(this.version);
+  async downloadStaticArchive(src: InstallSourceArchive): Promise<string> {
+    const release: GitHubRelease = await Install.getRelease(src.version);
     this._version = release.tag_name.replace(/^v+|v+$/g, '');
     core.debug(`docker.Install.download version: ${this._version}`);
 
-    const downloadURL = this.downloadURL(this._version, this.channel);
+    const downloadURL = this.downloadURL(this._version, src.channel);
     core.info(`Downloading ${downloadURL}`);
 
     const downloadPath = await tc.downloadTool(downloadURL);
@@ -92,6 +116,38 @@ export class Install {
       extractFolder = path.join(extractFolder, 'docker');
     }
     core.debug(`docker.Install.download extractFolder: ${extractFolder}`);
+    return extractFolder;
+  }
+
+  public async download(): Promise<string> {
+    let extractFolder: string;
+    let cacheKey: string;
+
+    switch (this.source.type) {
+      case 'image': {
+        const tag = this.source.tag;
+        this._version = tag;
+        cacheKey = `docker-image`;
+        core.info(`Downloading from moby/moby-bin and dockereng/cli-bin tag: ${tag}`);
+
+        const moby = await HubRepository.build('moby/moby-bin');
+        const cli = await HubRepository.build('dockereng/cli-bin');
+
+        extractFolder = await moby.extractImage(tag);
+        await cli.extractImage(tag, extractFolder);
+        break;
+      }
+      case 'archive': {
+        const version = this.source.version;
+        const channel = this.source.channel;
+        cacheKey = `docker-archive-${channel}`;
+        this._version = version;
+
+        core.info(`Downloading Docker ${version} from ${this.source.channel} at download.docker.com`);
+        extractFolder = await this.downloadStaticArchive(this.source);
+        break;
+      }
+    }
 
     core.info('Fixing perms');
     fs.readdir(path.join(extractFolder), function (err, files) {
@@ -104,7 +160,7 @@ export class Install {
       });
     });
 
-    const tooldir = await tc.cacheDir(extractFolder, `docker-${this.channel}`, this._version.replace(/(0+)([1-9]+)/, '$2'));
+    const tooldir = await tc.cacheDir(extractFolder, cacheKey, this._version.replace(/(0+)([1-9]+)/, '$2'));
     core.addPath(tooldir);
     core.info('Added Docker to PATH');
 
@@ -136,6 +192,10 @@ export class Install {
   }
 
   private async installDarwin(): Promise<string> {
+    if (this.source.type !== 'archive') {
+      throw new Error('Only archive source is supported on macOS');
+    }
+    const src = this.source as InstallSourceArchive;
     const limaDir = path.join(os.homedir(), '.lima', this.limaInstanceName);
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
@@ -170,8 +230,8 @@ export class Install {
         customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
-        dockerBinVersion: this._version,
-        dockerBinChannel: this.channel
+        dockerBinVersion: src.version.replace(/^v/, ''),
+        dockerBinChannel: src.channel
       });
       core.info(`Writing lima config to ${path.join(limaDir, 'lima.yaml')}`);
       fs.writeFileSync(path.join(limaDir, 'lima.yaml'), limaCfg);
@@ -527,7 +587,10 @@ EOF`,
     }
     const releases = <Record<string, GitHubRelease>>JSON.parse(body);
     if (!releases[version]) {
-      throw new Error(`Cannot find Docker release ${version} in ${url}`);
+      if (!releases['v' + version]) {
+        throw new Error(`Cannot find Docker release ${version} in ${url}`);
+      }
+      return releases['v' + version];
     }
     return releases[version];
   }
