@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/artifact@npm:^2.1.9":
-  version: 2.1.9
-  resolution: "@actions/artifact@npm:2.1.9"
+"@actions/artifact@npm:^2.1.10":
+  version: 2.1.10
+  resolution: "@actions/artifact@npm:2.1.10"
   dependencies:
     "@actions/core": ^1.10.0
     "@actions/github": ^5.1.1
@@ -30,7 +30,7 @@ __metadata:
     jwt-decode: ^3.1.2
     twirp-ts: ^2.5.0
     unzip-stream: ^0.3.1
-  checksum: b01404aa6b4d47186e04a64c0002100ff68a8473eafb811a3d49275a7e1135d1981ccaf527b81c4856f6da764beabe7489fd296bb287906fd7c1964dfaeef3df
+  checksum: dfe4cb49da913e7706b884ff2dac629671f298febb1e54b2800659e4e78651c47032548ee5e18f164e31894b4aca4320201a97a7cd4240d0fbf7d203a6955b29
   languageName: node
   linkType: hard
 
@@ -1109,7 +1109,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
-    "@actions/artifact": ^2.1.9
+    "@actions/artifact": ^2.1.10
     "@actions/cache": ^3.2.4
     "@actions/core": ^1.11.0
     "@actions/exec": ^1.1.1
