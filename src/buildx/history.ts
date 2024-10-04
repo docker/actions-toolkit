@@ -26,6 +26,7 @@ import {Context} from '../context';
 import {Docker} from '../docker/docker';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
+import {Util} from '../util';
 
 import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/buildx/history';
 
@@ -85,7 +86,7 @@ export class History {
     fs.mkdirSync(outDir, {recursive: true});
 
     // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await Util.sleep(3);
 
     const buildxInFifoPath = Context.tmpName({
       template: 'buildx-in-XXXXXX.fifo',
