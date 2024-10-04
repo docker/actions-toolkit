@@ -47,7 +47,7 @@
   "dependencies": {
     "@actions/artifact": "^2.1.10",
     "@actions/cache": "^3.2.4",
-    "@actions/core": "^1.11.0",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
     "@actions/http-client": "^2.2.3",
