@@ -45,7 +45,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@actions/artifact": "^2.1.10",
+    "@actions/artifact": "^2.1.11",
     "@actions/cache": "^3.2.4",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
