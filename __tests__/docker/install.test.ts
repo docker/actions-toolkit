@@ -21,7 +21,7 @@ import path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
 
-import {Install} from '../../src/docker/install';
+import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 
@@ -29,22 +29,39 @@ afterEach(function () {
   rimraf.sync(tmpDir);
 });
 
+const archive = (version: string, channel: string): InstallSourceArchive => {
+  return {
+    type: 'archive',
+    version: version,
+    channel: channel
+  };
+};
+
+const image = (tag: string): InstallSourceImage => {
+  return {
+    type: 'image',
+    tag: tag
+  };
+};
+
 describe('download', () => {
   // prettier-ignore
   test.each([
-    ['v19.03.14', 'linux'],
-    ['v20.10.22', 'linux'],
-    ['v20.10.22', 'darwin'],
-    ['v20.10.22', 'win32'],
+    [archive('v19.03.14', 'stable'), 'linux'],
+    [archive('v20.10.22', 'stable'), 'linux'],
+    [archive('v20.10.22', 'stable'), 'darwin'],
+    [archive('v20.10.22', 'stable'), 'win32'],
+
+    [image('master'), 'linux'],
+    [image('master'), 'win32'],
+
+    [image('27.3.1'), 'linux'],
+    [image('27.3.1'), 'win32'],
   ])(
-  'acquires %p of docker (%s)', async (version, platformOS) => {
+  'acquires %p of docker (%s)', async (source, platformOS) => {
     jest.spyOn(osm, 'platform').mockImplementation(() => platformOS as NodeJS.Platform);
     const install = new Install({
-      source: {
-        type: 'archive',
-        version: version,
-        channel: 'stable',
-      },
+      source: source,
       runDir: tmpDir,
     });
     const toolPath = await install.download();

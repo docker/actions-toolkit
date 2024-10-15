@@ -19,7 +19,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Install} from '../../src/docker/install';
+import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
@@ -40,8 +40,11 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
     process.env = originalEnv;
   });
   // prettier-ignore
-  test.each(['v26.1.4'])(
-    'install docker %s', async (version) => {
+  test.each([
+    {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
+    {type: 'image', tag: '27.3.1'} as InstallSourceImage,
+  ])(
+    'install docker %s', async (source) => {
       if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
         // Remove containerd first on ubuntu runners to make sure it takes
         // ones packaged with docker
@@ -55,11 +58,7 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
       }
       await expect((async () => {
         const install = new Install({
-          source: {
-            type: 'archive',
-            version: version,
-            channel: 'stable',
-          },
+          source: source,
           runDir: tmpDir,
           contextName: 'foo',
           daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
