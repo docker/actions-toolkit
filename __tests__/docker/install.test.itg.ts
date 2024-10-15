@@ -55,7 +55,11 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
       }
       await expect((async () => {
         const install = new Install({
-          version: version,
+          source: {
+            type: 'archive',
+            version: version,
+            channel: 'stable',
+          },
           runDir: tmpDir,
           contextName: 'foo',
           daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`

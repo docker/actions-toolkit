@@ -51,13 +51,6 @@ export type InstallSource = InstallSourceImage | InstallSourceArchive;
 export interface InstallOpts {
   source?: InstallSource;
 
-  // @deprecated
-  // Use `source = InstallSourceTypeArchive{version: ..., channel: ...}` instead
-  version?: string;
-  // @deprecated
-  // Use `source = InstallSourceTypeArchive{version: ..., channel: ...}` instead
-  channel?: string;
-
   // ...
   runDir: string;
   contextName?: string;
@@ -84,8 +77,8 @@ export class Install {
     this.runDir = opts.runDir;
     this.source = opts.source || {
       type: 'archive',
-      version: opts.version || 'latest',
-      channel: opts.channel || 'stable'
+      version: 'latest',
+      channel: 'stable'
     };
     this.contextName = opts.contextName || 'setup-docker-action';
     this.daemonConfig = opts.daemonConfig;
