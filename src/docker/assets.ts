@@ -221,16 +221,49 @@ provision:
     EOF
     fi
     export DEBIAN_FRONTEND=noninteractive
-    curl -fsSL https://get.docker.com | sh -s -- --channel {{dockerBinChannel}} --version {{dockerBinVersion}}
+    if [ "{{srcType}}" == "archive" ]; then
+      curl -fsSL https://get.docker.com | sh -s -- --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}
+    elif [ "{{srcType}}" == "image" ]; then
+      arch=$(uname -m)
+      case $arch in
+        x86_64) arch=amd64;;
+        aarch64) arch=arm64;;
+      esac
+      url="https://github.com/crazy-max/undock/releases/download/v0.8.0/undock_0.8.0_linux_$arch.tar.gz"
+
+      wget "$url" -O /tmp/undock.tar.gz
+      tar -C /usr/local/bin -xvf /tmp/undock.tar.gz
+      undock --version
+
+      HOME=/tmp undock moby/moby-bin:{{srcImageTag}} /usr/local/bin
+
+      wget https://raw.githubusercontent.com/moby/moby/{{srcImageTag}}/contrib/init/systemd/docker.service \
+        https://raw.githubusercontent.com/moby/moby/v{{srcImageTag}}/contrib/init/systemd/docker.service \
+        -O /etc/systemd/system/docker.service || true
+      wget https://raw.githubusercontent.com/moby/moby/{{srcImageTag}}/contrib/init/systemd/docker.socket \
+        https://raw.githubusercontent.com/moby/moby/v{{srcImageTag}}/contrib/init/systemd/docker.socket \
+        -O /etc/systemd/system/docker.socket || true
+
+      sed -i 's|^ExecStart=.*|ExecStart=/usr/local/bin/dockerd -H fd://|' /etc/systemd/system/docker.service
+      sed -i 's|containerd.service||' /etc/systemd/system/docker.service
+      if ! getent group docker; then
+        groupadd --system docker
+      fi
+      systemctl daemon-reload
+      fail=0
+      if ! systemctl enable --now docker; then
+        fail=1
+      fi
+      systemctl status docker.socket || true
+      systemctl status docker.service || true
+      exit $fail
+    fi
 
 probes:
 - script: |
     #!/bin/bash
     set -eux -o pipefail
-    if ! timeout 30s bash -c "until command -v docker >/dev/null 2>&1; do sleep 3; done"; then
-      echo >&2 "docker is not installed yet"
-      exit 1
-    fi
+    # Don't check for docker CLI as it's not installed in the VM (only on the host)
     if ! timeout 30s bash -c "until pgrep dockerd; do sleep 3; done"; then
       echo >&2 "dockerd is not running"
       exit 1

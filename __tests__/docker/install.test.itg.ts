@@ -41,8 +41,9 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
   });
   // prettier-ignore
   test.each([
-    {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
     {type: 'image', tag: '27.3.1'} as InstallSourceImage,
+    {type: 'image', tag: 'master'} as InstallSourceImage,
+    {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
   ])(
     'install docker %s', async (source) => {
       if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
@@ -56,18 +57,19 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
           }
         });
       }
+      const install = new Install({
+        source: source,
+        runDir: tmpDir,
+        contextName: 'foo',
+        daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
+      });
       await expect((async () => {
-        const install = new Install({
-          source: source,
-          runDir: tmpDir,
-          contextName: 'foo',
-          daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
-        });
         await install.download();
         await install.install();
         await Docker.printVersion();
         await Docker.printInfo();
+      })().finally(async () => {
         await install.tearDown();
-      })()).resolves.not.toThrow();
-    }, 1200000);
+      })).resolves.not.toThrow();
+    }, 30 * 60 * 1000);
 });

@@ -127,13 +127,14 @@ export class Install {
         const cli = await HubRepository.build('dockereng/cli-bin');
         extractFolder = await cli.extractImage(tag);
 
-        // Daemon is only available for Windows and Linux
         if (['win32', 'linux'].includes(platform)) {
           core.info(`Downloading dockerd from moby/moby-bin:${tag}`);
           const moby = await HubRepository.build('moby/moby-bin');
           await moby.extractImage(tag, extractFolder);
+        } else if (platform == 'darwin') {
+          // On macOS, the docker daemon binary will be downloaded inside the lima VM
         } else {
-          core.info(`dockerd not supported on ${platform}`);
+          core.warning(`dockerd not supported on ${platform}, only the Docker cli will be available`);
         }
         break;
       }
@@ -192,10 +193,7 @@ export class Install {
   }
 
   private async installDarwin(): Promise<string> {
-    if (this.source.type !== 'archive') {
-      throw new Error('Only archive source is supported on macOS');
-    }
-    const src = this.source as InstallSourceArchive;
+    const src = this.source;
     const limaDir = path.join(os.homedir(), '.lima', this.limaInstanceName);
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
@@ -226,12 +224,15 @@ export class Install {
       handlebars.registerHelper('stringify', function (obj) {
         return new handlebars.SafeString(JSON.stringify(obj));
       });
+      const srcArchive = src as InstallSourceArchive;
       const limaCfg = handlebars.compile(limaYamlData)({
         customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
-        dockerBinVersion: src.version.replace(/^v/, ''),
-        dockerBinChannel: src.channel
+        srcType: src.type,
+        srcArchiveVersion: srcArchive.version?.replace(/^v/, ''),
+        srcArchiveChannel: srcArchive.channel,
+        srcImageTag: (src as InstallSourceImage).tag
       });
       core.info(`Writing lima config to ${path.join(limaDir, 'lima.yaml')}`);
       fs.writeFileSync(path.join(limaDir, 'lima.yaml'), limaCfg);
