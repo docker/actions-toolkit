@@ -120,10 +120,6 @@ jobs:
           corepack enable
           yarn --version
       -
-        name: Set up QEMU
-        if: startsWith(matrix.os, 'macos')
-        uses: ./.github/actions/macos-setup-qemu
-      -
         name: Setup Node
         uses: actions/setup-node@v4
         with:
