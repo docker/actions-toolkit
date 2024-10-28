@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 actions-toolkit authors
+ * Copyright 2024 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,19 @@
 import {describe, expect, test} from '@jest/globals';
 import * as fs from 'fs';
 
-import {Install} from '../../src/buildx/install';
+import {Install} from '../../src/undock/install';
 
-const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
-
-maybe('download', () => {
+describe('download', () => {
   // prettier-ignore
   test.each(['latest'])(
-    'install buildx %s', async (version) => {
+    'install undock %s', async (version) => {
       await expect((async () => {
-        const install = new Install({
-          standalone: true
-        });
+        const install = new Install();
         const toolPath = await install.download(version);
         if (!fs.existsSync(toolPath)) {
           throw new Error('toolPath does not exist');
         }
-        const binPath = await install.installStandalone(toolPath);
+        const binPath = await install.install(toolPath);
         if (!fs.existsSync(binPath)) {
           throw new Error('binPath does not exist');
         }
