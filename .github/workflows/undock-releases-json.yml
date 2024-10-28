@@ -1,0 +1,58 @@
+name: undock-releases-json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - '.github/workflows/undock-releases-json.yml'
+
+jobs:
+  generate:
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@fa6141aedf23596fb8bdcceab9cce8dadaa31bd9
+    with:
+      repository: crazy-max/undock
+      artifact_name: undock-releases-json
+      filename: undock-releases.json
+    secrets: inherit
+
+  open-pr:
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'pull_request'
+    needs:
+      - generate
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Download
+        uses: actions/download-artifact@v4
+        with:
+          name: undock-releases-json
+          path: .github
+      -
+        name: Commit changes
+        run: |
+          git add -A .
+      -
+        name: Create PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          base: main
+          branch: bot/undock-releases-json
+          commit-message: "github: update .github/undock-releases.json"
+          signoff: true
+          delete-branch: true
+          title: "Update `.github/undock-releases.json`"
+          body: |
+            Update `.github/undock-releases.json` to keep in sync with [https://github.com/crazy-max/undock](https://github.com/crazy-max/undock).
+          draft: false
