@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import os from 'os';
-import path from 'path';
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
@@ -23,6 +21,20 @@ import {Exec} from '../exec';
 
 export interface UndockOpts {
   binPath?: string;
+}
+
+export interface UndockRunOpts {
+  source: string;
+  dist: string;
+  logLevel?: string;
+  logCaller?: boolean;
+  cacheDir?: string;
+  platform?: string;
+  all?: boolean;
+  include?: Array<string>;
+  insecure?: boolean;
+  rmDist?: boolean;
+  wrap?: boolean;
 }
 
 export class Undock {
@@ -36,8 +48,47 @@ export class Undock {
     this._versionOnce = false;
   }
 
-  static get cacheDir(): string {
-    return process.env.UNDOCK_CACHE_DIR || path.join(os.homedir(), '.local', 'share', 'undock', 'cache');
+  public async run(opts: UndockRunOpts): Promise<void> {
+    if (!opts.source) {
+      throw new Error('source is required');
+    }
+    if (!opts.dist) {
+      throw new Error('dist is required');
+    }
+    const args: Array<string> = [];
+    if (opts.logLevel) {
+      args.push(`--log-level=${opts.logLevel}`);
+    }
+    if (opts.logCaller) {
+      args.push('--log-caller');
+    }
+    if (opts.cacheDir) {
+      args.push(`--cachedir=${opts.cacheDir}`);
+    }
+    if (opts.platform) {
+      args.push(`--platform=${opts.platform}`);
+    }
+    if (opts.all) {
+      args.push('--all');
+    }
+    if (opts.include) {
+      opts.include.forEach(i => {
+        args.push(`--include=${i}`);
+      });
+    }
+    if (opts.insecure) {
+      args.push('--insecure');
+    }
+    if (opts.rmDist) {
+      args.push('--rm-dist');
+    }
+    if (opts.wrap) {
+      args.push('--wrap');
+    }
+    args.push(opts.source, opts.dist);
+    await Exec.exec(this.binPath, args, {
+      failOnStdErr: false
+    });
   }
 
   public async isAvailable(): Promise<boolean> {

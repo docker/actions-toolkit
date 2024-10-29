@@ -14,11 +14,32 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import {describe, expect, it, jest, test} from '@jest/globals';
 import * as semver from 'semver';
 
 import {Exec} from '../../src/exec';
 import {Undock} from '../../src/undock/undock';
+
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-undock-'));
+
+describe('run', () => {
+  it('extracts moby/moby-bin:26.1.5', async () => {
+    const undock = new Undock();
+    await expect(
+      (async () => {
+        // prettier-ignore
+        await undock.run({
+          source: 'moby/moby-bin:26.1.5',
+          dist: tmpDir,
+          all: true
+        });
+      })()
+    ).resolves.not.toThrow();
+  }, 100000);
+});
 
 describe('isAvailable', () => {
   it('checks undock is available', async () => {
