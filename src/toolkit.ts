@@ -20,6 +20,7 @@ import {Bake as BuildxBake} from './buildx/bake';
 import {Install as BuildxInstall} from './buildx/install';
 import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
+import {Undock} from './undock/undock';
 import {GitHub} from './github';
 
 export interface ToolkitOpts {
@@ -38,6 +39,7 @@ export class Toolkit {
   public buildxInstall: BuildxInstall;
   public builder: Builder;
   public buildkit: BuildKit;
+  public undock: Undock;
 
   constructor(opts: ToolkitOpts = {}) {
     this.github = new GitHub({token: opts.githubToken});
@@ -47,5 +49,6 @@ export class Toolkit {
     this.buildxInstall = new BuildxInstall();
     this.builder = new Builder({buildx: this.buildx});
     this.buildkit = new BuildKit({buildx: this.buildx});
+    this.undock = new Undock();
   }
 }
