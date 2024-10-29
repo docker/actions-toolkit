@@ -230,7 +230,7 @@ export class Install {
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
         srcType: src.type,
-        srcArchiveVersion: srcArchive.version?.replace(/^v/, ''),
+        srcArchiveVersion: this._version, // Use the resolved version (e.g. latest -> 27.4.0)
         srcArchiveChannel: srcArchive.channel,
         srcImageTag: (src as InstallSourceImage).tag
       });

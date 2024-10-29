@@ -44,6 +44,7 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
     {type: 'image', tag: '27.3.1'} as InstallSourceImage,
     {type: 'image', tag: 'master'} as InstallSourceImage,
     {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
+    {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive,
   ])(
     'install docker %s', async (source) => {
       if (process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) {
