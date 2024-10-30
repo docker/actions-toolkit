@@ -23,3 +23,5 @@ export const MEDIATYPE_IMAGE_INDEX_V1 = 'application/vnd.oci.image.index.v1+json
 export const MEDIATYPE_IMAGE_LAYER_V1 = 'application/vnd.oci.image.layer.v1.tar';
 
 export const MEDIATYPE_EMPTY_JSON_V1 = 'application/vnd.oci.empty.v1+json';
+
+export const MEDIATYPE_IMAGE_CONFIG_V1 = 'application/vnd.oci.image.config.v1+json';

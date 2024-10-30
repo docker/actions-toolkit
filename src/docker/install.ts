@@ -34,6 +34,7 @@ import {Util} from '../util';
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
 import {GitHubRelease} from '../types/github';
 import {HubRepository} from '../hubRepository';
+import {Image} from '../types/oci/config';
 
 export interface InstallSourceImage {
   type: 'image';
@@ -70,6 +71,8 @@ export class Install {
   private readonly daemonConfig?: string;
   private _version: string | undefined;
   private _toolDir: string | undefined;
+
+  private gitCommit: string | undefined;
 
   private readonly limaInstanceName = 'docker-actions-toolkit';
 
@@ -127,12 +130,28 @@ export class Install {
         const cli = await HubRepository.build('dockereng/cli-bin');
         extractFolder = await cli.extractImage(tag);
 
+        const moby = await HubRepository.build('moby/moby-bin');
         if (['win32', 'linux'].includes(platform)) {
           core.info(`Downloading dockerd from moby/moby-bin:${tag}`);
-          const moby = await HubRepository.build('moby/moby-bin');
           await moby.extractImage(tag, extractFolder);
         } else if (platform == 'darwin') {
-          // On macOS, the docker daemon binary will be downloaded inside the lima VM
+          // On macOS, the docker daemon binary will be downloaded inside the lima VM.
+          // However, we will get the exact git revision from the image config
+          // to get the matching systemd unit files.
+          core.info(`Getting git revision from moby/moby-bin:${tag}`);
+
+          // There's no macOS image for moby/moby-bin - a linux daemon is run inside lima.
+          const manifest = await moby.getPlatformManifest(tag, 'linux');
+
+          const config = await moby.getJSONBlob<Image>(manifest.config.digest);
+          core.debug(`Config ${JSON.stringify(config.config)}`);
+
+          this.gitCommit = config.config?.Labels?.['org.opencontainers.image.revision'];
+          if (!this.gitCommit) {
+            core.warning(`No git revision can be determined from the image. Will use master.`);
+            this.gitCommit = 'master';
+          }
+          core.info(`Git revision is ${this.gitCommit}`);
         } else {
           core.warning(`dockerd not supported on ${platform}, only the Docker cli will be available`);
         }
@@ -193,6 +212,9 @@ export class Install {
   }
 
   private async installDarwin(): Promise<string> {
+    if (this.source.type == 'image' && !this.gitCommit) {
+      throw new Error('gitCommit must be set. Run download first.');
+    }
     const src = this.source;
     const limaDir = path.join(os.homedir(), '.lima', this.limaInstanceName);
     await io.mkdirP(limaDir);
@@ -229,6 +251,7 @@ export class Install {
         customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
+        gitCommit: this.gitCommit,
         srcType: src.type,
         srcArchiveVersion: this._version, // Use the resolved version (e.g. latest -> 27.4.0)
         srcArchiveChannel: srcArchive.channel,
