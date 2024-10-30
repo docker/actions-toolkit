@@ -21,8 +21,8 @@ import * as core from '@actions/core';
 import {Manifest} from './types/oci/manifest';
 import * as tc from '@actions/tool-cache';
 import fs from 'fs';
-import {MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from './types/oci/mediatype';
-import {MEDIATYPE_IMAGE_MANIFEST_V2, MEDIATYPE_IMAGE_MANIFEST_LIST_V2} from './types/docker/mediatype';
+import {MEDIATYPE_IMAGE_CONFIG_V1, MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from './types/oci/mediatype';
+import {MEDIATYPE_IMAGE_CONFIG_V1 as DOCKER_MEDIATYPE_IMAGE_CONFIG_V1, MEDIATYPE_IMAGE_MANIFEST_LIST_V2, MEDIATYPE_IMAGE_MANIFEST_V2} from './types/docker/mediatype';
 import {DockerHub} from './dockerhub';
 
 export class HubRepository {
@@ -40,15 +40,20 @@ export class HubRepository {
     return new HubRepository(repository, token);
   }
 
+  public async getPlatformManifest(tagOrDigest: string, os?: string): Promise<Manifest> {
+    const index = await this.getManifest<Index>(tagOrDigest);
+    if (index.mediaType != MEDIATYPE_IMAGE_INDEX_V1 && index.mediaType != MEDIATYPE_IMAGE_MANIFEST_LIST_V2) {
+      core.error(`Unsupported image media type: ${index.mediaType}`);
+      throw new Error(`Unsupported image media type: ${index.mediaType}`);
+    }
+    const digest = HubRepository.getPlatformManifestDigest(index, os);
+    return await this.getManifest<Manifest>(digest);
+  }
+
   // Unpacks the image layers and returns the path to the extracted image.
   // Only OCI indexes/manifest list are supported for now.
   public async extractImage(tag: string, destDir?: string): Promise<string> {
-    const index = await this.getManifest<Index>(tag);
-    if (index.mediaType != MEDIATYPE_IMAGE_INDEX_V1 && index.mediaType != MEDIATYPE_IMAGE_MANIFEST_LIST_V2) {
-      throw new Error(`Unsupported image media type: ${index.mediaType}`);
-    }
-    const digest = HubRepository.getPlatformManifestDigest(index);
-    const manifest = await this.getManifest<Manifest>(digest);
+    const manifest = await this.getPlatformManifest(tag);
 
     const paths = manifest.layers.map(async layer => {
       const url = this.blobUrl(layer.digest);
@@ -99,25 +104,35 @@ export class HubRepository {
   }
 
   public async getManifest<T>(tagOrDigest: string): Promise<T> {
-    const url = `https://registry-1.docker.io/v2/${this.repo}/manifests/${tagOrDigest}`;
+    return await this.registryGet<T>(tagOrDigest, 'manifests', [MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_LIST_V2, MEDIATYPE_IMAGE_MANIFEST_V1, MEDIATYPE_IMAGE_MANIFEST_V2]);
+  }
+
+  public async getJSONBlob<T>(tagOrDigest: string): Promise<T> {
+    return await this.registryGet<T>(tagOrDigest, 'blobs', [MEDIATYPE_IMAGE_CONFIG_V1, DOCKER_MEDIATYPE_IMAGE_CONFIG_V1]);
+  }
+
+  private async registryGet<T>(tagOrDigest: string, endpoint: 'manifests' | 'blobs', accept: Array<string>): Promise<T> {
+    const url = `https://registry-1.docker.io/v2/${this.repo}/${endpoint}/${tagOrDigest}`;
 
     const headers = {
       Authorization: `Bearer ${this.token}`,
-      Accept: [MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_LIST_V2, MEDIATYPE_IMAGE_MANIFEST_V1, MEDIATYPE_IMAGE_MANIFEST_V2].join(', ')
+      Accept: accept.join(', ')
     };
+
     const resp = await HubRepository.http.get(url, headers);
     const body = await resp.readBody();
     const statusCode = resp.message.statusCode || 500;
     if (statusCode != 200) {
+      core.error(`registryGet(${this.repo}:${tagOrDigest}) failed: ${statusCode} ${body}`);
       throw DockerHub.parseError(resp, body);
     }
 
     return <T>JSON.parse(body);
   }
 
-  private static getPlatformManifestDigest(index: Index): string {
+  private static getPlatformManifestDigest(index: Index, osOverride?: string): string {
     // This doesn't handle all possible platforms normalizations, but it's good enough for now.
-    let pos: string = os.platform();
+    let pos: string = osOverride || os.platform();
     if (pos == 'win32') {
       pos = 'windows';
     }
@@ -150,8 +165,10 @@ export class HubRepository {
       return true;
     });
     if (!manifest) {
+      core.error(`Cannot find manifest for ${pos}/${arch}/${variant}`);
       throw new Error(`Cannot find manifest for ${pos}/${arch}/${variant}`);
     }
+
     return manifest.digest;
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jest, describe, expect, test, beforeEach, afterEach} from '@jest/globals';
+import {jest, describe, test, beforeEach, afterEach, expect} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -43,6 +43,7 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
   test.each([
     {type: 'image', tag: '27.3.1'} as InstallSourceImage,
     {type: 'image', tag: 'master'} as InstallSourceImage,
+    {type: 'image', tag: 'latest'} as InstallSourceImage,
     {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
     {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive,
   ])(
@@ -65,12 +66,17 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
         daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
       });
       await expect((async () => {
-        await install.download();
-        await install.install();
-        await Docker.printVersion();
-        await Docker.printInfo();
-      })().finally(async () => {
-        await install.tearDown();
-      })).resolves.not.toThrow();
+        try {
+          await install.download();
+          await install.install();
+          await Docker.printVersion();
+          await Docker.printInfo();
+        } catch (error) {
+          console.error(error);
+          throw error;
+        } finally {
+          await install.tearDown();
+        }
+      })()).resolves.not.toThrow();
     }, 30 * 60 * 1000);
 });

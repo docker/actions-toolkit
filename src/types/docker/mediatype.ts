@@ -17,3 +17,5 @@
 export const MEDIATYPE_IMAGE_MANIFEST_LIST_V2 = 'application/vnd.docker.distribution.manifest.list.v2+json';
 
 export const MEDIATYPE_IMAGE_MANIFEST_V2 = 'application/vnd.docker.distribution.manifest.v2+json';
+
+export const MEDIATYPE_IMAGE_CONFIG_V1 = 'application/vnd.docker.container.image.v1+json';

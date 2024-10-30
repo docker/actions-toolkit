@@ -237,12 +237,10 @@ provision:
 
       HOME=/tmp undock moby/moby-bin:{{srcImageTag}} /usr/local/bin
 
-      wget https://raw.githubusercontent.com/moby/moby/{{srcImageTag}}/contrib/init/systemd/docker.service \
-        https://raw.githubusercontent.com/moby/moby/v{{srcImageTag}}/contrib/init/systemd/docker.service \
-        -O /etc/systemd/system/docker.service || true
-      wget https://raw.githubusercontent.com/moby/moby/{{srcImageTag}}/contrib/init/systemd/docker.socket \
-        https://raw.githubusercontent.com/moby/moby/v{{srcImageTag}}/contrib/init/systemd/docker.socket \
-        -O /etc/systemd/system/docker.socket || true
+      wget https://raw.githubusercontent.com/moby/moby/{{gitCommit}}/contrib/init/systemd/docker.service \
+        -O /etc/systemd/system/docker.service
+      wget https://raw.githubusercontent.com/moby/moby/{{gitCommit}}/contrib/init/systemd/docker.socket \
+        -O /etc/systemd/system/docker.socket
 
       sed -i 's|^ExecStart=.*|ExecStart=/usr/local/bin/dockerd -H fd://|' /etc/systemd/system/docker.service
       sed -i 's|containerd.service||' /etc/systemd/system/docker.service
