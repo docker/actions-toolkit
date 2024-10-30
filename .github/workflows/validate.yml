@@ -17,16 +17,17 @@ jobs:
   prepare:
     runs-on: ubuntu-20.04
     outputs:
-      targets: ${{ steps.targets.outputs.matrix }}
+      targets: ${{ steps.generate.outputs.targets }}
     steps:
       -
         name: Checkout
         uses: actions/checkout@v4
       -
-        name: Matrix
-        id: targets
-        run: |
-          echo "matrix=$(docker buildx bake validate --print | jq -cr '.group.validate.targets')" >> $GITHUB_OUTPUT
+        name: List targets
+        id: generate
+        uses: docker/bake-action/subaction/list-targets@v5
+        with:
+          target: validate
 
   validate:
     runs-on: ubuntu-latest

@@ -21,7 +21,7 @@ group "pre-checkin" {
 }
 
 group "validate" {
-  targets = ["lint", "vendor-validate", "license-validate"]
+  targets = ["lint", "vendor-validate", "dockerfile-validate", "license-validate"]
 }
 
 target "build" {
@@ -52,6 +52,18 @@ target "vendor-validate" {
   dockerfile = "dev.Dockerfile"
   target = "vendor-validate"
   output = ["type=cacheonly"]
+}
+
+target "dockerfile-validate" {
+  matrix = {
+    dockerfile = [
+      "dev.Dockerfile",
+      "./hack/dockerfiles/license.Dockerfile"
+    ]
+  }
+  name = "dockerfile-validate-${md5(dockerfile)}"
+  dockerfile = dockerfile
+  call = "check"
 }
 
 target "test" {

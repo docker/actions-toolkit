@@ -74,9 +74,9 @@ RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
   yarn run lint
 
-FROM docker:${DOCKER_VERSION} as docker
-FROM docker/buildx-bin:${BUILDX_VERSION} as buildx
-FROM crazymax/undock:${UNDOCK_VERSION} as undock
+FROM docker:${DOCKER_VERSION} AS docker
+FROM docker/buildx-bin:${BUILDX_VERSION} AS buildx
+FROM crazymax/undock:${UNDOCK_VERSION} AS undock
 
 FROM deps AS test
 RUN --mount=type=bind,target=.,rw \
