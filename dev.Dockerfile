@@ -17,6 +17,7 @@
 ARG NODE_VERSION=20
 ARG DOCKER_VERSION=27.2.1
 ARG BUILDX_VERSION=0.17.1
+ARG UNDOCK_VERSION=0.8.0
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
@@ -75,6 +76,7 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM docker:${DOCKER_VERSION} as docker
 FROM docker/buildx-bin:${BUILDX_VERSION} as buildx
+FROM crazymax/undock:${UNDOCK_VERSION} as undock
 
 FROM deps AS test
 RUN --mount=type=bind,target=.,rw \
@@ -83,6 +85,7 @@ RUN --mount=type=bind,target=.,rw \
     --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
     --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
     --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
+    --mount=type=bind,from=undock,source=/usr/local/bin/undock,target=/usr/bin/undock \
     --mount=type=secret,id=GITHUB_TOKEN \
   GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN) yarn run test:coverage --coverageDirectory=/tmp/coverage
 
