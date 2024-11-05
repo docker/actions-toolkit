@@ -21,7 +21,6 @@ import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
 import * as handlebars from 'handlebars';
-import * as util from 'util';
 import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
 import * as io from '@actions/io';
@@ -56,6 +55,7 @@ export interface InstallOpts {
   runDir: string;
   contextName?: string;
   daemonConfig?: string;
+  rootless?: boolean;
 }
 
 interface LimaImage {
@@ -65,12 +65,13 @@ interface LimaImage {
 }
 
 export class Install {
-  private readonly runDir: string;
+  private runDir: string;
   private readonly source: InstallSource;
   private readonly contextName: string;
   private readonly daemonConfig?: string;
   private _version: string | undefined;
   private _toolDir: string | undefined;
+  private rootless: boolean;
 
   private gitCommit: string | undefined;
 
@@ -78,6 +79,7 @@ export class Install {
 
   constructor(opts: InstallOpts) {
     this.runDir = opts.runDir;
+    this.rootless = opts.rootless || false;
     this.source = opts.source || {
       type: 'archive',
       version: 'latest',
@@ -91,25 +93,25 @@ export class Install {
     return this._toolDir || Context.tmpDir();
   }
 
-  async downloadStaticArchive(src: InstallSourceArchive): Promise<string> {
+  async downloadStaticArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(src.version);
     this._version = release.tag_name.replace(/^v+|v+$/g, '');
     core.debug(`docker.Install.download version: ${this._version}`);
 
-    const downloadURL = this.downloadURL(this._version, src.channel);
+    const downloadURL = this.downloadURL(component, this._version, src.channel);
     core.info(`Downloading ${downloadURL}`);
 
     const downloadPath = await tc.downloadTool(downloadURL);
     core.debug(`docker.Install.download downloadPath: ${downloadPath}`);
 
-    let extractFolder: string;
+    let extractFolder;
     if (os.platform() == 'win32') {
-      extractFolder = await tc.extractZip(downloadPath);
+      extractFolder = await tc.extractZip(downloadPath, extractFolder);
     } else {
-      extractFolder = await tc.extractTar(downloadPath);
+      extractFolder = await tc.extractTar(downloadPath, extractFolder);
     }
-    if (Util.isDirectory(path.join(extractFolder, 'docker'))) {
-      extractFolder = path.join(extractFolder, 'docker');
+    if (Util.isDirectory(path.join(extractFolder, component))) {
+      extractFolder = path.join(extractFolder, component);
     }
     core.debug(`docker.Install.download extractFolder: ${extractFolder}`);
     return extractFolder;
@@ -164,7 +166,12 @@ export class Install {
         this._version = version;
 
         core.info(`Downloading Docker ${version} from ${this.source.channel} at download.docker.com`);
-        extractFolder = await this.downloadStaticArchive(this.source);
+        extractFolder = await this.downloadStaticArchive('docker', this.source);
+        if (this.rootless) {
+          core.info(`Downloading Docker rootless extras ${version} from ${this.source.channel} at download.docker.com`);
+          const extrasFolder = await this.downloadStaticArchive('docker-rootless-extras', this.source);
+          fs.copyFileSync(path.join(extrasFolder, 'dockerd-rootless.sh'), path.join(extractFolder, 'dockerd-rootless.sh'));
+        }
         break;
       }
     }
@@ -195,7 +202,13 @@ export class Install {
     if (!this.runDir) {
       throw new Error('runDir must be set');
     }
-    switch (os.platform()) {
+
+    const platform = os.platform();
+    if (this.rootless && platform != 'linux') {
+      // TODO: Support on macOS (via lima)
+      throw new Error(`rootless is only supported on linux`);
+    }
+    switch (platform) {
       case 'darwin': {
         return await this.installDarwin();
       }
@@ -339,21 +352,34 @@ export class Install {
     }
 
     const envs = Object.assign({}, process.env, {
-      PATH: `${this.toolDir}:${process.env.PATH}`
+      PATH: `${this.toolDir}:${process.env.PATH}`,
+      XDG_RUNTIME_DIR: (this.rootless && this.runDir) || undefined
     }) as {
       [key: string]: string;
     };
 
     await core.group('Start Docker daemon', async () => {
       const bashPath: string = await io.which('bash', true);
-      const cmd = `${this.toolDir}/dockerd --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid" --userland-proxy=false`;
+      let dockerPath = `${this.toolDir}/dockerd`;
+      if (this.rootless) {
+        dockerPath = `${this.toolDir}/dockerd-rootless.sh`;
+        if (fs.existsSync('/proc/sys/kernel/apparmor_restrict_unprivileged_userns')) {
+          await Exec.exec('sudo', ['sh', '-c', 'echo 0 > /proc/sys/kernel/apparmor_restrict_unprivileged_userns']);
+        }
+      }
+
+      const cmd = `${dockerPath} --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid"`;
       core.info(`[command] ${cmd}`); // https://github.com/actions/toolkit/blob/3d652d3133965f63309e4b2e1c8852cdbdcb3833/packages/exec/src/toolrunner.ts#L47
+      let sudo = 'sudo';
+      if (this.rootless) {
+        sudo += ' -u \\#1001';
+      }
       const proc = await child_process.spawn(
         // We can't use Exec.exec here because we need to detach the process to
         // avoid killing it when the action finishes running. Even if detached,
         // we also need to run dockerd in a subshell and unref the process so
         // GitHub Action doesn't wait for it to finish.
-        `sudo env "PATH=$PATH" ${bashPath} << EOF
+        `${sudo} env "PATH=$PATH" ${bashPath} << EOF
 ( ${cmd} 2>&1 | tee "${this.runDir}/dockerd.log" ) &
 EOF`,
         [],
@@ -517,11 +543,11 @@ EOF`,
     });
   }
 
-  private downloadURL(version: string, channel: string): string {
+  private downloadURL(component: 'docker' | 'docker-rootless-extras', version: string, channel: string): string {
     const platformOS = Install.platformOS();
     const platformArch = Install.platformArch();
     const ext = platformOS === 'win' ? '.zip' : '.tgz';
-    return util.format('https://download.docker.com/%s/static/%s/%s/docker-%s%s', platformOS, channel, platformArch, version, ext);
+    return `https://download.docker.com/${platformOS}/static/${channel}/${platformArch}/${component}-${version}${ext}`;
   }
 
   private static platformOS(): string {
