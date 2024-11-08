@@ -552,6 +552,9 @@ EOF`,
     await core.group('Removing Docker context', async () => {
       await Docker.exec(['context', 'rm', '-f', this.contextName]);
     });
+    await core.group('Stopping Docker daemon service', async () => {
+      await Exec.exec('powershell', ['-Command', `Stop-Service -Name docker -Force`]);
+    });
   }
 
   private downloadURL(component: 'docker' | 'docker-rootless-extras', version: string, channel: string): string {
