@@ -492,6 +492,13 @@ EOF`,
         throw new Error(`Unsupported platform: ${os.platform()}`);
       }
     }
+
+    await core.group(`Cleaning up toolDir`, async () => {
+      if (!this._toolDir) {
+        return;
+      }
+      fs.rmSync(this._toolDir, {recursive: true, force: true});
+    });
   }
 
   private async tearDownDarwin(): Promise<void> {
