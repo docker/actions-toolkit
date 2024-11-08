@@ -170,7 +170,11 @@ export class Install {
         if (this.rootless) {
           core.info(`Downloading Docker rootless extras ${version} from ${this.source.channel} at download.docker.com`);
           const extrasFolder = await this.downloadStaticArchive('docker-rootless-extras', this.source);
-          fs.copyFileSync(path.join(extrasFolder, 'dockerd-rootless.sh'), path.join(extractFolder, 'dockerd-rootless.sh'));
+          fs.readdirSync(extrasFolder).forEach(file => {
+            const src = path.join(extrasFolder, file);
+            const dest = path.join(extractFolder, file);
+            fs.copyFileSync(src, dest);
+          });
         }
         break;
       }
