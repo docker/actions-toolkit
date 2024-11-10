@@ -15,6 +15,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node_version:
+          - 20
+          - 18
     steps:
       -
         name: Checkout
@@ -24,3 +30,5 @@ jobs:
         uses: docker/bake-action@v5
         with:
           targets: build
+        env:
+          NODE_VERSION: ${{ matrix.node_version }}
