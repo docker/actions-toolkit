@@ -163,4 +163,14 @@ export class Git {
       return res.stdout.trim();
     });
   }
+
+  public static async commitDate(ref: string, gitDir: string | undefined = undefined): Promise<Date> {
+    const args = ['show', '-s', '--format="%ci"', ref];
+    if (gitDir !== undefined) {
+      args.push('--');
+      args.push(gitDir);
+    }
+
+    return new Date(await Git.exec(args));
+  }
 }
