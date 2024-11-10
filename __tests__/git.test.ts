@@ -279,3 +279,10 @@ describe('tag', () => {
     });
   });
 });
+
+describe('getCommitDate', () => {
+  it('head', async () => {
+    const date = await Git.commitDate('HEAD');
+    await expect(date).toBeInstanceOf(Date);
+  });
+});

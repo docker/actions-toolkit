@@ -163,4 +163,8 @@ export class Git {
       return res.stdout.trim();
     });
   }
+
+  public static async commitDate(ref: string): Promise<Date> {
+    return new Date(await Git.exec(['show', '-s', '--format="%ci"', ref]));
+  }
 }
