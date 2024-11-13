@@ -23,7 +23,7 @@ import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docke
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
-const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
+const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
 
 describe('install', () => {
   const originalEnv = process.env;
@@ -51,7 +51,7 @@ aarch64:https://cloud.debian.org/images/cloud/bookworm/20231013-1532/debian-12-g
       await ensureNoSystemContainerd();
       const install = new Install({
         source: source,
-        runDir: tmpDir,
+        runDir: tmpDir(),
         contextName: 'foo',
         daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
       });
@@ -74,7 +74,7 @@ describe('rootless', () => {
       await ensureNoSystemContainerd();
       const install = new Install({
         source: source,
-        runDir: tmpDir,
+        runDir: tmpDir(),
         contextName: 'foo',
         daemonConfig: `{"debug":true}`,
         rootless: true

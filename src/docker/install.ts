@@ -170,7 +170,11 @@ export class Install {
         if (this.rootless) {
           core.info(`Downloading Docker rootless extras ${version} from ${this.source.channel} at download.docker.com`);
           const extrasFolder = await this.downloadStaticArchive('docker-rootless-extras', this.source);
-          fs.copyFileSync(path.join(extrasFolder, 'dockerd-rootless.sh'), path.join(extractFolder, 'dockerd-rootless.sh'));
+          fs.readdirSync(extrasFolder).forEach(file => {
+            const src = path.join(extrasFolder, file);
+            const dest = path.join(extractFolder, file);
+            fs.copyFileSync(src, dest);
+          });
         }
         break;
       }
@@ -492,6 +496,13 @@ EOF`,
         throw new Error(`Unsupported platform: ${os.platform()}`);
       }
     }
+
+    await core.group(`Cleaning up toolDir`, async () => {
+      if (!this._toolDir) {
+        return;
+      }
+      fs.rmSync(this._toolDir, {recursive: true, force: true});
+    });
   }
 
   private async tearDownDarwin(): Promise<void> {
@@ -540,6 +551,9 @@ EOF`,
     });
     await core.group('Removing Docker context', async () => {
       await Docker.exec(['context', 'rm', '-f', this.contextName]);
+    });
+    await core.group('Stopping Docker daemon service', async () => {
+      await Exec.exec('powershell', ['-Command', `Stop-Service -Name docker -Force`]);
     });
   }
 
