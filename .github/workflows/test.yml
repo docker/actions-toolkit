@@ -43,7 +43,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: env.RUN_CODECOV == 'true'
         with:
           file: ./coverage/clover.xml
@@ -163,7 +163,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: env.RUN_CODECOV == 'true'
         with:
           file: ./coverage/clover.xml
