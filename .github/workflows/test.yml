@@ -43,10 +43,10 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: env.RUN_CODECOV == 'true'
         with:
-          file: ./coverage/clover.xml
+          files: ./coverage/clover.xml
           flags: unit
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -162,9 +162,9 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: env.RUN_CODECOV == 'true'
         with:
-          file: ./coverage/clover.xml
+          files: ./coverage/clover.xml
           flags: itg
           token: ${{ secrets.CODECOV_TOKEN }}
