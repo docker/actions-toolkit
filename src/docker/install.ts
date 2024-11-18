@@ -279,9 +279,14 @@ export class Install {
       core.info(limaCfg);
     });
 
-    const qemuArch = await Install.qemuArch();
+    if (!(await Install.qemuInstalled())) {
+      await core.group('Installing QEMU', async () => {
+        await Exec.exec('brew', ['install', 'qemu'], {env: envs});
+      });
+    }
+    const qemuBin = await Install.qemuBin();
     await core.group('QEMU version', async () => {
-      await Exec.exec(`qemu-system-${qemuArch} --version`);
+      await Exec.exec(qemuBin, ['--version']);
     });
 
     // lima might already be started on the runner so env var added in download
@@ -617,27 +622,40 @@ EOF`,
     return await io
       .which('lima', true)
       .then(res => {
-        core.debug(`docker.Install.limaAvailable ok: ${res}`);
+        core.debug(`docker.Install.limaInstalled ok: ${res}`);
         return true;
       })
       .catch(error => {
-        core.debug(`docker.Install.limaAvailable error: ${error}`);
+        core.debug(`docker.Install.limaInstalled error: ${error}`);
         return false;
       });
   }
 
-  private static async qemuArch(): Promise<string> {
+  private static async qemuBin(): Promise<string> {
     switch (os.arch()) {
       case 'x64': {
-        return 'x86_64';
+        return `qemu-system-x86_64`;
       }
       case 'arm64': {
-        return 'aarch64';
+        return `qemu-system-aarch64`;
       }
       default: {
-        return os.arch();
+        return `qemu-system-${os.arch()}`;
       }
     }
+  }
+
+  private static async qemuInstalled(): Promise<boolean> {
+    return await io
+      .which(await Install.qemuBin(), true)
+      .then(res => {
+        core.debug(`docker.Install.qemuInstalled ok: ${res}`);
+        return true;
+      })
+      .catch(error => {
+        core.debug(`docker.Install.qemuInstalled error: ${error}`);
+        return false;
+      });
   }
 
   public static async getRelease(version: string): Promise<GitHubRelease> {
