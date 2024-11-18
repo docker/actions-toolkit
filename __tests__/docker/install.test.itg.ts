@@ -19,21 +19,15 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
+import {Install, InstallSource, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
 
 const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
 
-describe('install', () => {
+describe('root', () => {
   // prettier-ignore
-  test.each([
-    {type: 'image', tag: '27.3.1'} as InstallSourceImage,
-    {type: 'image', tag: 'master'} as InstallSourceImage,
-    {type: 'image', tag: 'latest'} as InstallSourceImage,
-    {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
-    {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive,
-  ])(
+  test.each(getSources(true))(
     'install docker %s', async (source) => {
       await ensureNoSystemContainerd();
       const install = new Install({
@@ -48,16 +42,12 @@ describe('install', () => {
 
 describe('rootless', () => {
   // prettier-ignore
-  test.each([
-    {type: 'image', tag: 'latest'} as InstallSourceImage,
-    {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive,
-  ])(
+  test.each(getSources(false))(
     'install %s', async (source) => {
       // Skip on non linux
       if (os.platform() !== 'linux') {
         return;
       }
-
       await ensureNoSystemContainerd();
       const install = new Install({
         source: source,
@@ -107,5 +97,39 @@ async function ensureNoSystemContainerd() {
         [key: string]: string;
       }
     });
+  }
+}
+
+function getSources(root: boolean): Array<InstallSource> {
+  const dockerInstallType = process.env.DOCKER_INSTALL_TYPE;
+  const dockerInstallVersion = process.env.DOCKER_INSTALL_VERSION;
+  if (dockerInstallType && dockerInstallVersion) {
+    if (dockerInstallType === 'archive') {
+      // prettier-ignore
+      return [
+        { type: dockerInstallType, version: dockerInstallVersion, channel: 'stable'} as InstallSourceArchive
+      ];
+    } else {
+      // prettier-ignore
+      return [
+        { type: dockerInstallType, tag: dockerInstallVersion} as InstallSourceImage
+      ];
+    }
+  }
+  if (root) {
+    // prettier-ignore
+    return [
+      {type: 'image', tag: '27.3.1'} as InstallSourceImage,
+      {type: 'image', tag: 'master'} as InstallSourceImage,
+      {type: 'image', tag: 'latest'} as InstallSourceImage,
+      {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
+      {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive
+    ];
+  } else {
+    // prettier-ignore
+    return [
+      {type: 'image', tag: 'latest'} as InstallSourceImage,
+      {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive
+    ];
   }
 }
