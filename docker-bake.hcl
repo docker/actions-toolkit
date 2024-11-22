@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+variable "NODE_VERSION" {
+  default = null
+}
+
 group "default" {
   targets = ["build"]
 }
@@ -24,31 +28,42 @@ group "validate" {
   targets = ["lint", "vendor-validate", "dockerfile-validate", "license-validate"]
 }
 
+target "_common" {
+  args = {
+    NODE_VERSION = NODE_VERSION
+  }
+}
+
 target "build" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "build-update"
   output = ["."]
 }
 
 target "format" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "format-update"
   output = ["."]
 }
 
 target "lint" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "lint"
   output = ["type=cacheonly"]
 }
 
 target "vendor" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "vendor-update"
   output = ["."]
 }
 
 target "vendor-validate" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "vendor-validate"
   output = ["type=cacheonly"]
@@ -67,6 +82,7 @@ target "dockerfile-validate" {
 }
 
 target "test" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "test"
   output = ["type=cacheonly"]
@@ -74,6 +90,7 @@ target "test" {
 }
 
 target "test-coverage" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   target = "test-coverage"
   output = ["./coverage"]
@@ -87,6 +104,7 @@ variable "GITHUB_REF" {
 }
 
 target "publish" {
+  inherits = ["_common"]
   dockerfile = "dev.Dockerfile"
   args = {
     GITHUB_REF = GITHUB_REF

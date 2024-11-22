@@ -21,6 +21,12 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node_version:
+          - 20
+          - 18
     steps:
       -
         name: Checkout
@@ -32,6 +38,7 @@ jobs:
           targets: test-coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_VERSION: ${{ matrix.node_version }}
       -
         name: Check coverage
         run: |
@@ -44,7 +51,7 @@ jobs:
       -
         name: Upload coverage
         uses: codecov/codecov-action@v5
-        if: env.RUN_CODECOV == 'true'
+        if: env.RUN_CODECOV == 'true' && matrix.node_version == env.NODE_VERSION
         with:
           files: ./coverage/clover.xml
           flags: unit
