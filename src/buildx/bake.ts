@@ -33,6 +33,8 @@ export interface BakeOpts {
 }
 
 export interface BakeCmdOpts {
+  allow?: Array<string>;
+  call?: string;
   files?: Array<string>;
   load?: boolean;
   noCache?: boolean;
@@ -141,6 +143,14 @@ export class Bake {
       for (const override of cmdOpts.overrides) {
         args.push('--set', override);
       }
+    }
+    if (cmdOpts.allow) {
+      for (const allow of cmdOpts.allow) {
+        args.push('--allow', allow);
+      }
+    }
+    if (cmdOpts.call) {
+      args.push('--call', cmdOpts.call);
     }
     if (cmdOpts.load) {
       args.push('--load');
