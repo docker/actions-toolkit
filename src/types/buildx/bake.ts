@@ -20,18 +20,22 @@ export interface BakeDefinition {
 }
 
 export interface Group {
+  description?: string;
   targets: Array<string>;
 }
 
 export interface Target {
+  description?: string;
   args?: Record<string, string>;
   attest?: Array<string>;
   'cache-from'?: Array<string>;
   'cache-to'?: Array<string>;
+  call?: string;
   context: string;
   contexts?: Record<string, string>;
   dockerfile: string;
   'dockerfile-inline'?: string;
+  entitlements?: Array<string>;
   labels?: Record<string, string>;
   'no-cache'?: boolean;
   'no-cache-filter'?: Array<string>;
