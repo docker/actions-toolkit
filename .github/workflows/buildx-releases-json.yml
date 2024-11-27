@@ -22,7 +22,6 @@ jobs:
       repository: docker/buildx
       artifact_name: buildx-releases-json
       filename: buildx-releases.json
-      pin_latest: v0.18.0
     secrets: inherit
 
   open-pr:
