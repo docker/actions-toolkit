@@ -17,7 +17,7 @@ on:
 
 jobs:
   generate:
-    uses: crazy-max/.github/.github/workflows/releases-json.yml@fa6141aedf23596fb8bdcceab9cce8dadaa31bd9
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@7f83a5a887650a38e4d0e05d5262309cfaa31459
     with:
       repository: moby/moby
       artifact_name: docker-releases-json
