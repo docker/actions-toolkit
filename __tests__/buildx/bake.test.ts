@@ -94,7 +94,14 @@ describe('getDefinition', () => {
       ['*.output=type=docker', '*.platform=linux/amd64'],
       undefined,
       path.join(fixturesDir, 'bake-01-overrides.json')
-    ]
+    ],
+    [
+      [path.join(fixturesDir, 'bake-03.hcl')],
+      [],
+      [],
+      undefined,
+      path.join(fixturesDir, 'bake-03-default.json')
+    ],
   ])('given %p', async (files: string[], targets: string[], overrides: string[], execOptions: ExecOptions | undefined, out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
@@ -103,7 +110,7 @@ describe('getDefinition', () => {
       targets: targets,
       overrides: overrides
     }, execOptions)).toEqual(expectedDef);
-  });
+  }, 30 * 60 * 1000);
 });
 
 describe('hasLocalExporter', () => {
@@ -114,7 +121,9 @@ describe('hasLocalExporter', () => {
         "target": {
           "build": {
             "output": [
-              "type=docker"
+              {
+                "type": "docker"
+              }
             ]
           },
         }
@@ -136,7 +145,10 @@ describe('hasLocalExporter', () => {
         "target": {
           "local": {
             "output": [
-              "type=local,dest=./release-out"
+              {
+                "type": "local",
+                "dest": "./release-out"
+              }
             ]
           },
         }
@@ -148,19 +160,10 @@ describe('hasLocalExporter', () => {
         "target": {
           "tar": {
             "output": [
-              "type=tar,dest=/tmp/image.tar"
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false
-    ],
-    [
-      {
-        "target": {
-          "tar": {
-            "output": [
-              '"type=tar","dest=/tmp/image.tar"',
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
@@ -172,19 +175,10 @@ describe('hasLocalExporter', () => {
         "target": {
           "local": {
             "output": [
-              '" type= local" , dest=./release-out',
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      true
-    ],
-    [
-      {
-        "target": {
-          "local": {
-            "output": [
-              ".",
+              {
+                "type": "local",
+                "dest": "."
+              }
             ]
           },
         }
@@ -204,7 +198,10 @@ describe('hasTarExporter', () => {
         "target": {
           "reg": {
             "output": [
-              "type=registry,ref=user/app"
+              {
+                "type": "registry",
+                "ref": "user/app"
+              }
             ]
           },
         }
@@ -216,7 +213,9 @@ describe('hasTarExporter', () => {
         "target": {
           "build": {
             "output": [
-              "type=docker"
+              {
+                "type": "docker"
+              }
             ]
           },
         }
@@ -228,7 +227,10 @@ describe('hasTarExporter', () => {
         "target": {
           "local": {
             "output": [
-              "type=local,dest=./release-out"
+              {
+                "type": "local",
+                "dest": "./release-out"
+              }
             ]
           },
         }
@@ -240,7 +242,10 @@ describe('hasTarExporter', () => {
         "target": {
           "tar": {
             "output": [
-              "type=tar,dest=/tmp/image.tar"
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
@@ -252,20 +257,13 @@ describe('hasTarExporter', () => {
         "target": {
           "multi": {
             "output": [
-              "type=docker",
-              "type=tar,dest=/tmp/image.tar"
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      true
-    ],
-    [
-      {
-        "target": {
-          "tar": {
-            "output": [
-              '"type=tar","dest=/tmp/image.tar"',
+              {
+                "type": "docker"
+              },
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
@@ -277,19 +275,10 @@ describe('hasTarExporter', () => {
         "target": {
           "local": {
             "output": [
-              '" type= local" , dest=./release-out',
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false
-    ],
-    [
-      {
-        "target": {
-          "local": {
-            "output": [
-              ".",
+              {
+                "type": "local",
+                "dest": "."
+              }
             ]
           },
         }
@@ -309,7 +298,10 @@ describe('hasDockerExporter', () => {
         "target": {
           "reg": {
             "output": [
-              "type=registry,ref=user/app"
+              {
+                "type": "registry",
+                "ref": "user/app"
+              }
             ]
           },
         }
@@ -322,7 +314,9 @@ describe('hasDockerExporter', () => {
         "target": {
           "build": {
             "output": [
-              "type=docker"
+              {
+                "type": "docker"
+              }
             ]
           },
         }
@@ -335,8 +329,13 @@ describe('hasDockerExporter', () => {
         "target": {
           "multi": {
             "output": [
-              "type=docker",
-              "type=tar,dest=/tmp/image.tar"
+              {
+                "type": "docker"
+              },
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
@@ -349,20 +348,10 @@ describe('hasDockerExporter', () => {
         "target": {
           "local": {
             "output": [
-              '" type= local" , dest=./release-out'
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false,
-      undefined
-    ],
-    [
-      {
-        "target": {
-          "local": {
-            "output": [
-              "type=local,dest=./release-out"
+              {
+                "type": "local",
+                "dest": "./release-out"
+              }
             ]
           },
         }
@@ -375,7 +364,10 @@ describe('hasDockerExporter', () => {
         "target": {
           "tar": {
             "output": [
-              "type=tar,dest=/tmp/image.tar"
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
@@ -388,52 +380,18 @@ describe('hasDockerExporter', () => {
         "target": {
           "multi": {
             "output": [
-              "type=docker",
-              "type=tar,dest=/tmp/image.tar"
+              {
+                "type": "docker"
+              },
+              {
+                "type": "tar",
+                "dest": "/tmp/image.tar"
+              }
             ]
           },
         }
       } as unknown as BakeDefinition,
       true,
-      undefined
-    ],
-    [
-      {
-        "target": {
-          "tar": {
-            "output": [
-              '"type=tar","dest=/tmp/image.tar"'
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false,
-      undefined
-    ],
-    [
-      {
-        "target": {
-          "tar": {
-            "output": [
-              '"type=tar","dest=/tmp/image.tar"'
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false,
-      undefined
-    ],
-    [
-      {
-        "target": {
-          "local": {
-            "output": [
-              '" type= local" , dest=./release-out'
-            ]
-          },
-        }
-      } as unknown as BakeDefinition,
-      false,
       undefined
     ],
     [
@@ -441,7 +399,9 @@ describe('hasDockerExporter', () => {
         "target": {
           "build": {
             "output": [
-              "type=docker"
+              {
+                "type": "docker"
+              }
             ]
           },
         }
@@ -454,7 +414,9 @@ describe('hasDockerExporter', () => {
         "target": {
           "build": {
             "output": [
-              "type=docker"
+              {
+                "type": "docker"
+              }
             ]
           },
         }
@@ -467,7 +429,10 @@ describe('hasDockerExporter', () => {
         "target": {
           "build": {
             "output": [
-              "."
+              {
+                "type": "local",
+                "dest": "."
+              }
             ]
           },
         }

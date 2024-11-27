@@ -16,15 +16,15 @@
 
 import fs from 'fs';
 import path from 'path';
+import {parse} from 'csv-parse/sync';
 
-import {Build} from './build';
 import {Buildx} from './buildx';
 import {Context} from '../context';
 import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition} from '../types/buildx/bake';
+import {BakeDefinition, CacheEntry, ExportEntry, SecretEntry, SSHEntry} from '../types/buildx/bake';
 import {BuildMetadata} from '../types/buildx/build';
 import {VertexWarning} from '../types/buildkit/client';
 
@@ -178,27 +178,197 @@ export class Bake {
   }
 
   public static parseDefinition(dt: string): BakeDefinition {
-    return <BakeDefinition>JSON.parse(dt);
+    const definition = <BakeDefinition>JSON.parse(dt);
+
+    // convert to composable attributes: https://github.com/docker/buildx/pull/2758
+    for (const name in definition.target) {
+      const target = definition.target[name];
+      if (target['cache-from'] && Array.isArray(target['cache-from'])) {
+        target['cache-from'] = target['cache-from'].map((item: string | CacheEntry): CacheEntry => {
+          return Bake.parseCacheEntry(item);
+        });
+      }
+      if (target['cache-to'] && Array.isArray(target['cache-to'])) {
+        target['cache-to'] = target['cache-to'].map((item: string | CacheEntry): CacheEntry => {
+          return Bake.parseCacheEntry(item);
+        });
+      }
+      if (target['output'] && Array.isArray(target['output'])) {
+        target['output'] = target['output'].map((item: string | ExportEntry): ExportEntry => {
+          return Bake.parseExportEntry(item);
+        });
+      }
+      if (target['secret'] && Array.isArray(target['secret'])) {
+        target['secret'] = target['secret'].map((item: string | SecretEntry): SecretEntry => {
+          return Bake.parseSecretEntry(item);
+        });
+      }
+      if (target['ssh'] && Array.isArray(target['ssh'])) {
+        target['ssh'] = target['ssh'].map((item: string | SSHEntry): SSHEntry => {
+          return Bake.parseSSHEntry(item);
+        });
+      }
+    }
+
+    return definition;
+  }
+
+  private static parseCacheEntry(item: CacheEntry | string): CacheEntry {
+    if (typeof item !== 'string') {
+      return item;
+    }
+
+    const cacheEntry: CacheEntry = {type: ''};
+    const fields = parse(item, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+
+    if (fields.length === 1 && !fields[0].includes('=')) {
+      cacheEntry.type = 'registry';
+      cacheEntry.ref = fields[0];
+      return cacheEntry;
+    }
+
+    for (const field of fields) {
+      const [key, value] = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map((item: string) => item.trim());
+      switch (key) {
+        case 'type':
+          cacheEntry.type = value;
+          break;
+        default:
+          cacheEntry[key] = value;
+      }
+    }
+
+    return cacheEntry;
+  }
+
+  private static parseExportEntry(item: ExportEntry | string): ExportEntry {
+    if (typeof item !== 'string') {
+      return item;
+    }
+
+    const exportEntry: ExportEntry = {type: ''};
+    const fields = parse(item, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+
+    if (fields.length === 1 && fields[0] === item && !item.startsWith('type=')) {
+      if (item !== '-') {
+        exportEntry.type = 'local';
+        exportEntry.dest = item;
+        return exportEntry;
+      }
+      exportEntry.type = 'tar';
+      exportEntry.dest = item;
+      return exportEntry;
+    }
+
+    for (const field of fields) {
+      const [key, value] = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map((item: string) => item.trim());
+      switch (key) {
+        case 'type':
+          exportEntry.type = value;
+          break;
+        default:
+          exportEntry[key] = value;
+      }
+    }
+
+    return exportEntry;
+  }
+
+  private static parseSecretEntry(item: SecretEntry | string): SecretEntry {
+    if (typeof item !== 'string') {
+      return item;
+    }
+
+    const secretEntry: SecretEntry = {};
+    const fields = parse(item, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+
+    let typ = '';
+    for (const field of fields) {
+      const [key, value] = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map((item: string) => item.trim());
+      switch (key) {
+        case 'type':
+          typ = value;
+          break;
+        case 'id':
+          secretEntry.id = value;
+          break;
+        case 'source':
+        case 'src':
+          secretEntry.src = value;
+          break;
+        case 'env':
+          break;
+      }
+    }
+    if (typ === 'env' && !secretEntry.env) {
+      secretEntry.env = secretEntry.src;
+      secretEntry.src = undefined;
+    }
+    return secretEntry;
+  }
+
+  private static parseSSHEntry(item: SSHEntry | string): SSHEntry {
+    if (typeof item !== 'string') {
+      return item;
+    }
+
+    const sshEntry: SSHEntry = {};
+    const [key, value] = item.split('=', 2);
+    sshEntry.id = key;
+    if (value) {
+      sshEntry.paths = value.split(',');
+    }
+
+    return sshEntry;
   }
 
   public static hasLocalExporter(def: BakeDefinition): boolean {
-    return Build.hasExporterType('local', Bake.exporters(def));
+    return Bake.hasExporterType('local', Bake.exporters(def));
   }
 
   public static hasTarExporter(def: BakeDefinition): boolean {
-    return Build.hasExporterType('tar', Bake.exporters(def));
+    return Bake.hasExporterType('tar', Bake.exporters(def));
   }
 
   public static hasDockerExporter(def: BakeDefinition, load?: boolean): boolean {
-    return load || Build.hasExporterType('docker', Bake.exporters(def));
+    return load || Bake.hasExporterType('docker', Bake.exporters(def));
   }
 
-  private static exporters(def: BakeDefinition): Array<string> {
-    const exporters = new Array<string>();
+  public static hasExporterType(name: string, exporters: Array<ExportEntry>): boolean {
+    for (const exporter of exporters) {
+      if (exporter.type == name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static exporters(def: BakeDefinition): Array<ExportEntry> {
+    const exporters = new Array<ExportEntry>();
     for (const key in def.target) {
       const target = def.target[key];
       if (target.output) {
-        exporters.push(...target.output);
+        for (const output of target.output) {
+          exporters.push(Bake.parseExportEntry(output));
+        }
       }
     }
     return exporters;
