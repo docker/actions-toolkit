@@ -25,6 +25,7 @@ a library by most of our GitHub Actions:
 * [docker/login-action](https://github.com/docker/login-action)
 * [docker/metadata-action](https://github.com/docker/metadata-action)
 * [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action)
+* [docker/setup-docker-action](https://github.com/docker/setup-docker-action)
 * [docker/setup-qemu-action](https://github.com/docker/setup-qemu-action)
 
 This toolkit provides some utilities and common logic when developing GitHub
