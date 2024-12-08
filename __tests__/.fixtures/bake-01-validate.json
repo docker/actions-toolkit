@@ -22,7 +22,9 @@
         "GO_VERSION": "1.20"
       },
       "output": [
-        "type=cacheonly"
+        {
+          "type": "cacheonly"
+        }
       ]
     },
     "validate-docs": {
@@ -36,7 +38,9 @@
       },
       "target": "validate",
       "output": [
-        "type=cacheonly"
+        {
+          "type": "cacheonly"
+        }
       ]
     },
     "validate-vendor": {
@@ -48,7 +52,9 @@
       },
       "target": "validate",
       "output": [
-        "type=cacheonly"
+        {
+          "type": "cacheonly"
+        }
       ]
     }
   }
