@@ -5,6 +5,18 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v27.3.1",
     "assets": []
   },
+  "v25.0.7": {
+    "id": 189262441,
+    "tag_name": "v25.0.7",
+    "html_url": "https://github.com/moby/moby/releases/tag/v25.0.7",
+    "assets": []
+  },
+  "v23.0.16": {
+    "id": 189261618,
+    "tag_name": "v23.0.16",
+    "html_url": "https://github.com/moby/moby/releases/tag/v23.0.16",
+    "assets": []
+  },
   "edge": {
     "id": 189120203,
     "tag_name": "v27.4.0-rc.4",
