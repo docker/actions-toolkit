@@ -1,8 +1,14 @@
 {
   "latest": {
-    "id": 176167883,
-    "tag_name": "v27.3.1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v27.3.1",
+    "id": 189756585,
+    "tag_name": "v27.4.0",
+    "html_url": "https://github.com/moby/moby/releases/tag/v27.4.0",
+    "assets": []
+  },
+  "v27.4.0": {
+    "id": 189756585,
+    "tag_name": "v27.4.0",
+    "html_url": "https://github.com/moby/moby/releases/tag/v27.4.0",
     "assets": []
   },
   "v25.0.7": {
@@ -18,9 +24,9 @@
     "assets": []
   },
   "edge": {
-    "id": 189120203,
-    "tag_name": "v27.4.0-rc.4",
-    "html_url": "https://github.com/moby/moby/releases/tag/v27.4.0-rc.4",
+    "id": 189756585,
+    "tag_name": "v27.4.0",
+    "html_url": "https://github.com/moby/moby/releases/tag/v27.4.0",
     "assets": []
   },
   "v27.4.0-rc.4": {
