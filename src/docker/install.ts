@@ -56,6 +56,7 @@ export interface InstallOpts {
   contextName?: string;
   daemonConfig?: string;
   rootless?: boolean;
+  localTCPPort?: number;
 }
 
 interface LimaImage {
@@ -65,13 +66,15 @@ interface LimaImage {
 }
 
 export class Install {
-  private runDir: string;
+  private readonly runDir: string;
   private readonly source: InstallSource;
   private readonly contextName: string;
   private readonly daemonConfig?: string;
+  private readonly rootless: boolean;
+  private readonly localTCPPort?: number;
+
   private _version: string | undefined;
   private _toolDir: string | undefined;
-  private rootless: boolean;
 
   private gitCommit: string | undefined;
 
@@ -79,7 +82,6 @@ export class Install {
 
   constructor(opts: InstallOpts) {
     this.runDir = opts.runDir;
-    this.rootless = opts.rootless || false;
     this.source = opts.source || {
       type: 'archive',
       version: 'latest',
@@ -87,6 +89,8 @@ export class Install {
     };
     this.contextName = opts.contextName || 'setup-docker-action';
     this.daemonConfig = opts.daemonConfig;
+    this.rootless = opts.rootless || false;
+    this.localTCPPort = opts.localTCPPort;
   }
 
   get toolDir(): string {
@@ -268,6 +272,7 @@ export class Install {
         customImages: Install.limaCustomImages(),
         daemonConfig: limaDaemonConfig,
         dockerSock: `${limaDir}/docker.sock`,
+        localTCPPort: this.localTCPPort,
         gitCommit: this.gitCommit,
         srcType: src.type,
         srcArchiveVersion: this._version, // Use the resolved version (e.g. latest -> 27.4.0)
@@ -376,8 +381,10 @@ export class Install {
           await Exec.exec('sudo', ['sh', '-c', 'echo 0 > /proc/sys/kernel/apparmor_restrict_unprivileged_userns']);
         }
       }
-
-      const cmd = `${dockerPath} --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid"`;
+      let cmd = `${dockerPath} --host="${dockerHost}" --config-file="${daemonConfigPath}" --exec-root="${this.runDir}/execroot" --data-root="${this.runDir}/data" --pidfile="${this.runDir}/docker.pid"`;
+      if (this.localTCPPort) {
+        cmd += ` --host="tcp://127.0.0.1:${this.localTCPPort}"`;
+      }
       core.info(`[command] ${cmd}`); // https://github.com/actions/toolkit/blob/3d652d3133965f63309e4b2e1c8852cdbdcb3833/packages/exec/src/toolrunner.ts#L47
       let sudo = 'sudo';
       if (this.rootless) {
@@ -438,7 +445,7 @@ EOF`,
   }
 
   private async installWindows(): Promise<string> {
-    const dockerHost = 'npipe:////./pipe/setup_docker_action';
+    const dockerHostSocket = 'npipe:////./pipe/setup_docker_action';
 
     let daemonConfig = undefined;
     const daemonConfigPath = path.join(this.runDir, 'daemon.json');
@@ -460,24 +467,29 @@ EOF`,
       });
     }
 
+    const params = {
+      ToolDir: this.toolDir,
+      RunDir: this.runDir,
+      DockerHostSocket: dockerHostSocket,
+      DaemonConfig: daemonConfigStr
+    };
+    if (this.localTCPPort) {
+      params['DockerHostTCP'] = `tcp://127.0.0.1:${this.localTCPPort}`;
+    }
+
     await core.group('Install Docker daemon service', async () => {
-      const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), {
-        ToolDir: this.toolDir,
-        RunDir: this.runDir,
-        DockerHost: dockerHost,
-        DaemonConfig: daemonConfigStr
-      });
+      const setupCmd = await Util.powershellCommand(setupDockerWinPs1(), params);
       await Exec.exec(setupCmd.command, setupCmd.args);
       const logCmd = await Util.powershellCommand(dockerServiceLogsPs1());
       await Exec.exec(logCmd.command, logCmd.args);
     });
 
     await core.group('Create Docker context', async () => {
-      await Docker.exec(['context', 'create', this.contextName, '--docker', `host=${dockerHost}`]);
+      await Docker.exec(['context', 'create', this.contextName, '--docker', `host=${dockerHostSocket}`]);
       await Docker.exec(['context', 'use', this.contextName]);
     });
 
-    return dockerHost;
+    return dockerHostSocket;
   }
 
   public async tearDown(): Promise<void> {
