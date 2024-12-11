@@ -103,7 +103,7 @@ jobs:
               let includes = [];
               for (const os of ['ubuntu-latest', 'macos-13', 'windows-latest']) {
                 for (const test of tests) {
-                  if (os === 'macos-13' && test === 'docker/install.test.itg.ts') {
+                  if (test === 'docker/install.test.itg.ts') {
                     includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: '27.3.1' });
                     includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: 'master' });
                     includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: 'latest' });
