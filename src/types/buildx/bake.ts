@@ -28,8 +28,8 @@ export interface Target {
   description?: string;
   args?: Record<string, string>;
   attest?: Array<string>;
-  'cache-from'?: Array<string>;
-  'cache-to'?: Array<string>;
+  'cache-from'?: Array<CacheEntry> | Array<string>;
+  'cache-to'?: Array<CacheEntry> | Array<string>;
   call?: string;
   context: string;
   contexts?: Record<string, string>;
@@ -39,13 +39,34 @@ export interface Target {
   labels?: Record<string, string>;
   'no-cache'?: boolean;
   'no-cache-filter'?: Array<string>;
-  output?: Array<string>;
+  output?: Array<ExportEntry> | Array<string>;
   platforms?: Array<string>;
   pull?: boolean;
-  secret?: Array<string>;
+  secret?: Array<SecretEntry> | Array<string>;
   'shm-size'?: string;
-  ssh?: Array<string>;
+  ssh?: Array<SSHEntry> | Array<string>;
   tags?: Array<string>;
   target?: string;
   ulimits?: Array<string>;
+}
+
+export interface CacheEntry {
+  type: string;
+  [key: string]: string;
+}
+
+export interface ExportEntry {
+  type: string;
+  [key: string]: string;
+}
+
+export interface SecretEntry {
+  id?: string;
+  src?: string;
+  env?: string;
+}
+
+export interface SSHEntry {
+  id?: string;
+  paths?: Array<string>;
 }
