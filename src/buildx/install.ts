@@ -276,6 +276,9 @@ export class Install {
       version = repoKey;
       repoKey = 'official';
     }
+    if (repoKey === 'lab') {
+      repoKey = 'cloud';
+    }
     switch (repoKey) {
       case 'official': {
         return {
@@ -285,7 +288,7 @@ export class Install {
           releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'
         };
       }
-      case 'lab': {
+      case 'cloud': {
         return {
           key: repoKey,
           version: version,
