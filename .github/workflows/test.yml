@@ -103,12 +103,18 @@ jobs:
               let includes = [];
               for (const os of ['ubuntu-latest', 'macos-13', 'windows-latest']) {
                 for (const test of tests) {
-                  if (os === 'macos-13' && test === 'docker/install.test.itg.ts') {
-                    includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: '27.3.1' });
-                    includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: 'master' });
-                    includes.push({ os: os, test: test, docker_install_type: 'image', docker_install_version: 'latest' });
-                    includes.push({ os: os, test: test, docker_install_type: 'archive', docker_install_version: 'v26.1.4' });
-                    includes.push({ os: os, test: test, docker_install_type: 'archive', docker_install_version: 'latest' });
+                  if (test === 'docker/install.test.itg.ts') {
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: '27.3.1' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'master' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'latest' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v26.1.4' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'latest' });
+                    if (os === 'ubuntu-latest') {
+                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest' });
+                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest' });
+                    }
+                    includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'image', docker_install_version: 'latest' });
+                    includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'archive', docker_install_version: 'latest' });
                   } else {
                     includes.push({ os: os, test: test });
                   }
@@ -176,8 +182,16 @@ jobs:
         run: yarn install
       -
         name: Test
-        run: |
-          yarn test:itg-coverage --runTestsByPath __tests__/${{ matrix.test }} --coverageDirectory=./coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testName = `${{ matrix.test_name }}`;
+            let args = ['test:itg-coverage'];
+            if (testName) {
+              args.push(`--testNamePattern=^${testName} `);
+            }
+            args.push(`--runTestsByPath`, `__tests__/${{ matrix.test }}`, `--coverageDirectory=./coverage`);
+            await exec.exec('yarn', args);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CTN_BUILDER_NAME: ${{ steps.builder.outputs.name }}

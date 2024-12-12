@@ -51,7 +51,10 @@ param(
     [string]$RunDir,
 
     [Parameter(Mandatory = $true)]
-    [string]$DockerHost,
+    [string]$DockerHostSocket,
+
+    [Parameter(Mandatory = $false)]
+    [string]$DockerHostTCP,
 
     [Parameter(Mandatory = $false)]
     [string]$DaemonConfig)
@@ -82,7 +85,7 @@ if (Get-Service docker -ErrorAction SilentlyContinue) {
 $env:Path = "$ToolDir;" + [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 Write-Host "Path: $env:Path"
 
-$env:DOCKER_HOST = $DockerHost
+$env:DOCKER_HOST = $DockerHostSocket
 Write-Host "DOCKER_HOST: $env:DOCKER_HOST"
 
 if ($DaemonConfig) {
@@ -91,16 +94,21 @@ if ($DaemonConfig) {
   $DaemonConfig | Out-File -FilePath "$env:ProgramData\\Docker\\config\\daemon.json"
 }
 
+$arguments = @(
+  "--host=$DockerHostSocket",
+  "--data-root=$RunDir\\\\moby-root",
+  "--exec-root=$RunDir\\\\moby-exec",
+  "--pidfile=$RunDir\\\\docker.pid",
+  "--register-service"
+)
+if ($DockerHostTCP) {
+  $arguments += "--host=$DockerHostTCP"
+}
+
 Write-Host "Creating service"
 New-Item -ItemType Directory "$RunDir\\moby-root" -ErrorAction SilentlyContinue | Out-Null
 New-Item -ItemType Directory "$RunDir\\moby-exec" -ErrorAction SilentlyContinue | Out-Null
-Start-Process -Wait -NoNewWindow "$ToolDir\\dockerd" \`
-  -ArgumentList \`
-    "--host=$DockerHost", \`
-    "--data-root=$RunDir\\moby-root", \`
-    "--exec-root=$RunDir\\moby-exec", \`
-    "--pidfile=$RunDir\\docker.pid", \`
-    "--register-service"
+Start-Process -Wait -NoNewWindow "$ToolDir\\dockerd" -ArgumentList $arguments
 Write-Host "Starting service"
 Start-Service -Name docker
 Write-Host "Service started successfully!"
@@ -231,6 +239,11 @@ provision:
     export DEBIAN_FRONTEND=noninteractive
     if [ "{{srcType}}" == "archive" ]; then
       curl -fsSL https://get.docker.com | sh -s -- --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}
+      sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/dockerd -H fd://{{#if localTCPPort}} -H tcp://0.0.0.0:2375{{/if}} --containerd=/run/containerd/containerd.sock|' /usr/lib/systemd/system/docker.service
+      systemctl daemon-reload
+      systemctl restart docker
+      systemctl status docker.socket || true
+      systemctl status docker.service || true
     elif [ "{{srcType}}" == "image" ]; then
       arch=$(uname -m)
       case $arch in
@@ -250,7 +263,7 @@ provision:
       wget https://raw.githubusercontent.com/moby/moby/{{gitCommit}}/contrib/init/systemd/docker.socket \
         -O /etc/systemd/system/docker.socket
 
-      sed -i 's|^ExecStart=.*|ExecStart=/usr/local/bin/dockerd -H fd://|' /etc/systemd/system/docker.service
+      sed -i 's|^ExecStart=.*|ExecStart=/usr/local/bin/dockerd -H fd://{{#if localTCPPort}} -H tcp://0.0.0.0:2375{{/if}}|' /etc/systemd/system/docker.service
       sed -i 's|containerd.service||' /etc/systemd/system/docker.service
       if ! getent group docker; then
         groupadd --system docker
@@ -285,6 +298,10 @@ hostResolver:
 portForwards:
 - guestSocket: "/var/run/docker.sock"
   hostSocket: "{{dockerSock}}"
+{{#if localTCPPort}}
+- guestPort: 2375
+  hostPort: {{localTCPPort}}
+{{/if}}
 
 audio:
   # EXPERIMENTAL

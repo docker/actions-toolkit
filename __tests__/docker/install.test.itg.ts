@@ -69,6 +69,36 @@ describe('rootless', () => {
   );
 });
 
+describe('tcp', () => {
+  // prettier-ignore
+  test.each(getSources(false))(
+    'install %s', async (source) => {
+      await ensureNoSystemContainerd();
+      const install = new Install({
+        source: source,
+        runDir: tmpDir(),
+        contextName: 'foo',
+        daemonConfig: `{"debug":true}`,
+        localTCPPort: 2378
+      });
+      await expect(
+        tryInstall(install, async () => {
+          const out = await Docker.getExecOutput(['info'], {
+            env: Object.assign({}, process.env, {
+              DOCKER_HOST: 'tcp://localhost:2378',
+              DOCKER_CONTENT_TRUST: 'false'
+            }) as {
+              [key: string]: string;
+            }
+          });
+          expect(out.exitCode).toBe(0);
+        })
+      ).resolves.not.toThrow();
+    },
+    30 * 60 * 1000
+  );
+});
+
 async function tryInstall(install: Install, extraCheck?: () => Promise<void>): Promise<void> {
   try {
     await install.download();
