@@ -134,18 +134,26 @@ describe('getDownloadVersion', () => {
     expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json');
   });
 
-  it('returns lab latest download version', async () => {
-    const version = await Install.getDownloadVersion('lab:latest');
-    expect(version.key).toEqual('lab');
+  it('returns cloud latest download version', async () => {
+    const version = await Install.getDownloadVersion('cloud:latest');
+    expect(version.key).toEqual('cloud');
     expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
     expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
   });
 
-  it('returns lab v0.11.2-desktop.2 download version', async () => {
-    const version = await Install.getDownloadVersion('lab:v0.11.2-desktop.2');
-    expect(version.key).toEqual('lab');
+  it('returns cloud v0.11.2-desktop.2 download version', async () => {
+    const version = await Install.getDownloadVersion('cloud:v0.11.2-desktop.2');
+    expect(version.key).toEqual('cloud');
     expect(version.version).toEqual('v0.11.2-desktop.2');
+    expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+  });
+
+  it('returns cloud for lab version', async () => {
+    const version = await Install.getDownloadVersion('lab:latest');
+    expect(version.key).toEqual('cloud');
+    expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
     expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
   });
@@ -172,8 +180,8 @@ describe('getRelease', () => {
     expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.10.1');
   });
 
-  it('returns v0.11.2-desktop.2 lab GitHub release', async () => {
-    const version = await Install.getDownloadVersion('lab:v0.11.2-desktop.2');
+  it('returns v0.11.2-desktop.2 cloud GitHub release', async () => {
+    const version = await Install.getDownloadVersion('cloud:v0.11.2-desktop.2');
     const release = await Install.getRelease(version);
     expect(release).not.toBeNull();
     expect(release?.id).toEqual(118213369);
