@@ -201,6 +201,31 @@ ccccccccc`,
   });
 });
 
+describe('getInputNumber', () => {
+  it('should return a number when input is a valid number string', () => {
+    setInput('foo', '42');
+    const result = Util.getInputNumber('foo');
+    expect(result).toBe(42);
+  });
+
+  it('should return undefined when input is an empty string', () => {
+    setInput('foo', '');
+    const result = Util.getInputNumber('foo');
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when input is not provided', () => {
+    const result = Util.getInputNumber('foo');
+    expect(result).toBeUndefined();
+  });
+
+  it('should return NaN when input is not a valid number', () => {
+    setInput('foo', 'invalid');
+    const result = Util.getInputNumber('foo');
+    expect(result).toBeNaN();
+  });
+});
+
 describe('asyncForEach', () => {
   it('executes async tasks sequentially', async () => {
     const testValues = [1, 2, 3, 4, 5];
