@@ -64,6 +64,14 @@ export class Util {
     return res.filter(item => item).map(pat => pat.trim());
   }
 
+  public static getInputNumber(name: string): number | undefined {
+    const value = core.getInput(name);
+    if (!value) {
+      return undefined;
+    }
+    return parseInt(value);
+  }
+
   public static async asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
       await callback(array[index], index, array);
