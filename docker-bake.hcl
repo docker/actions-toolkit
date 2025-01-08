@@ -30,6 +30,7 @@ group "validate" {
 
 target "_common" {
   args = {
+    BUILDKIT_CONTEXT_KEEP_GIT_DIR = 1
     NODE_VERSION = NODE_VERSION
   }
 }
@@ -76,6 +77,7 @@ target "dockerfile-validate" {
       "./hack/dockerfiles/license.Dockerfile"
     ]
   }
+  inherits = ["_common"]
   name = "dockerfile-validate-${md5(dockerfile)}"
   dockerfile = dockerfile
   call = "check"
@@ -115,12 +117,14 @@ target "publish" {
 }
 
 target "license-validate" {
+  inherits = ["_common"]
   dockerfile = "./hack/dockerfiles/license.Dockerfile"
   target = "validate"
   output = ["type=cacheonly"]
 }
 
 target "license-update" {
+  inherits = ["_common"]
   dockerfile = "./hack/dockerfiles/license.Dockerfile"
   target = "update"
   output = ["."]
