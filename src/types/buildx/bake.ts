@@ -27,7 +27,7 @@ export interface Group {
 export interface Target {
   description?: string;
   args?: Record<string, string>;
-  attest?: Array<string>;
+  attest?: Array<AttestEntry> | Array<string>;
   'cache-from'?: Array<CacheEntry> | Array<string>;
   'cache-to'?: Array<CacheEntry> | Array<string>;
   call?: string;
@@ -48,6 +48,11 @@ export interface Target {
   tags?: Array<string>;
   target?: string;
   ulimits?: Array<string>;
+}
+
+export interface AttestEntry {
+  type: string;
+  [key: string]: string;
 }
 
 export interface CacheEntry {

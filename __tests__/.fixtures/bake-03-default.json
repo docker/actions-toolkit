@@ -3,6 +3,16 @@
     "default": {
       "context": ".",
       "dockerfile": "Dockerfile",
+      "attest": [
+        {
+          "mode": "max",
+          "type": "provenance"
+        },
+        {
+          "disabled": "true",
+          "type": "sbom"
+        }
+      ],
       "cache-from": [
         {
           "scope": "build",

@@ -24,7 +24,7 @@ import {Exec} from '../exec';
 import {Util} from '../util';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition, CacheEntry, ExportEntry, SecretEntry, SSHEntry} from '../types/buildx/bake';
+import {AttestEntry, BakeDefinition, CacheEntry, ExportEntry, SecretEntry, SSHEntry} from '../types/buildx/bake';
 import {BuildMetadata} from '../types/buildx/build';
 import {VertexWarning} from '../types/buildkit/client';
 
@@ -183,6 +183,11 @@ export class Bake {
     // convert to composable attributes: https://github.com/docker/buildx/pull/2758
     for (const name in definition.target) {
       const target = definition.target[name];
+      if (target['attest'] && Array.isArray(target['attest'])) {
+        target['attest'] = target['attest'].map((item: string | AttestEntry): AttestEntry => {
+          return Bake.parseAttestEntry(item);
+        });
+      }
       if (target['cache-from'] && Array.isArray(target['cache-from'])) {
         target['cache-from'] = target['cache-from'].map((item: string | CacheEntry): CacheEntry => {
           return Bake.parseCacheEntry(item);
@@ -211,6 +216,34 @@ export class Bake {
     }
 
     return definition;
+  }
+
+  private static parseAttestEntry(item: AttestEntry | string): AttestEntry {
+    if (typeof item !== 'string') {
+      return item;
+    }
+
+    const attestEntry: AttestEntry = {type: ''};
+    const fields = parse(item, {
+      relaxColumnCount: true,
+      skipEmptyLines: true
+    })[0];
+
+    for (const field of fields) {
+      const [key, value] = field
+        .toString()
+        .split(/(?<=^[^=]+?)=/)
+        .map((item: string) => item.trim());
+      switch (key) {
+        case 'type':
+          attestEntry.type = value;
+          break;
+        default:
+          attestEntry[key] = value;
+      }
+    }
+
+    return attestEntry;
   }
 
   private static parseCacheEntry(item: CacheEntry | string): CacheEntry {
