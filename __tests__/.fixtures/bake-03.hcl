@@ -13,6 +13,10 @@
 // limitations under the License.
 
 target "default" {
+  attest = [
+    "type=provenance,mode=max",
+    "type=sbom,disabled=true",
+  ]
   cache-from = [
     "type=gha,scope=build",
     "user/repo:cache",
