@@ -1,0 +1,38 @@
+{
+  "target": {
+    "default": {
+      "context": ".",
+      "dockerfile": "Dockerfile",
+      "cache-from": [
+        {
+          "scope": "build",
+          "type": "gha"
+        },
+        {
+          "ref": "user/repo:cache",
+          "type": "registry"
+        }
+      ],
+      "cache-to": [
+        {
+          "mode": "max",
+          "scope": "build",
+          "type": "gha"
+        },
+        {
+          "type": "inline"
+        }
+      ],
+      "output": [
+        {
+          "dest": "./release-out",
+          "type": "local"
+        },
+        {
+          "ref": "user/app",
+          "type": "registry"
+        }
+      ]
+    }
+  }
+}

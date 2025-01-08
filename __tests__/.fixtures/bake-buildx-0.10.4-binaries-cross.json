@@ -29,7 +29,10 @@
         "windows/arm64"
       ],
       "output": [
-        "./bin/build"
+        {
+          "dest": "./bin/build",
+          "type": "local"
+        }
       ]
     }
   }

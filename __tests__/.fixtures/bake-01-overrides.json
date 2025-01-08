@@ -22,7 +22,9 @@
         "linux/amd64"
       ],
       "output": [
-        "type=docker"
+        {
+          "type": "docker"
+        }
       ]
     }
   }
