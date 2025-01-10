@@ -29,4 +29,9 @@ target "default" {
     "./release-out",
     "type=registry,ref=user/app"
   ]
+  secret = [
+    "id=GITHUB_TOKEN,env=GITHUB_TOKEN",
+    "id=aws,src=__tests__/.fixtures/secret.txt",
+    "id=GITHUB_REPOSITORY"
+  ]
 }

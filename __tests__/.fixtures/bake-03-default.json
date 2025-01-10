@@ -42,6 +42,19 @@
           "ref": "user/app",
           "type": "registry"
         }
+      ],
+      "secret": [
+        {
+          "env": "GITHUB_TOKEN",
+          "id": "GITHUB_TOKEN"
+        },
+        {
+          "id": "aws",
+          "src": "__tests__/.fixtures/secret.txt"
+        },
+        {
+          "id": "GITHUB_REPOSITORY"
+        }
       ]
     }
   }
