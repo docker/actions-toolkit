@@ -348,6 +348,7 @@ export class Bake {
           secretEntry.src = value;
           break;
         case 'env':
+          secretEntry.env = value;
           break;
       }
     }
@@ -405,5 +406,19 @@ export class Bake {
       }
     }
     return exporters;
+  }
+
+  public static hasGitAuthTokenSecret(def: BakeDefinition): boolean {
+    for (const key in def.target) {
+      const target = def.target[key];
+      if (target.secret) {
+        for (const secret of target.secret) {
+          if (Bake.parseSecretEntry(secret).id === 'GIT_AUTH_TOKEN') {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 }

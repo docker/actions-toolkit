@@ -444,3 +444,44 @@ describe('hasDockerExporter', () => {
     expect(Bake.hasDockerExporter(def, load)).toEqual(expected);
   });
 });
+
+describe('hasGitAuthTokenSecret', () => {
+  // prettier-ignore
+  test.each([
+    [
+      {
+        "target": {
+          "reg": {
+            "secret": [
+              {
+                "id": "A_SECRET",
+                "env": "A_SECRET"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      false
+    ],
+    [
+      {
+        "target": {
+          "reg": {
+            "secret": [
+              {
+                "id": "A_SECRET",
+                "env": "A_SECRET"
+              },
+              {
+                "id": "GIT_AUTH_TOKEN"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      true
+    ],
+  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+    expect(Bake.hasGitAuthTokenSecret(def)).toEqual(expected);
+  });
+});
