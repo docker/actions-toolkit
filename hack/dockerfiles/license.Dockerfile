@@ -14,23 +14,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ARG ADDLICENSE_VERSION="v1.1.1"
+ARG ALPINE_VERSION="3.21"
+ARG GO_VERSION="1.23"
+ARG XX_VERSION="1.6.1"
+
 ARG LICENSE_HOLDER="actions-toolkit authors"
 ARG LICENSE_TYPE="apache"
 ARG LICENSE_FILES=".*\(Dockerfile\|Makefile\|\.js\|\.ts\|\.hcl\|\.sh|\.ps1\)"
-ARG ADDLICENSE_VERSION="v1.0.0"
 
-FROM ghcr.io/google/addlicense:${ADDLICENSE_VERSION} AS addlicense
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 
-FROM alpine:3.17 AS base
-WORKDIR /src
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS base
 RUN apk add --no-cache cpio findutils git
+ENV CGO_ENABLED=0
+WORKDIR /src
+COPY --link --from=xx / /
+
+FROM base AS addlicense
+ARG ADDLICENSE_VERSION
+ARG TARGETPLATFORM
+RUN --mount=target=/root/.cache,type=cache \
+    --mount=type=cache,target=/go/pkg/mod <<EOT
+  set -ex
+  xx-go install "github.com/google/addlicense@${ADDLICENSE_VERSION}"
+  mkdir /out
+  if ! xx-info is-cross; then
+    mv /go/bin/addlicense /out
+  else
+    mv /go/bin/*/addlicense* /out
+  fi
+EOT
 
 FROM base AS set
 ARG LICENSE_HOLDER
 ARG LICENSE_TYPE
 ARG LICENSE_FILES
 RUN --mount=type=bind,target=.,rw \
-    --mount=from=addlicense,source=/app/addlicense,target=/usr/bin/addlicense \
+    --mount=from=addlicense,source=/out/addlicense,target=/usr/bin/addlicense \
     find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | xargs addlicense -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE" && \
     mkdir /out && \
     find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | cpio -pdm /out
@@ -43,5 +64,5 @@ ARG LICENSE_HOLDER
 ARG LICENSE_TYPE
 ARG LICENSE_FILES
 RUN --mount=type=bind,target=. \
-    --mount=from=addlicense,source=/app/addlicense,target=/usr/bin/addlicense \
+    --mount=from=addlicense,source=/out/addlicense,target=/usr/bin/addlicense \
     find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | xargs addlicense -check -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE"
