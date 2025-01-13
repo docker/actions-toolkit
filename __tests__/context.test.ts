@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it, afterEach} from '@jest/globals';
+import {describe, expect, jest, it, afterEach, beforeEach, test} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -41,6 +41,34 @@ afterEach(() => {
 describe('gitRef', () => {
   it('returns refs/heads/master', async () => {
     expect(Context.gitRef()).toEqual('refs/heads/master');
+  });
+});
+
+describe('parseGitRef', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      DOCKER_GIT_CONTEXT_PR_HEAD_REF: ''
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  // prettier-ignore
+  test.each([
+    ['refs/heads/master', '860c1904a1ce19322e91ac35af1ab07466440c37', false, '860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['master', '860c1904a1ce19322e91ac35af1ab07466440c37', false, '860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', '860c1904a1ce19322e91ac35af1ab07466440c37', false, 'refs/pull/15/merge'],
+    ['refs/heads/master', '', false, 'refs/heads/master'],
+    ['master', '', false, 'master'],
+    ['refs/tags/v1.0.0', '', false, 'refs/tags/v1.0.0'],
+    ['refs/pull/15/merge', '', false, 'refs/pull/15/merge'],
+    ['refs/pull/15/merge', '', true, 'refs/pull/15/head'],
+  ])('given %p and %p, should return %p', async (ref: string, sha: string, prHeadRef: boolean, expected: string) => {
+    process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
+    expect(Context.parseGitRef(ref, sha)).toEqual(expected);
   });
 });
 

@@ -39,16 +39,20 @@ export class Context {
   }
 
   public static gitRef(): string {
-    let gitRef = github.context.ref;
-    if (github.context.sha && gitRef && !gitRef.startsWith('refs/')) {
-      gitRef = `refs/heads/${github.context.ref}`;
+    return Context.parseGitRef(github.context.ref, github.context.sha);
+  }
+
+  public static parseGitRef(ref: string, sha: string): string {
+    const setPullRequestHeadRef: boolean = !!(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF && process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF === 'true');
+    if (sha && ref && !ref.startsWith('refs/')) {
+      ref = `refs/heads/${ref}`;
     }
-    if (github.context.sha && !gitRef.startsWith(`refs/pull/`)) {
-      gitRef = github.context.sha;
-    } else if (gitRef.startsWith(`refs/pull/`)) {
-      gitRef = gitRef.replace(/\/merge$/g, '/head');
+    if (sha && !ref.startsWith(`refs/pull/`)) {
+      ref = sha;
+    } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
+      ref = ref.replace(/\/merge$/g, '/head');
     }
-    return gitRef;
+    return ref;
   }
 
   public static gitContext(): string {
