@@ -58,8 +58,4 @@ export class Context {
   public static gitContext(): string {
     return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git#${Context.gitRef()}`;
   }
-
-  public static provenanceBuilderID(): string {
-    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}/actions/runs/${github.context.runId}`;
-  }
 }
