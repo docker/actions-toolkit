@@ -33,9 +33,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "@actions/cache@npm:3.3.0"
+"@actions/cache@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@actions/cache@npm:4.0.0"
   dependencies:
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.0.1
@@ -45,8 +45,10 @@ __metadata:
     "@azure/abort-controller": ^1.1.0
     "@azure/ms-rest-js": ^2.6.0
     "@azure/storage-blob": ^12.13.0
+    "@protobuf-ts/plugin": ^2.9.4
     semver: ^6.3.1
-  checksum: f0761b1491b7706a80b44d68ed52eb48c04653fc939525a7c7b606e9d9251c40c7e4ac20846ab92ac32db6869e1a6f0f574bd6b7fec1ab9378c8e199c5acc9c9
+    twirp-ts: ^2.5.0
+  checksum: 8ab819a67b578a5ce6de984f4ef8420066f8270e1f9db053700f4a8f084d0bbe4f911114f7088a95a987372ea63078550355d99849412152dd0efdf688bf9144
   languageName: node
   linkType: hard
 
@@ -1108,7 +1110,7 @@ __metadata:
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
     "@actions/artifact": ^2.2.1
-    "@actions/cache": ^3.3.0
+    "@actions/cache": ^4.0.0
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.1.1
     "@actions/github": ^6.0.0
@@ -2009,7 +2011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@protobuf-ts/plugin@npm:^2.2.3-alpha.1":
+"@protobuf-ts/plugin@npm:^2.2.3-alpha.1, @protobuf-ts/plugin@npm:^2.9.4":
   version: 2.9.4
   resolution: "@protobuf-ts/plugin@npm:2.9.4"
   dependencies:
