@@ -37,3 +37,15 @@ GC Policy rule#2:
 GC Policy rule#3:
  All:        true
  Keep Bytes: 94.06GiB
+File#buildkitd.toml:
+ > debug = true
+ > insecure-entitlements = ["network.host", "security.insecure"]
+ > trace = true
+ >
+ > [log]
+ >   format = "text"
+ >
+File#foo.txt:
+ > foo = bar
+ > baz = qux
+ >
