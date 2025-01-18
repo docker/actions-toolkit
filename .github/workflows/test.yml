@@ -20,10 +20,13 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-22.04-arm
         node_version:
           - 20
           - 18
@@ -98,7 +101,7 @@ jobs:
             });
             await core.group(`Set includes`, async () => {
               let includes = [];
-              for (const os of ['ubuntu-latest', 'macos-13', 'windows-latest']) {
+              for (const os of ['ubuntu-latest', 'ubuntu-22.04-arm', 'macos-13', 'windows-latest']) {
                 for (const test of tests) {
                   if (test === 'docker/install.test.itg.ts') {
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: '27.3.1' });
