@@ -20,6 +20,8 @@ import {Bake as BuildxBake} from './buildx/bake';
 import {Install as BuildxInstall} from './buildx/install';
 import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
+import {Compose} from './compose/compose';
+import {Install as ComposeInstall} from './compose/install';
 import {Undock} from './undock/undock';
 import {GitHub} from './github';
 
@@ -39,6 +41,8 @@ export class Toolkit {
   public buildxInstall: BuildxInstall;
   public builder: Builder;
   public buildkit: BuildKit;
+  public compose: Compose;
+  public composeInstall: ComposeInstall;
   public undock: Undock;
 
   constructor(opts: ToolkitOpts = {}) {
@@ -49,6 +53,8 @@ export class Toolkit {
     this.buildxInstall = new BuildxInstall();
     this.builder = new Builder({buildx: this.buildx});
     this.buildkit = new BuildKit({buildx: this.buildx});
+    this.compose = new Compose();
+    this.composeInstall = new ComposeInstall();
     this.undock = new Undock();
   }
 }

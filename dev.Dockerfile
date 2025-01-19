@@ -17,6 +17,7 @@
 ARG NODE_VERSION=20
 ARG DOCKER_VERSION=27.2.1
 ARG BUILDX_VERSION=0.19.3
+ARG COMPOSE_VERSION=2.32.4
 ARG UNDOCK_VERSION=0.8.0
 
 FROM node:${NODE_VERSION}-alpine AS base
@@ -76,6 +77,7 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM docker:${DOCKER_VERSION} AS docker
 FROM docker/buildx-bin:${BUILDX_VERSION} AS buildx
+FROM docker/compose-bin:v${COMPOSE_VERSION} AS compose
 FROM crazymax/undock:${UNDOCK_VERSION} AS undock
 
 FROM deps AS test
@@ -85,6 +87,8 @@ RUN --mount=type=bind,target=.,rw \
     --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
     --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
     --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
+    --mount=type=bind,from=compose,source=/docker-compose,target=/usr/libexec/docker/cli-plugins/docker-compose \
+    --mount=type=bind,from=compose,source=/docker-compose,target=/usr/bin/compose \
     --mount=type=bind,from=undock,source=/usr/local/bin/undock,target=/usr/bin/undock \
     --mount=type=secret,id=GITHUB_TOKEN \
   GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN) yarn run test:coverage --coverageDirectory=/tmp/coverage
