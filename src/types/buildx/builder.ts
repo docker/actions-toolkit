@@ -35,6 +35,7 @@ export interface NodeInfo extends Node {
   features?: Record<string, boolean>;
   labels?: Record<string, string>;
   gcPolicy?: Array<GCPolicy>;
+  files?: Record<string, string>;
 }
 
 export interface GCPolicy {

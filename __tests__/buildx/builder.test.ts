@@ -449,7 +449,19 @@ describe('parseInspect', () => {
                "all": true,
                "keepBytes": "94.06GiB",
              }
-           ]
+           ],
+           "files": {
+             "buildkitd.toml": `debug = true
+insecure-entitlements = ["network.host", "security.insecure"]
+trace = true
+
+[log]
+  format = "text"
+`,
+             "foo.txt": `foo = bar
+baz = qux
+`,
+           }
          }
        ]
      }
