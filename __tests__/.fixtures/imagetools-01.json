@@ -1,0 +1,74 @@
+{
+  "created": "2024-12-16T23:44:38.698098711Z",
+  "architecture": "amd64",
+  "os": "linux",
+  "config": {
+    "Env": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+    ],
+    "Entrypoint": [
+      "buildkitd"
+    ],
+    "Volumes": {
+      "/var/lib/buildkit": {}
+    },
+    "WorkingDir": "/",
+    "ArgsEscaped": true
+  },
+  "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+      "sha256:75654b8eeebd3beae97271a102f57cdeb794cc91e442648544963a7e951e9558",
+      "sha256:6a1b167dc4f30367cc713f6d48710dff20eb913bfaf14d7df23cfbe8a235319c",
+      "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+      "sha256:cc4513cba548800cba786895e269f78eff73e7685e80b0447070f8c116652eea"
+    ]
+  },
+  "history": [
+    {
+      "created": "2024-09-06T12:05:36Z",
+      "created_by": "ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2024-09-06T12:05:36Z",
+      "created_by": "CMD [\"/bin/sh\"]",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2024-12-16T23:35:52.845698088Z",
+      "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2024-12-16T23:35:49.452745107Z",
+      "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2024-12-16T23:44:38.698098711Z",
+      "created_by": "VOLUME [/var/lib/buildkit]",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2024-12-16T23:44:38.698098711Z",
+      "created_by": "COPY / /usr/bin/ # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2024-12-16T23:44:38.698098711Z",
+      "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2024-12-16T23:44:38.698098711Z",
+      "created_by": "ENTRYPOINT [\"buildkitd\"]",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    }
+  ]
+}

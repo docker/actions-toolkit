@@ -1,0 +1,447 @@
+{
+  "linux/amd64": {
+    "created": "2024-12-16T23:44:38.698098711Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:75654b8eeebd3beae97271a102f57cdeb794cc91e442648544963a7e951e9558",
+        "sha256:6a1b167dc4f30367cc713f6d48710dff20eb913bfaf14d7df23cfbe8a235319c",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:cc4513cba548800cba786895e269f78eff73e7685e80b0447070f8c116652eea"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:35:52.845698088Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:38.698098711Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:38.698098711Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:38.698098711Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:38.698098711Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  },
+  "linux/arm/v7": {
+    "created": "2024-12-16T23:44:35.805758197Z",
+    "architecture": "arm",
+    "os": "linux",
+    "variant": "v7",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:0cee9b6e126689480f812b337d8926e8b051e2c1e40b3e36701ea2554f367b9d",
+        "sha256:4cfff05f912cc67c6ff688b2f53f84e6d74fe415725a228115a296634d919fd3",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:e0962dfb9d203ce37963e41ec72119610633651f760570d20b0217db3632b5d5"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-armv7.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:36:02.690991835Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:35.805758197Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:35.805758197Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:35.805758197Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:35.805758197Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  },
+  "linux/arm64": {
+    "created": "2024-12-16T23:44:45.848423966Z",
+    "architecture": "arm64",
+    "os": "linux",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:651d9022c23486dfbd396c13db293af6845731cbd098a5f5606db4bc9f5573e8",
+        "sha256:9c138da7f7ea7cc8190f71ce15f125e2eb79fd360f4cc2d34513dad016cb1096",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:9422ca7e65701d8eba4a5a31e325443dcbc753c2edef64e431c96702c94d2672"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-aarch64.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:36:03.586014466Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:45.848423966Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:45.848423966Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:45.848423966Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:45.848423966Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  },
+  "linux/ppc64le": {
+    "created": "2024-12-16T23:44:45.864267959Z",
+    "architecture": "ppc64le",
+    "os": "linux",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:fc80c1f6e8bee4861c27b2cee0f8edf887bd4d88d20063ba179f0caa93088770",
+        "sha256:e9fbfe005c7e2cd7d4f3159f07f6fbe82dad25c7e868a1ee2dd6503830d468c4",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:86e0c30fb5e087f5cd324e082a0529c6326af1025f1a030fc1d2ac2979dec81c"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-ppc64le.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:36:03.82451378Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:45.864267959Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:45.864267959Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:45.864267959Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:45.864267959Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  },
+  "linux/riscv64": {
+    "created": "2024-12-16T23:44:51.369236518Z",
+    "architecture": "riscv64",
+    "os": "linux",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:f9a3c4be4be59ad69b98da83e848450a28193c63ecdb40736f854308873152f9",
+        "sha256:231aa6f6a7db1c4ac8dc807a8bdd250f92be3ffac79ef9fec89ca8ac2f78e688",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:555c2f18bbe5d71e09387bdf745023055a8e5a6667905143c09a689e65f5ceff"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-riscv64.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:36:02.869897238Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:51.369236518Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:51.369236518Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:51.369236518Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:51.369236518Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  },
+  "linux/s390x": {
+    "created": "2024-12-16T23:44:38.777675109Z",
+    "architecture": "s390x",
+    "os": "linux",
+    "config": {
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BUILDKIT_SETUP_CGROUPV2_ROOT=1"
+      ],
+      "Entrypoint": [
+        "buildkitd"
+      ],
+      "Volumes": {
+        "/var/lib/buildkit": {}
+      },
+      "WorkingDir": "/",
+      "ArgsEscaped": true
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:a772154591ea8d876b24f25db93db4753a9f05c6500413a5ff966d581957655e",
+        "sha256:920529bf8be4087e77ec129bbcd9f3c4a179ede2f35cac38c6f8517fc9e41b9b",
+        "sha256:37453f29fa93eccde9d8ffa21c0b92c41a981c727ad6c32acee11caf4f5e42a8",
+        "sha256:2b99eb6f0070abe514fde85b61fa4993f1edfb32365b2a246841521f24fc38c0"
+      ]
+    },
+    "history": [
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "ADD alpine-minirootfs-3.20.3-s390x.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-09-06T12:05:36Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:36:04.705568496Z",
+        "created_by": "RUN /bin/sh -c apk add --no-cache fuse3 git openssh pigz xz iptables ip6tables   \u0026\u0026 ln -s fusermount3 /usr/bin/fusermount # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:35:49.452745107Z",
+        "created_by": "COPY examples/buildctl-daemonless/buildctl-daemonless.sh /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:38.777675109Z",
+        "created_by": "VOLUME [/var/lib/buildkit]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:38.777675109Z",
+        "created_by": "COPY / /usr/bin/ # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2024-12-16T23:44:38.777675109Z",
+        "created_by": "ENV BUILDKIT_SETUP_CGROUPV2_ROOT=1",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2024-12-16T23:44:38.777675109Z",
+        "created_by": "ENTRYPOINT [\"buildkitd\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      }
+    ]
+  }
+}
