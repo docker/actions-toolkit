@@ -25,6 +25,7 @@ import {Build} from '../src/buildx/build';
 import {Exec} from '../src/exec';
 import {GitHub} from '../src/github';
 import {History} from '../src/buildx/history';
+import {Util} from '../src/util';
 
 const fixturesDir = path.join(__dirname, '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'github-itg-'));
@@ -33,8 +34,10 @@ const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'tr
 
 maybe('uploadArtifact', () => {
   it('uploads an artifact', async () => {
+    const filename = path.join(tmpDir, `github-repo-${Util.generateRandomString()}.json`);
+    fs.copyFileSync(path.join(fixturesDir, `github-repo.json`), filename);
     const res = await GitHub.uploadArtifact({
-      filename: path.join(fixturesDir, 'github-repo.json'),
+      filename: filename,
       mimeType: 'application/json',
       retentionDays: 1
     });
