@@ -60,6 +60,7 @@ describe('download', () => {
   ])(
   'acquires %p of docker (%s)', async (source, platformOS) => {
     jest.spyOn(osm, 'platform').mockImplementation(() => platformOS as NodeJS.Platform);
+    jest.spyOn(osm, 'arch').mockImplementation(() => 'x64');
     const install = new Install({
       source: source,
       runDir: tmpDir,
