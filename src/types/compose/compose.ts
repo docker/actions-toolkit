@@ -15,6 +15,7 @@
  */
 
 export interface DownloadVersion {
+  key: string;
   version: string;
   downloadURL: string;
   releasesURL: string;

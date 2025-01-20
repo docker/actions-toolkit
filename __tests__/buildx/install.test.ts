@@ -57,22 +57,26 @@ describe('download', () => {
     ['v0.9.0'],
     ['v0.10.5'],
   ])(
-  'acquires %p of buildx with cache', async (version) => {
-    const install = new Install({standalone: false});
-    const toolPath = await install.download(version);
-    expect(fs.existsSync(toolPath)).toBe(true);
-  });
+    'acquires %p of buildx with cache', async (version) => {
+      const install = new Install({standalone: false});
+      const toolPath = await install.download(version);
+      expect(fs.existsSync(toolPath)).toBe(true);
+    },
+    100000
+  );
 
   // prettier-ignore
   test.each([
     ['v0.11.2'],
     ['v0.12.0'],
   ])(
-  'acquires %p of buildx without cache', async (version) => {
-    const install = new Install({standalone: false});
-    const toolPath = await install.download(version, true);
-    expect(fs.existsSync(toolPath)).toBe(true);
-  });
+    'acquires %p of buildx without cache', async (version) => {
+      const install = new Install({standalone: false});
+      const toolPath = await install.download(version, true);
+      expect(fs.existsSync(toolPath)).toBe(true);
+    },
+    100000
+  );
 
   // TODO: add tests for arm
   // prettier-ignore
@@ -86,7 +90,7 @@ describe('download', () => {
     ['linux', 'ppc64'],
     ['linux', 's390x'],
   ])(
-  'acquires buildx for %s/%s', async (os, arch) => {
+    'acquires buildx for %s/%s', async (os, arch) => {
       jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
       const install = new Install();

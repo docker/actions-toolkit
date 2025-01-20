@@ -63,7 +63,7 @@ export class Install {
     }
 
     const installCache = new Cache({
-      htcName: 'compose-dl-bin',
+      htcName: version.key != 'official' ? `compose-dl-bin-${version.key}` : 'compose-dl-bin',
       htcVersion: vspec,
       baseCacheDir: path.join(os.homedir(), '.bin'),
       cacheFile: os.platform() == 'win32' ? 'docker-compose.exe' : 'docker-compose',
@@ -172,11 +172,32 @@ export class Install {
   }
 
   public static async getDownloadVersion(v: string): Promise<DownloadVersion> {
-    return {
-      version: v,
-      downloadURL: 'https://github.com/docker/compose/releases/download/v%s/%s',
-      releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/compose-releases.json'
-    };
+    let [repoKey, version] = v.split(':');
+    if (!version) {
+      version = repoKey;
+      repoKey = 'official';
+    }
+    switch (repoKey) {
+      case 'official': {
+        return {
+          key: repoKey,
+          version: version,
+          downloadURL: 'https://github.com/docker/compose/releases/download/v%s/%s',
+          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/compose-releases.json'
+        };
+      }
+      case 'cloud': {
+        return {
+          key: repoKey,
+          version: version,
+          downloadURL: 'https://github.com/docker/compose-desktop/releases/download/v%s/%s',
+          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/compose-lab-releases.json'
+        };
+      }
+      default: {
+        throw new Error(`Cannot find compose version for ${v}`);
+      }
+    }
   }
 
   public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
