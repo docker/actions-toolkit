@@ -20,13 +20,27 @@ import os from 'os';
 import path from 'path';
 
 import {Cache} from '../src/cache';
+import {Util} from '../src/util';
 
 const fixturesDir = path.join(__dirname, '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'cache-itg-'));
 
 describe('cache', () => {
-  it('github-repo', async () => {
-    const r = (Math.random() + 1).toString(36).substring(7);
+  it('caches github-repo', async () => {
+    const r = Util.generateRandomString();
+    const htcName = `cache-test-github-repo-${r}`;
+    const c = new Cache({
+      htcName: htcName,
+      htcVersion: `v1.0.0+${r}`,
+      baseCacheDir: path.join(tmpDir, '.cache-test'),
+      cacheFile: 'github-repo.json'
+    });
+    expect(await c.save(path.join(fixturesDir, 'github-repo.json'), true)).not.toEqual('');
+    expect(await c.find()).not.toEqual('');
+  });
+
+  it('caches github-repo with post state', async () => {
+    const r = Util.generateRandomString();
     const htcName = `cache-test-github-repo-${r}`;
     const c = new Cache({
       htcName: htcName,
@@ -35,6 +49,7 @@ describe('cache', () => {
       cacheFile: 'github-repo.json'
     });
     expect(await c.save(path.join(fixturesDir, 'github-repo.json'))).not.toEqual('');
+    expect(await Cache.post()).not.toBeNull();
     expect(await c.find()).not.toEqual('');
   });
 });
