@@ -55,7 +55,7 @@ export class Cache {
     }
   }
 
-  public async save(file: string): Promise<string> {
+  public async save(file: string, skipState?: boolean): Promise<string> {
     core.debug(`Cache.save ${file}`);
     const cachePath = this.copyToCache(file);
 
@@ -63,14 +63,19 @@ export class Cache {
     core.debug(`Cache.save cached to hosted tool cache ${htcPath}`);
 
     if (!this.ghaNoCache && cache.isFeatureAvailable()) {
-      core.debug(`Cache.save sending ${this.ghaCacheKey} to post state`);
-      core.saveState(
-        Cache.POST_CACHE_KEY,
-        JSON.stringify({
-          dir: this.cacheDir,
-          key: this.ghaCacheKey
-        } as CachePostState)
-      );
+      if (skipState) {
+        core.debug(`Cache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
+        await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+      } else {
+        core.debug(`Cache.save sending ${this.ghaCacheKey} to post state`);
+        core.saveState(
+          Cache.POST_CACHE_KEY,
+          JSON.stringify({
+            dir: this.cacheDir,
+            key: this.ghaCacheKey
+          } as CachePostState)
+        );
+      }
     }
 
     return cachePath;
