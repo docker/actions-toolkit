@@ -52,7 +52,8 @@ export interface Target {
 
 export interface AttestEntry {
   type: string;
-  [key: string]: string;
+  disabled?: string | boolean;
+  [key: string]: string | boolean | undefined;
 }
 
 export interface CacheEntry {
