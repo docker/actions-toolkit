@@ -1,4 +1,11 @@
 {
+  "group": {
+    "default": {
+      "targets": [
+        "default"
+      ]
+    }
+  },
   "target": {
     "default": {
       "context": ".",
@@ -9,7 +16,7 @@
           "type": "provenance"
         },
         {
-          "disabled": "true",
+          "disabled": true,
           "type": "sbom"
         }
       ],

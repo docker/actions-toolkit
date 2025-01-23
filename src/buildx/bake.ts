@@ -238,6 +238,9 @@ export class Bake {
         case 'type':
           attestEntry.type = value;
           break;
+        case 'disabled':
+          attestEntry.disabled = Util.parseBool(value);
+          break;
         default:
           attestEntry[key] = value;
       }
