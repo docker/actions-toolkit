@@ -89,6 +89,7 @@ export class Builder {
     let parsingType: string | undefined;
     let currentNode: NodeInfo = {};
     let currentGCPolicy: GCPolicy | undefined;
+    let currentFile: string | undefined;
     for (const line of data.trim().split(`\n`)) {
       const [key, ...rest] = line.split(':');
       const lkey = key.toLowerCase();
@@ -178,6 +179,12 @@ export class Builder {
             currentGCPolicy = undefined;
           }
           break;
+        case lkey.startsWith('file#'):
+          parsingType = 'file';
+          currentFile = key.split('#')[1];
+          currentNode.files = currentNode.files || {};
+          currentNode.files[currentFile] = '';
+          break;
         default: {
           switch (parsingType || '') {
             case 'features': {
@@ -212,6 +219,15 @@ export class Builder {
                   currentGCPolicy.keepBytes = value;
                   break;
                 }
+              }
+              break;
+            }
+            case 'file': {
+              if (currentFile && currentNode.files) {
+                if (currentNode.files[currentFile].length > 0) {
+                  currentNode.files[currentFile] += '\n';
+                }
+                currentNode.files[currentFile] += line.replace(/^\s>\s?/, '');
               }
               break;
             }
