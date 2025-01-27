@@ -65,7 +65,7 @@ export class Install {
     const installCache = new Cache({
       htcName: version.key != 'official' ? `compose-dl-bin-${version.key}` : 'compose-dl-bin',
       htcVersion: vspec,
-      baseCacheDir: path.join(os.homedir(), '.bin'),
+      baseCacheDir: path.join(os.homedir(), '.bin', 'docker-compose'),
       cacheFile: os.platform() == 'win32' ? 'docker-compose.exe' : 'docker-compose',
       ghaNoCache: ghaNoCache
     });
