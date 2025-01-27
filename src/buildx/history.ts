@@ -37,7 +37,7 @@ export interface HistoryOpts {
 export class History {
   private readonly buildx: Buildx;
 
-  private static readonly EXPORT_BUILD_IMAGE_DEFAULT: string = 'docker.io/dockereng/export-build:latest';
+  private static readonly EXPORT_BUILD_IMAGE_DEFAULT: string = 'docker.io/dockereng/export-build:gha-stable-1';
   private static readonly EXPORT_BUILD_IMAGE_ENV: string = 'DOCKER_BUILD_EXPORT_BUILD_IMAGE';
 
   constructor(opts?: HistoryOpts) {
