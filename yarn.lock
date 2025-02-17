@@ -33,9 +33,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@actions/cache@npm:4.0.0"
+"@actions/cache@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@actions/cache@npm:4.0.1"
   dependencies:
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.0.1
@@ -47,8 +47,7 @@ __metadata:
     "@azure/storage-blob": ^12.13.0
     "@protobuf-ts/plugin": ^2.9.4
     semver: ^6.3.1
-    twirp-ts: ^2.5.0
-  checksum: 8ab819a67b578a5ce6de984f4ef8420066f8270e1f9db053700f4a8f084d0bbe4f911114f7088a95a987372ea63078550355d99849412152dd0efdf688bf9144
+  checksum: ca2cc59c8682817788f387bdb83279e1924dece32cb5a0789b0d57837c317caf35a90ec240f7671798ca3bf620a72085ddbdc86ef1c309a79e4b8efe73074bae
   languageName: node
   linkType: hard
 
@@ -1109,7 +1108,7 @@ __metadata:
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
     "@actions/artifact": ^2.2.1
-    "@actions/cache": ^4.0.0
+    "@actions/cache": ^4.0.1
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.1.1
     "@actions/github": ^6.0.0
