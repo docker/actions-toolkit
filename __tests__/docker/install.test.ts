@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, beforeEach, afterEach, it} from '@jest/globals';
+import {describe, expect, jest, test, beforeEach, afterEach, it, beforeAll} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -22,8 +22,16 @@ import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
+import {Undock} from '../../src/undock/undock';
+import {Install as UndockInstall} from '../../src/undock/install';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
+
+beforeAll(async () => {
+  const undockInstall = new UndockInstall();
+  const binPath = await undockInstall.download('v0.9.0', true);
+  await undockInstall.install(binPath);
+});
 
 afterEach(function () {
   rimraf.sync(tmpDir);
@@ -64,6 +72,7 @@ describe('download', () => {
     const install = new Install({
       source: source,
       runDir: tmpDir,
+      undock: new Undock()
     });
     const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);
