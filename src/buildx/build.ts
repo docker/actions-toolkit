@@ -139,16 +139,16 @@ export class Build {
   }
 
   public static resolveSecret(kvp: string, file: boolean): [string, string] {
-    const [key, _value] = Build.parseSecretKvp(kvp);
-    let value = _value;
+    const [key, value] = Build.parseSecretKvp(kvp);
+    const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
     if (file) {
       if (!fs.existsSync(value)) {
         throw new Error(`secret file ${value} not found`);
       }
-      value = fs.readFileSync(value, {encoding: 'utf-8'});
+      fs.copyFileSync(value, secretFile);
+    } else {
+      fs.writeFileSync(secretFile, value);
     }
-    const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
-    fs.writeFileSync(secretFile, value);
     return [key, secretFile];
   }
 
