@@ -19,7 +19,7 @@ import * as core from '@actions/core';
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
-import {BuilderInfo, GCPolicy, NodeInfo} from '../types/buildx/builder';
+import {BuilderInfo, Device, GCPolicy, NodeInfo} from '../types/buildx/builder';
 
 export interface BuilderOpts {
   buildx?: Buildx;
@@ -89,6 +89,7 @@ export class Builder {
     let parsingType: string | undefined;
     let currentNode: NodeInfo = {};
     let currentGCPolicy: GCPolicy | undefined;
+    let currentDevice: Device | undefined;
     let currentFile: string | undefined;
     for (const line of data.trim().split(`\n`)) {
       const [key, ...rest] = line.split(':');
@@ -172,6 +173,13 @@ export class Builder {
           parsingType = 'label';
           currentNode.labels = {};
           break;
+        case lkey == 'devices':
+          parsingType = 'devices';
+          if (currentNode.devices && currentDevice) {
+            currentNode.devices.push(currentDevice);
+            currentDevice = undefined;
+          }
+          break;
         case lkey.startsWith('gc policy rule#'):
           parsingType = 'gcpolicy';
           if (currentNode.gcPolicy && currentGCPolicy) {
@@ -197,6 +205,38 @@ export class Builder {
               currentNode.labels[key.trim()] = value;
               break;
             }
+            case 'devices': {
+              currentNode.devices = currentNode.devices || [];
+              currentDevice = currentDevice || {};
+              switch (lkey.trim()) {
+                case 'name': {
+                  currentDevice.name = value;
+                  break;
+                }
+                case 'on-demand': {
+                  if (value) {
+                    currentDevice.onDemand = value == 'true';
+                  }
+                  break;
+                }
+                case 'automatically allowed': {
+                  if (value) {
+                    currentDevice.autoAllow = value == 'true';
+                  }
+                  break;
+                }
+                case 'annotations': {
+                  currentDevice.annotations = currentDevice.annotations || {};
+                  break;
+                }
+                default: {
+                  if (currentDevice && currentDevice.annotations) {
+                    currentDevice.annotations[key.trim()] = value;
+                  }
+                }
+              }
+              break;
+            }
             case 'gcpolicy': {
               currentNode.gcPolicy = currentNode.gcPolicy || [];
               currentGCPolicy = currentGCPolicy || {};
@@ -219,6 +259,18 @@ export class Builder {
                   currentGCPolicy.keepBytes = value;
                   break;
                 }
+                case 'reserved space': {
+                  currentGCPolicy.reservedSpace = value;
+                  break;
+                }
+                case 'max used space': {
+                  currentGCPolicy.maxUsedSpace = value;
+                  break;
+                }
+                case 'min free space': {
+                  currentGCPolicy.minFreeSpace = value;
+                  break;
+                }
               }
               break;
             }
@@ -234,6 +286,9 @@ export class Builder {
           }
         }
       }
+    }
+    if (currentDevice && currentNode.devices) {
+      currentNode.devices.push(currentDevice);
     }
     if (currentGCPolicy && currentNode.gcPolicy) {
       currentNode.gcPolicy.push(currentGCPolicy);
