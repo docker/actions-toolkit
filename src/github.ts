@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import crypto from 'crypto';
-import fs from 'fs';
 import he from 'he';
 import jsyaml from 'js-yaml';
 import os from 'os';
@@ -24,15 +22,16 @@ import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@acti
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
 import {isGhes} from '@actions/artifact/lib/internal/shared/config';
 import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util';
+import {createZipUploadStream} from '@actions/artifact/lib/internal/upload/zip';
+import {uploadZipToBlobStorage} from '@actions/artifact/lib/internal/upload/blob-upload';
+import {UploadZipSpecification, getUploadZipSpecification} from '@actions/artifact/lib/internal/upload/upload-zip-specification';
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
-import {InvalidResponseError, NetworkError} from '@actions/artifact';
+import {FilesNotFoundError, InvalidResponseError} from '@actions/artifact';
 import * as core from '@actions/core';
 import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
-import {TransferProgressEvent} from '@azure/core-http';
-import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {Util} from './util';
@@ -143,6 +142,11 @@ export class GitHub {
 
     core.info(`Uploading ${artifactName} to blob storage`);
 
+    const zipSpecification: UploadZipSpecification[] = getUploadZipSpecification([opts.filename], path.dirname(opts.filename));
+    if (zipSpecification.length === 0) {
+      throw new FilesNotFoundError(zipSpecification.flatMap(s => (s.sourcePath ? [s.sourcePath] : [])));
+    }
+
     const createArtifactReq: CreateArtifactRequest = {
       workflowRunBackendId: backendIds.workflowRunBackendId,
       workflowJobRunBackendId: backendIds.workflowJobRunBackendId,
@@ -160,49 +164,20 @@ export class GitHub {
       throw new InvalidResponseError('cannot create artifact client');
     }
 
-    let uploadByteCount = 0;
-    const blobClient = new BlobClient(createArtifactResp.signedUploadUrl);
-    const blockBlobClient = blobClient.getBlockBlobClient();
+    const zipUploadStream = await createZipUploadStream(zipSpecification);
 
-    const headers: BlobHTTPHeaders = {
-      blobContentDisposition: `attachment; filename="${artifactName}"`
-    };
-    if (opts.mimeType) {
-      headers.blobContentType = opts.mimeType;
-    }
-    core.debug(`Upload headers: ${JSON.stringify(headers)}`);
-
-    try {
-      core.info('Beginning upload of artifact content to blob storage');
-      await blockBlobClient.uploadFile(opts.filename, {
-        blobHTTPHeaders: headers,
-        onProgress: (progress: TransferProgressEvent): void => {
-          core.info(`Uploaded bytes ${progress.loadedBytes}`);
-          uploadByteCount = progress.loadedBytes;
-        }
-      });
-    } catch (error) {
-      if (NetworkError.isNetworkErrorCode(error?.code)) {
-        throw new NetworkError(error?.code);
-      }
-      throw error;
-    }
-
-    core.info('Finished uploading artifact content to blob storage!');
-
-    const sha256Hash = crypto.createHash('sha256').update(fs.readFileSync(opts.filename)).digest('hex');
-    core.info(`SHA256 hash of uploaded artifact is ${sha256Hash}`);
+    const uploadResult = await uploadZipToBlobStorage(createArtifactResp.signedUploadUrl, zipUploadStream);
 
     const finalizeArtifactReq: FinalizeArtifactRequest = {
       workflowRunBackendId: backendIds.workflowRunBackendId,
       workflowJobRunBackendId: backendIds.workflowJobRunBackendId,
       name: artifactName,
-      size: uploadByteCount ? uploadByteCount.toString() : '0'
+      size: uploadResult.uploadSize ? uploadResult.uploadSize.toString() : '0'
     };
 
-    if (sha256Hash) {
+    if (uploadResult.sha256Hash) {
       finalizeArtifactReq.hash = StringValue.create({
-        value: `sha256:${sha256Hash}`
+        value: `sha256:${uploadResult.sha256Hash}`
       });
     }
 
@@ -221,7 +196,7 @@ export class GitHub {
     return {
       id: Number(artifactId),
       filename: artifactName,
-      size: uploadByteCount,
+      size: uploadResult.uploadSize || 0,
       url: artifactURL
     };
   }

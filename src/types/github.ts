@@ -45,7 +45,6 @@ export interface GitHubAnnotation extends AnnotationProperties {
 
 export interface UploadArtifactOpts {
   filename: string;
-  mimeType?: string;
   retentionDays?: number;
 }
 

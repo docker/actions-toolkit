@@ -38,7 +38,6 @@ maybe('uploadArtifact', () => {
     fs.copyFileSync(path.join(fixturesDir, `github-repo.json`), filename);
     const res = await GitHub.uploadArtifact({
       filename: filename,
-      mimeType: 'application/json',
       retentionDays: 1
     });
     expect(res).toBeDefined();
@@ -100,7 +99,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHub.uploadArtifact({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();
@@ -180,7 +178,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHub.uploadArtifact({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();
@@ -235,7 +232,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHub.uploadArtifact({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();
