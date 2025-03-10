@@ -162,12 +162,19 @@ images:
   arch: "{{arch}}"
   digest: "{{digest}}"
 {{/each}}
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20241004/ubuntu-24.04-server-cloudimg-amd64.img"
+- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/ubuntu-24.04-server-cloudimg-amd64.img"
   arch: "x86_64"
-  digest: "sha256:fad101d50b06b26590cf30542349f9e9d3041ad7929e3bc3531c81ec27f2c788"
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20241004/ubuntu-24.04-server-cloudimg-arm64.img"
+  digest: "sha256:a3aea891c930ee0c762077b963834f5e083eb8102574f1e4dfc9e6e4c1c73ac0"
+  kernel:
+    location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/unpacked/ubuntu-24.04-server-cloudimg-amd64-vmlinuz-generic"
+    digest: "sha256:2d9f30959f01675fd28aa1c2fe8934728e46766d04ecfad2d206823696a3f830"
+    cmdline: "root=LABEL=cloudimg-rootfs ro console=tty1 console=ttyAMA0 no_timer_check"
+  initrd:
+    location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/unpacked/ubuntu-24.04-server-cloudimg-amd64-initrd-generic"
+    digest: "sha256:231352d027aeebf0bb7dca281dfebae894c86e789c7377788d3c2c149471caa3"
+- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/ubuntu-24.04-server-cloudimg-arm64.img"
   arch: "aarch64"
-  digest: "sha256:e380b683b0c497d2a87af8a5dbe94c42eb54548fa976167f307ed8cf3944ec57"
+  digest: "sha256:278a0e8475008673d9d3da10ae66a7b1a3dda059746b83d749eca386a5670bd4"
 # Fallback to the latest release image.
 # Hint: run \`limactl prune\` to invalidate the cache
 - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img"
