@@ -1,0 +1,55 @@
+Name:          nvidia
+Driver:        docker-container
+Last Activity: 2025-02-14 15:57:45 +0000 UTC
+
+Nodes:
+Name:                  nvidia0
+Endpoint:              unix:///var/run/docker.sock
+Driver Options:        image="moby/buildkit:local"
+Status:                running
+BuildKit daemon flags: --allow-insecure-entitlement=network.host
+BuildKit version:      v0.20.0-rc2-4-gd30d8e22c.m
+Platforms:             linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+Features:
+ Cache export:         true
+ Docker exporter:      true
+ Multi-platform build: true
+ OCI exporter:         true
+Labels:
+ org.mobyproject.buildkit.worker.executor:         oci
+ org.mobyproject.buildkit.worker.hostname:         76ac9a510d96
+ org.mobyproject.buildkit.worker.network:          host
+ org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+ org.mobyproject.buildkit.worker.selinux.enabled:  false
+ org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+Devices:
+ Name:                  nvidia.com/gpu=all
+ Automatically allowed: true
+ Annotations:
+  foo:                                       bar
+  org.mobyproject.buildkit.device.autoallow: true
+ Name:                  docker.com/gpu=venus
+ Automatically allowed: false
+ Annotations:
+  bar:                                       baz
+GC Policy rule#0:
+ All:            false
+ Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout
+ Keep Duration:  48h0m0s
+ Max Used Space: 488.3MiB
+GC Policy rule#1:
+ All:            false
+ Keep Duration:  1440h0m0s
+ Reserved Space: 9.313GiB
+ Max Used Space: 93.13GiB
+ Min Free Space: 188.1GiB
+GC Policy rule#2:
+ All:            false
+ Reserved Space: 9.313GiB
+ Max Used Space: 93.13GiB
+ Min Free Space: 188.1GiB
+GC Policy rule#3:
+ All:            true
+ Reserved Space: 9.313GiB
+ Max Used Space: 93.13GiB
+ Min Free Space: 188.1GiB
