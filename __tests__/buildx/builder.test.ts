@@ -466,6 +466,89 @@ baz = qux
        ]
      }
     ],
+    [
+     'inspect12.txt',
+     {
+       "name": "nvidia",
+       "driver": "docker-container",
+       "lastActivity": new Date("2025-02-14T15:57:45.000Z"),
+       "nodes": [
+         {
+           "buildkit": "v0.20.0-rc2-4-gd30d8e22c.m",
+           "buildkitd-flags": "--allow-insecure-entitlement=network.host",
+           "driver-opts": [
+             "image=moby/buildkit:local",
+           ],
+           "endpoint": "unix:///var/run/docker.sock",
+           "name": "nvidia0",
+           "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6",
+           "status": "running",
+           "features": {
+             "Cache export": true,
+             "Docker exporter": true,
+             "Multi-platform build": true,
+             "OCI exporter": true,
+           },
+           "labels": {
+             "org.mobyproject.buildkit.worker.executor": "oci",
+             "org.mobyproject.buildkit.worker.hostname": "76ac9a510d96",
+             "org.mobyproject.buildkit.worker.network": "host",
+             "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+             "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+             "org.mobyproject.buildkit.worker.snapshotter": "overlayfs",
+           },
+           "devices": [
+             {
+               "annotations": {
+                 "foo": "bar",
+                 "org.mobyproject.buildkit.device.autoallow": "true"
+               },
+               "autoAllow": true,
+               "name": "nvidia.com/gpu=all"
+             },
+             {
+               "annotations": {
+                 "bar": "baz"
+               },
+               "autoAllow": false,
+               "name": "docker.com/gpu=venus"
+             }
+           ],
+           "gcPolicy": [
+             {
+               "all": false,
+               "filter": [
+                 "type==source.local",
+                 "type==exec.cachemount",
+                 "type==source.git.checkout"
+               ],
+               "keepDuration": "48h0m0s",
+               "maxUsedSpace": "488.3MiB",
+             },
+             {
+               "all": false,
+               "keepDuration": "1440h0m0s",
+               "maxUsedSpace": "93.13GiB",
+               "minFreeSpace": "188.1GiB",
+               "reservedSpace": "9.313GiB",
+             },
+             {
+               "all": false,
+               "maxUsedSpace": "93.13GiB",
+               "minFreeSpace": "188.1GiB",
+               "reservedSpace": "9.313GiB",
+             },
+             {
+               "all": true,
+               "maxUsedSpace": "93.13GiB",
+               "minFreeSpace": "188.1GiB",
+               "reservedSpace": "9.313GiB",
+             }
+           ]
+         }
+       ]
+     }
+    ],
   ])('given %p', async (inspectFile, expected) => {
     expect(await Builder.parseInspect(fs.readFileSync(path.join(fixturesDir, inspectFile)).toString())).toEqual(expected);
   });
