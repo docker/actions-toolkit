@@ -32,6 +32,11 @@ export interface BuildOpts {
   buildx?: Buildx;
 }
 
+export interface ResolveSecretsOpts {
+  asFile?: boolean;
+  redact?: boolean;
+}
+
 export class Build {
   private readonly buildx: Buildx;
   private readonly iidFilename: string;
@@ -124,12 +129,16 @@ export class Build {
   }
 
   public static resolveSecretString(kvp: string): string {
-    const [key, file] = Build.resolveSecret(kvp, false);
+    const [key, file] = Build.resolveSecret(kvp, {
+      redact: true
+    });
     return `id=${key},src=${file}`;
   }
 
   public static resolveSecretFile(kvp: string): string {
-    const [key, file] = Build.resolveSecret(kvp, true);
+    const [key, file] = Build.resolveSecret(kvp, {
+      asFile: true
+    });
     return `id=${key},src=${file}`;
   }
 
@@ -138,10 +147,10 @@ export class Build {
     return `id=${key},env=${value}`;
   }
 
-  public static resolveSecret(kvp: string, file: boolean): [string, string] {
-    const [key, value] = Build.parseSecretKvp(kvp);
+  public static resolveSecret(kvp: string, opts?: ResolveSecretsOpts): [string, string] {
+    const [key, value] = Build.parseSecretKvp(kvp, opts?.redact);
     const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
-    if (file) {
+    if (opts?.asFile) {
       if (!fs.existsSync(value)) {
         throw new Error(`secret file ${value} not found`);
       }
@@ -310,12 +319,15 @@ export class Build {
     return false;
   }
 
-  private static parseSecretKvp(kvp: string): [string, string] {
+  public static parseSecretKvp(kvp: string, redact?: boolean): [string, string] {
     const delimiterIndex = kvp.indexOf('=');
     const key = kvp.substring(0, delimiterIndex);
     const value = kvp.substring(delimiterIndex + 1);
     if (key.length == 0 || value.length == 0) {
       throw new Error(`${kvp} is not a valid secret`);
+    }
+    if (redact) {
+      core.setSecret(value);
     }
     return [key, value];
   }
