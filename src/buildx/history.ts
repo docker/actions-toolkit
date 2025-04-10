@@ -28,7 +28,7 @@ import {Exec} from '../exec';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
-import {ExportRecordOpts, ExportRecordResponse, Summaries} from '../types/buildx/history';
+import {ExportBuildOpts, ExportBuildResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history';
 
 export interface HistoryOpts {
   buildx?: Buildx;
@@ -44,7 +44,35 @@ export class History {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async export(opts: ExportRecordOpts): Promise<ExportRecordResponse> {
+  public async getCommand(args: Array<string>) {
+    return await this.buildx.getCommand(['history', ...args]);
+  }
+
+  public async getInspectCommand(args: Array<string>) {
+    return await this.getCommand(['inspect', ...args]);
+  }
+
+  public async inspect(opts: InspectOpts): Promise<InspectResponse> {
+    const args: Array<string> = ['--format', 'json'];
+    if (opts.builder) {
+      args.push('--builder', opts.builder);
+    }
+    if (opts.ref) {
+      args.push(opts.ref);
+    }
+    const cmd = await this.getInspectCommand(args);
+    return await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return <InspectResponse>JSON.parse(res.stdout);
+    });
+  }
+
+  public async export(opts: ExportBuildOpts): Promise<ExportBuildResponse> {
     if (os.platform() === 'win32') {
       throw new Error('Exporting a build record is currently not supported on Windows');
     }

@@ -30,6 +30,48 @@ const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
+maybe('inspect', () => {
+  it('build', async () => {
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build', '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+          '--metadata-file', build.getMetadataFilePath(),
+          fixturesDir
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = build.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRef = build.resolveRef(metadata);
+    if (!buildRef) {
+      throw new Error('buildRef is undefined');
+    }
+    const [builderName, nodeName, ref] = buildRef.split('/');
+    expect(builderName).toBeDefined();
+    expect(nodeName).toBeDefined();
+    expect(ref).toBeDefined();
+
+    const history = new History({buildx: buildx});
+    const res = await history.inspect({
+      ref: ref,
+      builder: builderName
+    });
+
+    expect(res).toBeDefined();
+    expect(res?.Name).toBeDefined();
+    expect(res?.Ref).toBeDefined();
+  });
+});
+
 maybe('exportBuild', () => {
   // prettier-ignore
   test.each([
