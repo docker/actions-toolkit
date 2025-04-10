@@ -22,7 +22,7 @@ export interface InspectOpts {
 export type BuildStatus = 'completed' | 'running' | 'failed' | 'canceled';
 
 export interface InspectResponse {
-  Name?: string;
+  Name: string;
   Ref: string;
 
   Context?: string;
@@ -37,8 +37,8 @@ export interface InspectResponse {
 
   StartedAt?: Date;
   CompletedAt?: Date;
-  Duration?: number;
-  Status?: BuildStatus;
+  Duration: number;
+  Status: BuildStatus;
   Error?: InspectErrorOutput;
 
   NumCompletedSteps: number;
@@ -103,18 +103,20 @@ export interface InspectKeyValueOutput {
   Value?: string;
 }
 
-export interface ExportBuildOpts {
+export interface ExportOpts {
   refs: Array<string>;
+  noSummaries?: boolean;
   image?: string;
+  useContainer?: boolean;
 }
 
-export interface ExportBuildResponse {
+export interface ExportResponse {
   dockerbuildFilename: string;
   dockerbuildSize: number;
-  summaries: Summaries;
   builderName: string;
   nodeName: string;
   refs: Array<string>;
+  summaries?: Summaries;
 }
 
 export interface Summaries {
@@ -128,6 +130,6 @@ export interface Summary {
   numCachedSteps: number;
   numTotalSteps: number;
   numCompletedSteps: number;
-  frontendAttrs: Record<string, string>;
+  frontendAttrs?: Record<string, string>;
   error?: string;
 }

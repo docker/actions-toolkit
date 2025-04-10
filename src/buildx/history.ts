@@ -28,7 +28,7 @@ import {Exec} from '../exec';
 import {GitHub} from '../github';
 import {Util} from '../util';
 
-import {ExportBuildOpts, ExportBuildResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history';
+import {ExportOpts, ExportResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history';
 
 export interface HistoryOpts {
   buildx?: Buildx;
@@ -36,9 +36,6 @@ export interface HistoryOpts {
 
 export class History {
   private readonly buildx: Buildx;
-
-  private static readonly EXPORT_BUILD_IMAGE_DEFAULT: string = 'docker.io/dockereng/export-build:latest';
-  private static readonly EXPORT_BUILD_IMAGE_ENV: string = 'DOCKER_BUILD_EXPORT_BUILD_IMAGE';
 
   constructor(opts?: HistoryOpts) {
     this.buildx = opts?.buildx || new Buildx();
@@ -50,6 +47,10 @@ export class History {
 
   public async getInspectCommand(args: Array<string>) {
     return await this.getCommand(['inspect', ...args]);
+  }
+
+  public async getExportCommand(args: Array<string>) {
+    return await this.getCommand(['export', ...args]);
   }
 
   public async inspect(opts: InspectOpts): Promise<InspectResponse> {
@@ -72,20 +73,7 @@ export class History {
     });
   }
 
-  public async export(opts: ExportBuildOpts): Promise<ExportBuildResponse> {
-    if (os.platform() === 'win32') {
-      throw new Error('Exporting a build record is currently not supported on Windows');
-    }
-    if (!(await Docker.isAvailable())) {
-      throw new Error('Docker is required to export a build record');
-    }
-    if (!(await Docker.isDaemonRunning())) {
-      throw new Error('Docker daemon needs to be running to export a build record');
-    }
-    if (!(await this.buildx.versionSatisfies('>=0.13.0'))) {
-      throw new Error('Buildx >= 0.13.0 is required to export a build record');
-    }
-
+  public async export(opts: ExportOpts): Promise<ExportResponse> {
     let builderName: string = '';
     let nodeName: string = '';
     const refs: Array<string> = [];
@@ -112,6 +100,72 @@ export class History {
     const outDir = path.join(Context.tmpDir(), 'export');
     core.info(`exporting build record to ${outDir}`);
     fs.mkdirSync(outDir, {recursive: true});
+
+    if (opts.useContainer || (await this.buildx.versionSatisfies('<0.23.0'))) {
+      return await this.exportLegacy(builderName, nodeName, refs, outDir, opts.image);
+    }
+
+    // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
+    await Util.sleep(3);
+
+    const summaries: Summaries = {};
+    if (!opts.noSummaries) {
+      for (const ref of refs) {
+        await this.inspect({
+          ref: ref,
+          builder: builderName
+        }).then(res => {
+          let errorLogs = '';
+          if (res.Error && res.Status !== 'canceled') {
+            if (res.Error.Message) {
+              errorLogs = res.Error.Message;
+            } else if (res.Error.Name && res.Error.Logs) {
+              errorLogs = `=> ${res.Error.Name}\n${res.Error.Logs}`;
+            }
+          }
+          summaries[ref] = {
+            name: res.Name,
+            status: res.Status,
+            duration: Util.formatDuration(res.Duration),
+            numCachedSteps: res.NumCachedSteps,
+            numTotalSteps: res.NumTotalSteps,
+            numCompletedSteps: res.NumCompletedSteps,
+            error: errorLogs
+          };
+        });
+      }
+    }
+
+    const dockerbuildPath = path.join(outDir, `${History.exportFilename(refs)}.dockerbuild`);
+
+    const cmd = await this.getExportCommand(['--builder', builderName, '--output', dockerbuildPath, ...refs]);
+    await Exec.getExecOutput(cmd.command, cmd.args);
+
+    const dockerbuildStats = fs.statSync(dockerbuildPath);
+
+    return {
+      dockerbuildFilename: dockerbuildPath,
+      dockerbuildSize: dockerbuildStats.size,
+      builderName: builderName,
+      nodeName: nodeName,
+      refs: refs,
+      summaries: summaries
+    };
+  }
+
+  private async exportLegacy(builderName: string, nodeName: string, refs: Array<string>, outDir: string, image?: string): Promise<ExportResponse> {
+    if (os.platform() === 'win32') {
+      throw new Error('Exporting a build record is currently not supported on Windows');
+    }
+    if (!(await Docker.isAvailable())) {
+      throw new Error('Docker is required to export a build record');
+    }
+    if (!(await Docker.isDaemonRunning())) {
+      throw new Error('Docker daemon needs to be running to export a build record');
+    }
+    if (!(await this.buildx.versionSatisfies('>=0.13.0'))) {
+      throw new Error('Buildx >= 0.13.0 is required to export a build record');
+    }
 
     // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
     await Util.sleep(3);
@@ -167,7 +221,7 @@ export class History {
         'run', '--rm', '-i',
         '-v', `${Buildx.refsDir}:/buildx-refs`,
         '-v', `${outDir}:/out`,
-        opts.image || process.env[History.EXPORT_BUILD_IMAGE_ENV] || History.EXPORT_BUILD_IMAGE_DEFAULT,
+        image || process.env['DOCKER_BUILD_EXPORT_BUILD_IMAGE'] || 'docker.io/dockereng/export-build:latest',
         ...ebargs
       ]
       core.info(`[command]docker ${dockerRunArgs.join(' ')}`);
@@ -218,12 +272,7 @@ export class History {
         }
       });
 
-    let dockerbuildFilename = `${GitHub.context.repo.owner}~${GitHub.context.repo.repo}~${refs[0].substring(0, 6).toUpperCase()}`;
-    if (refs.length > 1) {
-      dockerbuildFilename += `+${refs.length - 1}`;
-    }
-
-    const dockerbuildPath = path.join(outDir, `${dockerbuildFilename}.dockerbuild`);
+    const dockerbuildPath = path.join(outDir, `${History.exportFilename(refs)}.dockerbuild`);
     fs.renameSync(tmpDockerbuildFilename, dockerbuildPath);
     const dockerbuildStats = fs.statSync(dockerbuildPath);
 
@@ -239,5 +288,13 @@ export class History {
       nodeName: nodeName,
       refs: refs
     };
+  }
+
+  private static exportFilename(refs: Array<string>): string {
+    let name = `${GitHub.context.repo.owner}~${GitHub.context.repo.repo}~${refs[0].substring(0, 6).toUpperCase()}`;
+    if (refs.length > 1) {
+      name += `+${refs.length - 1}`;
+    }
+    return name;
   }
 }

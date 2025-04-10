@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, test} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -72,7 +72,7 @@ maybe('inspect', () => {
   });
 });
 
-maybe('exportBuild', () => {
+maybe('export', () => {
   // prettier-ignore
   test.each([
     [
@@ -92,7 +92,7 @@ maybe('exportBuild', () => {
         fixturesDir
       ],
     ]
-  ])('export build %p', async (_, bargs) => {
+  ])('export with build %p', async (_, bargs) => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -152,7 +152,7 @@ maybe('exportBuild', () => {
         'hello-matrix'
       ],
     ]
-  ])('export bake build %p', async (_, bargs) => {
+  ])('export with bake %p', async (_, bargs) => {
     const buildx = new Buildx();
     const bake = new Bake({buildx: buildx});
 
@@ -187,22 +187,8 @@ maybe('exportBuild', () => {
     expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
     expect(exportRes?.summaries).toBeDefined();
   });
-});
 
-maybe('exportBuild custom image', () => {
-  const originalEnv = process.env;
-  beforeEach(() => {
-    jest.resetModules();
-    process.env = {
-      ...originalEnv,
-      DOCKER_BUILD_EXPORT_BUILD_IMAGE: 'docker.io/dockereng/export-build:0.2.2'
-    };
-  });
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it('with custom image', async () => {
+  it('export using container', async () => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -227,7 +213,8 @@ maybe('exportBuild custom image', () => {
 
     const history = new History({buildx: buildx});
     const exportRes = await history.export({
-      refs: [buildRef ?? '']
+      refs: [buildRef ?? ''],
+      useContainer: true
     });
 
     expect(exportRes).toBeDefined();
