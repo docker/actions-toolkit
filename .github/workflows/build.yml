@@ -29,3 +29,10 @@ jobs:
           targets: build
         env:
           NODE_VERSION: ${{ matrix.node_version }}
+
+  octoguard:
+    uses: crazy-max/docker-octoguard/.github/workflows/octoguard.yml@zizmor-verbose
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
