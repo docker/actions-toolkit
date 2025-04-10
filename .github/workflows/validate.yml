@@ -15,7 +15,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       targets: ${{ steps.generate.outputs.targets }}
     steps:
