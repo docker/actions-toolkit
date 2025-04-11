@@ -34,13 +34,24 @@ export interface NodeInfo extends Node {
   buildkit?: string;
   features?: Record<string, boolean>;
   labels?: Record<string, string>;
+  devices?: Array<Device>;
   gcPolicy?: Array<GCPolicy>;
   files?: Record<string, string>;
+}
+
+export interface Device {
+  name?: string;
+  annotations?: Record<string, string>;
+  autoAllow?: boolean;
+  onDemand?: boolean;
 }
 
 export interface GCPolicy {
   all?: boolean;
   filter?: string[];
   keepDuration?: string;
-  keepBytes?: string;
+  keepBytes?: string; // deprecated, use reservedSpace instead
+  reservedSpace?: string;
+  maxUsedSpace?: string;
+  minFreeSpace?: string;
 }
