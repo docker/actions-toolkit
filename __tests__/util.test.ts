@@ -469,6 +469,36 @@ describe('isPathRelativeTo', () => {
   });
 });
 
+describe('formatDuration', () => {
+  it('formats 0 nanoseconds as "0s"', () => {
+    expect(Util.formatDuration(0)).toBe('0s');
+  });
+  it('formats only seconds', () => {
+    expect(Util.formatDuration(5e9)).toBe('5s');
+    expect(Util.formatDuration(59e9)).toBe('59s');
+  });
+  it('formats minutes and seconds', () => {
+    expect(Util.formatDuration(65e9)).toBe('1m5s');
+    expect(Util.formatDuration(600e9)).toBe('10m');
+  });
+  it('formats hours, minutes, and seconds', () => {
+    expect(Util.formatDuration(3661e9)).toBe('1h1m1s');
+    expect(Util.formatDuration(7322e9)).toBe('2h2m2s');
+  });
+  it('formats hours only', () => {
+    expect(Util.formatDuration(3 * 3600e9)).toBe('3h');
+  });
+  it('formats hours and minutes', () => {
+    expect(Util.formatDuration(3900e9)).toBe('1h5m');
+  });
+  it('formats minutes only', () => {
+    expect(Util.formatDuration(120e9)).toBe('2m');
+  });
+  it('rounds down partial seconds', () => {
+    expect(Util.formatDuration(1799999999)).toBe('1s');
+  });
+});
+
 // See: https://github.com/actions/toolkit/blob/a1b068ec31a042ff1e10a522d8fdf0b8869d53ca/packages/core/src/core.ts#L89
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
