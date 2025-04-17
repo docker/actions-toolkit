@@ -20,6 +20,69 @@ import * as semver from 'semver';
 import {Exec} from '../../src/exec';
 import {Regctl} from '../../src/regclient/regctl';
 
+import {Image} from '../../src/types/oci/config';
+
+describe('manifestGet', () => {
+  // prettier-ignore
+  test.each([
+    ['moby/moby-bin:28.1.0-rc.2'],
+    ['crazymax/diun:4.17.0'],
+  ])('given %p', async image => {
+    const regctl = new Regctl();
+    const manifest = await regctl.manifestGet({
+      image: image,
+    });
+    console.log(`${image} manifest: ${JSON.stringify(manifest, null, 2)}`);
+    expect(manifest).not.toBeNull();
+    expect(manifest?.config).toBeDefined();
+    expect(manifest?.config.digest).not.toEqual('');
+    expect(manifest?.layers).toBeDefined();
+    expect(manifest?.layers.length).toBeGreaterThan(0);
+  });
+});
+
+describe('blobGet', () => {
+  // prettier-ignore
+  test.each([
+    ['moby/moby-bin', 'sha256:234fccbd13fde0ba978a19f728cbdc67e29bc76247ac560822bb6ae5236c0bf0'],
+    ['crazymax/diun', 'sha256:1e4881f66e0ec0f1710b837002107050bbbc0a231d8a42d7f422b56a139900bb'],
+  ])('given %p', async (repo, digest) => {
+    const regctl = new Regctl();
+    const blob = await regctl.blobGet({
+      repository: repo,
+      digest: digest
+    });
+    expect(blob).toBeDefined();
+    console.log(`${repo}:@${digest} blob: ${JSON.stringify(JSON.parse(blob), null, 2)}`);
+  });
+});
+
+describe('image config', () => {
+  // prettier-ignore
+  test.each([
+    ['moby/moby-bin:28.1.0-rc.2'],
+    ['crazymax/diun:4.17.0'],
+  ])('given %p', async image => {
+    const regctl = new Regctl();
+    const manifest = await regctl.manifestGet({
+      image: image,
+    });
+    expect(manifest).not.toBeNull();
+    expect(manifest?.config).toBeDefined();
+    expect(manifest?.config.digest).not.toEqual('');
+    const blob = await regctl.blobGet({
+      repository: image, // image works as well
+      digest: manifest?.config.digest
+    });
+    const imageConfig = <Image>JSON.parse(blob);
+    console.log(`${image} config: ${JSON.stringify(imageConfig, null, 2)}`);
+    expect(imageConfig).not.toBeNull();
+    expect(imageConfig.config).toBeDefined();
+    expect(imageConfig?.config?.Labels).toBeDefined();
+    expect(Object.keys(imageConfig?.config?.Labels || {}).length).toBeGreaterThan(0);
+  });
+});
+
 describe('isAvailable', () => {
   it('checks regctl is available', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
