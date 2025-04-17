@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 actions-toolkit authors
+ * Copyright 2025 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import path from 'path';
 import * as rimraf from 'rimraf';
 import osm = require('os');
 
-import {Install} from '../../src/undock/install';
+import {Install} from '../../src/regclient/install';
 
-const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-install-'));
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'regclient-install-'));
 
 afterEach(function () {
   rimraf.sync(tmpDir);
@@ -32,16 +32,15 @@ afterEach(function () {
 describe('download', () => {
   // prettier-ignore
   test.each([
-    ['v0.4.0'],
-    ['v0.7.0'],
+    ['v0.8.2'],
     ['latest']
   ])(
-  'acquires %p of undock', async (version) => {
+  'acquires %p of regclient', async (version) => {
       const install = new Install();
       const toolPath = await install.download(version);
       expect(fs.existsSync(toolPath)).toBe(true);
-      const undockBin = await install.install(toolPath, tmpDir);
-      expect(fs.existsSync(undockBin)).toBe(true);
+      const regclientBin = await install.install(toolPath, tmpDir);
+      expect(fs.existsSync(regclientBin)).toBe(true);
     },
     100000
   );
@@ -49,10 +48,9 @@ describe('download', () => {
   // prettier-ignore
   test.each([
     // following versions are already cached to htc from previous test cases
-    ['v0.4.0'],
-    ['v0.7.0'],
+    ['v0.8.2'],
   ])(
-  'acquires %p of undock with cache', async (version) => {
+  'acquires %p of regclient with cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -60,20 +58,17 @@ describe('download', () => {
 
   // prettier-ignore
   test.each([
-    ['v0.5.0'],
-    ['v0.6.0'],
+    ['v0.8.1'],
   ])(
-  'acquires %p of undock without cache', async (version) => {
+  'acquires %p of regclient without cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);
   });
 
-  // TODO: add tests for arm
   // prettier-ignore
   test.each([
     ['win32', 'x64'],
-    ['win32', 'arm64'],
     ['darwin', 'x64'],
     ['darwin', 'arm64'],
     ['linux', 'x64'],
@@ -81,12 +76,12 @@ describe('download', () => {
     ['linux', 'ppc64'],
     ['linux', 's390x'],
   ])(
-  'acquires undock for %s/%s', async (os, arch) => {
+  'acquires regclient for %s/%s', async (os, arch) => {
       jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
       jest.spyOn(osm, 'arch').mockImplementation(() => arch);
       const install = new Install();
-      const undockBin = await install.download('latest');
-      expect(fs.existsSync(undockBin)).toBe(true);
+      const regclientBin = await install.download('latest');
+      expect(fs.existsSync(regclientBin)).toBe(true);
     },
     100000
   );
@@ -96,14 +91,14 @@ describe('getDownloadVersion', () => {
   it('returns latest download version', async () => {
     const version = await Install.getDownloadVersion('latest');
     expect(version.version).toEqual('latest');
-    expect(version.downloadURL).toEqual('https://github.com/crazy-max/undock/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/undock-releases.json');
+    expect(version.downloadURL).toEqual('https://github.com/regclient/regclient/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json');
   });
-  it('returns v0.6.0 download version', async () => {
-    const version = await Install.getDownloadVersion('v0.6.0');
-    expect(version.version).toEqual('v0.6.0');
-    expect(version.downloadURL).toEqual('https://github.com/crazy-max/undock/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/undock-releases.json');
+  it('returns v0.8.1 download version', async () => {
+    const version = await Install.getDownloadVersion('v0.8.1');
+    expect(version.version).toEqual('v0.8.1');
+    expect(version.downloadURL).toEqual('https://github.com/regclient/regclient/releases/download/v%s/%s');
+    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json');
   });
 });
 
@@ -114,16 +109,16 @@ describe('getRelease', () => {
     expect(release).not.toBeNull();
     expect(release?.tag_name).not.toEqual('');
   });
-  it('returns v0.6.0 GitHub release', async () => {
-    const version = await Install.getDownloadVersion('v0.6.0');
+  it('returns v0.8.1 GitHub release', async () => {
+    const version = await Install.getDownloadVersion('v0.8.1');
     const release = await Install.getRelease(version);
     expect(release).not.toBeNull();
-    expect(release?.id).toEqual(121362767);
-    expect(release?.tag_name).toEqual('v0.6.0');
-    expect(release?.html_url).toEqual('https://github.com/crazy-max/undock/releases/tag/v0.6.0');
+    expect(release?.id).toEqual(199719231);
+    expect(release?.tag_name).toEqual('v0.8.1');
+    expect(release?.html_url).toEqual('https://github.com/regclient/regclient/releases/tag/v0.8.1');
   });
   it('unknown release', async () => {
     const version = await Install.getDownloadVersion('foo');
-    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find Undock release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/undock-releases.json'));
+    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find regclient release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json'));
   });
 });
