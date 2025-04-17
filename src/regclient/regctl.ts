@@ -19,8 +19,15 @@ import * as semver from 'semver';
 
 import {Exec} from '../exec';
 
+import {Manifest} from '../types/oci/manifest';
+
 export interface RegctlOpts {
   binPath?: string;
+}
+
+export interface RegctlManifestGetOpts {
+  image: string;
+  platform?: string;
 }
 
 export class Regctl {
@@ -32,6 +39,18 @@ export class Regctl {
     this.binPath = opts?.binPath || 'regctl';
     this._version = '';
     this._versionOnce = false;
+  }
+
+  public async manifestGet(opts: RegctlManifestGetOpts): Promise<Manifest> {
+    return await Exec.getExecOutput(this.binPath, ['manifest', 'get', opts.image, `--platform=${opts.platform ?? 'local'}`, `--format={{json .}}`], {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return <Manifest>JSON.parse(res.stdout.trim());
+    });
   }
 
   public async isAvailable(): Promise<boolean> {

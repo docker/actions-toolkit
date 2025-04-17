@@ -20,6 +20,26 @@ import * as semver from 'semver';
 import {Exec} from '../../src/exec';
 import {Regctl} from '../../src/regclient/regctl';
 
+describe('manifestGet', () => {
+  // prettier-ignore
+  test.each([
+    ['moby/moby-bin:latest'],
+    ['crazymax/undock:latest'],
+    ['crazymax/diun:4.17.0'],
+  ])('given %p', async image => {
+    const regctl = new Regctl();
+    const manifest = await regctl.manifestGet({
+      image: image,
+    });
+    console.log(`${image}: ${JSON.stringify(manifest, null, 2)}`);
+    expect(manifest).not.toBeNull();
+    expect(manifest?.config).toBeDefined();
+    expect(manifest?.config.digest).not.toEqual('');
+    expect(manifest?.layers).toBeDefined();
+    expect(manifest?.layers.length).toBeGreaterThan(0);
+  });
+});
+
 describe('isAvailable', () => {
   it('checks regctl is available', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
