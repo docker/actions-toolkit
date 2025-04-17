@@ -17,12 +17,9 @@
 import {describe, expect, it} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
-import path from 'path';
 
 import {Undock} from '../../src/undock/undock';
 import {Install as UndockInstall} from '../../src/undock/install';
-
-const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-itg-'));
 
 describe('run', () => {
   it('extracts moby/moby-bin:26.1.5', async () => {
@@ -41,9 +38,8 @@ describe('run', () => {
       (async () => {
         // prettier-ignore
         await undock.run({
-          source: 'moby/moby-bin:26.1.5',
-          dist: tmpDir,
-          all: true
+          source: 'docker/buildx-bin:0.23.0',
+          dist: os.tmpdir()
         });
       })()
     ).resolves.not.toThrow();
