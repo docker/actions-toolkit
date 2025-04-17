@@ -25,6 +25,11 @@ export interface RegctlOpts {
   binPath?: string;
 }
 
+export interface RegctlBlobGetOpts {
+  repository: string;
+  digest: string;
+}
+
 export interface RegctlManifestGetOpts {
   image: string;
   platform?: string;
@@ -39,6 +44,19 @@ export class Regctl {
     this.binPath = opts?.binPath || 'regctl';
     this._version = '';
     this._versionOnce = false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async blobGet(opts: RegctlBlobGetOpts): Promise<any> {
+    return await Exec.getExecOutput(this.binPath, ['blob', 'get', opts.repository, opts.digest], {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return res.stdout;
+    });
   }
 
   public async manifestGet(opts: RegctlManifestGetOpts): Promise<Manifest> {
