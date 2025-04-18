@@ -14,31 +14,122 @@
  * limitations under the License.
  */
 
-export interface ExportRecordOpts {
-  refs: Array<string>;
-  image?: string;
+export interface InspectOpts {
+  ref?: string;
+  builder?: string;
 }
 
-export interface ExportRecordResponse {
+export type BuildStatus = 'completed' | 'running' | 'failed' | 'canceled';
+
+export interface InspectResponse {
+  Name: string;
+  Ref: string;
+
+  Context?: string;
+  Dockerfile?: string;
+  VCSRepository?: string;
+  VCSRevision?: string;
+  Target?: string;
+  Platform?: Array<string>;
+  KeepGitDir?: boolean;
+
+  NamedContexts?: Array<InspectKeyValueOutput>;
+
+  StartedAt?: Date;
+  CompletedAt?: Date;
+  Duration: number;
+  Status: BuildStatus;
+  Error?: InspectErrorOutput;
+
+  NumCompletedSteps: number;
+  NumTotalSteps: number;
+  NumCachedSteps: number;
+
+  BuildArgs?: Array<InspectKeyValueOutput>;
+  Labels?: Array<InspectKeyValueOutput>;
+
+  Config?: InspectConfigOutput;
+
+  Materials?: InspectMaterialOutput[];
+  Attachments?: InspectAttachmentOutput[];
+
+  Errors?: Array<string>;
+}
+
+export interface InspectConfigOutput {
+  Network?: string;
+  ExtraHosts?: Array<string>;
+  Hostname?: string;
+  CgroupParent?: string;
+  ImageResolveMode?: string;
+  MultiPlatform?: boolean;
+  NoCache?: boolean;
+  NoCacheFilter?: Array<string>;
+
+  ShmSize?: string;
+  Ulimit?: string;
+  CacheMountNS?: string;
+  DockerfileCheckConfig?: string;
+  SourceDateEpoch?: string;
+  SandboxHostname?: string;
+
+  RestRaw?: Array<InspectKeyValueOutput>;
+}
+
+export interface InspectMaterialOutput {
+  URI?: string;
+  Digests?: Array<string>;
+}
+
+export interface InspectAttachmentOutput {
+  Digest?: string;
+  Platform?: string;
+  Type?: string;
+}
+
+export interface InspectErrorOutput {
+  Code?: number;
+  Message?: string;
+  Name?: string;
+  Logs?: Array<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Sources?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Stack?: any;
+}
+
+export interface InspectKeyValueOutput {
+  Name?: string;
+  Value?: string;
+}
+
+export interface ExportOpts {
+  refs: Array<string>;
+  noSummaries?: boolean;
+  image?: string;
+  useContainer?: boolean;
+}
+
+export interface ExportResponse {
   dockerbuildFilename: string;
   dockerbuildSize: number;
-  summaries: Summaries;
   builderName: string;
   nodeName: string;
   refs: Array<string>;
+  summaries?: Summaries;
 }
 
 export interface Summaries {
-  [ref: string]: RecordSummary;
+  [ref: string]: Summary;
 }
 
-export interface RecordSummary {
+export interface Summary {
   name: string;
   status: string;
   duration: string;
   numCachedSteps: number;
   numTotalSteps: number;
   numCompletedSteps: number;
-  frontendAttrs: Record<string, string>;
+  frontendAttrs?: Record<string, string>;
   error?: string;
 }
