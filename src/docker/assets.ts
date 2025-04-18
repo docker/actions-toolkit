@@ -257,7 +257,7 @@ provision:
         x86_64) arch=amd64;;
         aarch64) arch=arm64;;
       esac
-      url="https://github.com/crazy-max/undock/releases/download/v0.8.0/undock_0.8.0_linux_$arch.tar.gz"
+      url="https://github.com/crazy-max/undock/releases/download/v0.10.0/undock_0.10.0_linux_$arch.tar.gz"
 
       wget "$url" -O /tmp/undock.tar.gz
       tar -C /usr/local/bin -xvf /tmp/undock.tar.gz
