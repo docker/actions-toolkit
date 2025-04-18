@@ -36,20 +36,18 @@ describe('download', () => {
     ['v2.32.4', true],
     ['latest', true]
   ])(
-    'acquires %p of compose (standalone: %p)', async (version, standalone) => {
-      const install = new Install({standalone: standalone});
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-      let composeBin: string;
-      if (standalone) {
-        composeBin = await install.installStandalone(toolPath, tmpDir);
-      } else {
-        composeBin = await install.installPlugin(toolPath, tmpDir);
-      }
-      expect(fs.existsSync(composeBin)).toBe(true);
-    },
-    100000
-  );
+  'acquires %p of compose (standalone: %p)', async (version, standalone) => {
+    const install = new Install({standalone: standalone});
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+    let composeBin: string;
+    if (standalone) {
+      composeBin = await install.installStandalone(toolPath, tmpDir);
+    } else {
+      composeBin = await install.installPlugin(toolPath, tmpDir);
+    }
+    expect(fs.existsSync(composeBin)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -57,26 +55,22 @@ describe('download', () => {
     ['v2.31.0'],
     ['v2.32.4'],
   ])(
-    'acquires %p of compose with cache', async (version) => {
-      const install = new Install({standalone: false});
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-    },
-    100000
-  );
+  'acquires %p of compose with cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
     ['v2.27.1'],
     ['v2.28.0'],
   ])(
-    'acquires %p of compose without cache', async (version) => {
-      const install = new Install({standalone: false});
-      const toolPath = await install.download(version, true);
-      expect(fs.existsSync(toolPath)).toBe(true);
-    },
-    100000
-  );
+  'acquires %p of compose without cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version, true);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  }, 100000);
 
   // TODO: add tests for arm
   // prettier-ignore
@@ -90,15 +84,13 @@ describe('download', () => {
     ['linux', 'ppc64'],
     ['linux', 's390x'],
   ])(
-    'acquires compose for %s/%s', async (os, arch) => {
-      jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-      jest.spyOn(osm, 'arch').mockImplementation(() => arch);
-      const install = new Install();
-      const composeBin = await install.download('latest');
-      expect(fs.existsSync(composeBin)).toBe(true);
-    },
-    100000
-  );
+  'acquires compose for %s/%s', async (os, arch) => {
+    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
+    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    const install = new Install();
+    const composeBin = await install.download('latest');
+    expect(fs.existsSync(composeBin)).toBe(true);
+  }, 100000);
 });
 
 describe('getDownloadVersion', () => {

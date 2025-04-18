@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, beforeEach, afterEach, it} from '@jest/globals';
+import {describe, expect, jest, test, beforeEach, afterEach, it, beforeAll} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -22,8 +22,24 @@ import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
+import {Regctl} from '../../src/regclient/regctl';
+import {Install as RegclientInstall} from '../../src/regclient/install';
+import {Undock} from '../../src/undock/undock';
+import {Install as UndockInstall} from '../../src/undock/install';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
+
+beforeAll(async () => {
+  process.env.HOME = tmpDir;
+
+  const undockInstall = new UndockInstall();
+  const undockBinPath = await undockInstall.download('v0.10.0', true);
+  await undockInstall.install(undockBinPath);
+
+  const regclientInstall = new RegclientInstall();
+  const regclientBinPath = await regclientInstall.download('v0.8.2', true);
+  await regclientInstall.install(regclientBinPath);
+}, 100000);
 
 afterEach(function () {
   rimraf.sync(tmpDir);
@@ -64,6 +80,8 @@ describe('download', () => {
     const install = new Install({
       source: source,
       runDir: tmpDir,
+      regctl: new Regctl(),
+      undock: new Undock()
     });
     const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);

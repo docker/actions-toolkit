@@ -36,14 +36,12 @@ describe('download', () => {
     ['latest']
   ])(
   'acquires %p of regclient', async (version) => {
-      const install = new Install();
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-      const regclientBin = await install.install(toolPath, tmpDir);
-      expect(fs.existsSync(regclientBin)).toBe(true);
-    },
-    100000
-  );
+    const install = new Install();
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+    const regclientBin = await install.install(toolPath, tmpDir);
+    expect(fs.existsSync(regclientBin)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -54,7 +52,7 @@ describe('download', () => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
-  });
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -64,7 +62,7 @@ describe('download', () => {
     const install = new Install();
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);
-  });
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -77,14 +75,12 @@ describe('download', () => {
     ['linux', 's390x'],
   ])(
   'acquires regclient for %s/%s', async (os, arch) => {
-      jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-      jest.spyOn(osm, 'arch').mockImplementation(() => arch);
-      const install = new Install();
-      const regclientBin = await install.download('latest');
-      expect(fs.existsSync(regclientBin)).toBe(true);
-    },
-    100000
-  );
+    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
+    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    const install = new Install();
+    const regclientBin = await install.download('latest');
+    expect(fs.existsSync(regclientBin)).toBe(true);
+  }, 100000);
 });
 
 describe('getDownloadVersion', () => {
