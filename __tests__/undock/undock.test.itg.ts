@@ -1,0 +1,51 @@
+/**
+ * Copyright 2025 actions-toolkit authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {describe, expect, it} from '@jest/globals';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+import {Undock} from '../../src/undock/undock';
+import {Install as UndockInstall} from '../../src/undock/install';
+
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-itg-'));
+
+describe('run', () => {
+  it('extracts moby/moby-bin:26.1.5', async () => {
+    const install = new UndockInstall();
+    const toolPath = await install.download('latest');
+    if (!fs.existsSync(toolPath)) {
+      throw new Error('toolPath does not exist');
+    }
+    const binPath = await install.install(toolPath);
+    if (!fs.existsSync(binPath)) {
+      throw new Error('binPath does not exist');
+    }
+
+    const undock = new Undock();
+    await expect(
+      (async () => {
+        // prettier-ignore
+        await undock.run({
+          source: 'moby/moby-bin:26.1.5',
+          dist: tmpDir,
+          all: true
+        });
+      })()
+    ).resolves.not.toThrow();
+  }, 100000);
+});
