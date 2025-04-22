@@ -37,19 +37,17 @@ describe('download', () => {
     ['latest', true]
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
-      const install = new Install({standalone: standalone});
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-      let buildxBin: string;
-      if (standalone) {
-        buildxBin = await install.installStandalone(toolPath, tmpDir);
-      } else {
-        buildxBin = await install.installPlugin(toolPath, tmpDir);
-      }
-      expect(fs.existsSync(buildxBin)).toBe(true);
-    },
-    100000
-  );
+    const install = new Install({standalone: standalone});
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+    let buildxBin: string;
+    if (standalone) {
+      buildxBin = await install.installStandalone(toolPath, tmpDir);
+    } else {
+      buildxBin = await install.installPlugin(toolPath, tmpDir);
+    }
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -57,26 +55,22 @@ describe('download', () => {
     ['v0.9.0'],
     ['v0.10.5'],
   ])(
-    'acquires %p of buildx with cache', async (version) => {
-      const install = new Install({standalone: false});
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-    },
-    100000
-  );
+  'acquires %p of buildx with cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
     ['v0.11.2'],
     ['v0.12.0'],
   ])(
-    'acquires %p of buildx without cache', async (version) => {
-      const install = new Install({standalone: false});
-      const toolPath = await install.download(version, true);
-      expect(fs.existsSync(toolPath)).toBe(true);
-    },
-    100000
-  );
+  'acquires %p of buildx without cache', async (version) => {
+    const install = new Install({standalone: false});
+    const toolPath = await install.download(version, true);
+    expect(fs.existsSync(toolPath)).toBe(true);
+  }, 100000);
 
   // TODO: add tests for arm
   // prettier-ignore
@@ -90,15 +84,13 @@ describe('download', () => {
     ['linux', 'ppc64'],
     ['linux', 's390x'],
   ])(
-    'acquires buildx for %s/%s', async (os, arch) => {
-      jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-      jest.spyOn(osm, 'arch').mockImplementation(() => arch);
-      const install = new Install();
-      const buildxBin = await install.download('latest');
-      expect(fs.existsSync(buildxBin)).toBe(true);
-    },
-    100000
-  );
+  'acquires buildx for %s/%s', async (os, arch) => {
+    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
+    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    const install = new Install();
+    const buildxBin = await install.download('latest');
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
 });
 
 describe('build', () => {

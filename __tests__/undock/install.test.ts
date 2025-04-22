@@ -37,14 +37,12 @@ describe('download', () => {
     ['latest']
   ])(
   'acquires %p of undock', async (version) => {
-      const install = new Install();
-      const toolPath = await install.download(version);
-      expect(fs.existsSync(toolPath)).toBe(true);
-      const undockBin = await install.install(toolPath, tmpDir);
-      expect(fs.existsSync(undockBin)).toBe(true);
-    },
-    100000
-  );
+    const install = new Install();
+    const toolPath = await install.download(version);
+    expect(fs.existsSync(toolPath)).toBe(true);
+    const undockBin = await install.install(toolPath, tmpDir);
+    expect(fs.existsSync(undockBin)).toBe(true);
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -56,7 +54,7 @@ describe('download', () => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
-  });
+  }, 100000);
 
   // prettier-ignore
   test.each([
@@ -67,7 +65,7 @@ describe('download', () => {
     const install = new Install();
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);
-  });
+  }, 100000);
 
   // TODO: add tests for arm
   // prettier-ignore
@@ -82,14 +80,12 @@ describe('download', () => {
     ['linux', 's390x'],
   ])(
   'acquires undock for %s/%s', async (os, arch) => {
-      jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-      jest.spyOn(osm, 'arch').mockImplementation(() => arch);
-      const install = new Install();
-      const undockBin = await install.download('latest');
-      expect(fs.existsSync(undockBin)).toBe(true);
-    },
-    100000
-  );
+    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
+    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    const install = new Install();
+    const undockBin = await install.download('latest');
+    expect(fs.existsSync(undockBin)).toBe(true);
+  }, 100000);
 });
 
 describe('getDownloadVersion', () => {
