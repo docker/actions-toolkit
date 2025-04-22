@@ -28,11 +28,13 @@ import * as tc from '@actions/tool-cache';
 
 import {Context} from '../context';
 import {Docker} from './docker';
+import {Regctl} from '../regclient/regctl';
+import {Undock} from '../undock/undock';
 import {Exec} from '../exec';
 import {Util} from '../util';
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
+
 import {GitHubRelease} from '../types/github';
-import {HubRepository} from '../hubRepository';
 import {Image} from '../types/oci/config';
 
 export interface InstallSourceImage {
@@ -57,6 +59,9 @@ export interface InstallOpts {
   daemonConfig?: string;
   rootless?: boolean;
   localTCPPort?: number;
+
+  regctl: Regctl;
+  undock: Undock;
 }
 
 interface LimaImage {
@@ -72,6 +77,8 @@ export class Install {
   private readonly daemonConfig?: string;
   private readonly rootless: boolean;
   private readonly localTCPPort?: number;
+  private readonly regctl: Regctl;
+  private readonly undock: Undock;
 
   private _version: string | undefined;
   private _toolDir: string | undefined;
@@ -91,34 +98,12 @@ export class Install {
     this.daemonConfig = opts.daemonConfig;
     this.rootless = opts.rootless || false;
     this.localTCPPort = opts.localTCPPort;
+    this.regctl = opts.regctl;
+    this.undock = opts.undock;
   }
 
   get toolDir(): string {
     return this._toolDir || Context.tmpDir();
-  }
-
-  async downloadStaticArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
-    const release: GitHubRelease = await Install.getRelease(src.version);
-    this._version = release.tag_name.replace(/^v+|v+$/g, '');
-    core.debug(`docker.Install.download version: ${this._version}`);
-
-    const downloadURL = this.downloadURL(component, this._version, src.channel);
-    core.info(`Downloading ${downloadURL}`);
-
-    const downloadPath = await tc.downloadTool(downloadURL);
-    core.debug(`docker.Install.download downloadPath: ${downloadPath}`);
-
-    let extractFolder;
-    if (os.platform() == 'win32') {
-      extractFolder = await tc.extractZip(downloadPath, extractFolder);
-    } else {
-      extractFolder = await tc.extractTar(downloadPath, extractFolder);
-    }
-    if (Util.isDirectory(path.join(extractFolder, component))) {
-      extractFolder = path.join(extractFolder, component);
-    }
-    core.debug(`docker.Install.download extractFolder: ${extractFolder}`);
-    return extractFolder;
   }
 
   public async download(): Promise<string> {
@@ -128,39 +113,9 @@ export class Install {
 
     switch (this.source.type) {
       case 'image': {
-        const tag = this.source.tag;
-        this._version = tag;
+        this._version = this.source.tag;
         cacheKey = `docker-image`;
-
-        core.info(`Downloading docker cli from dockereng/cli-bin:${tag}`);
-        const cli = await HubRepository.build('dockereng/cli-bin');
-        extractFolder = await cli.extractImage(tag);
-
-        const moby = await HubRepository.build('moby/moby-bin');
-        if (['win32', 'linux'].includes(platform)) {
-          core.info(`Downloading dockerd from moby/moby-bin:${tag}`);
-          await moby.extractImage(tag, extractFolder);
-        } else if (platform == 'darwin') {
-          // On macOS, the docker daemon binary will be downloaded inside the lima VM.
-          // However, we will get the exact git revision from the image config
-          // to get the matching systemd unit files.
-          core.info(`Getting git revision from moby/moby-bin:${tag}`);
-
-          // There's no macOS image for moby/moby-bin - a linux daemon is run inside lima.
-          const manifest = await moby.getPlatformManifest(tag, 'linux');
-
-          const config = await moby.getJSONBlob<Image>(manifest.config.digest);
-          core.debug(`Config ${JSON.stringify(config.config)}`);
-
-          this.gitCommit = config.config?.Labels?.['org.opencontainers.image.revision'];
-          if (!this.gitCommit) {
-            core.warning(`No git revision can be determined from the image. Will use master.`);
-            this.gitCommit = 'master';
-          }
-          core.info(`Git revision is ${this.gitCommit}`);
-        } else {
-          core.warning(`dockerd not supported on ${platform}, only the Docker cli will be available`);
-        }
+        extractFolder = await this.downloadSourceImage(platform);
         break;
       }
       case 'archive': {
@@ -170,10 +125,10 @@ export class Install {
         this._version = version;
 
         core.info(`Downloading Docker ${version} from ${this.source.channel} at download.docker.com`);
-        extractFolder = await this.downloadStaticArchive('docker', this.source);
+        extractFolder = await this.downloadSourceArchive('docker', this.source);
         if (this.rootless) {
           core.info(`Downloading Docker rootless extras ${version} from ${this.source.channel} at download.docker.com`);
-          const extrasFolder = await this.downloadStaticArchive('docker-rootless-extras', this.source);
+          const extrasFolder = await this.downloadSourceArchive('docker-rootless-extras', this.source);
           fs.readdirSync(extrasFolder).forEach(file => {
             const src = path.join(extrasFolder, file);
             const dest = path.join(extractFolder, file);
@@ -191,7 +146,9 @@ export class Install {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       files.forEach(function (file, index) {
-        fs.chmodSync(path.join(extractFolder, file), '0755');
+        if (!Util.isDirectory(path.join(extractFolder, file))) {
+          fs.chmodSync(path.join(extractFolder, file), '0755');
+        }
       });
     });
 
@@ -201,6 +158,72 @@ export class Install {
 
     this._toolDir = tooldir;
     return tooldir;
+  }
+
+  private async downloadSourceImage(platform: string): Promise<string> {
+    const dest = path.join(Context.tmpDir(), 'docker-install-image');
+    const cliImage = `dockereng/cli-bin:${this._version}`;
+    const engineImage = `moby/moby-bin:${this._version}`;
+
+    core.info(`Downloading Docker CLI from ${cliImage}`);
+    await this.undock.run({
+      source: cliImage,
+      dist: dest
+    });
+
+    if (['win32', 'linux'].includes(platform)) {
+      core.info(`Downloading Docker engine from ${engineImage}`);
+      await this.undock.run({
+        source: engineImage,
+        dist: dest
+      });
+    } else if (platform == 'darwin') {
+      // On macOS, the docker daemon binary will be downloaded inside the lima VM.
+      // However, we will get the exact git revision from the image config
+      // to get the matching systemd unit files. There's no macOS image for
+      // moby/moby-bin - a linux daemon is run inside lima.
+      try {
+        const engineImageConfig = await this.imageConfig(engineImage, 'linux/arm64');
+        core.debug(`docker.Install.downloadSourceImage engineImageConfig: ${JSON.stringify(engineImageConfig)}`);
+        this.gitCommit = engineImageConfig.config?.Labels?.['org.opencontainers.image.revision'];
+        if (!this.gitCommit) {
+          throw new Error(`No git revision can be determined from the image`);
+        }
+      } catch (e) {
+        core.warning(e);
+        this.gitCommit = 'master';
+      }
+
+      core.debug(`docker.Install.downloadSourceImage gitCommit: ${this.gitCommit}`);
+    } else {
+      core.warning(`Docker engine not supported on ${platform}, only the Docker cli will be available`);
+    }
+
+    return dest;
+  }
+
+  private async downloadSourceArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
+    const release: GitHubRelease = await Install.getRelease(src.version);
+    this._version = release.tag_name.replace(/^v+|v+$/g, '');
+    core.debug(`docker.Install.downloadSourceArchive version: ${this._version}`);
+
+    const downloadURL = this.downloadURL(component, this._version, src.channel);
+    core.info(`Downloading ${downloadURL}`);
+
+    const downloadPath = await tc.downloadTool(downloadURL);
+    core.debug(`docker.Install.downloadSourceArchive downloadPath: ${downloadPath}`);
+
+    let extractFolder;
+    if (os.platform() == 'win32') {
+      extractFolder = await tc.extractZip(downloadPath, extractFolder);
+    } else {
+      extractFolder = await tc.extractTar(downloadPath, extractFolder);
+    }
+    if (Util.isDirectory(path.join(extractFolder, component))) {
+      extractFolder = path.join(extractFolder, component);
+    }
+    core.debug(`docker.Install.downloadSourceArchive extractFolder: ${extractFolder}`);
+    return extractFolder;
   }
 
   public async install(): Promise<string> {
@@ -708,5 +731,21 @@ EOF`,
       });
     }
     return res;
+  }
+
+  private async imageConfig(image: string, platform?: string): Promise<Image> {
+    const manifest = await this.regctl.manifestGet({
+      image: image,
+      platform: platform
+    });
+    const configDigest = manifest?.config?.digest;
+    if (!configDigest) {
+      throw new Error(`No config digest found for image ${image}`);
+    }
+    const blob = await this.regctl.blobGet({
+      repository: image,
+      digest: configDigest
+    });
+    return <Image>JSON.parse(blob);
   }
 }
