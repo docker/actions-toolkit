@@ -22,6 +22,8 @@ import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
+import {Regctl} from '../../src/regclient/regctl';
+import {Undock} from '../../src/undock/undock';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 
@@ -64,6 +66,8 @@ describe('download', () => {
     const install = new Install({
       source: source,
       runDir: tmpDir,
+      regctl: new Regctl(),
+      undock: new Undock()
     });
     const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);
