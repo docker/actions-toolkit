@@ -19,7 +19,7 @@ import * as core from '@actions/core';
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
-import {BuilderInfo, GCPolicy, NodeInfo} from '../types/buildx/builder';
+import {BuilderInfo, Device, GCPolicy, NodeInfo} from '../types/buildx/builder';
 
 export interface BuilderOpts {
   buildx?: Buildx;
@@ -89,6 +89,7 @@ export class Builder {
     let parsingType: string | undefined;
     let currentNode: NodeInfo = {};
     let currentGCPolicy: GCPolicy | undefined;
+    let currentDevice: Device | undefined;
     let currentFile: string | undefined;
     for (const line of data.trim().split(`\n`)) {
       const [key, ...rest] = line.split(':');
@@ -172,6 +173,10 @@ export class Builder {
           parsingType = 'label';
           currentNode.labels = {};
           break;
+        case lkey == 'devices':
+          parsingType = 'devices';
+          currentNode.devices = currentNode.devices || [];
+          break;
         case lkey.startsWith('gc policy rule#'):
           parsingType = 'gcpolicy';
           if (currentNode.gcPolicy && currentGCPolicy) {
@@ -186,6 +191,10 @@ export class Builder {
           currentNode.files[currentFile] = '';
           break;
         default: {
+          if (parsingType && parsingType !== 'devices' && currentNode.devices && currentDevice) {
+            currentNode.devices.push(currentDevice);
+            currentDevice = undefined;
+          }
           switch (parsingType || '') {
             case 'features': {
               currentNode.features = currentNode.features || {};
@@ -195,6 +204,42 @@ export class Builder {
             case 'label': {
               currentNode.labels = currentNode.labels || {};
               currentNode.labels[key.trim()] = value;
+              break;
+            }
+            case 'devices': {
+              switch (lkey.trim()) {
+                case 'name': {
+                  if (currentNode.devices && currentDevice) {
+                    currentNode.devices.push(currentDevice);
+                  }
+                  currentDevice = {};
+                  currentDevice.name = value;
+                  break;
+                }
+                case 'on-demand': {
+                  if (currentDevice && value) {
+                    currentDevice.onDemand = value == 'true';
+                  }
+                  break;
+                }
+                case 'automatically allowed': {
+                  if (currentDevice && value) {
+                    currentDevice.autoAllow = value == 'true';
+                  }
+                  break;
+                }
+                case 'annotations': {
+                  if (currentDevice) {
+                    currentDevice.annotations = currentDevice.annotations || {};
+                  }
+                  break;
+                }
+                default: {
+                  if (currentDevice && currentDevice.annotations) {
+                    currentDevice.annotations[key.trim()] = value;
+                  }
+                }
+              }
               break;
             }
             case 'gcpolicy': {
@@ -219,6 +264,18 @@ export class Builder {
                   currentGCPolicy.keepBytes = value;
                   break;
                 }
+                case 'reserved space': {
+                  currentGCPolicy.reservedSpace = value;
+                  break;
+                }
+                case 'max used space': {
+                  currentGCPolicy.maxUsedSpace = value;
+                  break;
+                }
+                case 'min free space': {
+                  currentGCPolicy.minFreeSpace = value;
+                  break;
+                }
               }
               break;
             }
@@ -234,6 +291,9 @@ export class Builder {
           }
         }
       }
+    }
+    if (currentDevice && currentNode.devices) {
+      currentNode.devices.push(currentDevice);
     }
     if (currentGCPolicy && currentNode.gcPolicy) {
       currentNode.gcPolicy.push(currentGCPolicy);
