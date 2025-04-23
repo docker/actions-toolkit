@@ -19,7 +19,7 @@ import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
 import {BakeDefinition} from './buildx/bake';
-import {ExportRecordResponse} from './buildx/history';
+import {ExportResponse} from './buildx/history';
 
 export interface GitHubRelease {
   id: number;
@@ -57,7 +57,7 @@ export interface UploadArtifactResponse {
 }
 
 export interface BuildSummaryOpts {
-  exportRes: ExportRecordResponse;
+  exportRes: ExportResponse;
   uploadRes?: UploadArtifactResponse;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs?: any;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, test} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -30,7 +30,49 @@ const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
-maybe('exportBuild', () => {
+maybe('inspect', () => {
+  it('build', async () => {
+    const buildx = new Buildx();
+    const build = new Build({buildx: buildx});
+
+    fs.mkdirSync(tmpDir, {recursive: true});
+    await expect(
+      (async () => {
+        // prettier-ignore
+        const buildCmd = await buildx.getCommand([
+          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+          'build', '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+          '--metadata-file', build.getMetadataFilePath(),
+          fixturesDir
+        ]);
+        await Exec.exec(buildCmd.command, buildCmd.args);
+      })()
+    ).resolves.not.toThrow();
+
+    const metadata = build.resolveMetadata();
+    expect(metadata).toBeDefined();
+    const buildRef = build.resolveRef(metadata);
+    if (!buildRef) {
+      throw new Error('buildRef is undefined');
+    }
+    const [builderName, nodeName, ref] = buildRef.split('/');
+    expect(builderName).toBeDefined();
+    expect(nodeName).toBeDefined();
+    expect(ref).toBeDefined();
+
+    const history = new History({buildx: buildx});
+    const res = await history.inspect({
+      ref: ref,
+      builder: builderName
+    });
+
+    expect(res).toBeDefined();
+    expect(res?.Name).toBeDefined();
+    expect(res?.Ref).toBeDefined();
+  });
+});
+
+maybe('export', () => {
   // prettier-ignore
   test.each([
     [
@@ -50,7 +92,7 @@ maybe('exportBuild', () => {
         fixturesDir
       ],
     ]
-  ])('export build %p', async (_, bargs) => {
+  ])('export with build %p', async (_, bargs) => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -110,7 +152,7 @@ maybe('exportBuild', () => {
         'hello-matrix'
       ],
     ]
-  ])('export bake build %p', async (_, bargs) => {
+  ])('export with bake %p', async (_, bargs) => {
     const buildx = new Buildx();
     const bake = new Bake({buildx: buildx});
 
@@ -145,22 +187,8 @@ maybe('exportBuild', () => {
     expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
     expect(exportRes?.summaries).toBeDefined();
   });
-});
 
-maybe('exportBuild custom image', () => {
-  const originalEnv = process.env;
-  beforeEach(() => {
-    jest.resetModules();
-    process.env = {
-      ...originalEnv,
-      DOCKER_BUILD_EXPORT_BUILD_IMAGE: 'docker.io/dockereng/export-build:0.2.2'
-    };
-  });
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it('with custom image', async () => {
+  it('export using container', async () => {
     const buildx = new Buildx();
     const build = new Build({buildx: buildx});
 
@@ -185,7 +213,8 @@ maybe('exportBuild custom image', () => {
 
     const history = new History({buildx: buildx});
     const exportRes = await history.export({
-      refs: [buildRef ?? '']
+      refs: [buildRef ?? ''],
+      useContainer: true
     });
 
     expect(exportRes).toBeDefined();

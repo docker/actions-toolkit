@@ -269,56 +269,58 @@ export class GitHub {
     // Feedback survey
     sum.addRaw(`<p>`).addRaw(`Find this useful? `).addRaw(addLink('Let us know', 'https://docs.docker.com/feedback/gha-build-summary')).addRaw('</p>');
 
-    // Preview
-    sum.addRaw('<p>');
-    const summaryTableData: Array<Array<SummaryTableCell>> = [
-      [
-        {header: true, data: 'ID'},
-        {header: true, data: 'Name'},
-        {header: true, data: 'Status'},
-        {header: true, data: 'Cached'},
-        {header: true, data: 'Duration'}
-      ]
-    ];
-    let buildError: string | undefined;
-    for (const ref in opts.exportRes.summaries) {
-      if (Object.prototype.hasOwnProperty.call(opts.exportRes.summaries, ref)) {
-        const summary = opts.exportRes.summaries[ref];
-        // prettier-ignore
-        summaryTableData.push([
+    if (opts.exportRes.summaries) {
+      // Preview
+      sum.addRaw('<p>');
+      const summaryTableData: Array<Array<SummaryTableCell>> = [
+        [
+          {header: true, data: 'ID'},
+          {header: true, data: 'Name'},
+          {header: true, data: 'Status'},
+          {header: true, data: 'Cached'},
+          {header: true, data: 'Duration'}
+        ]
+      ];
+      let buildError: string | undefined;
+      for (const ref in opts.exportRes.summaries) {
+        if (Object.prototype.hasOwnProperty.call(opts.exportRes.summaries, ref)) {
+          const summary = opts.exportRes.summaries[ref];
+          // prettier-ignore
+          summaryTableData.push([
           {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
           {data: `<strong>${Util.stringToUnicodeEntities(summary.name)}</strong>`},
           {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
           {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
           {data: summary.duration}
         ]);
-        if (summary.error) {
-          buildError = summary.error;
+          if (summary.error) {
+            buildError = summary.error;
+          }
         }
       }
-    }
-    sum.addTable([...summaryTableData]);
-    sum.addRaw(`</p>`);
+      sum.addTable([...summaryTableData]);
+      sum.addRaw(`</p>`);
 
-    // Build error
-    if (buildError) {
-      sum.addRaw(`<blockquote>`);
-      if (Util.countLines(buildError) > 10) {
-        // prettier-ignore
-        sum
+      // Build error
+      if (buildError) {
+        sum.addRaw(`<blockquote>`);
+        if (Util.countLines(buildError) > 10) {
+          // prettier-ignore
+          sum
           .addRaw(`<details><summary><strong>Error</strong></summary>`)
             .addCodeBlock(he.encode(buildError), 'text')
           .addRaw(`</details>`);
-      } else {
-        // prettier-ignore
-        sum
+        } else {
+          // prettier-ignore
+          sum
           .addRaw(`<strong>Error</strong>`)
           .addBreak()
           .addRaw(`<p>`)
             .addCodeBlock(he.encode(buildError), 'text')
           .addRaw(`</p>`);
+        }
+        sum.addRaw(`</blockquote>`);
       }
-      sum.addRaw(`</blockquote>`);
     }
 
     // Build inputs
