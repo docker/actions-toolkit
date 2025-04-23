@@ -43,13 +43,14 @@ export class Context {
   }
 
   public static parseGitRef(ref: string, sha: string): string {
-    const setPullRequestHeadRef: boolean = !!(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF && process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF === 'true');
-    if (sha && ref && !ref.startsWith('refs/')) {
-      ref = `refs/heads/${ref}`;
+    if (!ref) {
+      if (!sha) {
+        throw new Error('Git reference or commit SHA is required');
+      }
+      return sha;
     }
-    if (sha && !ref.startsWith(`refs/pull/`)) {
-      ref = sha;
-    } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
+    const setPullRequestHeadRef: boolean = !!(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF && process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF === 'true');
+    if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
       ref = ref.replace(/\/merge$/g, '/head');
     }
     return ref;
