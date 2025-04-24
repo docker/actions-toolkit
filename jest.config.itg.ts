@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
-
-process.env = Object.assign({}, process.env, {
-  TEMP: tmpDir,
-  RUNNER_TEMP: path.join(tmpDir, 'runner-temp'),
-  RUNNER_TOOL_CACHE: path.join(tmpDir, 'runner-tool-cache')
-}) as {
-  [key: string]: string;
-};
-
 module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['js', 'ts'],
