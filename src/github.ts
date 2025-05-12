@@ -237,6 +237,16 @@ export class GitHub {
 
     const sum = core.summary.addHeading('Docker Build summary', 2);
 
+    if (opts.buildURL) {
+      // prettier-ignore
+      sum.addRaw(`<p>`)
+        .addRaw(`For a detailed look at the build, you can check the results at:`)
+      .addRaw('</p>')
+      .addRaw(`<p>`)
+        .addRaw(`:whale: ${addLink(`<strong>${opts.buildURL}</strong>`, opts.buildURL)}`)
+      .addRaw(`</p>`);
+    }
+
     if (opts.uploadRes) {
       // we just need the last two parts of the URL as they are always relative
       // to the workflow run URL otherwise URL could be broken if GitHub
@@ -246,17 +256,29 @@ export class GitHub {
       // https://github.com/docker/actions-toolkit/issues/367
       const artifactRelativeURL = `./${GitHub.runId}/${opts.uploadRes.url.split('/').slice(-2).join('/')}`;
 
+      if (opts.buildURL) {
+        // prettier-ignore
+        sum.addRaw(`<p>`)
+          .addRaw(`You can also download the following build record archive and import it into Docker Desktop's Builds view. `)
+          .addBreak()
+          .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
+          .addRaw(addLink('Learn more', 'https://www.docker.com/blog/new-beta-feature-deep-dive-into-github-actions-docker-builds-with-docker-desktop/?utm_source=github&utm_medium=actions'))
+        .addRaw('</p>')
+      } else {
+        // prettier-ignore
+        sum.addRaw(`<p>`)
+          .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
+          .addBreak()
+          .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
+          .addRaw(addLink('Learn more', 'https://www.docker.com/blog/new-beta-feature-deep-dive-into-github-actions-docker-builds-with-docker-desktop/?utm_source=github&utm_medium=actions'))
+        .addRaw('</p>')
+      }
+
       // prettier-ignore
       sum.addRaw(`<p>`)
-        .addRaw(`For a detailed look at the build, download the following build record archive and import it into Docker Desktop's Builds view. `)
-        .addBreak()
-        .addRaw(`Build records include details such as timing, dependencies, results, logs, traces, and other information about a build. `)
-        .addRaw(addLink('Learn more', 'https://www.docker.com/blog/new-beta-feature-deep-dive-into-github-actions-docker-builds-with-docker-desktop/?utm_source=github&utm_medium=actions'))
-      .addRaw('</p>')
-      .addRaw(`<p>`)
         .addRaw(`:arrow_down: ${addLink(`<strong>${Util.stringToUnicodeEntities(opts.uploadRes.filename)}</strong>`, artifactRelativeURL)} (${Util.formatFileSize(opts.uploadRes.size)} - includes <strong>${refsSize} build record${refsSize > 1 ? 's' : ''}</strong>)`)
       .addRaw(`</p>`);
-    } else {
+    } else if (opts.exportRes.summaries) {
       // prettier-ignore
       sum.addRaw(`<p>`)
         .addRaw(`The following table provides a brief summary of your build.`)
