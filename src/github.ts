@@ -31,7 +31,7 @@ import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
-import {TransferProgressEvent} from '@azure/core-http';
+import {type TransferProgressEvent} from '@azure/core-http';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
@@ -346,5 +346,33 @@ export class GitHub {
 
     core.info(`Writing summary`);
     await sum.addSeparator().write();
+  }
+
+  public static async writeCloudSummary(refs: Array<{platform: string; refId: string}>) {
+    if (refs.length > 0) {
+      const sum = core.summary.addHeading('Docker Build Cloud summary', 2);
+      sum.addRaw('<p>Your builds were executed using Docker Build Cloud. You can view detailed build information, logs, and results for each build below:</p>');
+
+      // Build the table rows
+      const tableRows = [
+        [
+          {header: true, data: 'Platform'},
+          {header: true, data: 'Build ID'},
+          {header: true, data: 'Link'}
+        ]
+      ];
+      for (const {platform, refId} of refs) {
+        const buildUrl = `https://app.docker.com/build/accounts/docker/builds/${platform}/${refId}`;
+        tableRows.push([
+          {header: false, data: platform},
+          {header: false, data: refId},
+          {header: false, data: `<a href="${buildUrl}">${buildUrl}</a>`}
+        ]);
+        core.info(`View build details: ${buildUrl}`);
+      }
+      sum.addTable(tableRows);
+      sum.addRaw('<p>').addRaw('For more information about Docker Build Cloud, see ').addLink('the documentation', 'https://docs.docker.com/build/cloud/').addRaw('.').addRaw('</p>');
+      await sum.addSeparator().write();
+    }
   }
 }
