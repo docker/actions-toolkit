@@ -105,8 +105,11 @@ export class History {
       return await this.exportLegacy(builderName, nodeName, refs, outDir, opts.image);
     }
 
-    // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
-    await Util.sleep(3);
+    if (await this.buildx.versionSatisfies('<0.24.0')) {
+      // wait 3 seconds to ensure build records are finalized: https://github.com/moby/buildkit/pull/5109
+      // not necessary since buildx 0.24.0: https://github.com/docker/buildx/pull/3152
+      await Util.sleep(3);
+    }
 
     const summaries: Summaries = {};
     if (!opts.noSummaries) {
@@ -139,7 +142,12 @@ export class History {
 
     const dockerbuildPath = path.join(outDir, `${History.exportFilename(refs)}.dockerbuild`);
 
-    const cmd = await this.getExportCommand(['--builder', builderName, '--output', dockerbuildPath, ...refs]);
+    const exportArgs = ['--builder', builderName, '--output', dockerbuildPath, ...refs];
+    if (await this.buildx.versionSatisfies('>=0.24.0')) {
+      exportArgs.push('--finalize');
+    }
+
+    const cmd = await this.getExportCommand(exportArgs);
     await Exec.getExecOutput(cmd.command, cmd.args);
 
     const dockerbuildStats = fs.statSync(dockerbuildPath);
