@@ -5,6 +5,30 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v28.1.1",
     "assets": []
   },
+  "v25.0.10": {
+    "id": 218958962,
+    "tag_name": "v25.0.10",
+    "html_url": "https://github.com/moby/moby/releases/tag/v25.0.10",
+    "assets": []
+  },
+  "v25.0.9": {
+    "id": 218957753,
+    "tag_name": "v25.0.9",
+    "html_url": "https://github.com/moby/moby/releases/tag/v25.0.9",
+    "assets": []
+  },
+  "v23.0.18": {
+    "id": 218962082,
+    "tag_name": "v23.0.18",
+    "html_url": "https://github.com/moby/moby/releases/tag/v23.0.18",
+    "assets": []
+  },
+  "v23.0.17": {
+    "id": 218961915,
+    "tag_name": "v23.0.17",
+    "html_url": "https://github.com/moby/moby/releases/tag/v23.0.17",
+    "assets": []
+  },
   "v28.1.1": {
     "id": 213296967,
     "tag_name": "v28.1.1",
