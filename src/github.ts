@@ -31,13 +31,14 @@ import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
+import * as httpm from '@actions/http-client';
 import {TransferProgressEvent} from '@azure/core-http';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {Util} from './util';
 
-import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
+import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
 
 export interface GitHubOpts {
   token?: string;
@@ -47,11 +48,36 @@ export class GitHub {
   public readonly octokit: InstanceType<typeof Octokit>;
 
   constructor(opts?: GitHubOpts) {
-    this.octokit = github.getOctokit(`${opts?.token}`);
+    this.octokit = github.getOctokit(`${opts?.token || process.env.GITHUB_TOKEN}`);
   }
 
   public repoData(): Promise<GitHubRepo> {
     return this.octokit.rest.repos.get({...github.context.repo}).then(response => response.data as GitHubRepo);
+  }
+
+  public async releases(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
+    let dt: string;
+    try {
+      const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
+      const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+      const httpResp: httpm.HttpClientResponse = await http.get(url);
+      dt = await httpResp.readBody();
+      const statusCode = httpResp.message.statusCode || 500;
+      if (statusCode >= 400) {
+        core.info(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${dt}, fallback to GitHub API`);
+        const apiResp = await this.octokit.rest.repos.getContent({
+          owner: opts.owner,
+          repo: opts.repo,
+          ref: opts.ref,
+          path: opts.path
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dt = Buffer.from((apiResp.data as any).content, (apiResp.data as any).encoding).toString();
+      }
+    } catch (error) {
+      throw new Error(`Failed to get ${name} releases: ${error instanceof Error ? error.message : error}`);
+    }
+    return <Record<string, GitHubRelease>>JSON.parse(dt);
   }
 
   static get context(): Context {
