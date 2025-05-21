@@ -60,8 +60,8 @@ export interface InstallOpts {
   rootless?: boolean;
   localTCPPort?: number;
 
-  regctl: Regctl;
-  undock: Undock;
+  regctl?: Regctl;
+  undock?: Undock;
 }
 
 interface LimaImage {
@@ -98,8 +98,8 @@ export class Install {
     this.daemonConfig = opts.daemonConfig;
     this.rootless = opts.rootless || false;
     this.localTCPPort = opts.localTCPPort;
-    this.regctl = opts.regctl;
-    this.undock = opts.undock;
+    this.regctl = opts.regctl || new Regctl();
+    this.undock = opts.undock || new Undock();
   }
 
   get toolDir(): string {
