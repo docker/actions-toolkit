@@ -1119,7 +1119,7 @@ __metadata:
     "@actions/tool-cache": ^2.0.2
     "@azure/storage-blob": ^12.15.0
     "@octokit/core": ^5.1.0
-    "@octokit/plugin-rest-endpoint-methods": ^10.4.0
+    "@octokit/plugin-rest-endpoint-methods": ^15.0.0
     "@types/csv-parse": ^1.2.2
     "@types/gunzip-maybe": ^1.4.2
     "@types/he": ^1.2.3
@@ -1837,6 +1837,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@octokit/openapi-types@npm:^25.0.0":
+  version: 25.0.0
+  resolution: "@octokit/openapi-types@npm:25.0.0"
+  checksum: f751b75da153ac98623e2e4c033ffa4f4707eb9ff2aa60b2ed603b1100f4ba154f93c3bad8cfa248c341f9aedc51fe37f3aed1c11e0cd838a95f8d95769a54e3
+  languageName: node
+  linkType: hard
+
 "@octokit/plugin-paginate-rest@npm:^2.17.0":
   version: 2.21.3
   resolution: "@octokit/plugin-paginate-rest@npm:2.21.3"
@@ -1876,6 +1883,17 @@ __metadata:
   peerDependencies:
     "@octokit/core": ">=5"
   checksum: 8ee155825c7ea1dd2991a50d5b3f205988b8ea19af4bebbd91c55bb7b78c4e2215956d578671496a4a86df19ff2d5405ce37ee35c9c6c188dc9a199c045c30be
+  languageName: node
+  linkType: hard
+
+"@octokit/plugin-rest-endpoint-methods@npm:^15.0.0":
+  version: 15.0.0
+  resolution: "@octokit/plugin-rest-endpoint-methods@npm:15.0.0"
+  dependencies:
+    "@octokit/types": ^14.0.0
+  peerDependencies:
+    "@octokit/core": ">=6"
+  checksum: d0d1036555e66d9bbe7b22d78a4c7bc08117e3248f20c370a624d1d8813a3924b7e798f1bd8af88bc727c9ef735c2df5b3f170bad648563e0155852e8e98fc38
   languageName: node
   linkType: hard
 
@@ -2006,6 +2024,15 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^24.2.0
   checksum: fca3764548d5872535b9025c3b5fe6373fe588b287cb5b5259364796c1931bbe5e9ab8a86a5274ce43bb2b3e43b730067c3b86b6b1ade12a98cd59b2e8b3610d
+  languageName: node
+  linkType: hard
+
+"@octokit/types@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "@octokit/types@npm:14.0.0"
+  dependencies:
+    "@octokit/openapi-types": ^25.0.0
+  checksum: 2c63dd529449b1dec8ff0dc4a6c9839032edc3c38cc8d76e368d124e67496e26dfe75fb106409aebd5120924266a12f8be2c05c8baa165a772523075a6dfdb93
   languageName: node
   linkType: hard
 
