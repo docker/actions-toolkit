@@ -56,27 +56,40 @@ export class GitHub {
   }
 
   public async releases(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
-    let dt: string;
+    let releases: Record<string, GitHubRelease>;
     try {
-      const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
-      const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-      const httpResp: httpm.HttpClientResponse = await http.get(url);
-      dt = await httpResp.readBody();
-      const statusCode = httpResp.message.statusCode || 500;
-      if (statusCode >= 400) {
-        core.info(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${dt}, fallback to GitHub API`);
-        const apiResp = await this.octokit.rest.repos.getContent({
-          owner: opts.owner,
-          repo: opts.repo,
-          ref: opts.ref,
-          path: opts.path
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dt = Buffer.from((apiResp.data as any).content, (apiResp.data as any).encoding).toString();
-      }
+      releases = await this.releasesRaw(name, opts);
     } catch (error) {
-      throw new Error(`Failed to get ${name} releases: ${error instanceof Error ? error.message : error}`);
+      try {
+        releases = await this.releasesAPI(name, opts);
+      } catch (error) {
+        throw new Error(`Failed to get ${name} releases: ${error instanceof Error ? error.message : error}`);
+      }
     }
+    return releases;
+  }
+
+  public async releasesRaw(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
+    const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
+    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+    const httpResp: httpm.HttpClientResponse = await http.get(url);
+    const dt = await httpResp.readBody();
+    const statusCode = httpResp.message.statusCode || 500;
+    if (statusCode >= 400) {
+      throw new Error(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${dt}`);
+    }
+    return <Record<string, GitHubRelease>>JSON.parse(dt);
+  }
+
+  public async releasesAPI(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
+    const apiResp = await this.octokit.rest.repos.getContent({
+      owner: opts.owner,
+      repo: opts.repo,
+      ref: opts.ref,
+      path: opts.path
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dt = Buffer.from((apiResp.data as any).content, (apiResp.data as any).encoding).toString();
     return <Record<string, GitHubRelease>>JSON.parse(dt);
   }
 
