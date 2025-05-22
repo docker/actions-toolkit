@@ -130,6 +130,7 @@ export class History {
             numCachedSteps: res.NumCachedSteps,
             numTotalSteps: res.NumTotalSteps,
             numCompletedSteps: res.NumCompletedSteps,
+            defaultPlatform: res.Platform?.[0],
             error: errorLogs
           };
         });
