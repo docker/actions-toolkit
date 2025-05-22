@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {GitHubContentOpts} from '../github';
+
 export interface DownloadVersion {
   version: string;
   downloadURL: string;
-  releasesURL: string;
+  contentOpts: GitHubContentOpts;
 }

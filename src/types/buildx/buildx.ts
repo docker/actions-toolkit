@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {GitHubContentOpts} from '../github';
+
 export interface Cert {
   cacert?: string;
   cert?: string;
@@ -24,7 +26,7 @@ export interface DownloadVersion {
   key: string;
   version: string;
   downloadURL: string;
-  releasesURL: string;
+  contentOpts: GitHubContentOpts;
 }
 
 export interface LocalRefsOpts {
