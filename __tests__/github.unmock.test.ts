@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it} from '@jest/globals';
+import {describe, expect, jest, it, test} from '@jest/globals';
 
 import {GitHub} from '../src/github';
 
@@ -29,6 +29,29 @@ describe('releases', () => {
       repo: 'actions-toolkit',
       ref: 'main',
       path: '.github/undock-releases.json'
+    });
+    expect(releases).toBeDefined();
+    expect(Object.keys(releases).length).toBeGreaterThan(0);
+  });
+});
+
+describe('releasesRaw', () => {
+  // prettier-ignore
+  test.each([
+    ['.github/buildx-lab-releases.json'],
+    ['.github/buildx-releases.json'],
+    ['.github/compose-lab-releases.json'],
+    ['.github/compose-releases.json'],
+    ['.github/docker-releases.json'],
+    ['.github/regclient-releases.json'],
+    ['.github/undock-releases.json'],
+  ])('returns %p using GitHub CDN', async (path: string) => {
+    const github = new GitHub();
+    const releases = await github.releasesRaw('Undock', {
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: path
     });
     expect(releases).toBeDefined();
     expect(Object.keys(releases).length).toBeGreaterThan(0);
