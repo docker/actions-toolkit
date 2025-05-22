@@ -284,10 +284,10 @@ export class History {
     return {
       dockerbuildFilename: dockerbuildPath,
       dockerbuildSize: dockerbuildStats.size,
-      summaries: summaries,
       builderName: builderName,
       nodeName: nodeName,
-      refs: refs
+      refs: refs,
+      summaries: summaries
     };
   }
 

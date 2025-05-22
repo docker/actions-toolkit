@@ -234,16 +234,20 @@ export class GitHub {
     };
 
     const refsSize = Object.keys(opts.exportRes.refs).length;
+    const singleRef = refsSize === 1 ? Object.keys(opts.exportRes.refs)[0] : undefined;
+    const singleSummary = singleRef && opts.exportRes.summaries?.[singleRef];
+    const dbcAccount = opts.driver === 'cloud' && opts.endpoint?.split('/')[0];
 
     const sum = core.summary.addHeading('Docker Build summary', 2);
 
-    if (opts.buildURL) {
+    if (dbcAccount && singleRef && singleSummary) {
+      const buildURL = GitHub.formatDBCBuildURL(dbcAccount, singleRef, singleSummary.defaultPlatform);
       // prettier-ignore
       sum.addRaw(`<p>`)
         .addRaw(`For a detailed look at the build, you can check the results at:`)
       .addRaw('</p>')
       .addRaw(`<p>`)
-        .addRaw(`:whale: ${addLink(`<strong>${opts.buildURL}</strong>`, opts.buildURL)}`)
+        .addRaw(`:whale: ${addLink(`<strong>${buildURL}</strong>`, buildURL)}`)
       .addRaw(`</p>`);
     }
 
@@ -256,7 +260,7 @@ export class GitHub {
       // https://github.com/docker/actions-toolkit/issues/367
       const artifactRelativeURL = `./${GitHub.runId}/${opts.uploadRes.url.split('/').slice(-2).join('/')}`;
 
-      if (opts.buildURL) {
+      if (dbcAccount && refsSize === 1) {
         // prettier-ignore
         sum.addRaw(`<p>`)
           .addRaw(`You can also download the following build record archive and import it into Docker Desktop's Builds view. `)
@@ -295,12 +299,14 @@ export class GitHub {
       // Preview
       sum.addRaw('<p>');
       const summaryTableData: Array<Array<SummaryTableCell>> = [
+        // prettier-ignore
         [
           {header: true, data: 'ID'},
           {header: true, data: 'Name'},
           {header: true, data: 'Status'},
           {header: true, data: 'Cached'},
-          {header: true, data: 'Duration'}
+          {header: true, data: 'Duration'},
+          ...(dbcAccount && refsSize > 1 ? [{header: true, data: 'Build result URL'}] : [])
         ]
       ];
       let buildError: string | undefined;
@@ -309,12 +315,13 @@ export class GitHub {
           const summary = opts.exportRes.summaries[ref];
           // prettier-ignore
           summaryTableData.push([
-          {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
-          {data: `<strong>${Util.stringToUnicodeEntities(summary.name)}</strong>`},
-          {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
-          {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
-          {data: summary.duration}
-        ]);
+            {data: `<code>${ref.substring(0, 6).toUpperCase()}</code>`},
+            {data: `<strong>${Util.stringToUnicodeEntities(summary.name)}</strong>`},
+            {data: `${summary.status === 'completed' ? ':white_check_mark:' : summary.status === 'canceled' ? ':no_entry_sign:' : ':x:'} ${summary.status}`},
+            {data: `${summary.numCachedSteps > 0 ? Math.round((summary.numCachedSteps / summary.numTotalSteps) * 100) : 0}%`},
+            {data: summary.duration},
+            ...(dbcAccount && refsSize > 1 ? [{data: addLink(':whale: Open', GitHub.formatDBCBuildURL(dbcAccount, ref, summary.defaultPlatform))}] : [])
+          ]);
           if (summary.error) {
             buildError = summary.error;
           }
@@ -368,5 +375,9 @@ export class GitHub {
 
     core.info(`Writing summary`);
     await sum.addSeparator().write();
+  }
+
+  private static formatDBCBuildURL(account: string, ref: string, platform?: string): string {
+    return `https://app.docker.com/build/accounts/${account}/builds/${(platform ?? 'linux/amd64').replace('/', '-')}/${ref}`;
   }
 }

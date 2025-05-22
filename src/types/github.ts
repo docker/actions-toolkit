@@ -59,8 +59,10 @@ export interface UploadArtifactResponse {
 export interface BuildSummaryOpts {
   exportRes: ExportResponse;
   uploadRes?: UploadArtifactResponse;
-  buildURL?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs?: any;
   bakeDefinition?: BakeDefinition;
+  // builder options
+  driver?: string;
+  endpoint?: string;
 }
