@@ -130,6 +130,7 @@ export class History {
             numCachedSteps: res.NumCachedSteps,
             numTotalSteps: res.NumTotalSteps,
             numCompletedSteps: res.NumCompletedSteps,
+            defaultPlatform: res.Platform?.[0],
             error: errorLogs
           };
         });
@@ -283,10 +284,10 @@ export class History {
     return {
       dockerbuildFilename: dockerbuildPath,
       dockerbuildSize: dockerbuildStats.size,
-      summaries: summaries,
       builderName: builderName,
       nodeName: nodeName,
-      refs: refs
+      refs: refs,
+      summaries: summaries
     };
   }
 

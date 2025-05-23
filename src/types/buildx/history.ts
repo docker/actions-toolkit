@@ -131,5 +131,6 @@ export interface Summary {
   numTotalSteps: number;
   numCompletedSteps: number;
   frontendAttrs?: Record<string, string>;
+  defaultPlatform?: string;
   error?: string;
 }
