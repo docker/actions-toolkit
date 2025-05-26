@@ -6,9 +6,15 @@
     "assets": []
   },
   "edge": {
-    "id": 218898330,
-    "tag_name": "v28.2.0-rc.1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v28.2.0-rc.1",
+    "id": 220155575,
+    "tag_name": "v28.2.0-rc.2",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.2.0-rc.2",
+    "assets": []
+  },
+  "v28.2.0-rc.2": {
+    "id": 220155575,
+    "tag_name": "v28.2.0-rc.2",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.2.0-rc.2",
     "assets": []
   },
   "v28.2.0-rc.1": {
