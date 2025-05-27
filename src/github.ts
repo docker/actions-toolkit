@@ -233,15 +233,15 @@ export class GitHub {
       return `<a href="${url}">${text}</a>` + (addEOL ? os.EOL : '');
     };
 
-    const refsSize = Object.keys(opts.exportRes.refs).length;
-    const singleRef = refsSize === 1 ? Object.keys(opts.exportRes.refs)[0] : undefined;
-    const singleSummary = singleRef && opts.exportRes.summaries?.[singleRef];
-    const dbcAccount = opts.driver === 'cloud' && opts.endpoint?.split('/')[0];
+    const refsSize = opts.exportRes.refs.length;
+    const firstRef = refsSize > 0 ? opts.exportRes.refs?.[0] : undefined;
+    const firstSummary = firstRef ? opts.exportRes.summaries?.[firstRef] : undefined;
+    const dbcAccount = opts.driver === 'cloud' && opts.endpoint ? opts.endpoint?.replace(/^cloud:\/\//, '').split('/')[0] : undefined;
 
     const sum = core.summary.addHeading('Docker Build summary', 2);
 
-    if (dbcAccount && singleRef && singleSummary) {
-      const buildURL = GitHub.formatDBCBuildURL(dbcAccount, singleRef, singleSummary.defaultPlatform);
+    if (dbcAccount && refsSize === 1 && firstRef && firstSummary) {
+      const buildURL = GitHub.formatDBCBuildURL(dbcAccount, firstRef, firstSummary.defaultPlatform);
       // prettier-ignore
       sum.addRaw(`<p>`)
         .addRaw(`For a detailed look at the build, you can check the results at:`)
