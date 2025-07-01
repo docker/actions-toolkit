@@ -32,13 +32,12 @@ describe('manifestGet', () => {
     const manifest = await regctl.manifestGet({
       image: image,
     });
-    console.log(`${image} manifest: ${JSON.stringify(manifest, null, 2)}`);
     expect(manifest).not.toBeNull();
     expect(manifest?.config).toBeDefined();
     expect(manifest?.config.digest).not.toEqual('');
     expect(manifest?.layers).toBeDefined();
     expect(manifest?.layers.length).toBeGreaterThan(0);
-  });
+  }, 100000);
 });
 
 describe('blobGet', () => {
@@ -53,8 +52,7 @@ describe('blobGet', () => {
       digest: digest
     });
     expect(blob).toBeDefined();
-    console.log(`${repo}:@${digest} blob: ${JSON.stringify(JSON.parse(blob), null, 2)}`);
-  });
+  }, 100000);
 });
 
 describe('image config', () => {
@@ -75,12 +73,11 @@ describe('image config', () => {
       digest: manifest?.config.digest
     });
     const imageConfig = <Image>JSON.parse(blob);
-    console.log(`${image} config: ${JSON.stringify(imageConfig, null, 2)}`);
     expect(imageConfig).not.toBeNull();
     expect(imageConfig.config).toBeDefined();
     expect(imageConfig?.config?.Labels).toBeDefined();
     expect(Object.keys(imageConfig?.config?.Labels || {}).length).toBeGreaterThan(0);
-  });
+  }, 100000);
 });
 
 describe('isAvailable', () => {
