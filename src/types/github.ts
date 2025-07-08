@@ -28,6 +28,13 @@ export interface GitHubRelease {
   assets: Array<string>;
 }
 
+export interface GitHubContentOpts {
+  owner: string;
+  repo: string;
+  ref?: string;
+  path: string;
+}
+
 export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
 
 export interface GitHubActionsRuntimeToken extends JwtPayload {
