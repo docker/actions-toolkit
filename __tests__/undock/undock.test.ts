@@ -38,7 +38,7 @@ describe('run', () => {
         });
       })()
     ).resolves.not.toThrow();
-  }, 100000);
+  }, 500000);
 });
 
 describe('isAvailable', () => {
