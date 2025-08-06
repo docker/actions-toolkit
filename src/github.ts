@@ -17,7 +17,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import he from 'he';
-import jsyaml from 'js-yaml';
+import {dump as yamldump} from 'js-yaml';
 import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
@@ -357,7 +357,7 @@ export class GitHub {
       // prettier-ignore
       sum.addRaw(`<details><summary><strong>Build inputs</strong></summary>`)
         .addCodeBlock(
-          jsyaml.dump(opts.inputs, {
+          yamldump(opts.inputs, {
             indent: 2,
             lineWidth: -1
           }), 'yaml'
