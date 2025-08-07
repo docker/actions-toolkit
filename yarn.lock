@@ -32,9 +32,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "@actions/cache@npm:4.0.3"
+"@actions/cache@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "@actions/cache@npm:4.0.4"
   dependencies:
     "@actions/core": "npm:^1.11.1"
     "@actions/exec": "npm:^1.0.1"
@@ -44,9 +44,8 @@ __metadata:
     "@azure/abort-controller": "npm:^1.1.0"
     "@azure/ms-rest-js": "npm:^2.6.0"
     "@azure/storage-blob": "npm:^12.13.0"
-    "@protobuf-ts/plugin": "npm:^2.9.4"
     semver: "npm:^6.3.1"
-  checksum: 10/232790477fcbddf4591c84cd2860b009715515e53edb7bcba718b73ddd46401f09fd859f04b426614ad82e8cdcf6948fdc4ff03e926fbf5081163d77d9a8eec8
+  checksum: 10/998d22af988d5fb203f570e17b14731f8403c2c6049169c9f96b72f0a69180daa0f7bd23b94d43b7bd7f7b9d0d722450ce290fd397c47e42dfbdcd31f00c629c
   languageName: node
   linkType: hard
 
@@ -1110,7 +1109,7 @@ __metadata:
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
     "@actions/artifact": "npm:^2.3.2"
-    "@actions/cache": "npm:^4.0.3"
+    "@actions/cache": "npm:^4.0.4"
     "@actions/core": "npm:^1.11.1"
     "@actions/exec": "npm:^1.1.1"
     "@actions/github": "npm:^6.0.1"
@@ -2074,7 +2073,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@protobuf-ts/plugin@npm:^2.2.3-alpha.1, @protobuf-ts/plugin@npm:^2.9.4":
+"@protobuf-ts/plugin@npm:^2.2.3-alpha.1":
   version: 2.9.4
   resolution: "@protobuf-ts/plugin@npm:2.9.4"
   dependencies:
