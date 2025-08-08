@@ -418,7 +418,7 @@ export class Install {
         // avoid killing it when the action finishes running. Even if detached,
         // we also need to run dockerd in a subshell and unref the process so
         // GitHub Action doesn't wait for it to finish.
-        `${sudo} env "PATH=$PATH" ${bashPath} << EOF
+        `${sudo} env "PATH=$PATH" "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" ${bashPath} << EOF
 ( ${cmd} 2>&1 | tee "${this.runDir}/dockerd.log" ) &
 EOF`,
         [],
