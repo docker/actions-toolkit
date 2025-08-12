@@ -33,7 +33,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       -
         name: Test
         uses: docker/bake-action@v6
@@ -68,7 +68,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       -
         name: Enable corepack
         run: |
@@ -147,7 +147,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       -
         name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
