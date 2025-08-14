@@ -28,6 +28,7 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
         node_version:
+          - 24
           - 20
           - 18
     steps:
