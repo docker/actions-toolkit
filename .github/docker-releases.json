@@ -29,6 +29,12 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v28.4.0-rc.1",
     "assets": []
   },
+  "v25.0.13": {
+    "id": 244806783,
+    "tag_name": "v25.0.13",
+    "html_url": "https://github.com/moby/moby/releases/tag/v25.0.13",
+    "assets": []
+  },
   "v28.3.3": {
     "id": 235196329,
     "tag_name": "v28.3.3",
