@@ -153,12 +153,13 @@ jobs:
         name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v3
       -
-        # FIXME: Needs to setup node twice on Windows due to a bug with runner
+        # FIXME: Needs to setup node twice on Windows: https://github.com/actions/setup-node/issues/1357#issuecomment-3254613964
         name: Setup Node
         if: startsWith(matrix.os, 'windows')
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
       -
         name: Enable corepack
         run: |
