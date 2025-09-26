@@ -5,13 +5,19 @@
     "html_url": "https://github.com/moby/moby/releases/tag/v28.4.0",
     "assets": []
   },
-  "v28.4.0": {
-    "id": 244504005,
-    "tag_name": "v28.4.0",
-    "html_url": "https://github.com/moby/moby/releases/tag/v28.4.0",
+  "edge": {
+    "id": 249763924,
+    "tag_name": "v28.5.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.5.0-rc.1",
     "assets": []
   },
-  "edge": {
+  "v28.5.0-rc.1": {
+    "id": 249763924,
+    "tag_name": "v28.5.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.5.0-rc.1",
+    "assets": []
+  },
+  "v28.4.0": {
     "id": 244504005,
     "tag_name": "v28.4.0",
     "html_url": "https://github.com/moby/moby/releases/tag/v28.4.0",
