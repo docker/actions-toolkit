@@ -1124,7 +1124,7 @@ __metadata:
     "@types/he": "npm:^1.2.3"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.19.9"
-    "@types/semver": "npm:^7.7.0"
+    "@types/semver": "npm:^7.7.1"
     "@types/tar-stream": "npm:^3.1.4"
     "@types/tmp": "npm:^0.2.6"
     "@typescript-eslint/eslint-plugin": "npm:^7.18.0"
@@ -1145,7 +1145,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.6.2"
     rimraf: "npm:^6.0.1"
-    semver: "npm:^7.7.2"
+    semver: "npm:^7.7.3"
     tar-stream: "npm:^3.1.7"
     tmp: "npm:^0.2.5"
     ts-jest: "npm:^29.4.1"
@@ -2329,10 +2329,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:^7.7.0":
-  version: 7.7.0
-  resolution: "@types/semver@npm:7.7.0"
-  checksum: 10/ee4514c6c852b1c38f951239db02f9edeea39f5310fad9396a00b51efa2a2d96b3dfca1ae84c88181ea5b7157c57d32d7ef94edacee36fbf975546396b85ba5b
+"@types/semver@npm:^7.7.1":
+  version: 7.7.1
+  resolution: "@types/semver@npm:7.7.1"
+  checksum: 10/8f09e7e6ca3ded67d78ba7a8f7535c8d9cf8ced83c52e7f3ac3c281fe8c689c3fe475d199d94390dc04fc681d51f2358b430bb7b2e21c62de24f2bee2c719068
   languageName: node
   linkType: hard
 
@@ -8172,6 +8172,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10/7a24cffcaa13f53c09ce55e05efe25cd41328730b2308678624f8b9f5fc3093fc4d189f47950f0b811ff8f3c3039c24a2c36717ba7961615c682045bf03e1dda
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.7.3":
+  version: 7.7.3
+  resolution: "semver@npm:7.7.3"
+  bin:
+    semver: bin/semver.js
+  checksum: 10/8dbc3168e057a38fc322af909c7f5617483c50caddba135439ff09a754b20bdd6482a5123ff543dad4affa488ecf46ec5fb56d61312ad20bb140199b88dfaea9
   languageName: node
   linkType: hard
 
