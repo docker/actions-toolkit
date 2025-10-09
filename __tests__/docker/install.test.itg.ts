@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, test, expect} from '@jest/globals';
+import {beforeAll, describe, jest, test, expect} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 import {Install, InstallSource, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
 import {Docker} from '../../src/docker/docker';
-import {Regctl} from '../../src/regclient/regctl';
 import {Install as RegclientInstall} from '../../src/regclient/install';
-import {Undock} from '../../src/undock/undock';
 import {Install as UndockInstall} from '../../src/undock/install';
 import {Exec} from '../../src/exec';
 
 const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
+
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
 
 beforeAll(async () => {
   const undockInstall = new UndockInstall();
@@ -48,9 +49,7 @@ describe('root', () => {
         source: source,
         runDir: tmpDir(),
         contextName: 'foo',
-        daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`,
-        regctl: new Regctl(),
-        undock: new Undock()
+        daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
       });
       await expect(tryInstall(install)).resolves.not.toThrow();
     }, 30 * 60 * 1000);
@@ -70,9 +69,7 @@ describe('rootless', () => {
         runDir: tmpDir(),
         contextName: 'foo',
         daemonConfig: `{"debug":true}`,
-        rootless: true,
-        regctl: new Regctl(),
-        undock: new Undock()
+        rootless: true
       });
       await expect(
         tryInstall(install, async () => {
@@ -97,9 +94,7 @@ describe('tcp', () => {
         runDir: tmpDir(),
         contextName: 'foo',
         daemonConfig: `{"debug":true}`,
-        localTCPPort: 2378,
-        regctl: new Regctl(),
-        undock: new Undock()
+        localTCPPort: 2378
       });
       await expect(
         tryInstall(install, async () => {
