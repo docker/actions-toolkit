@@ -22,6 +22,9 @@ import * as rimraf from 'rimraf';
 
 import {Context} from '../../src/context.js';
 import {Build} from '../../src/buildx/build.js';
+import {Buildx} from '../../src/buildx/buildx.js';
+
+import {GitContextFormat} from '../../src/types/buildx/build.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));
@@ -39,6 +42,66 @@ vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
 
 afterEach(() => {
   rimraf.sync(tmpDir);
+});
+
+describe('gitContext', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    vi.resetModules();
+    process.env = {
+      ...originalEnv,
+      DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF: '',
+      BUILDX_SEND_GIT_QUERY_AS_INPUT: ''
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  type GitContextTestCase = {
+    ref: string;
+    format: GitContextFormat | undefined;
+    prHeadRef: boolean;
+    sendGitQueryAsInput: boolean;
+    buildxQuerySupport: boolean;
+  };
+
+  // prettier-ignore
+  const gitContextCases: [GitContextTestCase, string][] = [
+    // no format set (defaults to fragment)
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/merge'],
+    [{ref: 'refs/tags/v1.0.0', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/head'],
+    // no format set (defaults to query only when client-side query resolution is enabled and supported)
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: true, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: false, sendGitQueryAsInput: true, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/merge&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: true, sendGitQueryAsInput: true, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: true, buildxQuerySupport: false}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    // query format
+    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/merge&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/tags/v1.0.0', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/tags/v1.0.0&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: 'query', prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    // fragment format
+    [{ref: 'refs/heads/master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/merge'],
+    [{ref: 'refs/tags/v1.0.0', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/pull/15/merge', format: 'fragment', prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/head'],
+  ];
+
+  test.each(gitContextCases)('given %o should return %o', async (input: GitContextTestCase, expected: string) => {
+    const {ref, format, prHeadRef, sendGitQueryAsInput, buildxQuerySupport} = input;
+    process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
+    process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT = sendGitQueryAsInput ? 'true' : '';
+    const buildx = new Buildx();
+    vi.spyOn(buildx, 'versionSatisfies').mockResolvedValue(buildxQuerySupport);
+    const build = new Build({buildx});
+    expect(await build.gitContext(ref, '860c1904a1ce19322e91ac35af1ab07466440c37', format)).toEqual(expected);
+  });
 });
 
 describe('resolveImageID', () => {

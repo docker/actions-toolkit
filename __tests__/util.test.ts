@@ -315,6 +315,7 @@ describe('hash', () => {
 // https://github.com/golang/go/blob/f6b93a4c358b28b350dd8fe1780c1f78e520c09c/src/strconv/atob_test.go#L36-L58
 describe('parseBool', () => {
   [
+    {input: undefined, expected: false, throwsError: false},
     {input: '', expected: false, throwsError: true},
     {input: 'asdf', expected: false, throwsError: true},
     {input: '0', expected: false, throwsError: false},
@@ -339,6 +340,13 @@ describe('parseBool', () => {
         expect(Util.parseBool(input)).toBe(expected);
       }
     });
+  });
+});
+
+describe('parseBoolOrDefault', () => {
+  it('returns default value when input is invalid', () => {
+    expect(Util.parseBoolOrDefault('asdf')).toBe(false);
+    expect(Util.parseBoolOrDefault('asdf', true)).toBe(true);
   });
 });
 

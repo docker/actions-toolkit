@@ -157,7 +157,10 @@ export class Util {
   }
 
   // https://github.com/golang/go/blob/f6b93a4c358b28b350dd8fe1780c1f78e520c09c/src/strconv/atob.go#L7-L18
-  public static parseBool(str: string): boolean {
+  public static parseBool(str: string | undefined): boolean {
+    if (str === undefined) {
+      return false;
+    }
     switch (str) {
       case '1':
       case 't':
@@ -175,6 +178,14 @@ export class Util {
         return false;
       default:
         throw new Error(`parseBool syntax error: ${str}`);
+    }
+  }
+
+  public static parseBoolOrDefault(str: string | undefined, defaultValue = false): boolean {
+    try {
+      return this.parseBool(str);
+    } catch {
+      return defaultValue;
     }
   }
 
