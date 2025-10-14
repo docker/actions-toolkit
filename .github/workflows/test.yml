@@ -77,7 +77,7 @@ jobs:
           yarn --version
       -
         name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
@@ -156,7 +156,7 @@ jobs:
         # FIXME: Needs to setup node twice on Windows: https://github.com/actions/setup-node/issues/1357#issuecomment-3254613964
         name: Setup Node
         if: startsWith(matrix.os, 'windows')
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
@@ -167,7 +167,7 @@ jobs:
           yarn --version
       -
         name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
