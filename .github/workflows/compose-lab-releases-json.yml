@@ -17,7 +17,7 @@ on:
 
 jobs:
   generate:
-    uses: crazy-max/.github/.github/workflows/releases-json.yml@7f83a5a887650a38e4d0e05d5262309cfaa31459
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@9791b02439e3c95de89d128a625169ceee56dc55
     with:
       repository: docker/compose-desktop
       artifact_name: compose-lab-releases-json
