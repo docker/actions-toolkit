@@ -116,6 +116,7 @@ jobs:
                     }
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v26.1.4' });
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'latest' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v29.0.0-rc.1', docker_install_channel: 'test' });
                     if (os === 'ubuntu-latest') {
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest' });
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest' });
@@ -208,6 +209,7 @@ jobs:
           TEST_FOR_SUMMARY: ${{ secrets.TEST_FOR_SUMMARY }}
           DOCKER_INSTALL_TYPE: ${{ matrix.docker_install_type }}
           DOCKER_INSTALL_VERSION: ${{ matrix.docker_install_version }}
+          DOCKER_INSTALL_CHANNEL: ${{ matrix.docker_install_channel }}
       -
         name: Check coverage
         run: |

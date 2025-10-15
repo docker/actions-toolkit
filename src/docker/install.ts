@@ -204,7 +204,7 @@ export class Install {
 
   private async downloadSourceArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
     const release: GitHubRelease = await Install.getRelease(src.version);
-    this._version = release.tag_name.replace(/^v+|v+$/g, '');
+    this._version = release.tag_name.replace(/^(docker-)?v+/, '');
     core.debug(`docker.Install.downloadSourceArchive version: ${this._version}`);
 
     const downloadURL = this.downloadURL(component, this._version, src.channel);

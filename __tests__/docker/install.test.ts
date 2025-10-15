@@ -53,6 +53,7 @@ describe('download', () => {
     [archive('v20.10.22', 'stable'), 'linux'],
     [archive('v20.10.22', 'stable'), 'darwin'],
     [archive('v20.10.22', 'stable'), 'win32'],
+    [archive('v29.0.0-rc.1', 'test'), 'linux'],
 
     [image('master'), 'linux'],
     [image('master'), 'win32'],
@@ -81,12 +82,20 @@ describe('getRelease', () => {
     expect(release?.tag_name).not.toEqual('');
   });
 
-  it('returns v23.0.0 buildx GitHub release', async () => {
+  it('returns v23.0.0 docker GitHub release', async () => {
     const release = await Install.getRelease('v23.0.0');
     expect(release).not.toBeNull();
     expect(release?.id).toEqual(91109643);
     expect(release?.tag_name).toEqual('v23.0.0');
     expect(release?.html_url).toEqual('https://github.com/moby/moby/releases/tag/v23.0.0');
+  });
+
+  it('returns v29.0.0-rc.1 docker GitHub release', async () => {
+    const release = await Install.getRelease('v29.0.0-rc.1');
+    expect(release).not.toBeNull();
+    expect(release?.id).toEqual(252020476);
+    expect(release?.tag_name).toEqual('docker-v29.0.0-rc.1');
+    expect(release?.html_url).toEqual('https://github.com/moby/moby/releases/tag/docker-v29.0.0-rc.1');
   });
 
   it('unknown release', async () => {
