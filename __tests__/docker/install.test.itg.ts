@@ -153,11 +153,12 @@ async function ensureNoSystemContainerd() {
 function getSources(root: boolean): Array<InstallSource> {
   const dockerInstallType = process.env.DOCKER_INSTALL_TYPE;
   const dockerInstallVersion = process.env.DOCKER_INSTALL_VERSION;
+  const dockerInstallChannel = process.env.DOCKER_INSTALL_CHANNEL || 'stable';
   if (dockerInstallType && dockerInstallVersion) {
     if (dockerInstallType === 'archive') {
       // prettier-ignore
       return [
-        { type: dockerInstallType, version: dockerInstallVersion, channel: 'stable'} as InstallSourceArchive
+        { type: dockerInstallType, version: dockerInstallVersion, channel: dockerInstallChannel} as InstallSourceArchive
       ];
     } else {
       // prettier-ignore
@@ -173,7 +174,8 @@ function getSources(root: boolean): Array<InstallSource> {
       {type: 'image', tag: 'master'} as InstallSourceImage,
       {type: 'image', tag: 'latest'} as InstallSourceImage,
       {type: 'archive', version: 'v26.1.4', channel: 'stable'} as InstallSourceArchive,
-      {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive
+      {type: 'archive', version: 'latest', channel: 'stable'} as InstallSourceArchive,
+      {type: 'archive', version: 'v29.0.0-rc.1', channel: 'test'} as InstallSourceArchive
     ];
   } else {
     // prettier-ignore
