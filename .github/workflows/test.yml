@@ -106,7 +106,7 @@ jobs:
             });
             await core.group(`Set includes`, async () => {
               let includes = [];
-              for (const os of ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-13', 'windows-latest']) {
+              for (const os of ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'windows-latest']) {
                 for (const test of tests) {
                   if (test === 'docker/install.test.itg.ts') {
                     if (os !== 'windows-latest') {
