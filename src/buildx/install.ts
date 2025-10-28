@@ -36,13 +36,16 @@ import {GitHubRelease} from '../types/github';
 
 export interface InstallOpts {
   standalone?: boolean;
+  githubToken?: string;
 }
 
 export class Install {
   private readonly standalone: boolean | undefined;
+  private readonly githubToken: string | undefined;
 
   constructor(opts?: InstallOpts) {
     this.standalone = opts?.standalone;
+    this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
   }
 
   /*
@@ -83,7 +86,7 @@ export class Install {
     const downloadURL = util.format(version.downloadURL, vspec, this.filename(vspec));
     core.info(`Downloading ${downloadURL}`);
 
-    const htcDownloadPath = await tc.downloadTool(downloadURL);
+    const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
     const cacheSavePath = await installCache.save(htcDownloadPath);

@@ -63,6 +63,8 @@ export interface InstallOpts {
 
   regctl?: Regctl;
   undock?: Undock;
+
+  githubToken?: string;
 }
 
 interface LimaImage {
@@ -80,6 +82,7 @@ export class Install {
   private readonly localTCPPort?: number;
   private readonly regctl: Regctl;
   private readonly undock: Undock;
+  private readonly githubToken?: string;
 
   private _version: string | undefined;
   private _toolDir: string | undefined;
@@ -101,6 +104,7 @@ export class Install {
     this.localTCPPort = opts.localTCPPort;
     this.regctl = opts.regctl || new Regctl();
     this.undock = opts.undock || new Undock();
+    this.githubToken = opts.githubToken || process.env.GITHUB_TOKEN;
   }
 
   get toolDir(): string {
@@ -211,7 +215,7 @@ export class Install {
     const downloadURL = this.downloadURL(component, this._version, src.channel);
     core.info(`Downloading ${downloadURL}`);
 
-    const downloadPath = await tc.downloadTool(downloadURL);
+    const downloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`docker.Install.downloadSourceArchive downloadPath: ${downloadPath}`);
 
     let extractFolder;

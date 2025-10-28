@@ -29,7 +29,17 @@ import {GitHub} from '../github';
 import {GitHubRelease} from '../types/github';
 import {DownloadVersion} from '../types/regclient/regclient';
 
+export interface InstallOpts {
+  githubToken?: string;
+}
+
 export class Install {
+  private readonly githubToken: string | undefined;
+
+  constructor(opts?: InstallOpts) {
+    this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
+  }
+
   /*
    * Download regclient binary from GitHub release
    * @param v: version semver version or latest
@@ -68,7 +78,7 @@ export class Install {
     const downloadURL = util.format(version.downloadURL, vspec, this.filename());
     core.info(`Downloading ${downloadURL}`);
 
-    const htcDownloadPath = await tc.downloadTool(downloadURL);
+    const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
     const cacheSavePath = await installCache.save(htcDownloadPath);
