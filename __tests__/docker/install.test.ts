@@ -22,8 +22,6 @@ import * as rimraf from 'rimraf';
 import osm = require('os');
 
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
-import {Regctl} from '../../src/regclient/regctl';
-import {Undock} from '../../src/undock/undock';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 
@@ -66,9 +64,7 @@ describe('download', () => {
     jest.spyOn(osm, 'arch').mockImplementation(() => 'x64');
     const install = new Install({
       source: source,
-      runDir: tmpDir,
-      regctl: new Regctl(),
-      undock: new Undock()
+      runDir: tmpDir
     });
     const toolPath = await install.download();
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -99,7 +95,7 @@ describe('getRelease', () => {
   });
 
   it('unknown release', async () => {
-    await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Docker release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json'));
+    await expect(Install.getRelease('foo')).rejects.toThrow(new Error('Cannot find Docker release foo in releases JSON'));
   });
 });
 

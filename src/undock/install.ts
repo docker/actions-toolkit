@@ -18,13 +18,13 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
-import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
 import {Cache} from '../cache';
 import {Context} from '../context';
+import {GitHub} from '../github';
 
 import {GitHubRelease} from '../types/github';
 import {DownloadVersion} from '../types/undock/undock';
@@ -145,21 +145,20 @@ export class Install {
     return {
       version: v,
       downloadURL: 'https://github.com/crazy-max/undock/releases/download/v%s/%s',
-      releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/undock-releases.json'
+      contentOpts: {
+        owner: 'docker',
+        repo: 'actions-toolkit',
+        ref: 'main',
+        path: '.github/undock-releases.json'
+      }
     };
   }
 
   public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(version.releasesURL);
-    const body = await resp.readBody();
-    const statusCode = resp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get Undock releases from ${version.releasesURL} with status code ${statusCode}: ${body}`);
-    }
-    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+    const github = new GitHub();
+    const releases = await github.releases('Undock', version.contentOpts);
     if (!releases[version.version]) {
-      throw new Error(`Cannot find Undock release ${version.version} in ${version.releasesURL}`);
+      throw new Error(`Cannot find Undock release ${version.version} in releases JSON`);
     }
     return releases[version.version];
   }

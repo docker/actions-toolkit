@@ -18,7 +18,6 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
-import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
@@ -29,6 +28,7 @@ import {Context} from '../context';
 import {Exec} from '../exec';
 import {Docker} from '../docker/docker';
 import {Git} from '../git';
+import {GitHub} from '../github';
 import {Util} from '../util';
 
 import {DownloadVersion} from '../types/buildx/buildx';
@@ -39,10 +39,10 @@ export interface InstallOpts {
 }
 
 export class Install {
-  private readonly _standalone: boolean | undefined;
+  private readonly standalone: boolean | undefined;
 
   constructor(opts?: InstallOpts) {
-    this._standalone = opts?.standalone;
+    this.standalone = opts?.standalone;
   }
 
   /*
@@ -205,7 +205,7 @@ export class Install {
   }
 
   private async isStandalone(): Promise<boolean> {
-    const standalone = this._standalone ?? !(await Docker.isAvailable());
+    const standalone = this.standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
   }
@@ -285,7 +285,12 @@ export class Install {
           key: repoKey,
           version: version,
           downloadURL: 'https://github.com/docker/buildx/releases/download/v%s/%s',
-          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'
+          contentOpts: {
+            owner: 'docker',
+            repo: 'actions-toolkit',
+            ref: 'main',
+            path: '.github/buildx-releases.json'
+          }
         };
       }
       case 'cloud': {
@@ -293,7 +298,12 @@ export class Install {
           key: repoKey,
           version: version,
           downloadURL: 'https://github.com/docker/buildx-desktop/releases/download/v%s/%s',
-          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json'
+          contentOpts: {
+            owner: 'docker',
+            repo: 'actions-toolkit',
+            ref: 'main',
+            path: '.github/buildx-lab-releases.json'
+          }
         };
       }
       default: {
@@ -303,16 +313,10 @@ export class Install {
   }
 
   public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(version.releasesURL);
-    const body = await resp.readBody();
-    const statusCode = resp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get Buildx releases from ${version.releasesURL} with status code ${statusCode}: ${body}`);
-    }
-    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+    const github = new GitHub();
+    const releases = await github.releases('Buildx', version.contentOpts);
     if (!releases[version.version]) {
-      throw new Error(`Cannot find Buildx release ${version.version} in ${version.releasesURL}`);
+      throw new Error(`Cannot find Buildx release ${version.version} in releases JSON`);
     }
     return releases[version.version];
   }

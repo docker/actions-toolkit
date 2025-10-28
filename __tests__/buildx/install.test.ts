@@ -119,7 +119,12 @@ describe('getDownloadVersion', () => {
     expect(version.key).toEqual('official');
     expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/buildx-releases.json'
+    });
   });
 
   it('returns official v0.10.1 download version', async () => {
@@ -127,7 +132,12 @@ describe('getDownloadVersion', () => {
     expect(version.key).toEqual('official');
     expect(version.version).toEqual('v0.10.1');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/buildx-releases.json'
+    });
   });
 
   it('returns cloud latest download version', async () => {
@@ -135,7 +145,12 @@ describe('getDownloadVersion', () => {
     expect(version.key).toEqual('cloud');
     expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/buildx-lab-releases.json'
+    });
   });
 
   it('returns cloud v0.11.2-desktop.2 download version', async () => {
@@ -143,7 +158,12 @@ describe('getDownloadVersion', () => {
     expect(version.key).toEqual('cloud');
     expect(version.version).toEqual('v0.11.2-desktop.2');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/buildx-lab-releases.json'
+    });
   });
 
   it('returns cloud for lab version', async () => {
@@ -151,7 +171,12 @@ describe('getDownloadVersion', () => {
     expect(version.key).toEqual('cloud');
     expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/docker/buildx-desktop/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/buildx-lab-releases.json'
+    });
   });
 
   it('unknown repo', async () => {
@@ -187,6 +212,6 @@ describe('getRelease', () => {
 
   it('unknown release', async () => {
     const version = await Install.getDownloadVersion('foo');
-    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json'));
+    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find Buildx release foo in releases JSON'));
   });
 });

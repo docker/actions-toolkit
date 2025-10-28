@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, jest, it, beforeEach, afterEach, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
@@ -40,6 +40,29 @@ describe('context', () => {
   });
   it('is repository private', async () => {
     expect(GitHub.context.payload.repository?.private).toEqual(true);
+  });
+});
+
+describe('releases', () => {
+  // prettier-ignore
+  test.each([
+    ['.github/buildx-lab-releases.json'],
+    ['.github/buildx-releases.json'],
+    ['.github/compose-lab-releases.json'],
+    ['.github/compose-releases.json'],
+    ['.github/docker-releases.json'],
+    ['.github/regclient-releases.json'],
+    ['.github/undock-releases.json'],
+  ])('returns %p', async (path: string) => {
+    const github = new GitHub();
+    const releases = await github.releases('App', {
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: path
+    });
+    expect(releases).toBeDefined();
+    expect(Object.keys(releases).length).toBeGreaterThan(0);
   });
 });
 
