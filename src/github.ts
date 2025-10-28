@@ -45,10 +45,12 @@ export interface GitHubOpts {
 }
 
 export class GitHub {
+  private readonly githubToken?: string;
   public readonly octokit: InstanceType<typeof Octokit>;
 
   constructor(opts?: GitHubOpts) {
-    this.octokit = github.getOctokit(`${opts?.token}`);
+    this.githubToken = opts?.token || process.env.GITHUB_TOKEN;
+    this.octokit = github.getOctokit(`${this.githubToken}`);
   }
 
   public repoData(): Promise<GitHubRepo> {
@@ -58,7 +60,10 @@ export class GitHub {
   public async releases(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
     const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const httpResp: httpm.HttpClientResponse = await http.get(url);
+    // prettier-ignore
+    const httpResp: httpm.HttpClientResponse = await http.get(url, this.githubToken ? {
+      Authorization: `token ${this.githubToken}`
+    } : undefined);
     const dt = await httpResp.readBody();
     const statusCode = httpResp.message.statusCode || 500;
     if (statusCode >= 400) {

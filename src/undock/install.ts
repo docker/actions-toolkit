@@ -50,7 +50,7 @@ export class Install {
     const version: DownloadVersion = await Install.getDownloadVersion(v);
     core.debug(`Install.download version: ${version.version}`);
 
-    const release: GitHubRelease = await Install.getRelease(version);
+    const release: GitHubRelease = await Install.getRelease(version, this.githubToken);
     core.debug(`Install.download release tag name: ${release.tag_name}`);
 
     const vspec = await this.vspec(release.tag_name);
@@ -164,8 +164,8 @@ export class Install {
     };
   }
 
-  public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
-    const github = new GitHub();
+  public static async getRelease(version: DownloadVersion, githubToken?: string): Promise<GitHubRelease> {
+    const github = new GitHub({token: githubToken});
     const releases = await github.releases('Undock', version.contentOpts);
     if (!releases[version.version]) {
       throw new Error(`Cannot find Undock release ${version.version} in releases JSON`);

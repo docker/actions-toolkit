@@ -208,14 +208,14 @@ export class Install {
   }
 
   private async downloadSourceArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
-    const release: GitHubRelease = await Install.getRelease(src.version);
+    const release: GitHubRelease = await Install.getRelease(src.version, this.githubToken);
     this._version = release.tag_name.replace(/^(docker-)?v+/, '');
     core.debug(`docker.Install.downloadSourceArchive version: ${this._version}`);
 
     const downloadURL = this.downloadURL(component, this._version, src.channel);
     core.info(`Downloading ${downloadURL}`);
 
-    const downloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
+    const downloadPath = await tc.downloadTool(downloadURL);
     core.debug(`docker.Install.downloadSourceArchive downloadPath: ${downloadPath}`);
 
     let extractFolder;
@@ -698,8 +698,8 @@ EOF`,
       });
   }
 
-  public static async getRelease(version: string): Promise<GitHubRelease> {
-    const github = new GitHub();
+  public static async getRelease(version: string, githubToken?: string): Promise<GitHubRelease> {
+    const github = new GitHub({token: githubToken});
     const releases = await github.releases('Docker', {
       owner: 'docker',
       repo: 'actions-toolkit',
