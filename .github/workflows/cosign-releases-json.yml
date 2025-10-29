@@ -1,0 +1,58 @@
+name: cosign-releases-json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - '.github/workflows/cosign-releases-json.yml'
+
+jobs:
+  generate:
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@34fd436075cac6431d2036d5f6f1c3f3d4687ac5
+    with:
+      repository: sigstore/cosign
+      artifact_name: cosign-releases-json
+      filename: cosign-releases.json
+    secrets: inherit
+
+  open-pr:
+    runs-on: ubuntu-24.04
+    if: github.event_name != 'pull_request'
+    needs:
+      - generate
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v5
+      -
+        name: Download
+        uses: actions/download-artifact@v6
+        with:
+          name: cosign-releases-json
+          path: .github
+      -
+        name: Commit changes
+        run: |
+          git add -A .
+      -
+        name: Create PR
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e  # v7.0.8
+        with:
+          base: main
+          branch: bot/cosign-releases-json
+          commit-message: "github: update .github/cosign-releases.json"
+          signoff: true
+          delete-branch: true
+          title: "Update `.github/cosign-releases.json`"
+          body: |
+            Update `.github/cosign-releases.json` to keep in sync with [https://github.com/sigstore/cosign](https://github.com/sigstore/cosign).
+          draft: false
