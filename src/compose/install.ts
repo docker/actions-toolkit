@@ -18,27 +18,30 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
-import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
 import {Cache} from '../cache';
 import {Context} from '../context';
+import {Docker} from '../docker/docker';
+import {GitHub} from '../github';
 
 import {DownloadVersion} from '../types/compose/compose';
 import {GitHubRelease} from '../types/github';
-import {Docker} from '../docker/docker';
 
 export interface InstallOpts {
   standalone?: boolean;
+  githubToken?: string;
 }
 
 export class Install {
-  private readonly _standalone: boolean | undefined;
+  private readonly standalone: boolean | undefined;
+  private readonly githubToken: string | undefined;
 
   constructor(opts?: InstallOpts) {
-    this._standalone = opts?.standalone;
+    this.standalone = opts?.standalone;
+    this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
   }
 
   /*
@@ -51,7 +54,7 @@ export class Install {
     const version: DownloadVersion = await Install.getDownloadVersion(v);
     core.debug(`Install.download version: ${version.version}`);
 
-    const release: GitHubRelease = await Install.getRelease(version);
+    const release: GitHubRelease = await Install.getRelease(version, this.githubToken);
     core.debug(`Install.download release tag name: ${release.tag_name}`);
 
     const vspec = await this.vspec(release.tag_name);
@@ -79,7 +82,7 @@ export class Install {
     const downloadURL = util.format(version.downloadURL, vspec, this.filename());
     core.info(`Downloading ${downloadURL}`);
 
-    const htcDownloadPath = await tc.downloadTool(downloadURL);
+    const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
     const cacheSavePath = await installCache.save(htcDownloadPath);
@@ -129,7 +132,7 @@ export class Install {
   }
 
   private async isStandalone(): Promise<boolean> {
-    const standalone = this._standalone ?? !(await Docker.isAvailable());
+    const standalone = this.standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
   }
@@ -183,7 +186,12 @@ export class Install {
           key: repoKey,
           version: version,
           downloadURL: 'https://github.com/docker/compose/releases/download/v%s/%s',
-          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/compose-releases.json'
+          contentOpts: {
+            owner: 'docker',
+            repo: 'actions-toolkit',
+            ref: 'main',
+            path: '.github/compose-releases.json'
+          }
         };
       }
       case 'cloud': {
@@ -191,7 +199,12 @@ export class Install {
           key: repoKey,
           version: version,
           downloadURL: 'https://github.com/docker/compose-desktop/releases/download/v%s/%s',
-          releasesURL: 'https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/compose-lab-releases.json'
+          contentOpts: {
+            owner: 'docker',
+            repo: 'actions-toolkit',
+            ref: 'main',
+            path: '.github/compose-lab-releases.json'
+          }
         };
       }
       default: {
@@ -200,17 +213,11 @@ export class Install {
     }
   }
 
-  public static async getRelease(version: DownloadVersion): Promise<GitHubRelease> {
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(version.releasesURL);
-    const body = await resp.readBody();
-    const statusCode = resp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get Compose releases from ${version.releasesURL} with status code ${statusCode}: ${body}`);
-    }
-    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+  public static async getRelease(version: DownloadVersion, githubToken?: string): Promise<GitHubRelease> {
+    const github = new GitHub({token: githubToken});
+    const releases = await github.releases('Compose', version.contentOpts);
     if (!releases[version.version]) {
-      throw new Error(`Cannot find Compose release ${version.version} in ${version.releasesURL}`);
+      throw new Error(`Cannot find Compose release ${version.version} in releases JSON`);
     }
     return releases[version.version];
   }

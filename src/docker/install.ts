@@ -22,16 +22,17 @@ import path from 'path';
 import retry from 'async-retry';
 import * as handlebars from 'handlebars';
 import * as core from '@actions/core';
-import * as httpm from '@actions/http-client';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
 import {Context} from '../context';
 import {Docker} from './docker';
+import {Exec} from '../exec';
+import {GitHub} from '../github';
 import {Regctl} from '../regclient/regctl';
 import {Undock} from '../undock/undock';
-import {Exec} from '../exec';
 import {Util} from '../util';
+
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
 
 import {GitHubRelease} from '../types/github';
@@ -62,6 +63,8 @@ export interface InstallOpts {
 
   regctl?: Regctl;
   undock?: Undock;
+
+  githubToken?: string;
 }
 
 interface LimaImage {
@@ -79,6 +82,7 @@ export class Install {
   private readonly localTCPPort?: number;
   private readonly regctl: Regctl;
   private readonly undock: Undock;
+  private readonly githubToken?: string;
 
   private _version: string | undefined;
   private _toolDir: string | undefined;
@@ -100,6 +104,7 @@ export class Install {
     this.localTCPPort = opts.localTCPPort;
     this.regctl = opts.regctl || new Regctl();
     this.undock = opts.undock || new Undock();
+    this.githubToken = opts.githubToken || process.env.GITHUB_TOKEN;
   }
 
   get toolDir(): string {
@@ -203,7 +208,7 @@ export class Install {
   }
 
   private async downloadSourceArchive(component: 'docker' | 'docker-rootless-extras', src: InstallSourceArchive): Promise<string> {
-    const release: GitHubRelease = await Install.getRelease(src.version);
+    const release: GitHubRelease = await Install.getRelease(src.version, this.githubToken);
     this._version = release.tag_name.replace(/^(docker-)?v+/, '');
     core.debug(`docker.Install.downloadSourceArchive version: ${this._version}`);
 
@@ -693,19 +698,17 @@ EOF`,
       });
   }
 
-  public static async getRelease(version: string): Promise<GitHubRelease> {
-    const url = `https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/docker-releases.json`;
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    const resp: httpm.HttpClientResponse = await http.get(url);
-    const body = await resp.readBody();
-    const statusCode = resp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get Docker release ${version} from ${url} with status code ${statusCode}: ${body}`);
-    }
-    const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+  public static async getRelease(version: string, githubToken?: string): Promise<GitHubRelease> {
+    const github = new GitHub({token: githubToken});
+    const releases = await github.releases('Docker', {
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/docker-releases.json'
+    });
     if (!releases[version]) {
       if (!releases['v' + version]) {
-        throw new Error(`Cannot find Docker release ${version} in ${url}`);
+        throw new Error(`Cannot find Docker release ${version} in releases JSON`);
       }
       return releases['v' + version];
     }

@@ -31,27 +31,45 @@ import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
+import * as httpm from '@actions/http-client';
 import {TransferProgressEvent} from '@azure/core-http';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {Util} from './util';
 
-import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
+import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
 
 export interface GitHubOpts {
   token?: string;
 }
 
 export class GitHub {
+  private readonly githubToken?: string;
   public readonly octokit: InstanceType<typeof Octokit>;
 
   constructor(opts?: GitHubOpts) {
-    this.octokit = github.getOctokit(`${opts?.token}`);
+    this.githubToken = opts?.token || process.env.GITHUB_TOKEN;
+    this.octokit = github.getOctokit(`${this.githubToken}`);
   }
 
   public repoData(): Promise<GitHubRepo> {
     return this.octokit.rest.repos.get({...github.context.repo}).then(response => response.data as GitHubRepo);
+  }
+
+  public async releases(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
+    const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
+    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+    // prettier-ignore
+    const httpResp: httpm.HttpClientResponse = await http.get(url, this.githubToken ? {
+      Authorization: `token ${this.githubToken}`
+    } : undefined);
+    const dt = await httpResp.readBody();
+    const statusCode = httpResp.message.statusCode || 500;
+    if (statusCode >= 400) {
+      throw new Error(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${dt}`);
+    }
+    return <Record<string, GitHubRelease>>JSON.parse(dt);
   }
 
   static get context(): Context {

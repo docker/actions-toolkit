@@ -88,13 +88,23 @@ describe('getDownloadVersion', () => {
     const version = await Install.getDownloadVersion('latest');
     expect(version.version).toEqual('latest');
     expect(version.downloadURL).toEqual('https://github.com/regclient/regclient/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/regclient-releases.json'
+    });
   });
   it('returns v0.8.1 download version', async () => {
     const version = await Install.getDownloadVersion('v0.8.1');
     expect(version.version).toEqual('v0.8.1');
     expect(version.downloadURL).toEqual('https://github.com/regclient/regclient/releases/download/v%s/%s');
-    expect(version.releasesURL).toEqual('https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json');
+    expect(version.contentOpts).toEqual({
+      owner: 'docker',
+      repo: 'actions-toolkit',
+      ref: 'main',
+      path: '.github/regclient-releases.json'
+    });
   });
 });
 
@@ -115,6 +125,6 @@ describe('getRelease', () => {
   });
   it('unknown release', async () => {
     const version = await Install.getDownloadVersion('foo');
-    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find regclient release foo in https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/regclient-releases.json'));
+    await expect(Install.getRelease(version)).rejects.toThrow(new Error('Cannot find regclient release foo in releases JSON'));
   });
 });
