@@ -18,3 +18,9 @@
 export const MEDIATYPE_PAYLOAD = 'application/vnd.in-toto+json';
 
 export const MEDIATYPE_PREDICATE = 'in-toto.io/predicate-type';
+
+// https://github.com/in-toto/in-toto-golang/blob/0a34c087cedcc36de065b4fccb7cf7c9bc16e29f/in_toto/attestations.go#L30-L42
+export interface Subject {
+  name: string;
+  digest: Record<string, string>;
+}
