@@ -140,7 +140,10 @@ Get-WinEvent -ea SilentlyContinue \`
 `;
 
 export const limaYamlData = `
-# Source: https://github.com/lima-vm/lima/blob/master/templates/docker-rootful.yaml
+# Source:
+# - https://github.com/lima-vm/lima/blob/master/templates/docker-rootful.yaml
+# - https://github.com/lima-vm/lima/blob/master/templates/_images/ubuntu-lts.yaml
+# - https://github.com/lima-vm/lima/blob/master/templates/_images/ubuntu-24.04.yaml
 
 # VM type: "qemu" or "vz" (on macOS 13 and later).
 # The vmType can be specified only on creating the instance.
@@ -162,24 +165,24 @@ images:
   arch: "{{arch}}"
   digest: "{{digest}}"
 {{/each}}
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/ubuntu-24.04-server-cloudimg-amd64.img"
+- location: "https://cloud-images.ubuntu.com/releases/noble/release-20250704/ubuntu-24.04-server-cloudimg-amd64.img"
   arch: "x86_64"
-  digest: "sha256:a3aea891c930ee0c762077b963834f5e083eb8102574f1e4dfc9e6e4c1c73ac0"
+  digest: "sha256:f1652d29d497fb7c623433705c9fca6525d1311b11294a0f495eed55c7639d1f"
   kernel:
-    location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/unpacked/ubuntu-24.04-server-cloudimg-amd64-vmlinuz-generic"
-    digest: "sha256:2d9f30959f01675fd28aa1c2fe8934728e46766d04ecfad2d206823696a3f830"
+    location: "https://cloud-images.ubuntu.com/releases/noble/release-20250704/unpacked/ubuntu-24.04-server-cloudimg-amd64-vmlinuz-generic"
+    digest: "sha256:67cd9af083515de2101de032b49a64fc4b65778e5383df6ef21cf788a3f4688e"
     cmdline: "root=LABEL=cloudimg-rootfs ro console=tty1 console=ttyAMA0 no_timer_check"
   initrd:
-    location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/unpacked/ubuntu-24.04-server-cloudimg-amd64-initrd-generic"
-    digest: "sha256:231352d027aeebf0bb7dca281dfebae894c86e789c7377788d3c2c149471caa3"
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release-20250228/ubuntu-24.04-server-cloudimg-arm64.img"
+    location: "https://cloud-images.ubuntu.com/releases/noble/release-20250704/unpacked/ubuntu-24.04-server-cloudimg-amd64-initrd-generic"
+    digest: "sha256:f257d581c44f66da2d80c7c5dc3fa598ce76ef313d6e27b368683e8030a9e8fd"
+- location: "https://cloud-images.ubuntu.com/releases/noble/release-20250704/ubuntu-24.04-server-cloudimg-arm64.img"
   arch: "aarch64"
-  digest: "sha256:278a0e8475008673d9d3da10ae66a7b1a3dda059746b83d749eca386a5670bd4"
+  digest: "sha256:bbecbb88100ee65497927ed0da247ba15af576a8855004182cf3c87265e25d35"
 # Fallback to the latest release image.
 # Hint: run \`limactl prune\` to invalidate the cache
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img"
+- location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
   arch: "x86_64"
-- location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
+- location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-arm64.img
   arch: "aarch64"
 
 # CPUs
