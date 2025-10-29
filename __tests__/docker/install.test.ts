@@ -25,6 +25,9 @@ import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docke
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
+
 afterEach(function () {
   rimraf.sync(tmpDir);
 });

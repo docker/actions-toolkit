@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {describe, expect, it} from '@jest/globals';
+import {describe, expect, jest, it} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 
 import {Undock} from '../../src/undock/undock';
 import {Install as UndockInstall} from '../../src/undock/install';
+
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
 
 describe('run', () => {
   it('extracts moby/moby-bin:26.1.5', async () => {

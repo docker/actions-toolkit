@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {describe, expect, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 
 import {Install} from '../../src/regclient/install';
+
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
 
 describe('download', () => {
   // prettier-ignore

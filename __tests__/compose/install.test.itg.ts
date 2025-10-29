@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {describe, expect, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 
 import {Install} from '../../src/compose/install';
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
+
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
 
 maybe('download', () => {
   // prettier-ignore
