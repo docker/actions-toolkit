@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, it} from '@jest/globals';
+import {describe, expect, jest, it} from '@jest/globals';
 import fs from 'fs';
 import * as path from 'path';
 
@@ -23,6 +23,9 @@ import {Sigstore} from '../../src/sigstore/sigstore';
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 const maybe = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'true' && process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu') ? describe : describe.skip;
+
+// needs current GitHub repo info
+jest.unmock('@actions/github');
 
 maybe('signProvenanceBlobs', () => {
   it('single platform', async () => {

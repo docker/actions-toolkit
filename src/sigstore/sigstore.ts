@@ -18,18 +18,22 @@ import {X509Certificate} from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import {signingEndpoints, SigstoreInstance} from '@actions/attest/lib/endpoints';
+import {Endpoints} from '@actions/attest/lib/endpoints';
 import * as core from '@actions/core';
 import {signPayload} from '@actions/attest/lib/sign';
 import {bundleToJSON} from '@sigstore/bundle';
 import {Attestation} from '@actions/attest';
 import {Bundle} from '@sigstore/sign';
 
-import {Subject} from '../types/intoto/intoto';
+import {GitHub} from '../github';
+
+import {MEDIATYPE_PAYLOAD as intotoMediatypePayload, Subject} from '../types/intoto/intoto';
+import {FULCIO_URL, REKOR_URL, SEARCH_URL, TSASERVER_URL} from '../types/sigstore/sigstore';
 
 export interface SignProvenanceBlobsOpts {
   localExportDir: string;
   name?: string;
+  noTransparencyLog?: boolean;
 }
 
 export interface SignProvenanceBlobsResult extends Attestation {
@@ -38,9 +42,6 @@ export interface SignProvenanceBlobsResult extends Attestation {
 }
 
 export class Sigstore {
-  private intotoPayloadType = 'application/vnd.in-toto+json';
-  private searchSigstoreURL = 'https://search.sigstore.dev';
-
   public async signProvenanceBlobs(opts: SignProvenanceBlobsOpts): Promise<Record<string, SignProvenanceBlobsResult>> {
     const result: Record<string, SignProvenanceBlobsResult> = {};
     try {
@@ -48,8 +49,7 @@ export class Sigstore {
         throw new Error('missing "id-token" permission. Please add "permissions: id-token: write" to your workflow.');
       }
 
-      const sigstoreInstance: SigstoreInstance = 'public-good';
-      const endpoints = signingEndpoints(sigstoreInstance);
+      const endpoints = this.signingEndpoints(opts);
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
 
       const provenanceBlobs = Sigstore.getProvenanceBlobs(opts);
@@ -65,7 +65,7 @@ export class Sigstore {
           const bundle = await signPayload(
             {
               body: blob,
-              type: this.intotoPayloadType
+              type: intotoMediatypePayload
             },
             endpoints
           );
@@ -76,7 +76,7 @@ export class Sigstore {
             core.info(`  - ${subject.name} (${digestAlg}:${digestValue})`);
           }
           if (attest.tlogID) {
-            core.info(`Attestation signature uploaded to Rekor transparency log: ${this.searchSigstoreURL}?logIndex=${attest.tlogID}`);
+            core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
           }
           core.info(`Writing Sigstore bundle to: ${bundlePath}`);
           fs.writeFileSync(bundlePath, JSON.stringify(attest.bundle, null, 2), {
@@ -93,6 +93,16 @@ export class Sigstore {
       throw new Error(`Signing BuildKit provenance blobs failed: ${(err as Error).message}`);
     }
     return result;
+  }
+
+  private signingEndpoints(opts: SignProvenanceBlobsOpts): Endpoints {
+    const noTransparencyLog = opts.noTransparencyLog ?? GitHub.context.payload.repository?.private;
+    core.info(`Upload to transparency log: ${noTransparencyLog ? 'disabled' : 'enabled'}`);
+    return {
+      fulcioURL: FULCIO_URL,
+      rekorURL: noTransparencyLog ? undefined : REKOR_URL,
+      tsaServerURL: TSASERVER_URL
+    };
   }
 
   private static getProvenanceBlobs(opts: SignProvenanceBlobsOpts): Record<string, Buffer> {
