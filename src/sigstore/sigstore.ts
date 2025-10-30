@@ -25,6 +25,8 @@ import {bundleToJSON} from '@sigstore/bundle';
 import {Attestation} from '@actions/attest';
 import {Bundle} from '@sigstore/sign';
 
+import {Cosign} from '../cosign/cosign';
+import {Exec} from '../exec';
 import {GitHub} from '../github';
 
 import {MEDIATYPE_PAYLOAD as intotoMediatypePayload, Subject} from '../types/intoto/intoto';
@@ -41,7 +43,26 @@ export interface SignProvenanceBlobsResult extends Attestation {
   subjects: Array<Subject>;
 }
 
+export interface VerifySignedArtifactsOpts {
+  certificateIdentityRegexp: string;
+}
+
+export interface VerifySignedArtifactsResult {
+  bundlePath: string;
+  cosignArgs: Array<string>;
+}
+
+export interface SigstoreOpts {
+  cosign?: Cosign;
+}
+
 export class Sigstore {
+  private readonly cosign: Cosign;
+
+  constructor(opts?: SigstoreOpts) {
+    this.cosign = opts?.cosign || new Cosign();
+  }
+
   public async signProvenanceBlobs(opts: SignProvenanceBlobsOpts): Promise<Record<string, SignProvenanceBlobsResult>> {
     const result: Record<string, SignProvenanceBlobsResult> = {};
     try {
@@ -91,6 +112,44 @@ export class Sigstore {
       }
     } catch (err) {
       throw new Error(`Signing BuildKit provenance blobs failed: ${(err as Error).message}`);
+    }
+    return result;
+  }
+
+  public async verifySignedArtifacts(opts: VerifySignedArtifactsOpts, signed: Record<string, SignProvenanceBlobsResult>): Promise<Record<string, VerifySignedArtifactsResult>> {
+    const result: Record<string, VerifySignedArtifactsResult> = {};
+    if (!(await this.cosign.isAvailable())) {
+      throw new Error('Cosign is required to verify signed artifacts');
+    }
+    for (const [provenancePath, signedRes] of Object.entries(signed)) {
+      const baseDir = path.dirname(provenancePath);
+      await core.group(`Verifying ${signedRes.bundlePath}`, async () => {
+        for (const subject of signedRes.subjects) {
+          const artifactPath = path.join(baseDir, subject.name);
+          core.info(`Verifying signed artifact ${artifactPath}`);
+          // prettier-ignore
+          const cosignArgs = [
+            'verify-blob-attestation',
+            '--new-bundle-format',
+            '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
+            '--certificate-identity-regexp', opts.certificateIdentityRegexp
+          ]
+          if (!signedRes.bundle.verificationMaterial || !Array.isArray(signedRes.bundle.verificationMaterial.tlogEntries) || signedRes.bundle.verificationMaterial.tlogEntries.length === 0) {
+            // if there is no tlog entry, we skip tlog verification but still verify the signed timestamp
+            cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
+          }
+          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, '--bundle', signedRes.bundlePath, artifactPath], {
+            ignoreReturnCode: true
+          });
+          if (execRes.stderr.length > 0 && execRes.exitCode != 0) {
+            throw new Error(execRes.stderr);
+          }
+          result[artifactPath] = {
+            bundlePath: signedRes.bundlePath,
+            cosignArgs: cosignArgs
+          };
+        }
+      });
     }
     return result;
   }

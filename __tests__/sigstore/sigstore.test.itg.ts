@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it} from '@jest/globals';
+import {describe, expect, jest, it, beforeAll} from '@jest/globals';
 import fs from 'fs';
 import * as path from 'path';
 
+import {Install as CosignInstall} from '../../src/cosign/install';
 import {Sigstore} from '../../src/sigstore/sigstore';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
@@ -26,6 +27,12 @@ const maybe = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'true
 
 // needs current GitHub repo info
 jest.unmock('@actions/github');
+
+beforeAll(async () => {
+  const cosignInstall = new CosignInstall();
+  const cosignBinPath = await cosignInstall.download('v3.0.2', true);
+  await cosignInstall.install(cosignBinPath);
+}, 100000);
 
 maybe('signProvenanceBlobs', () => {
   it('single platform', async () => {
@@ -57,6 +64,29 @@ maybe('signProvenanceBlobs', () => {
       expect(res.tlogID).toBeDefined();
       expect(res.attestationID).not.toBeDefined();
       console.log(provenancePath, JSON.stringify(res.bundle, null, 2));
+    }
+  });
+});
+
+maybe('verifySignedArtifacts', () => {
+  it('sign and verify', async () => {
+    const sigstore = new Sigstore();
+    const signResults = await sigstore.signProvenanceBlobs({
+      localExportDir: path.join(fixturesDir, 'sigstore', 'multi')
+    });
+    expect(Object.keys(signResults).length).toEqual(2);
+
+    const verifyResults = await sigstore.verifySignedArtifacts(
+      {
+        certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
+      },
+      signResults
+    );
+    expect(Object.keys(verifyResults).length).toEqual(2);
+    for (const [artifactPath, res] of Object.entries(verifyResults)) {
+      expect(fs.existsSync(artifactPath)).toBe(true);
+      expect(res.bundlePath).toBeDefined();
+      expect(res.cosignArgs).toBeDefined();
     }
   });
 });
