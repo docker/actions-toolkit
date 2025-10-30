@@ -3,9 +3,9 @@
   "predicateType": "https://slsa.dev/provenance/v1",
   "subject": [
     {
-      "name": "myapp",
+      "name": "hello.txt",
       "digest": {
-        "sha256": "4b667c986650394031c49aa325f905d0f9dde27ea57d7b4ab3e43d48f0f9140b"
+        "sha256": "870e0065e68cbdeacbf9cec21b598bb579b0ef55bc48b65b71509667edb570bd"
       }
     }
   ],
@@ -20,44 +20,28 @@
           }
         },
         {
-          "uri": "pkg:docker/docker/dockerfile@1",
+          "uri": "pkg:docker/alpine@latest?platform=linux%2Farm64",
           "digest": {
-            "sha256": "b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6"
+            "sha256": "4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412"
           }
         },
         {
-          "uri": "pkg:docker/golang@1.25-alpine?platform=linux%2Famd64",
+          "uri": "https://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
           "digest": {
-            "sha256": "aee43c3ccbf24fdffb7295693b6e33b21e01baec1b2a55acc351fde345e9ec34"
-          }
-        },
-        {
-          "uri": "pkg:docker/tonistiigi/xx@1.7.0?platform=linux%2Famd64",
-          "digest": {
-            "sha256": "010d4b66aed389848b0694f91c7aaee9df59a6f20be7f5d12e53663a37bd14e2"
-          }
-        },
-        {
-          "uri": "https://github.com/docker/github-builder-test.git#f1bd8fdfe4d417acd107b32d5749638ff1533bfd",
-          "digest": {
-            "sha1": "f1bd8fdfe4d417acd107b32d5749638ff1533bfd"
+            "sha1": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
           }
         }
       ],
       "externalParameters": {
         "configSource": {
-          "uri": "https://github.com/docker/github-builder-test.git#f1bd8fdfe4d417acd107b32d5749638ff1533bfd",
+          "uri": "https://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
           "digest": {
-            "sha1": "f1bd8fdfe4d417acd107b32d5749638ff1533bfd"
+            "sha1": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
           },
-          "path": "Dockerfile"
+          "path": "hello.Dockerfile"
         },
         "request": {
-          "frontend": "gateway.v0",
-          "args": {
-            "cmdline": "docker/dockerfile:1",
-            "source": "docker/dockerfile:1"
-          },
+          "frontend": "dockerfile.v0",
           "secrets": [
             {
               "id": "GIT_AUTH_HEADER",
@@ -73,15 +57,10 @@
       "internalParameters": {
         "buildConfig": {
           "digestMapping": {
-            "sha256:1f4a4008f77e0fd66e5e405280ee9b3f1968beac6a3f28c110b31d15b8cd472a": "step2",
-            "sha256:2030d53ec35fa99af0f54fca7548a9665ec96f2514ba3cbc1b19c9f5c7cec173": "step0",
-            "sha256:368b1bc65dc4d0861c183479a82ba1d9792be1ec2a72aaa7d01c079683d737ff": "step8",
-            "sha256:4fcabdc8e56358c8b9a740d0bf712ef67bc33786112213b9071132a6d595b56f": "step5",
-            "sha256:6a2df8f51e15d0173d4785a6ef59a3c267ab89e42ebb4684a384c03a7ad05147": "step7",
-            "sha256:6ebefcdf46d57291371b70b4c09dbd29559df2b73ef100296cffb93ea6b083bb": "step6",
-            "sha256:717558c6da2ccb95acf2519318ee6f40d7ffbb1f63b0a9d211ffbc1a1d0e345f": "step4",
-            "sha256:d4b5a8c2437dc07cb5a1884896309711c899ee3557268d10b66818dd93f13784": "step1",
-            "sha256:dc0d490768523aa0ed6c1a7c68c5884e1a18e9b7a8c36a0a983edbe17a9bb89e": "step3"
+            "sha256:69f88b22af1cbbe236f4b5d834dfe9c4adb9535c1c602f726fd90212c302a7da": "step0",
+            "sha256:98c0e3a8b1a38f5aa8db558b99aace8e7645a18b0e24d6807018146d21788ae2": "step2",
+            "sha256:a560219f1e0cfb232a9727b9bbf9d6735c0b2190f8e00364f844cfc82bd42479": "step1",
+            "sha256:c7edeef726371083a69f15a3565d6c62be55a91e820f251d9a965f8e36fe3e32": "step3"
           },
           "llbDefinition": [
             {
@@ -89,27 +68,47 @@
               "op": {
                 "Op": {
                   "source": {
-                    "identifier": "docker-image://docker.io/library/golang:1.25-alpine@sha256:aee43c3ccbf24fdffb7295693b6e33b21e01baec1b2a55acc351fde345e9ec34"
+                    "identifier": "docker-image://docker.io/library/alpine:latest@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412"
                   }
                 },
                 "constraints": {},
                 "platform": {
-                  "Architecture": "amd64",
+                  "Architecture": "arm64",
                   "OS": "linux"
                 }
               }
             },
             {
               "id": "step1",
+              "inputs": [
+                "step0:0"
+              ],
               "op": {
                 "Op": {
-                  "source": {
-                    "identifier": "docker-image://docker.io/tonistiigi/xx:1.7.0@sha256:010d4b66aed389848b0694f91c7aaee9df59a6f20be7f5d12e53663a37bd14e2"
+                  "exec": {
+                    "meta": {
+                      "args": [
+                        "/bin/sh",
+                        "-c",
+                        "echo \"Hello, World! This is ${TARGETPLATFORM}\" \u003e /hello.txt"
+                      ],
+                      "cwd": "/",
+                      "env": [
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        "TARGETPLATFORM=linux/arm64"
+                      ],
+                      "removeMountStubsRecursive": true
+                    },
+                    "mounts": [
+                      {
+                        "dest": "/"
+                      }
+                    ]
                   }
                 },
                 "constraints": {},
                 "platform": {
-                  "Architecture": "amd64",
+                  "Architecture": "arm64",
                   "OS": "linux"
                 }
               }
@@ -117,7 +116,6 @@
             {
               "id": "step2",
               "inputs": [
-                "step0:0",
                 "step1:0"
               ],
               "op": {
@@ -134,176 +132,7 @@
                             "dirCopyContents": true,
                             "followSymlink": true,
                             "mode": -1,
-                            "src": "/",
-                            "timestamp": -1
-                          }
-                        },
-                        "input": 0,
-                        "output": 0,
-                        "secondaryInput": 1
-                      }
-                    ]
-                  }
-                },
-                "constraints": {}
-              }
-            },
-            {
-              "id": "step3",
-              "inputs": [
-                "step2:0"
-              ],
-              "op": {
-                "Op": {
-                  "exec": {
-                    "meta": {
-                      "args": [
-                        "/bin/sh",
-                        "-c",
-                        "apk add --no-cache file git"
-                      ],
-                      "cwd": "/go",
-                      "env": [
-                        "PATH=/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                        "GOLANG_VERSION=1.25.3",
-                        "GOTOOLCHAIN=local",
-                        "GOPATH=/go"
-                      ],
-                      "removeMountStubsRecursive": true
-                    },
-                    "mounts": [
-                      {
-                        "dest": "/"
-                      }
-                    ]
-                  }
-                },
-                "constraints": {},
-                "platform": {
-                  "Architecture": "amd64",
-                  "OS": "linux"
-                }
-              }
-            },
-            {
-              "id": "step4",
-              "inputs": [
-                "step3:0"
-              ],
-              "op": {
-                "Op": {
-                  "file": {
-                    "actions": [
-                      {
-                        "Action": {
-                          "mkdir": {
-                            "makeParents": true,
-                            "mode": 493,
-                            "path": "/src",
-                            "timestamp": -1
-                          }
-                        },
-                        "input": 0,
-                        "output": 0,
-                        "secondaryInput": -1
-                      }
-                    ]
-                  }
-                },
-                "constraints": {}
-              }
-            },
-            {
-              "id": "step5",
-              "op": {
-                "Op": {
-                  "source": {
-                    "attrs": {
-                      "git.authheadersecret": "GIT_AUTH_HEADER",
-                      "git.authtokensecret": "GIT_AUTH_TOKEN",
-                      "git.fullurl": "https://github.com/docker/github-builder-test.git"
-                    },
-                    "identifier": "git://github.com/docker/github-builder-test.git#f1bd8fdfe4d417acd107b32d5749638ff1533bfd"
-                  }
-                },
-                "constraints": {}
-              }
-            },
-            {
-              "id": "step6",
-              "inputs": [
-                "step4:0",
-                "step5:0"
-              ],
-              "op": {
-                "Op": {
-                  "exec": {
-                    "meta": {
-                      "args": [
-                        "/bin/sh",
-                        "-c",
-                        "xx-go build -trimpath -o /out/myapp .   \u0026\u0026 xx-verify --static /out/myapp"
-                      ],
-                      "cwd": "/src",
-                      "env": [
-                        "PATH=/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                        "GOLANG_VERSION=1.25.3",
-                        "GOTOOLCHAIN=local",
-                        "GOPATH=/go",
-                        "CGO_ENABLED=0",
-                        "TARGETPLATFORM=linux/arm64"
-                      ],
-                      "removeMountStubsRecursive": true
-                    },
-                    "mounts": [
-                      {
-                        "dest": "/"
-                      },
-                      {
-                        "cacheOpt": {
-                          "ID": "//root/.cache"
-                        },
-                        "dest": "/root/.cache",
-                        "input": -1,
-                        "mountType": 3,
-                        "output": -1
-                      },
-                      {
-                        "dest": "/src",
-                        "input": 1,
-                        "output": -1,
-                        "readonly": true
-                      }
-                    ]
-                  }
-                },
-                "constraints": {},
-                "platform": {
-                  "Architecture": "amd64",
-                  "OS": "linux"
-                }
-              }
-            },
-            {
-              "id": "step7",
-              "inputs": [
-                "step6:0"
-              ],
-              "op": {
-                "Op": {
-                  "file": {
-                    "actions": [
-                      {
-                        "Action": {
-                          "copy": {
-                            "allowEmptyWildcard": true,
-                            "allowWildcard": true,
-                            "createDestPath": true,
-                            "dest": "/",
-                            "dirCopyContents": true,
-                            "followSymlink": true,
-                            "mode": -1,
-                            "src": "/out",
+                            "src": "/hello.txt",
                             "timestamp": -1
                           }
                         },
@@ -318,9 +147,9 @@
               }
             },
             {
-              "id": "step8",
+              "id": "step3",
               "inputs": [
-                "step7:0"
+                "step2:0"
               ],
               "op": {
                 "Op": {}
@@ -329,6 +158,8 @@
           ]
         },
         "builderPlatform": "linux/amd64",
+        "github_actor": "crazy-max",
+        "github_actor_id": "1951866",
         "github_event_name": "workflow_dispatch",
         "github_event_payload": {
           "enterprise": {
@@ -440,9 +271,9 @@
             },
             "private": true,
             "pulls_url": "https://api.github.com/repos/docker/github-builder-test/pulls{/number}",
-            "pushed_at": "2025-10-22T14:08:38Z",
+            "pushed_at": "2025-10-30T10:04:10Z",
             "releases_url": "https://api.github.com/repos/docker/github-builder-test/releases{/id}",
-            "size": 24,
+            "size": 25,
             "ssh_url": "git@github.com:docker/github-builder-test.git",
             "stargazers_count": 0,
             "stargazers_url": "https://api.github.com/repos/docker/github-builder-test/stargazers",
@@ -454,7 +285,7 @@
             "teams_url": "https://api.github.com/repos/docker/github-builder-test/teams",
             "topics": [],
             "trees_url": "https://api.github.com/repos/docker/github-builder-test/git/trees{/sha}",
-            "updated_at": "2025-10-22T14:08:42Z",
+            "updated_at": "2025-10-30T10:04:14Z",
             "url": "https://api.github.com/repos/docker/github-builder-test",
             "visibility": "internal",
             "watchers": 0,
@@ -483,17 +314,41 @@
             "user_view_type": "public"
           },
           "workflow": ".github/workflows/ci.yml"
-        }
+        },
+        "github_job": "build",
+        "github_ref": "refs/heads/main",
+        "github_ref_name": "main",
+        "github_ref_protected": "false",
+        "github_ref_type": "branch",
+        "github_repository": "docker/github-builder-test",
+        "github_repository_id": "1040594287",
+        "github_repository_owner": "docker",
+        "github_repository_owner_id": "5429470",
+        "github_run_attempt": "1",
+        "github_run_id": "18937328894",
+        "github_run_number": "183",
+        "github_runner_arch": "X64",
+        "github_runner_environment": "github-hosted",
+        "github_runner_image_os": "ubuntu24",
+        "github_runner_image_version": "20250929.60.1",
+        "github_runner_name": "GitHub Actions 1002376925",
+        "github_runner_os": "Linux",
+        "github_runner_tracking_id": "github_7c0a7521-2999-41e5-af30-b7f0681f204f",
+        "github_server_url": "https://github.com",
+        "github_triggering_actor": "crazy-max",
+        "github_workflow": "ci",
+        "github_workflow_ref": "docker/github-builder-test/.github/workflows/ci.yml@refs/heads/main",
+        "github_workflow_sha": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
       }
     },
     "runDetails": {
       "builder": {
-        "id": "https://github.com/docker/github-builder-test/actions/runs/18720329526/attempts/1"
+        "id": "https://github.com/docker/github-builder-test/actions/runs/18937328894/attempts/1"
       },
       "metadata": {
-        "invocationID": "3lb9gejzb3ondafiy8szq6pza",
-        "startedOn": "2025-10-22T14:53:42.019047245Z",
-        "finishedOn": "2025-10-22T14:54:12.811607358Z",
+        "invocationID": "7qg2yuux3iklv02ktbmbtwgeb",
+        "startedOn": "2025-10-30T10:19:52.868710505Z",
+        "finishedOn": "2025-10-30T10:19:57.635810119Z",
         "buildkit_metadata": {
           "source": {
             "locations": {
@@ -503,10 +358,10 @@
                     "ranges": [
                       {
                         "start": {
-                          "line": 8
+                          "line": 1
                         },
                         "end": {
-                          "line": 8
+                          "line": 1
                         }
                       }
                     ]
@@ -519,10 +374,10 @@
                     "ranges": [
                       {
                         "start": {
-                          "line": 6
+                          "line": 3
                         },
                         "end": {
-                          "line": 6
+                          "line": 3
                         }
                       }
                     ]
@@ -535,99 +390,10 @@
                     "ranges": [
                       {
                         "start": {
-                          "line": 9
+                          "line": 7
                         },
                         "end": {
-                          "line": 9
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "step3": {
-                "locations": [
-                  {
-                    "ranges": [
-                      {
-                        "start": {
-                          "line": 10
-                        },
-                        "end": {
-                          "line": 10
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "step4": {
-                "locations": [
-                  {
-                    "ranges": [
-                      {
-                        "start": {
-                          "line": 12
-                        },
-                        "end": {
-                          "line": 12
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "step5": {},
-              "step6": {
-                "locations": [
-                  {
-                    "ranges": [
-                      {
-                        "start": {
-                          "line": 16
-                        },
-                        "end": {
-                          "line": 16
-                        }
-                      },
-                      {
-                        "start": {
-                          "line": 17
-                        },
-                        "end": {
-                          "line": 17
-                        }
-                      },
-                      {
-                        "start": {
-                          "line": 18
-                        },
-                        "end": {
-                          "line": 18
-                        }
-                      },
-                      {
-                        "start": {
-                          "line": 19
-                        },
-                        "end": {
-                          "line": 19
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "step7": {
-                "locations": [
-                  {
-                    "ranges": [
-                      {
-                        "start": {
-                          "line": 23
-                        },
-                        "end": {
-                          "line": 23
+                          "line": 7
                         }
                       }
                     ]
@@ -637,16 +403,16 @@
             },
             "infos": [
               {
-                "filename": "Dockerfile",
+                "filename": "hello.Dockerfile",
                 "language": "Dockerfile",
-                "data": "IyBzeW50YXg9ZG9ja2VyL2RvY2tlcmZpbGU6MQoKQVJHIEdPX1ZFUlNJT049IjEuMjUiCgojIHh4IGlzIGEgaGVscGVyIGZvciBjcm9zcy1jb21waWxhdGlvbgpGUk9NIC0tcGxhdGZvcm09JEJVSUxEUExBVEZPUk0gdG9uaXN0aWlnaS94eDoxLjcuMCBBUyB4eAoKRlJPTSAtLXBsYXRmb3JtPSRCVUlMRFBMQVRGT1JNIGdvbGFuZzoke0dPX1ZFUlNJT059LWFscGluZSBBUyBiYXNlCkNPUFkgLS1mcm9tPXh4IC8gLwpSVU4gYXBrIGFkZCAtLW5vLWNhY2hlIGZpbGUgZ2l0CkVOViBDR09fRU5BQkxFRD0wCldPUktESVIgL3NyYwoKRlJPTSBiYXNlIEFTIGJ1aWxkCkFSRyBUQVJHRVRQTEFURk9STQpSVU4gLS1tb3VudD10eXBlPWJpbmQsdGFyZ2V0PS4gXAogICAgLS1tb3VudD10YXJnZXQ9L3Jvb3QvLmNhY2hlLHR5cGU9Y2FjaGUgXAogIHh4LWdvIGJ1aWxkIC10cmltcGF0aCAtbyAvb3V0L215YXBwIC4gXAogICYmIHh4LXZlcmlmeSAtLXN0YXRpYyAvb3V0L215YXBwCkFSRyBCVUlMREtJVF9TQk9NX1NDQU5fU1RBR0U9dHJ1ZQoKRlJPTSBzY3JhdGNoCkNPUFkgLS1mcm9tPWJ1aWxkIC9vdXQgLwo=",
+                "data": "RlJPTSBhbHBpbmUgQVMgYmFzZQpBUkcgVEFSR0VUUExBVEZPUk0KUlVOIGVjaG8gIkhlbGxvLCBXb3JsZCEgVGhpcyBpcyAke1RBUkdFVFBMQVRGT1JNfSIgPiAvaGVsbG8udHh0CkFSRyBCVUlMREtJVF9TQk9NX1NDQU5fU1RBR0U9dHJ1ZQoKRlJPTSBzY3JhdGNoCkNPUFkgLS1mcm9tPWJhc2UgL2hlbGxvLnR4dCAvCg==",
                 "llbDefinition": [
                   {
                     "id": "step0",
                     "op": {
                       "Op": {
                         "source": {
-                          "identifier": "git://github.com/docker/github-builder-test.git#f1bd8fdfe4d417acd107b32d5749638ff1533bfd",
+                          "identifier": "git://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
                           "attrs": {
                             "git.authheadersecret": "GIT_AUTH_HEADER",
                             "git.authtokensecret": "GIT_AUTH_TOKEN",
@@ -668,8 +434,8 @@
                   }
                 ],
                 "digestMapping": {
-                  "sha256:4fcabdc8e56358c8b9a740d0bf712ef67bc33786112213b9071132a6d595b56f": "step0",
-                  "sha256:bc50cc258c6043da1edc694266872a90e37fe4d9dd4b4a6f29715b79a0778011": "step1"
+                  "sha256:47540f0959d81a7ff2fc9742b9ef0bb37d7eca99c13aa6df83b883d06e808ef2": "step0",
+                  "sha256:96933c546ff00debd500304305864192fcb51d348e8c41b6a6e1569a051e66ed": "step1"
                 }
               }
             ]
@@ -679,37 +445,8 @@
               [
                 {
                   "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:2d35ebdb57d9971fea0cac1582aa78935adf8058b2cc32db163c98822e5dfa1b",
-                  "size": 3802452
-                },
-                {
-                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:85e8836fcdb2966cd3e43a5440ccddffd1828d2d186a49fa7c17b605db8b3bb3",
-                  "size": 291155
-                },
-                {
-                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:91631faa732ae651543f888b70295cbfe29a433d3c8da02b9966f67f238d3603",
-                  "size": 60150352
-                },
-                {
-                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:f3f5ae8826faeb0e0415f8f29afbc9550ae5d655f3982b2924949c93d5efd5c8",
-                  "size": 126
-                },
-                {
-                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
-                  "size": 32
-                }
-              ]
-            ],
-            "step1:0": [
-              [
-                {
-                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                  "digest": "sha256:15db0d88ae4923276807d48a05fc8a7208dfbec142770f2fce52af9fee6cd287",
-                  "size": 17084
+                  "digest": "sha256:6b59a28fa20117e6048ad0616b8d8c901877ef15ff4c7f18db04e4f01f43bc39",
+                  "size": 4138069
                 }
               ]
             ]
