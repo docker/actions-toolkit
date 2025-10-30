@@ -71,7 +71,7 @@ export class Install {
 
     const cacheFoundPath = await installCache.find();
     if (cacheFoundPath) {
-      core.info(`Unodck binary found in ${cacheFoundPath}`);
+      core.info(`Undock binary found in ${cacheFoundPath}`);
       return cacheFoundPath;
     }
 
@@ -112,7 +112,7 @@ export class Install {
     fs.chmodSync(undockPath, '0755');
 
     core.addPath(binDir);
-    core.info('Added Unodck to PATH');
+    core.info('Added Undock to PATH');
 
     core.info(`Binary path: ${undockPath}`);
     return undockPath;

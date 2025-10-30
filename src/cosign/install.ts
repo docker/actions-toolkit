@@ -48,7 +48,7 @@ export class Install {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async download(v: string, ghaNoCache?: boolean): Promise<string> {
+  public async download(v: string, ghaNoCache?: boolean, skipState?: boolean): Promise<string> {
     const version: DownloadVersion = await Install.getDownloadVersion(v);
     core.debug(`Install.download version: ${version.version}`);
 
@@ -83,12 +83,12 @@ export class Install {
     const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
-    const cacheSavePath = await installCache.save(htcDownloadPath);
+    const cacheSavePath = await installCache.save(htcDownloadPath, skipState);
     core.info(`Cached to ${cacheSavePath}`);
     return cacheSavePath;
   }
 
-  public async build(gitContext: string, ghaNoCache?: boolean): Promise<string> {
+  public async build(gitContext: string, ghaNoCache?: boolean, skipState?: boolean): Promise<string> {
     const vspec = await this.vspec(gitContext);
     core.debug(`Install.build vspec: ${vspec}`);
 
@@ -119,7 +119,7 @@ export class Install {
       return `${outputDir}/cosign`;
     });
 
-    const cacheSavePath = await installCache.save(buildBinPath);
+    const cacheSavePath = await installCache.save(buildBinPath, skipState);
     core.info(`Cached to ${cacheSavePath}`);
     return cacheSavePath;
   }
@@ -139,7 +139,7 @@ export class Install {
     fs.chmodSync(cosignPath, '0755');
 
     core.addPath(binDir);
-    core.info('Added Unodck to PATH');
+    core.info('Added Cosign to PATH');
 
     core.info(`Binary path: ${cosignPath}`);
     return cosignPath;
