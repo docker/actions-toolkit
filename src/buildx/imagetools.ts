@@ -17,7 +17,10 @@
 import {Buildx} from './buildx';
 import {Exec} from '../exec';
 
+import {Manifest as ImageToolsManifest} from '../types/buildx/imagetools';
 import {Image} from '../types/oci/config';
+import {Descriptor} from '../types/oci/descriptor';
+import {Digest} from '../types/oci/digest';
 
 export interface ImageToolsOpts {
   buildx?: Buildx;
@@ -57,5 +60,38 @@ export class ImageTools {
       }
       throw new Error('Unexpected output format');
     });
+  }
+
+  public async inspectManifest(name: string): Promise<ImageToolsManifest | Descriptor> {
+    const cmd = await this.getInspectCommand([name, '--format', '{{json .Manifest}}']);
+    return await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      const parsedOutput = JSON.parse(res.stdout);
+      if (typeof parsedOutput === 'object' && !Array.isArray(parsedOutput) && parsedOutput !== null) {
+        if (Object.prototype.hasOwnProperty.call(parsedOutput, 'manifests')) {
+          return <ImageToolsManifest>parsedOutput;
+        } else {
+          return <Descriptor>parsedOutput;
+        }
+      }
+      throw new Error('Unexpected output format');
+    });
+  }
+
+  public async attestationDescriptors(name: string): Promise<Array<Descriptor>> {
+    const manifest = await this.inspectManifest(name);
+    if (typeof manifest === 'object' && manifest !== null && 'manifests' in manifest && Array.isArray(manifest.manifests)) {
+      return manifest.manifests.filter(m => m.annotations && m.annotations['vnd.docker.reference.type'] === 'attestation-manifest');
+    }
+    throw new Error(`No attestation descriptors found for ${name}`);
+  }
+
+  public async attestationDigests(name: string): Promise<Array<Digest>> {
+    return (await this.attestationDescriptors(name)).map(attestation => attestation.digest);
   }
 }
