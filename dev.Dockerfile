@@ -20,6 +20,7 @@ ARG BUILDX_VERSION=0.29.1
 ARG COMPOSE_VERSION=2.39.1
 ARG UNDOCK_VERSION=0.10.0
 ARG REGCTL_VERSION=v0.8.2
+ARG COSIGN_VERSION=v3.0.2
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
@@ -81,6 +82,7 @@ FROM docker/buildx-bin:${BUILDX_VERSION} AS buildx
 FROM docker/compose-bin:v${COMPOSE_VERSION} AS compose
 FROM crazymax/undock:${UNDOCK_VERSION} AS undock
 FROM ghcr.io/regclient/regctl:${REGCTL_VERSION} AS regctl
+FROM ghcr.io/sigstore/cosign/cosign:${COSIGN_VERSION} AS cosign
 
 FROM deps AS test
 RUN --mount=type=bind,target=.,rw \
@@ -93,6 +95,7 @@ RUN --mount=type=bind,target=.,rw \
     --mount=type=bind,from=compose,source=/docker-compose,target=/usr/bin/compose \
     --mount=type=bind,from=undock,source=/usr/local/bin/undock,target=/usr/bin/undock \
     --mount=type=bind,from=regctl,source=/regctl,target=/usr/bin/regctl \
+    --mount=type=bind,from=cosign,source=/ko-app/cosign,target=/usr/bin/cosign \
     --mount=type=secret,id=GITHUB_TOKEN \
   GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN) yarn run test:coverage --coverageDirectory=/tmp/coverage
 
