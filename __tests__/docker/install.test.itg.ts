@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, test, expect} from '@jest/globals';
+import {beforeAll, describe, jest, test, expect} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -26,6 +26,9 @@ import {Install as UndockInstall} from '../../src/undock/install';
 import {Exec} from '../../src/exec';
 
 const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
+
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
 
 beforeAll(async () => {
   const undockInstall = new UndockInstall();

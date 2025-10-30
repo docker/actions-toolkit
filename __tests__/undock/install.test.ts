@@ -25,6 +25,9 @@ import {Install} from '../../src/undock/install';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-install-'));
 
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
+
 afterEach(function () {
   rimraf.sync(tmpDir);
 });
