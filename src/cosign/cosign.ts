@@ -15,12 +15,26 @@
  */
 
 import * as core from '@actions/core';
+import {BUNDLE_V03_MEDIA_TYPE, SerializedBundle} from '@sigstore/bundle';
 
 import {Exec} from '../exec';
 import * as semver from 'semver';
+import {MEDIATYPE_EMPTY_JSON_V1} from '../types/oci/mediatype';
 
 export interface CosignOpts {
   binPath?: string;
+}
+
+export interface CosignCommandResult {
+  bundle?: SerializedBundle;
+  signatureManifestDigest?: string;
+  errors?: Array<CosignCommandError>;
+}
+
+export interface CosignCommandError {
+  code: string;
+  message: string;
+  detail: string;
 }
 
 export class Cosign {
@@ -87,5 +101,60 @@ export class Cosign {
     const res = semver.satisfies(ver, range) || /^[0-9a-f]{7}$/.exec(ver) !== null;
     core.debug(`Cosign.versionSatisfies ${ver} statisfies ${range}: ${res}`);
     return res;
+  }
+
+  public static parseCommandOutput(logs: string): CosignCommandResult {
+    let signatureManifestDigest: string | undefined;
+    let signatureManifestFallbackDigest: string | undefined;
+    let bundlePayload: SerializedBundle | undefined;
+    let errors: Array<CosignCommandError> | undefined;
+
+    for (const rawLine of logs.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line.startsWith('{') || !line.endsWith('}')) {
+        continue;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let obj: any;
+      try {
+        obj = JSON.parse(line);
+      } catch {
+        continue;
+      }
+
+      if (obj && Array.isArray(obj.errors) && obj.errors.length > 0) {
+        errors = obj.errors;
+      }
+
+      // signature manifest digest
+      if (!signatureManifestDigest && obj && Array.isArray(obj.manifests) && obj.manifests.length > 0) {
+        const m0 = obj.manifests[0];
+        if (m0?.artifactType === BUNDLE_V03_MEDIA_TYPE && typeof m0.digest === 'string') {
+          signatureManifestDigest = m0.digest;
+        } else if (m0?.artifactType === MEDIATYPE_EMPTY_JSON_V1 && typeof m0.digest === 'string') {
+          signatureManifestFallbackDigest = m0.digest;
+        }
+      }
+
+      // signature payload
+      if (!bundlePayload && obj && obj.mediaType === BUNDLE_V03_MEDIA_TYPE) {
+        bundlePayload = obj as SerializedBundle;
+      }
+
+      if (bundlePayload && signatureManifestDigest) {
+        break;
+      }
+    }
+
+    if (!errors && !bundlePayload) {
+      throw new Error(`Cannot find signature bundle from cosign command output: ${logs}`);
+    }
+
+    return {
+      bundle: bundlePayload,
+      signatureManifestDigest: signatureManifestDigest || signatureManifestFallbackDigest,
+      errors: errors
+    };
   }
 }

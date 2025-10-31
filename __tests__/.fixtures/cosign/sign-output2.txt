@@ -1,0 +1,408 @@
+25/10/31 12:23:12 --> GET https://ghcr.io/v2/
+2025/10/31 12:23:12 GET /v2/ HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:13 <-- 401 https://ghcr.io/v2/ (89.150488ms)
+2025/10/31 12:23:13 HTTP/2.0 401 Unauthorized
+Content-Length: 73
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:13 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Www-Authenticate: ***"https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
+X-Github-Request-Id: 6801:2BD711:1CF2F3:21999C:6904AA31
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required"}]}
+
+2025/10/31 12:23:13 --> GET https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io [body redacted: basic token response contains credentials]
+2025/10/31 12:23:13 GET /token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:13 <-- 200 https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io (77.913846ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:13 HTTP/2.0 200 OK
+Content-Length: 69
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:13 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6801:2BD711:1CF2FF:2199A6:6904AA31
+
+
+2025/10/31 12:23:13 --> GET https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+2025/10/31 12:23:13 GET /v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:13 <-- 200 https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 (123.693613ms)
+2025/10/31 12:23:13 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:23:13 GMT
+Docker-Content-Digest: sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+Docker-Distribution-Api-Version: registry/2.0
+Etag: "sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4"
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6801:2BD711:1CF313:2199BD:6904AA31
+
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "artifactType": "application/vnd.docker.attestation.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.empty.v1+json",
+    "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "size": 2,
+    "data": "e30="
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:7a5799d5199ade2a153ad2a7dcb18ea47801eacdb60baab8888bdddf1b7625db",
+      "size": 1066,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:82c4b93ca70a89e9905a66223e9b20b4fed6b8ae4b49a9fa15a576556637b47f",
+      "size": 81248,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:ef2bf2ba303ba8a61a16ff013a69db540e27693a9c4c2e00dddeb3a171ba94a5",
+      "size": 12963,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://slsa.dev/provenance/v1"
+      }
+    }
+  ],
+  "subject": {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:d496a83e4181e4e552e502411b2e1714059d52e2d8249f9e629f7728de894b5c",
+    "size": 476
+  }
+}
+Signing artifact...
+2025/10/31 12:23:14 --> GET https://ghcr.io/v2/
+2025/10/31 12:23:14 GET /v2/ HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:14 <-- 401 https://ghcr.io/v2/ (95.609743ms)
+2025/10/31 12:23:14 HTTP/2.0 401 Unauthorized
+Content-Length: 73
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Www-Authenticate: ***"https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
+X-Github-Request-Id: 6802:6EC77:1D0CD6:21D994:6904AA32
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required"}]}
+
+2025/10/31 12:23:14 --> GET https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io [body redacted: basic token response contains credentials]
+2025/10/31 12:23:14 GET /token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:14 <-- 200 https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apull&service=ghcr.io (84.855255ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:14 HTTP/2.0 200 OK
+Content-Length: 69
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0CDE:21D9A0:6904AA32
+
+
+2025/10/31 12:23:14 --> HEAD https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+2025/10/31 12:23:14 HEAD /v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+
+
+2025/10/31 12:23:14 <-- 200 https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 (71.474101ms)
+2025/10/31 12:23:14 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Content-Digest: sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+Docker-Distribution-Api-Version: registry/2.0
+Etag: "sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4"
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0CF3:21D9BA:6904AA32
+
+
+2025/10/31 12:23:14 --> GET https://ghcr.io/v2/
+2025/10/31 12:23:14 GET /v2/ HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:14 <-- 401 https://ghcr.io/v2/ (30.699866ms)
+2025/10/31 12:23:14 HTTP/2.0 401 Unauthorized
+Content-Length: 73
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Www-Authenticate: ***"https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
+X-Github-Request-Id: 6802:6EC77:1D0D02:21D9C9:6904AA32
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required"}]}
+
+2025/10/31 12:23:14 --> GET https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apush%2Cpull&service=ghcr.io [body redacted: basic token response contains credentials]
+2025/10/31 12:23:14 GET /token?scope=repository%3Adocker%2Fgithub-builder-test%3Apush%2Cpull&service=ghcr.io HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:14 <-- 200 https://ghcr.io/token?scope=repository%3Adocker%2Fgithub-builder-test%3Apush%2Cpull&service=ghcr.io (75.969624ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:14 HTTP/2.0 200 OK
+Content-Length: 69
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D09:21D9D5:6904AA32
+
+
+2025/10/31 12:23:14 --> HEAD https://ghcr.io/v2/docker/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+2025/10/31 12:23:14 HEAD /v2/docker/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:23:14 <-- 200 https://ghcr.io/v2/docker/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a (98.215603ms)
+2025/10/31 12:23:14 HTTP/2.0 200 OK
+Content-Length: 2
+Content-Type: application/vnd.oci.empty.v1+json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Content-Digest: sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+Docker-Distribution-Api-Version: registry/2.0
+Etag: "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D17:21D9E5:6904AA32
+
+
+2025/10/31 12:23:14 --> HEAD https://ghcr.io/v2/docker/github-builder-test/blobs/sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7
+2025/10/31 12:23:14 HEAD /v2/docker/github-builder-test/blobs/sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:23:14 <-- 404 https://ghcr.io/v2/docker/github-builder-test/blobs/sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7 (47.830432ms)
+2025/10/31 12:23:14 HTTP/2.0 404 Not Found
+Content-Length: 74
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D2E:21D9F7:6904AA32
+
+
+2025/10/31 12:23:14 --> POST https://ghcr.io/v2/docker/github-builder-test/blobs/uploads/
+2025/10/31 12:23:14 POST /v2/docker/github-builder-test/blobs/uploads/ HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/json
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:14 <-- 202 https://ghcr.io/v2/docker/github-builder-test/blobs/uploads/ (166.290948ms)
+2025/10/31 12:23:14 HTTP/2.0 202 Accepted
+Content-Length: 0
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:14 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Upload-Uuid: 46e84f19-fb63-4170-bd9b-f9130303b9f5
+Location: /v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5
+Range: 0-0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D35:21DA0A:6904AA32
+
+
+2025/10/31 12:23:14 --> PATCH https://ghcr.io/v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5
+2025/10/31 12:23:14 PATCH /v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 10395
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","verificationMaterial":{"certificate":{"rawBytes":"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"},"tlogEntries":[{"logIndex":"658949873","logId":{"keyId":"wNI9atQGlz+VWfO6LRygH4QUfY/8W4RFwiT5i5WRgB0="},"kindVersion":{"kind":"dsse","version":"0.0.1"},"integratedTime":"1761913394","inclusionPromise":{"signedEntryTimestamp":"MEUCIQC7ryEY4+TY9EInE26I7nZvRx+syLxTMwNJI2S7iLuUAQIgJ4yr4/v28svJ7kziHPCaLu6XohrhTIL802XjIVAmUfk="},"inclusionProof":{"logIndex":"537045611","rootHash":"S1/6pJxY47NyTTGZbeBhnIx0fF+xGhjbxCNaWO0flKg=","treeSize":"537045613","hashes":["52m5oXN+9Qdrx0bqz6GIEf7hBXYf5ZRBfWYE5DfQSec=","GdUIZawg/YKdziJ5lsSRfsQ4coLJ+iummN72h24BN6E=","l6kiWAqZKP22khjat5v0pOogfPJwNuEygIHQg2Z7cjw=","vvpx7CQg7A3uupiKKPjSCkBCri7fjp4dLUoxPcuLX/Q=","O1dsgL2LCczO6dWokKozaU7xb1SyxmCubP9rGWoeSCs=","p3NjxT2FoaDV5Gjj2Ex4mDeYNCC5ACdtqUEEMPokp2g=","+ukHPMlbS0ZMC0HZZ17V2ggBbu6BbaiRnXpESdr5hcA=","hxeWAKhzQdqOBjOQ8W0MCrMAltMhR69VI25jjbjEb8U=","7eU4MO2rD280XoJuu+dx58GT6AcVjTptjjfcbl2zhx8=","wxy+qRAkZr0OZMsIEhPAvUdGhqViqQbv9IthVGOm3lI=","P6OrPNhquaHIdM/iPT2DlOVW2K/cO02h2h5AGOxNDcE=","T4DqWD42hAtN+vX8jKCWqoC4meE4JekI9LxYGCcPy1M="],"checkpoint":{"envelope":"rekor.sigstore.dev - 1193050959916656506\n537045613\nS1/6pJxY47NyTTGZbeBhnIx0fF+xGhjbxCNaWO0flKg=\n\n— rekor.sigstore.dev wNI9ajBFAiEAxVrgGnOJAFkoEiyl2tfPHoeH+zvpxowfrAHLTOMlLKECIAZt/l7ImJ7zSFRKxttzSLk+yDwO8Ut8aOMac0vUes0a\n"}},"canonicalizedBody":"eyJhcGlWZXJzaW9uIjoiMC4wLjEiLCJraW5kIjoiZHNzZSIsInNwZWMiOnsiZW52ZWxvcGVIYXNoIjp7ImFsZ29yaXRobSI6InNoYTI1NiIsInZhbHVlIjoiNzY3NWVkNjM5ZjlmMjkwMTk3YzIwMzMyNTM2OTE3OGM4ODMzYWIwNGM2YWUzNGU1ZWQyZTZmZjc5YWU2MTlkYiJ9LCJwYXlsb2FkSGFzaCI6eyJhbGdvcml0aG0iOiJzaGEyNTYiLCJ2YWx1ZSI6IjViYzA2MTY5NzgyMGNhNWJiNzYzN2EzMTQ5NmE2ZjIyNTE3NTBhNjRmNTE3NGJkMTJmNGJlMjBkN2QwZTMyMmMifSwic2lnbmF0dXJlcyI6W3sic2lnbmF0dXJlIjoiTUVRQ0lEWEh5cjdXSjAvQTRtK1BZRS8xRWpjazZNYkxoOCs3N2RtQUxLci9JcDd3QWlCeS9XWE9lbmd1MEZpdmVVU1MxMTlRWUZyM0hlMzVndG1UTnhibVNwcHJKUT09IiwidmVyaWZpZXIiOiJMUzB0TFMxQ1JVZEpUaUJEUlZKVVNVWkpRMEZVUlMwdExTMHRDazFKU1VoSVZFTkRRbkZUWjBGM1NVSkJaMGxWUzNCaFEzaFZOVFpDTUhoRWRqTTBXbVUwWkhOMFdVUnRNVkp2ZDBObldVbExiMXBKZW1vd1JVRjNUWGNLVG5wRlZrMUNUVWRCTVZWRlEyaE5UV015Ykc1ak0xSjJZMjFWZFZwSFZqSk5ValIzU0VGWlJGWlJVVVJGZUZaNllWZGtlbVJIT1hsYVV6RndZbTVTYkFwamJURnNXa2RzYUdSSFZYZElhR05PVFdwVmVFMUVUWGhOVkVsNVRYcEZlbGRvWTA1TmFsVjRUVVJOZUUxVVNYcE5la1Y2VjJwQlFVMUdhM2RGZDFsSUNrdHZXa2w2YWpCRFFWRlpTVXR2V2tsNmFqQkVRVkZqUkZGblFVVkZTM1JFVDFOVlVqWkdZMkZaUWpsc2JUaEdXWFExVmtGQ2Qyc3JTRXd3ZHpOME9FWUtVV3BOVEdWTFFYRlVkVmhMVjFWV2MxWTRTRk5IUmtwWGRYRkxlRVIzUzI1SlFqRTNkVkJqZFVGb05qZFpVM2xEYlV0UFEwSmpUWGRuWjFjdlRVRTBSd3BCTVZWa1JIZEZRaTkzVVVWQmQwbElaMFJCVkVKblRsWklVMVZGUkVSQlMwSm5aM0pDWjBWR1FsRmpSRUY2UVdSQ1owNVdTRkUwUlVablVWVkZOQ3RKQ2pSMVdIVmxVakY1VkRWMmFteGthM0phTkVjcmFITkpkMGgzV1VSV1VqQnFRa0puZDBadlFWVXpPVkJ3ZWpGWmEwVmFZalZ4VG1wd1MwWlhhWGhwTkZrS1drUTRkMmRaU1VkQk1WVmtSVkZGUWk5M1VqUk5TR0ZIWkVkb01HUklRbnBQYVRoMldqSnNNR0ZJVm1sTWJVNTJZbE01YTJJeVRuSmFXRWwyV2pKc01BcGhTRlpwVEZkS01XRlhlR3RhV0VsMFdsaG9kMXBZU25CaVYxWjFaRWRHYzB4NU5XNWhXRkp2WkZkSmRtUXlPWGxoTWxwellqTmtla3d5U2pGaFYzaHJDa3h1YkhSaVJVSjVXbGRhZWt3eWFHeFpWMUo2VERKS01XRlhlR3RNV0Vwc1pGaE9hRmx0ZUd4TVdHUjJZMjEwYldKSE9UTk5SR3RIUTJselIwRlJVVUlLWnpjNGQwRlJSVVZMTW1nd1pFaENlazlwT0haa1J6bHlXbGMwZFZsWFRqQmhWemwxWTNrMWJtRllVbTlrVjBveFl6SldlVmt5T1hWa1IxWjFaRU0xYWdwaU1qQjNTSGRaUzB0M1dVSkNRVWRFZG5wQlFrRm5VVkprTWpsNVlUSmFjMkl6WkdaYVIyeDZZMGRHTUZreVozZE9aMWxMUzNkWlFrSkJSMFIyZWtGQ0NrRjNVVzlaVkVFMVdtMU5NbHBYU1RSUFJFMHpXa1JOZDA1VVVUUlplbEpyV1dwSk1rMUVZekJaZWtKcFdYcFpNVTVVUm14UFZFbDRUbFJCVVVKbmIzSUtRbWRGUlVGWlR5OU5RVVZGUWtGS2FtRlVRVzlDWjI5eVFtZEZSVUZaVHk5TlFVVkdRa0p3YTJJeVRuSmFXRWwyV2pKc01HRklWbWxNVjBveFlWZDRhd3BhV0VsMFpFZFdlbVJFUVdSQ1oyOXlRbWRGUlVGWlR5OU5RVVZIUWtFNWVWcFhXbnBNTW1oc1dWZFNla3d5TVdoaFZ6UjNUM2RaUzB0M1dVSkNRVWRFQ25aNlFVSkRRVkYwUkVOMGIyUklVbmRqZW05MlRETlNkbUV5Vm5WTWJVWnFaRWRzZG1KdVRYVmFNbXd3WVVoV2FXUllUbXhqYlU1MlltNVNiR0p1VVhVS1dUSTVkRTFKUjBWQ1oyOXlRbWRGUlVGWlR5OU5RVVZLUWtoWlRXUkhhREJrU0VKNlQyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmRncGFNbXd3WVVoV2FVeFhTakZoVjNocldsaEpkRnBZYUhkYVdFcHdZbGRXZFdSSFJuTk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rb3hDbUZYZUd0TWJteDBZa1ZDZVZwWFducE1NbWhzV1ZkU2Vrd3lTakZoVjNoclRGaEtiR1JZVG1oWmJYaHNURmhrZG1OdGRHMWlSemt6VFVSblIwTnBjMGNLUVZGUlFtYzNPSGRCVVc5RlMyZDNiMDFIVlhkYVJGRXlUbGROTWxwSFRtaE5lbHB0VG5wT2JFMUVZelZQUjFWNlRWZFZNazlVUlRWUFZFSnRUMVJzYkFwT2JWWnFUa1JCWkVKbmIzSkNaMFZGUVZsUEwwMUJSVXhDUVRoTlJGZGtjR1JIYURGWmFURnZZak5PTUZwWFVYZFFVVmxMUzNkWlFrSkJSMFIyZWtGQ0NrUkJVWFpFUXpGdlpFaFNkMk42YjNaTU1tUndaRWRvTVZscE5XcGlNakIyV2tjNWFtRXlWbmxNTW1Sd1pFZG9NVmxwTVdsa1YyeHpXa2RXZVV4WVVtd0tZek5SZDA5QldVdExkMWxDUWtGSFJIWjZRVUpFVVZGeFJFTm9hRTFFYkcxWmVscHNXV3BuTkUxNlpHdE5la0V4VGtSb2FrNUhVbWxOYWxsM1RucFNhZ3BOUjBwcVRtcFZNVTFYVlRWTmFrVXhUVUk0UjBOcGMwZEJVVkZDWnpjNGQwRlJORVZGVVhkUVkyMVdiV041T1c5YVYwWnJZM2s1ZEZsWGJIVk5RbTlIQ2tOcGMwZEJVVkZDWnpjNGQwRlJPRVZFUVhkTFRWUkJNRTFFVlRWT1JFazBUbnBCY0VKbmIzSkNaMFZGUVZsUEwwMUJSVkZDUW5OTlIxZG9NR1JJUW5vS1QyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmQwWjNXVXRMZDFsQ1FrRkhSSFo2UVVKRlVWRktSRUZqTVU1RVNUVk9SR04zVFVkWlJ3cERhWE5IUVZGUlFtYzNPSGRCVWtsRlYwRjRWMkZJVWpCalNFMDJUSGs1Ym1GWVVtOWtWMGwxV1RJNWRFd3lVblpaTW5Sc1kyazVibUZZVW05a1YwbDBDbGx1Vm5CaVIxSnNZMmt4TUZwWVRqQk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rNXdURzVzZEdKRlFubGFWMXA2VERKb2JGbFhVbm9LVERJeGFHRlhOSGRQUVZsTFMzZFpRa0pCUjBSMmVrRkNSWGRSY1VSRGFHaE5SR3h0V1hwYWJGbHFaelJOZW1SclRYcEJNVTVFYUdwT1IxSnBUV3BaZHdwT2VsSnFUVWRLYWs1cVZURk5WMVUxVFdwRk1VMURSVWREYVhOSFFWRlJRbWMzT0hkQlVsRkZSWGQzVW1ReU9YbGhNbHB6WWpOa1pscEhiSHBqUjBZd0Nsa3laM2RaVVZsTFMzZFpRa0pCUjBSMmVrRkNSbEZTVkVSR1JtOWtTRkozWTNwdmRrd3laSEJrUjJneFdXazFhbUl5TUhaYVJ6bHFZVEpXZVV3eVpIQUtaRWRvTVZscE1XbGtWMnh6V2tkV2VVeFlVbXhqTTFGMldWZE9NR0ZYT1hWamVUbDVaRmMxZWt4NlJUUlBWR041VFhwak1VMVVXWGxNTWtZd1pFZFdkQXBqU0ZKNlRIcEZkMGRCV1V0TGQxbENRa0ZIUkhaNlFVSkdaMUZMUkVGb2NHSnVVbXhqYlRWb1lrUkRRbWxuV1V0TGQxbENRa0ZJVjJWUlNVVkJaMUk0Q2tKSWIwRmxRVUl5UVU0d09VMUhja2Q0ZUVWNVdYaHJaVWhLYkc1T2QwdHBVMncyTkROcWVYUXZOR1ZMWTI5QmRrdGxOazlCUVVGQ2JXcHZOREJpZDBFS1FVRlJSRUZGWTNkU1VVbG9RVTkyVEhCSGVYZHhPVkkxVWtWYWN5dHRLMU5tZFhSSmFXSnFRM2hEZGs1V1VuUmtjbGhDWkVwNmNHNUJhVUZxT1hOb1ZBb3JjM2xOUkM5WGEwWk5hRTl1UVhCNGFteGtPRU5pZG5KdVIxQk5Rak5CVEZaMWRTdE9ha0ZMUW1kbmNXaHJhazlRVVZGRVFYZE9ia0ZFUW10QmFrSkhDbWREVUdkTmFEVldSR0ZEU25WM0wySkZSbUZKSzA4NWFEVnNUbkJMUkhWRFFtSjFTRWcxVURCdWNqRTRTVXhzVURsdVFUVlhkbXhtZFhGWk9EVjNiME1LVFVKQ1ZIQjZjRTUxVGxWbFEzTjBWM0ZNYjNaSVMxWkpWM1F6Y0hKUmVYZFJTbVJhWW5kT1pYQkVOMFpzVm01MVpVZEZjMDlCV1VOeFdFNWlVMEZVWkFwVFFUMDlDaTB0TFMwdFJVNUVJRU5GVWxSSlJrbERRVlJGTFMwdExTMEsifV19fQ=="}],"timestampVerificationData":{"rfc3161Timestamps":[{"signedTimestamp":"MIICyTADAgEAMIICwAYJKoZIhvcNAQcCoIICsTCCAq0CAQMxDTALBglghkgBZQMEAgEwgbgGCyqGSIb3DQEJEAEEoIGoBIGlMIGiAgEBBgkrBgEEAYO/MAIwMTANBglghkgBZQMEAgEFAAQghJr6SlEcNiabE0P40jFKimwsNQOHA1sYTagKjocwPCsCFQDF5U5dqA6Fl5i00aofySZLmJMi1xgPMjAyNTEwMzExMjIzMTNaMAMCAQGgMqQwMC4xFTATBgNVBAoTDHNpZ3N0b3JlLmRldjEVMBMGA1UEAxMMc2lnc3RvcmUtdHNhoAAxggHaMIIB1gIBATBRMDkxFTATBgNVBAoTDHNpZ3N0b3JlLmRldjEgMB4GA1UEAxMXc2lnc3RvcmUtdHNhLXNlbGZzaWduZWQCFDoTVC8MkGHuvMFDL8uKjosqI4sMMAsGCWCGSAFlAwQCAaCB/DAaBgkqhkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTI1MTAzMTEyMjMxM1owLwYJKoZIhvcNAQkEMSIEIHDsaBIBOVqiV6ClSRGMB0ZnDfKNukLeAHEJmw2+I1iDMIGOBgsqhkiG9w0BCRACLzF/MH0wezB5BCCF+Se8B6tiysO0Q1bBDvyBssaIP9p6uebYcNnROs0FtzBVMD2kOzA5MRUwEwYDVQQKEwxzaWdzdG9yZS5kZXYxIDAeBgNVBAMTF3NpZ3N0b3JlLXRzYS1zZWxmc2lnbmVkAhQ6E1QvDJBh7rzBQy/Lio6LKiOLDDAKBggqhkjOPQQDAgRmMGQCMHnK6uZheOSbX82+RdV2ThCJ48/6J6oMQAcqR0pNWaXYhpriMydi+GPsZODPFt5MkwIwQD/AG1GDnYXRrylo74qsCURwTegurMi7QfPePz11xv0TMKyTC38sDrEsV6OA85xJ"}]}},"dsseEnvelope":{"payload":"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJkaWdlc3QiOnsic2hhMjU2IjoiYzZmYzQ1OGNjODcxODYyOGU4ZmI4YjY5OWQyOTkxMDU2NTkwZTBmZWQ0ZWEwZDZmODY1ODM3MDUyMDJiZGNlNCJ9fV0sInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3NpZ3N0b3JlLmRldi9jb3NpZ24vc2lnbi92MSJ9","payloadType":"application/vnd.in-toto+json","signatures":[{"sig":"MEQCIDXHyr7WJ0/A4m+PYE/1Ejck6MbLh8+77dmALKr/Ip7wAiBy/WXOengu0FiveUSS119QYFr3He35gtmTNxbmSpprJQ=="}]}}
+2025/10/31 12:23:15 <-- 202 https://ghcr.io/v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5 (152.096564ms)
+2025/10/31 12:23:15 HTTP/2.0 202 Accepted
+Content-Length: 0
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:15 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Upload-Uuid: 46e84f19-fb63-4170-bd9b-f9130303b9f5
+Location: /v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5
+Range: 0-10394
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D5D:21DA34:6904AA32
+
+
+2025/10/31 12:23:15 --> PUT https://ghcr.io/v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5?digest=sha256%3Aecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7
+2025/10/31 12:23:15 PUT /v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5?digest=sha256%3Aecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:15 <-- 201 https://ghcr.io/v2/docker/github-builder-test/blobs/upload/46e84f19-fb63-4170-bd9b-f9130303b9f5?digest=sha256%3Aecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7 (799.390883ms)
+2025/10/31 12:23:15 HTTP/2.0 201 Created
+Content-Length: 0
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:15 GMT
+Docker-Content-Digest: sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7
+Docker-Distribution-Api-Version: registry/2.0
+Location: /v2/docker/github-builder-test/blobs/sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0D7F:21DA60:6904AA33
+
+
+2025/10/31 12:23:15 --> PUT https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10
+2025/10/31 12:23:15 PUT /v2/docker/github-builder-test/manifests/sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 880
+Authorization: <redacted>
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Accept-Encoding: gzip
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.manifest.v1+json","config":{"mediaType":"application/vnd.oci.empty.v1+json","size":2,"digest":"sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"},"layers":[{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","size":10395,"digest":"sha256:ecb58f9176a603e8800a1e7669b96a58717eb8201f775ae3de20265139cc4ad7"}],"annotations":{"dev.sigstore.bundle.content":"dsse-envelope","dev.sigstore.bundle.predicateType":"https://sigstore.dev/cosign/sign/v1","org.opencontainers.image.created":"2025-10-31T12:23:14Z"},"subject":{"mediaType":"application/vnd.oci.image.manifest.v1+json","size":1380,"digest":"sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4"},"artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"}
+2025/10/31 12:23:16 <-- 201 https://ghcr.io/v2/docker/github-builder-test/manifests/sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10 (328.504128ms)
+2025/10/31 12:23:16 HTTP/2.0 201 Created
+Content-Length: 0
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:16 GMT
+Docker-Content-Digest: sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10
+Docker-Distribution-Api-Version: registry/2.0
+Location: /v2/docker/github-builder-test/manifests/sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0E11:21DB0F:6904AA33
+
+
+2025/10/31 12:23:16 --> GET https://ghcr.io/v2/docker/github-builder-test/referrers/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+2025/10/31 12:23:16 GET /v2/docker/github-builder-test/referrers/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:16 <-- 303 https://ghcr.io/v2/docker/github-builder-test/referrers/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 (30.18015ms)
+2025/10/31 12:23:16 HTTP/2.0 303 See Other
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:16 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Location: https://github.com/-/v2/packages/container/package/docker%2Fgithub-builder-test%2Freferrers%2Fsha256
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0E57:21DB61:6904AA34
+Content-Length: 0
+
+
+2025/10/31 12:23:16 --> GET https://github.com/-/v2/packages/container/package/docker%2Fgithub-builder-test%2Freferrers%2Fsha256
+2025/10/31 12:23:16 GET /-/v2/packages/container/package/docker%2Fgithub-builder-test%2Freferrers%2Fsha256 HTTP/1.1
+Host: github.com
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Referer: https://ghcr.io/v2/docker/github-builder-test/referrers/sha256:c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:16 <-- 404 https://github.com/-/v2/packages/container/package/docker%2Fgithub-builder-test%2Freferrers%2Fsha256 (172.380181ms)
+2025/10/31 12:23:16 HTTP/2.0 404 Not Found
+Content-Length: 9
+Cache-Control: no-cache
+Content-Security-Policy: default-src 'none'; base-uri 'self'; connect-src 'self'; form-action 'self'; img-src 'self' data:; script-src 'self'; style-src 'unsafe-inline'
+Content-Type: text/plain; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:16 GMT
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Server: github.com
+Set-Cookie: _gh_sess=5WkZnrTo7OblU8ytdh9sksWYIrgLDiUpsHFmKt7hX0ejpvSJfKC6YMVX75sbmHItWZ%2FnibbCURNUzLm7twffWQw3QIgQ5tIBafuKf1zKppawGd4Y7QWUSn23tNFohFfSqiggO0ZbTgDyD%2BAKYECzAmGji0%2F%2FwyDocVOkWVGoxnsA3WOVq4ErmuzJnlfchdC1v59dt8IsHPvzYhkPaj6ViAWWxTVxpkNz5y%2Bg8a2ENV9PtnZmnjBoH4SHuD0CFZJ1eYs%2Fiohsdh%2BiM2gNKP3b8A%3D%3D--jrurs0xR%2FoPBaOwH--n0WTe0LbUeDMussaftfzWA%3D%3D; Path=/; HttpOnly; Secure; SameSite=Lax
+Set-Cookie: _octo=GH1.1.1313354934.1761913396; Path=/; Domain=github.com; Expires=Sat, 31 Oct 2026 12:23:16 GMT; Secure; SameSite=Lax
+Set-Cookie: logged_in=no; Path=/; Domain=github.com; Expires=Sat, 31 Oct 2026 12:23:16 GMT; HttpOnly; Secure; SameSite=Lax
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+Vary: X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With,Accept-Encoding, Accept, X-Requested-With
+X-Content-Type-Options: nosniff
+X-Frame-Options: deny
+X-Github-Request-Id: 6800:1C02A6:2507E6C:32BB7B7:6904AA34
+X-Xss-Protection: 0
+
+Not Found
+2025/10/31 12:23:16 --> GET https://ghcr.io/v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+2025/10/31 12:23:16 GET /v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:16 <-- 404 https://ghcr.io/v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 (49.208935ms)
+2025/10/31 12:23:16 HTTP/2.0 404 Not Found
+Content-Length: 70
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:16 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Github-Request-Id: 6802:6EC77:1D0E86:21DB97:6904AA34
+
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+2025/10/31 12:23:16 --> PUT https://ghcr.io/v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4
+2025/10/31 12:23:16 PUT /v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 HTTP/1.1
+Host: ghcr.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 291
+Authorization: <redacted>
+Content-Type: application/vnd.oci.image.index.v1+json
+Accept-Encoding: gzip
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.oci.image.manifest.v1+json","size":880,"digest":"sha256:65b138b622eb88020a0e070e14c8d2d71044a000ae190d00d8b9546503486d10","artifactType":"application/vnd.oci.empty.v1+json"}]}
+2025/10/31 12:23:16 <-- 201 https://ghcr.io/v2/docker/github-builder-test/manifests/sha256-c6fc458cc8718628e8fb8b699d2991056590e0fed4ea0d6f86583705202bdce4 (291.184483ms)
+2025/10/31 12:23:16 HTTP/2.0 201 Created
+Content-Length: 0
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:23:16 GMT
+Docker-Content-Digest: sha256:5fcf33cac79026a9c5f94468df5a92be601e48bb1befc51d067d22f516b87d97
+Docker-Distribution-Api-Version: registry/2.0
+Location: /v2/docker/github-builder-test/manifests/sha256:5fcf33cac79026a9c5f94468df5a92be601e48bb1befc51d067d22f516b87d97
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
