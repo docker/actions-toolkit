@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 actions-toolkit authors
+ * Copyright 2025 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-// https://github.com/in-toto/in-toto-golang/blob/dd6278764ab1dae7301609c7510129888e2fd569/in_toto/envelope.go#L17
-export const MEDIATYPE_PAYLOAD = 'application/vnd.in-toto+json';
-
-export const MEDIATYPE_PREDICATE = 'in-toto.io/predicate-type';
-
-// https://github.com/in-toto/in-toto-golang/blob/0a34c087cedcc36de065b4fccb7cf7c9bc16e29f/in_toto/attestations.go#L30-L42
-export interface Subject {
-  name: string;
-  digest: Record<string, string>;
-}
+export const FULCIO_URL = 'https://fulcio.sigstore.dev';
+export const REKOR_URL = 'https://rekor.sigstore.dev';
+export const TSASERVER_URL = 'https://timestamp.sigstore.dev';
+export const SEARCH_URL = 'https://search.sigstore.dev';
