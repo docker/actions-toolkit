@@ -1,0 +1,300 @@
+25/10/31 12:23:03 --> GET https://public.ecr.aws/v2/
+2025/10/31 12:23:03 GET /v2/ HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:03 <-- 401 https://public.ecr.aws/v2/ (90.930446ms)
+2025/10/31 12:23:03 HTTP/2.0 401 Unauthorized
+Content-Length: 58
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Www-Authenticate: ***"https://public.ecr.aws/token/",service="public.ecr.aws",scope="aws"
+
+{"errors":[{"code":"DENIED","message":"Not Authorized"}]}
+
+2025/10/31 12:23:03 --> GET https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws [body redacted: basic token response contains credentials]
+2025/10/31 12:23:03 GET /token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:03 <-- 200 https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws (22.311294ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:03 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:03 --> GET https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664
+2025/10/31 12:23:03 GET /v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:03 <-- 200 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 (91.079098ms)
+2025/10/31 12:23:03 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:23:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "artifactType": "application/vnd.docker.attestation.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.empty.v1+json",
+    "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "size": 2,
+    "data": "e30="
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:4035c82011637a22031168bbbf63f591b17b3ab5a8752a17c578def9163b5dbe",
+      "size": 1074,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:f650ede06a7462a0940c41b578760d0755d03cbf4cd1196cab7eb1ea8025e9c9",
+      "size": 81256,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:a2b9b221d0dc010231a6e7e740707e0a7858737305f50d03670674fbccedd91a",
+      "size": 12971,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://slsa.dev/provenance/v1"
+      }
+    }
+  ],
+  "subject": {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:8d0bfeb83c07fa67a4ce6e5c881608c016a33b3b60c4b4cc787fb3e8deaa7e96",
+    "size": 476
+  }
+}
+Signing artifact...
+2025/10/31 12:23:04 --> GET https://public.ecr.aws/v2/
+2025/10/31 12:23:04 GET /v2/ HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:04 <-- 401 https://public.ecr.aws/v2/ (92.39115ms)
+2025/10/31 12:23:04 HTTP/2.0 401 Unauthorized
+Content-Length: 58
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Www-Authenticate: ***"https://public.ecr.aws/token/",service="public.ecr.aws",scope="aws"
+
+{"errors":[{"code":"DENIED","message":"Not Authorized"}]}
+
+2025/10/31 12:23:04 --> GET https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws [body redacted: basic token response contains credentials]
+2025/10/31 12:23:04 GET /token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:04 <-- 200 https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apull&service=public.ecr.aws (23.003502ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:04 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:04 --> HEAD https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664
+2025/10/31 12:23:04 HEAD /v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+
+
+2025/10/31 12:23:04 <-- 200 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 (97.669676ms)
+2025/10/31 12:23:04 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Content-Digest: sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:04 --> GET https://public.ecr.aws/v2/
+2025/10/31 12:23:04 GET /v2/ HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:04 <-- 401 https://public.ecr.aws/v2/ (22.769592ms)
+2025/10/31 12:23:04 HTTP/2.0 401 Unauthorized
+Content-Length: 58
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Www-Authenticate: ***"https://public.ecr.aws/token/",service="public.ecr.aws",scope="aws"
+
+{"errors":[{"code":"DENIED","message":"Not Authorized"}]}
+
+2025/10/31 12:23:04 --> GET https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apush%2Cpull&service=public.ecr.aws [body redacted: basic token response contains credentials]
+2025/10/31 12:23:04 GET /token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apush%2Cpull&service=public.ecr.aws HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:04 <-- 200 https://public.ecr.aws/token/?scope=repository%3Aq3b5f1u4%2Ftest-docker-action%3Apush%2Cpull&service=public.ecr.aws (23.492809ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:23:04 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json; charset=utf-8
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:04 --> HEAD https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+2025/10/31 12:23:04 HEAD /v2/q3b5f1u4/test-docker-action/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:23:04 <-- 200 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a (87.79419ms)
+2025/10/31 12:23:04 HTTP/2.0 200 OK
+Content-Length: 2
+Content-Type: application/vnd.oci.empty.v1+json
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Content-Digest: sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:04 --> HEAD https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8
+2025/10/31 12:23:04 HEAD /v2/q3b5f1u4/test-docker-action/blobs/sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:23:04 <-- 404 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8 (121.507023ms)
+2025/10/31 12:23:04 HTTP/2.0 404 Not Found
+Connection: close
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+
+2025/10/31 12:23:04 --> POST https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/
+2025/10/31 12:23:04 POST /v2/q3b5f1u4/test-docker-action/blobs/uploads/ HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/json
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:04 <-- 202 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/ (160.219538ms)
+2025/10/31 12:23:04 HTTP/2.0 202 Accepted
+Connection: close
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Location: https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6
+Oci-Chunk-Min-Length: 10485760
+Range: bytes=0-10485760
+
+
+2025/10/31 12:23:04 --> PATCH https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6
+2025/10/31 12:23:04 PATCH /v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 10399
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","verificationMaterial":{"certificate":{"rawBytes":"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"},"tlogEntries":[{"logIndex":"658949562","logId":{"keyId":"wNI9atQGlz+VWfO6LRygH4QUfY/8W4RFwiT5i5WRgB0="},"kindVersion":{"kind":"dsse","version":"0.0.1"},"integratedTime":"1761913383","inclusionPromise":{"signedEntryTimestamp":"MEUCIQDnstANwb5LE1i9KDZ5FL7xEa/cJyn4o2QE1EfBFYGZ7wIgIW/DSEIF+9lNABWjC1RCstfvXEHwr5nSkVZq9I/PYVc="},"inclusionProof":{"logIndex":"537045300","rootHash":"K/3sYCfOOurW5jz3vc3Xe68mOzPzseXLvig+onGHTo8=","treeSize":"537045305","hashes":["gX8GjjGP3em1QIJMEm4tlHcBa56DnV/ljK6NTkrCsAg=","tFkGL+OGoAMUyLPuArv/agdojtCfpnB2ve5bAcvK2Hw=","glvFnAf4iaE48R8xz/3v/IOtCIiIvcOQ2W8L73CebMw=","Jxs+mw9u/us8hxQwo5iV9TjmsMYt7Ba/WFF5DozW5PM=","lkjMRgx8iRl8zRObYlqN1iyeKWc7/ocWWszE/LBRgm0=","hYKYgC0bJLi7dMKQqNMUZu5pxWGMxuhtrzqfZqUW0LQ=","DU1i9y7G6fEVyBMopomsF9Uqn9ikw+3OeJ3m2Lmf99w=","hxeWAKhzQdqOBjOQ8W0MCrMAltMhR69VI25jjbjEb8U=","7eU4MO2rD280XoJuu+dx58GT6AcVjTptjjfcbl2zhx8=","wxy+qRAkZr0OZMsIEhPAvUdGhqViqQbv9IthVGOm3lI=","P6OrPNhquaHIdM/iPT2DlOVW2K/cO02h2h5AGOxNDcE=","T4DqWD42hAtN+vX8jKCWqoC4meE4JekI9LxYGCcPy1M="],"checkpoint":{"envelope":"rekor.sigstore.dev - 1193050959916656506\n537045305\nK/3sYCfOOurW5jz3vc3Xe68mOzPzseXLvig+onGHTo8=\n\n— rekor.sigstore.dev wNI9ajBGAiEAu5Q2PWbspoPaE/eaS2yEVCQr8ur2WPpZ3Ay87Fku154CIQC3KelkLz3LQgOExJ1Hq9aEzsLDl00BinFNpZ4C41XBeA==\n"}},"canonicalizedBody":"eyJhcGlWZXJzaW9uIjoiMC4wLjEiLCJraW5kIjoiZHNzZSIsInNwZWMiOnsiZW52ZWxvcGVIYXNoIjp7ImFsZ29yaXRobSI6InNoYTI1NiIsInZhbHVlIjoiNWFmNjI4MGM4OTA0M2NkMWYxNjFiY2VlN2E1NmQ1Mzk1YTQ5MzgxMDQyNGU0NmQ0MzRkNTY2YTZkMGZiMTBkMCJ9LCJwYXlsb2FkSGFzaCI6eyJhbGdvcml0aG0iOiJzaGEyNTYiLCJ2YWx1ZSI6ImEwYzBkYTNhYmIyMzY1MjM4MGU1MTUxYzE1ZDkyNWRhNzdmMTJiZDg0ZGMwMmVhZTIxZjgxMGJhYWI1MzA1YmUifSwic2lnbmF0dXJlcyI6W3sic2lnbmF0dXJlIjoiTUVVQ0lRRDRXRDFoY3REcTk5enBGTkdqRkwvZnBpWk9kUWVvSU9BR1lBbEthdFExR0FJZ0hJV1IxQ0Q4Mko3V2Z5RFhHZHp0SFFFYmdVc3lQWitmdGwxVFBCVXIzaDQ9IiwidmVyaWZpZXIiOiJMUzB0TFMxQ1JVZEpUaUJEUlZKVVNVWkpRMEZVUlMwdExTMHRDazFKU1VoSWFrTkRRbkZYWjBGM1NVSkJaMGxWVjJwc1ZHOXpXV1ZJZERVeWJuTlRiUzl6UVROdVNsZHNlbXR6ZDBObldVbExiMXBKZW1vd1JVRjNUWGNLVG5wRlZrMUNUVWRCTVZWRlEyaE5UV015Ykc1ak0xSjJZMjFWZFZwSFZqSk5ValIzU0VGWlJGWlJVVVJGZUZaNllWZGtlbVJIT1hsYVV6RndZbTVTYkFwamJURnNXa2RzYUdSSFZYZElhR05PVFdwVmVFMUVUWGhOVkVsNVRYcEJlbGRvWTA1TmFsVjRUVVJOZUUxVVNYcE5la0Y2VjJwQlFVMUdhM2RGZDFsSUNrdHZXa2w2YWpCRFFWRlpTVXR2V2tsNmFqQkVRVkZqUkZGblFVVXZjVzFPVGtSWlNrTkhXV1JUZEhsS1pESnVjbGswTWxCV09VUllUazVWY1dFM2NpOEtNalIwVTNkeGNrSjBhakUwVERacmJHOVViRGQyYUdSVlUyeFdlVzF4VjFCV1RHRkJUMEoxZHpGRlNWZFBObk5IYm1GUFEwSmpVWGRuWjFoQlRVRTBSd3BCTVZWa1JIZEZRaTkzVVVWQmQwbElaMFJCVkVKblRsWklVMVZGUkVSQlMwSm5aM0pDWjBWR1FsRmpSRUY2UVdSQ1owNVdTRkUwUlVablVWVldVbWR0Q2pReVdrMUZWamxsWm0weVIwOURXakJ3ZUUxMlRURnpkMGgzV1VSV1VqQnFRa0puZDBadlFWVXpPVkJ3ZWpGWmEwVmFZalZ4VG1wd1MwWlhhWGhwTkZrS1drUTRkMmRaU1VkQk1WVmtSVkZGUWk5M1VqUk5TR0ZIWkVkb01HUklRbnBQYVRoMldqSnNNR0ZJVm1sTWJVNTJZbE01YTJJeVRuSmFXRWwyV2pKc01BcGhTRlpwVEZkS01XRlhlR3RhV0VsMFdsaG9kMXBZU25CaVYxWjFaRWRHYzB4NU5XNWhXRkp2WkZkSmRtUXlPWGxoTWxwellqTmtla3d5U2pGaFYzaHJDa3h1YkhSaVJVSjVXbGRhZWt3eWFHeFpWMUo2VERKS01XRlhlR3RNV0Vwc1pGaE9hRmx0ZUd4TVdHUjJZMjEwYldKSE9UTk5SR3RIUTJselIwRlJVVUlLWnpjNGQwRlJSVVZMTW1nd1pFaENlazlwT0haa1J6bHlXbGMwZFZsWFRqQmhWemwxWTNrMWJtRllVbTlrVjBveFl6SldlVmt5T1hWa1IxWjFaRU0xYWdwaU1qQjNTSGRaUzB0M1dVSkNRVWRFZG5wQlFrRm5VVkprTWpsNVlUSmFjMkl6WkdaYVIyeDZZMGRHTUZreVozZE9aMWxMUzNkWlFrSkJSMFIyZWtGQ0NrRjNVVzlaVkVFMVdtMU5NbHBYU1RSUFJFMHpXa1JOZDA1VVVUUlplbEpyV1dwSk1rMUVZekJaZWtKcFdYcFpNVTVVUm14UFZFbDRUbFJCVVVKbmIzSUtRbWRGUlVGWlR5OU5RVVZGUWtGS2FtRlVRVzlDWjI5eVFtZEZSVUZaVHk5TlFVVkdRa0p3YTJJeVRuSmFXRWwyV2pKc01HRklWbWxNVjBveFlWZDRhd3BhV0VsMFpFZFdlbVJFUVdSQ1oyOXlRbWRGUlVGWlR5OU5RVVZIUWtFNWVWcFhXbnBNTW1oc1dWZFNla3d5TVdoaFZ6UjNUM2RaUzB0M1dVSkNRVWRFQ25aNlFVSkRRVkYwUkVOMGIyUklVbmRqZW05MlRETlNkbUV5Vm5WTWJVWnFaRWRzZG1KdVRYVmFNbXd3WVVoV2FXUllUbXhqYlU1MlltNVNiR0p1VVhVS1dUSTVkRTFKUjBWQ1oyOXlRbWRGUlVGWlR5OU5RVVZLUWtoWlRXUkhhREJrU0VKNlQyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmRncGFNbXd3WVVoV2FVeFhTakZoVjNocldsaEpkRnBZYUhkYVdFcHdZbGRXZFdSSFJuTk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rb3hDbUZYZUd0TWJteDBZa1ZDZVZwWFducE1NbWhzV1ZkU2Vrd3lTakZoVjNoclRGaEtiR1JZVG1oWmJYaHNURmhrZG1OdGRHMWlSemt6VFVSblIwTnBjMGNLUVZGUlFtYzNPSGRCVVc5RlMyZDNiMDFIVlhkYVJGRXlUbGROTWxwSFRtaE5lbHB0VG5wT2JFMUVZelZQUjFWNlRWZFZNazlVUlRWUFZFSnRUMVJzYkFwT2JWWnFUa1JCWkVKbmIzSkNaMFZGUVZsUEwwMUJSVXhDUVRoTlJGZGtjR1JIYURGWmFURnZZak5PTUZwWFVYZFFVVmxMUzNkWlFrSkJSMFIyZWtGQ0NrUkJVWFpFUXpGdlpFaFNkMk42YjNaTU1tUndaRWRvTVZscE5XcGlNakIyV2tjNWFtRXlWbmxNTW1Sd1pFZG9NVmxwTVdsa1YyeHpXa2RXZVV4WVVtd0tZek5SZDA5QldVdExkMWxDUWtGSFJIWjZRVUpFVVZGeFJFTm9hRTFFYkcxWmVscHNXV3BuTkUxNlpHdE5la0V4VGtSb2FrNUhVbWxOYWxsM1RucFNhZ3BOUjBwcVRtcFZNVTFYVlRWTmFrVXhUVUk0UjBOcGMwZEJVVkZDWnpjNGQwRlJORVZGVVhkUVkyMVdiV041T1c5YVYwWnJZM2s1ZEZsWGJIVk5RbTlIQ2tOcGMwZEJVVkZDWnpjNGQwRlJPRVZFUVhkTFRWUkJNRTFFVlRWT1JFazBUbnBCY0VKbmIzSkNaMFZGUVZsUEwwMUJSVkZDUW5OTlIxZG9NR1JJUW5vS1QyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmQwWjNXVXRMZDFsQ1FrRkhSSFo2UVVKRlVWRktSRUZqTVU1RVNUVk9SR04zVFVkWlJ3cERhWE5IUVZGUlFtYzNPSGRCVWtsRlYwRjRWMkZJVWpCalNFMDJUSGs1Ym1GWVVtOWtWMGwxV1RJNWRFd3lVblpaTW5Sc1kyazVibUZZVW05a1YwbDBDbGx1Vm5CaVIxSnNZMmt4TUZwWVRqQk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rNXdURzVzZEdKRlFubGFWMXA2VERKb2JGbFhVbm9LVERJeGFHRlhOSGRQUVZsTFMzZFpRa0pCUjBSMmVrRkNSWGRSY1VSRGFHaE5SR3h0V1hwYWJGbHFaelJOZW1SclRYcEJNVTVFYUdwT1IxSnBUV3BaZHdwT2VsSnFUVWRLYWs1cVZURk5WMVUxVFdwRk1VMURSVWREYVhOSFFWRlJRbWMzT0hkQlVsRkZSWGQzVW1ReU9YbGhNbHB6WWpOa1pscEhiSHBqUjBZd0Nsa3laM2RaVVZsTFMzZFpRa0pCUjBSMmVrRkNSbEZTVkVSR1JtOWtTRkozWTNwdmRrd3laSEJrUjJneFdXazFhbUl5TUhaYVJ6bHFZVEpXZVV3eVpIQUtaRWRvTVZscE1XbGtWMnh6V2tkV2VVeFlVbXhqTTFGMldWZE9NR0ZYT1hWamVUbDVaRmMxZWt4NlJUUlBWR041VFhwak1VMVVXWGxNTWtZd1pFZFdkQXBqU0ZKNlRIcEZkMGRCV1V0TGQxbENRa0ZIUkhaNlFVSkdaMUZMUkVGb2NHSnVVbXhqYlRWb1lrUkRRbWwzV1V0TGQxbENRa0ZJVjJWUlNVVkJaMUk1Q2tKSWMwRmxVVUl6UVU0d09VMUhja2Q0ZUVWNVdYaHJaVWhLYkc1T2QwdHBVMncyTkROcWVYUXZOR1ZMWTI5QmRrdGxOazlCUVVGQ2JXcHZOSEZyWjBFS1FVRlJSRUZGWjNkU1owbG9RVkJKYUhBNUx6RnhlQzh3U21zMGQwZHZZV1pLYzNSc1RuZDRVbmxJWVhwNWMweEhLMlJ4Um10QksyUkJhVVZCYkdGT2F3b3dhRkJSWjBocWFXVXplRmh4VkUxQ1EycGljR3RLWkhCWk1qaE1WWGMxVEVNNVIxWmtXR2QzUTJkWlNVdHZXa2w2YWpCRlFYZE5SRnAzUVhkYVFVbDNDa1p4VGpCMFZWSnhVVzR5VkVOeGJtWkVPVE5LYkV0cmEyaFVjMjVKZEdrclRDdDVRM0JyUkVoR1lVUnhZaTkzVW5oSFEyUktkMnRtYlVab1p6TjFWa01LUVdwQ2NYUmhMMGRLWm5aYWFYVnBWVU5DWTBScWJtTXdlVmhGWkRKVUsydDZNVGhRY1VSM1kydFpTa1IzTlVVNWEyWlNaa0ZwZFhwaVVWQkNOemt2YXdwclZHTTlDaTB0TFMwdFJVNUVJRU5GVWxSSlJrbERRVlJGTFMwdExTMEsifV19fQ=="}],"timestampVerificationData":{"rfc3161Timestamps":[{"signedTimestamp":"MIICyTADAgEAMIICwAYJKoZIhvcNAQcCoIICsTCCAq0CAQMxDTALBglghkgBZQMEAgEwgbcGCyqGSIb3DQEJEAEEoIGnBIGkMIGhAgEBBgkrBgEEAYO/MAIwMTANBglghkgBZQMEAgEFAAQgmyxG8uBDx23ddRbk6PYLazqQUXiBBPmCgCx9ErX7w/ACFEkK7G00ygmDLw/gFO4nF3Ry0jWMGA8yMDI1MTAzMTEyMjMwM1owAwIBAaAypDAwLjEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MRUwEwYDVQQDEwxzaWdzdG9yZS10c2GgADGCAdswggHXAgEBMFEwOTEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MSAwHgYDVQQDExdzaWdzdG9yZS10c2Etc2VsZnNpZ25lZAIUOhNULwyQYe68wUMvy4qOiyojiwwwCwYJYIZIAWUDBAIBoIH8MBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAcBgkqhkiG9w0BCQUxDxcNMjUxMDMxMTIyMzAzWjAvBgkqhkiG9w0BCQQxIgQggASUwwEFRvY7eEtrHk+gNvV1AZh37OhIYEeR4aSllMIwgY4GCyqGSIb3DQEJEAIvMX8wfTB7MHkEIIX5J7wHq2LKw7RDVsEO/IGyxog/2nq55thw2dE6zQW3MFUwPaQ7MDkxFTATBgNVBAoTDHNpZ3N0b3JlLmRldjEgMB4GA1UEAxMXc2lnc3RvcmUtdHNhLXNlbGZzaWduZWQCFDoTVC8MkGHuvMFDL8uKjosqI4sMMAoGCCqGSM49BAMCBGcwZQIwSlk2h1jQhL/D/FeMJmf6pndc1iRf4qFMXNFcWcT8QJldpfmKwX5Nk89rvaamBmdXAjEAuLGhWWfd5iu+2YZhFMWNorWdVQRdq/GJfisshCakLSIxkTSYxlvHyVQy54yXqb/q"}]}},"dsseEnvelope":{"payload":"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJkaWdlc3QiOnsic2hhMjU2IjoiOGZlNjNmOGIwNTU1NjkwMTU0MDdlNWJkMGM3ODA3MWU4N2NmOTIxMDE5MjQ5YjhiN2E5MTMwOTFmNjgwYTY2NCJ9fV0sInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3NpZ3N0b3JlLmRldi9jb3NpZ24vc2lnbi92MSJ9","payloadType":"application/vnd.in-toto+json","signatures":[{"sig":"MEUCIQD4WD1hctDq99zpFNGjFL/fpiZOdQeoIOAGYAlKatQ1GAIgHIWR1CD82J7WfyDXGdztHQEbgUsyPZ+ftl1TPBUr3h4="}]}}
+2025/10/31 12:23:04 <-- 201 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6 (132.007246ms)
+2025/10/31 12:23:04 HTTP/2.0 201 Created
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:23:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Upload-Uuid: e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6
+Location: https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6
+Range: 0-10398
+
+
+2025/10/31 12:23:04 --> PUT https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6?digest=sha256%3A2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8
+2025/10/31 12:23:04 PUT /v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6?digest=sha256%3A2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:05 <-- 201 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/uploads/e1f614e2-a6b6-41c6-b753-c4eb2cf5e5e6?digest=sha256%3A2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8 (276.8397ms)
+2025/10/31 12:23:05 HTTP/2.0 201 Created
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:23:05 GMT
+Docker-Content-Digest: sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8
+Docker-Distribution-Api-Version: registry/2.0
+Location: https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/blobs/sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8
+
+
+2025/10/31 12:23:05 --> PUT https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:b79760ca789467ba1bf1cf6ff89d71353e23819474e8ffb44a1116ce95a102fa
+2025/10/31 12:23:05 PUT /v2/q3b5f1u4/test-docker-action/manifests/sha256:b79760ca789467ba1bf1cf6ff89d71353e23819474e8ffb44a1116ce95a102fa HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 880
+Authorization: <redacted>
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Accept-Encoding: gzip
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.manifest.v1+json","config":{"mediaType":"application/vnd.oci.empty.v1+json","size":2,"digest":"sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"},"layers":[{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","size":10399,"digest":"sha256:2b4c5c9d02679447fac16423a8f30512d32779434b4cd09ec4e37c370fca72f8"}],"annotations":{"dev.sigstore.bundle.content":"dsse-envelope","dev.sigstore.bundle.predicateType":"https://sigstore.dev/cosign/sign/v1","org.opencontainers.image.created":"2025-10-31T12:23:04Z"},"subject":{"mediaType":"application/vnd.oci.image.manifest.v1+json","size":1380,"digest":"sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664"},"artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"}
+2025/10/31 12:23:05 <-- 201 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:b79760ca789467ba1bf1cf6ff89d71353e23819474e8ffb44a1116ce95a102fa (311.620833ms)
+2025/10/31 12:23:05 HTTP/2.0 201 Created
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:23:05 GMT
+Docker-Content-Digest: sha256:b79760ca789467ba1bf1cf6ff89d71353e23819474e8ffb44a1116ce95a102fa
+Docker-Distribution-Api-Version: registry/2.0
+Oci-Subject: sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664
+
+
+2025/10/31 12:23:05 --> GET https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/referrers/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664
+2025/10/31 12:23:05 GET /v2/q3b5f1u4/test-docker-action/referrers/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 HTTP/1.1
+Host: public.ecr.aws
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:23:05 <-- 200 https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/referrers/sha256:8fe63f8b055569015407e5bd0c78071e87cf921019249b8b7a913091f680a664 (151.162755ms)
+2025/10/31 12:23:05 HTTP/2.0 200 OK
+Content-Length: 497
+Content-Type: application/vnd.oci.image.index.v1+json
+Date: Fri, 31 Oct 2025 12:23:05 GMT
+Docker-Distribution-Api-Version: registry/2.0
+
+{"manifests":[{"digest":"sha256:b79760ca789467ba1bf1cf6ff89d71353e23819474e8ffb44a1116ce95a102fa","mediaType":"application/vnd.oci.image.manifest.v1+json","artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json","size":880,"annotations":{"dev.sigstore.bundle.content":"dsse-envelope","dev.sigstore.bundle.predicateType":"https://sigstore.dev/cosign/sign/v1","org.opencontainers.image.created":"2025-10-31T12:23:04Z"}}],"mediaType":"application/vnd.oci.image.index.v1+json","schemaVersion":2}
