@@ -1,0 +1,462 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "subject": [
+    {
+      "name": "hello.txt",
+      "digest": {
+        "sha256": "870e0065e68cbdeacbf9cec21b598bb579b0ef55bc48b65b71509667edb570bd"
+      }
+    }
+  ],
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md",
+      "resolvedDependencies": [
+        {
+          "uri": "pkg:docker/docker/buildkit-syft-scanner@stable-1",
+          "digest": {
+            "sha256": "e930c2697be77cb7271d316ecfa78768b5eac73de3b16018ed38eb0ea0b5a7cb"
+          }
+        },
+        {
+          "uri": "pkg:docker/alpine@latest?platform=linux%2Farm64",
+          "digest": {
+            "sha256": "4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412"
+          }
+        },
+        {
+          "uri": "https://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
+          "digest": {
+            "sha1": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
+          }
+        }
+      ],
+      "externalParameters": {
+        "configSource": {
+          "uri": "https://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
+          "digest": {
+            "sha1": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
+          },
+          "path": "hello.Dockerfile"
+        },
+        "request": {
+          "frontend": "dockerfile.v0",
+          "secrets": [
+            {
+              "id": "GIT_AUTH_HEADER",
+              "optional": true
+            },
+            {
+              "id": "GIT_AUTH_TOKEN",
+              "optional": true
+            }
+          ]
+        }
+      },
+      "internalParameters": {
+        "buildConfig": {
+          "digestMapping": {
+            "sha256:69f88b22af1cbbe236f4b5d834dfe9c4adb9535c1c602f726fd90212c302a7da": "step0",
+            "sha256:98c0e3a8b1a38f5aa8db558b99aace8e7645a18b0e24d6807018146d21788ae2": "step2",
+            "sha256:a560219f1e0cfb232a9727b9bbf9d6735c0b2190f8e00364f844cfc82bd42479": "step1",
+            "sha256:c7edeef726371083a69f15a3565d6c62be55a91e820f251d9a965f8e36fe3e32": "step3"
+          },
+          "llbDefinition": [
+            {
+              "id": "step0",
+              "op": {
+                "Op": {
+                  "source": {
+                    "identifier": "docker-image://docker.io/library/alpine:latest@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412"
+                  }
+                },
+                "constraints": {},
+                "platform": {
+                  "Architecture": "arm64",
+                  "OS": "linux"
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "inputs": [
+                "step0:0"
+              ],
+              "op": {
+                "Op": {
+                  "exec": {
+                    "meta": {
+                      "args": [
+                        "/bin/sh",
+                        "-c",
+                        "echo \"Hello, World! This is ${TARGETPLATFORM}\" \u003e /hello.txt"
+                      ],
+                      "cwd": "/",
+                      "env": [
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        "TARGETPLATFORM=linux/arm64"
+                      ],
+                      "removeMountStubsRecursive": true
+                    },
+                    "mounts": [
+                      {
+                        "dest": "/"
+                      }
+                    ]
+                  }
+                },
+                "constraints": {},
+                "platform": {
+                  "Architecture": "arm64",
+                  "OS": "linux"
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "inputs": [
+                "step1:0"
+              ],
+              "op": {
+                "Op": {
+                  "file": {
+                    "actions": [
+                      {
+                        "Action": {
+                          "copy": {
+                            "allowEmptyWildcard": true,
+                            "allowWildcard": true,
+                            "createDestPath": true,
+                            "dest": "/",
+                            "dirCopyContents": true,
+                            "followSymlink": true,
+                            "mode": -1,
+                            "src": "/hello.txt",
+                            "timestamp": -1
+                          }
+                        },
+                        "input": -1,
+                        "output": 0,
+                        "secondaryInput": 0
+                      }
+                    ]
+                  }
+                },
+                "constraints": {}
+              }
+            },
+            {
+              "id": "step3",
+              "inputs": [
+                "step2:0"
+              ],
+              "op": {
+                "Op": {}
+              }
+            }
+          ]
+        },
+        "builderPlatform": "linux/amd64",
+        "github_actor": "crazy-max",
+        "github_actor_id": "1951866",
+        "github_event_name": "workflow_dispatch",
+        "github_event_payload": {
+          "enterprise": {
+            "avatar_url": "https://avatars.githubusercontent.com/b/19176?v=4",
+            "created_at": "2022-12-30T23:53:17Z",
+            "description": null,
+            "html_url": "https://github.com/enterprises/docker",
+            "id": 19176,
+            "name": "Docker",
+            "node_id": "E_kgDNSug",
+            "slug": "docker",
+            "updated_at": "2025-10-20T20:39:05Z",
+            "website_url": null
+          },
+          "inputs": null,
+          "organization": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/5429470?v=4",
+            "description": "Docker helps developers bring their ideas to life by conquering the complexity of app development.",
+            "events_url": "https://api.github.com/orgs/docker/events",
+            "hooks_url": "https://api.github.com/orgs/docker/hooks",
+            "id": 5429470,
+            "issues_url": "https://api.github.com/orgs/docker/issues",
+            "login": "docker",
+            "members_url": "https://api.github.com/orgs/docker/members{/member}",
+            "node_id": "MDEyOk9yZ2FuaXphdGlvbjU0Mjk0NzA=",
+            "public_members_url": "https://api.github.com/orgs/docker/public_members{/member}",
+            "repos_url": "https://api.github.com/orgs/docker/repos",
+            "url": "https://api.github.com/orgs/docker"
+          },
+          "ref": "refs/heads/main",
+          "repository": {
+            "allow_forking": true,
+            "archive_url": "https://api.github.com/repos/docker/github-builder-test/{archive_format}{/ref}",
+            "archived": false,
+            "assignees_url": "https://api.github.com/repos/docker/github-builder-test/assignees{/user}",
+            "blobs_url": "https://api.github.com/repos/docker/github-builder-test/git/blobs{/sha}",
+            "branches_url": "https://api.github.com/repos/docker/github-builder-test/branches{/branch}",
+            "clone_url": "https://github.com/docker/github-builder-test.git",
+            "collaborators_url": "https://api.github.com/repos/docker/github-builder-test/collaborators{/collaborator}",
+            "comments_url": "https://api.github.com/repos/docker/github-builder-test/comments{/number}",
+            "commits_url": "https://api.github.com/repos/docker/github-builder-test/commits{/sha}",
+            "compare_url": "https://api.github.com/repos/docker/github-builder-test/compare/{base}...{head}",
+            "contents_url": "https://api.github.com/repos/docker/github-builder-test/contents/{+path}",
+            "contributors_url": "https://api.github.com/repos/docker/github-builder-test/contributors",
+            "created_at": "2025-08-19T08:08:29Z",
+            "custom_properties": {},
+            "default_branch": "main",
+            "deployments_url": "https://api.github.com/repos/docker/github-builder-test/deployments",
+            "description": "Test repo for https://github.com/docker/github-builder-experimental",
+            "disabled": false,
+            "downloads_url": "https://api.github.com/repos/docker/github-builder-test/downloads",
+            "events_url": "https://api.github.com/repos/docker/github-builder-test/events",
+            "fork": false,
+            "forks": 0,
+            "forks_count": 0,
+            "forks_url": "https://api.github.com/repos/docker/github-builder-test/forks",
+            "full_name": "docker/github-builder-test",
+            "git_commits_url": "https://api.github.com/repos/docker/github-builder-test/git/commits{/sha}",
+            "git_refs_url": "https://api.github.com/repos/docker/github-builder-test/git/refs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/docker/github-builder-test/git/tags{/sha}",
+            "git_url": "git://github.com/docker/github-builder-test.git",
+            "has_discussions": false,
+            "has_downloads": true,
+            "has_issues": false,
+            "has_pages": false,
+            "has_projects": false,
+            "has_wiki": false,
+            "homepage": null,
+            "hooks_url": "https://api.github.com/repos/docker/github-builder-test/hooks",
+            "html_url": "https://github.com/docker/github-builder-test",
+            "id": 1040594287,
+            "is_template": false,
+            "issue_comment_url": "https://api.github.com/repos/docker/github-builder-test/issues/comments{/number}",
+            "issue_events_url": "https://api.github.com/repos/docker/github-builder-test/issues/events{/number}",
+            "issues_url": "https://api.github.com/repos/docker/github-builder-test/issues{/number}",
+            "keys_url": "https://api.github.com/repos/docker/github-builder-test/keys{/key_id}",
+            "labels_url": "https://api.github.com/repos/docker/github-builder-test/labels{/name}",
+            "language": "Dockerfile",
+            "languages_url": "https://api.github.com/repos/docker/github-builder-test/languages",
+            "license": null,
+            "merges_url": "https://api.github.com/repos/docker/github-builder-test/merges",
+            "milestones_url": "https://api.github.com/repos/docker/github-builder-test/milestones{/number}",
+            "mirror_url": null,
+            "name": "github-builder-test",
+            "node_id": "R_kgDOPgY1bw",
+            "notifications_url": "https://api.github.com/repos/docker/github-builder-test/notifications{?since,all,participating}",
+            "open_issues": 0,
+            "open_issues_count": 0,
+            "owner": {
+              "avatar_url": "https://avatars.githubusercontent.com/u/5429470?v=4",
+              "events_url": "https://api.github.com/users/docker/events{/privacy}",
+              "followers_url": "https://api.github.com/users/docker/followers",
+              "following_url": "https://api.github.com/users/docker/following{/other_user}",
+              "gists_url": "https://api.github.com/users/docker/gists{/gist_id}",
+              "gravatar_id": "",
+              "html_url": "https://github.com/docker",
+              "id": 5429470,
+              "login": "docker",
+              "node_id": "MDEyOk9yZ2FuaXphdGlvbjU0Mjk0NzA=",
+              "organizations_url": "https://api.github.com/users/docker/orgs",
+              "received_events_url": "https://api.github.com/users/docker/received_events",
+              "repos_url": "https://api.github.com/users/docker/repos",
+              "site_admin": false,
+              "starred_url": "https://api.github.com/users/docker/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/docker/subscriptions",
+              "type": "Organization",
+              "url": "https://api.github.com/users/docker",
+              "user_view_type": "public"
+            },
+            "private": true,
+            "pulls_url": "https://api.github.com/repos/docker/github-builder-test/pulls{/number}",
+            "pushed_at": "2025-10-30T10:04:10Z",
+            "releases_url": "https://api.github.com/repos/docker/github-builder-test/releases{/id}",
+            "size": 25,
+            "ssh_url": "git@github.com:docker/github-builder-test.git",
+            "stargazers_count": 0,
+            "stargazers_url": "https://api.github.com/repos/docker/github-builder-test/stargazers",
+            "statuses_url": "https://api.github.com/repos/docker/github-builder-test/statuses/{sha}",
+            "subscribers_url": "https://api.github.com/repos/docker/github-builder-test/subscribers",
+            "subscription_url": "https://api.github.com/repos/docker/github-builder-test/subscription",
+            "svn_url": "https://github.com/docker/github-builder-test",
+            "tags_url": "https://api.github.com/repos/docker/github-builder-test/tags",
+            "teams_url": "https://api.github.com/repos/docker/github-builder-test/teams",
+            "topics": [],
+            "trees_url": "https://api.github.com/repos/docker/github-builder-test/git/trees{/sha}",
+            "updated_at": "2025-10-30T10:04:14Z",
+            "url": "https://api.github.com/repos/docker/github-builder-test",
+            "visibility": "internal",
+            "watchers": 0,
+            "watchers_count": 0,
+            "web_commit_signoff_required": false
+          },
+          "sender": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/1951866?v=4",
+            "events_url": "https://api.github.com/users/crazy-max/events{/privacy}",
+            "followers_url": "https://api.github.com/users/crazy-max/followers",
+            "following_url": "https://api.github.com/users/crazy-max/following{/other_user}",
+            "gists_url": "https://api.github.com/users/crazy-max/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/crazy-max",
+            "id": 1951866,
+            "login": "crazy-max",
+            "node_id": "MDQ6VXNlcjE5NTE4NjY=",
+            "organizations_url": "https://api.github.com/users/crazy-max/orgs",
+            "received_events_url": "https://api.github.com/users/crazy-max/received_events",
+            "repos_url": "https://api.github.com/users/crazy-max/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/crazy-max/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/crazy-max/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/crazy-max",
+            "user_view_type": "public"
+          },
+          "workflow": ".github/workflows/ci.yml"
+        },
+        "github_job": "build",
+        "github_ref": "refs/heads/main",
+        "github_ref_name": "main",
+        "github_ref_protected": "false",
+        "github_ref_type": "branch",
+        "github_repository": "docker/github-builder-test",
+        "github_repository_id": "1040594287",
+        "github_repository_owner": "docker",
+        "github_repository_owner_id": "5429470",
+        "github_run_attempt": "1",
+        "github_run_id": "18937328894",
+        "github_run_number": "183",
+        "github_runner_arch": "X64",
+        "github_runner_environment": "github-hosted",
+        "github_runner_image_os": "ubuntu24",
+        "github_runner_image_version": "20250929.60.1",
+        "github_runner_name": "GitHub Actions 1002376925",
+        "github_runner_os": "Linux",
+        "github_runner_tracking_id": "github_7c0a7521-2999-41e5-af30-b7f0681f204f",
+        "github_server_url": "https://github.com",
+        "github_triggering_actor": "crazy-max",
+        "github_workflow": "ci",
+        "github_workflow_ref": "docker/github-builder-test/.github/workflows/ci.yml@refs/heads/main",
+        "github_workflow_sha": "bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe"
+      }
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/docker/github-builder-test/actions/runs/18937328894/attempts/1"
+      },
+      "metadata": {
+        "invocationID": "7qg2yuux3iklv02ktbmbtwgeb",
+        "startedOn": "2025-10-30T10:19:52.868710505Z",
+        "finishedOn": "2025-10-30T10:19:57.635810119Z",
+        "buildkit_metadata": {
+          "source": {
+            "locations": {
+              "step0": {
+                "locations": [
+                  {
+                    "ranges": [
+                      {
+                        "start": {
+                          "line": 1
+                        },
+                        "end": {
+                          "line": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "step1": {
+                "locations": [
+                  {
+                    "ranges": [
+                      {
+                        "start": {
+                          "line": 3
+                        },
+                        "end": {
+                          "line": 3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "step2": {
+                "locations": [
+                  {
+                    "ranges": [
+                      {
+                        "start": {
+                          "line": 7
+                        },
+                        "end": {
+                          "line": 7
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "infos": [
+              {
+                "filename": "hello.Dockerfile",
+                "language": "Dockerfile",
+                "data": "RlJPTSBhbHBpbmUgQVMgYmFzZQpBUkcgVEFSR0VUUExBVEZPUk0KUlVOIGVjaG8gIkhlbGxvLCBXb3JsZCEgVGhpcyBpcyAke1RBUkdFVFBMQVRGT1JNfSIgPiAvaGVsbG8udHh0CkFSRyBCVUlMREtJVF9TQk9NX1NDQU5fU1RBR0U9dHJ1ZQoKRlJPTSBzY3JhdGNoCkNPUFkgLS1mcm9tPWJhc2UgL2hlbGxvLnR4dCAvCg==",
+                "llbDefinition": [
+                  {
+                    "id": "step0",
+                    "op": {
+                      "Op": {
+                        "source": {
+                          "identifier": "git://github.com/docker/github-builder-test.git#bdb96fcfe8cc9e3a54800bc2537a4d4a14f0c5fe",
+                          "attrs": {
+                            "git.authheadersecret": "GIT_AUTH_HEADER",
+                            "git.authtokensecret": "GIT_AUTH_TOKEN",
+                            "git.fullurl": "https://github.com/docker/github-builder-test.git"
+                          }
+                        }
+                      },
+                      "constraints": {}
+                    }
+                  },
+                  {
+                    "id": "step1",
+                    "op": {
+                      "Op": {}
+                    },
+                    "inputs": [
+                      "step0:0"
+                    ]
+                  }
+                ],
+                "digestMapping": {
+                  "sha256:47540f0959d81a7ff2fc9742b9ef0bb37d7eca99c13aa6df83b883d06e808ef2": "step0",
+                  "sha256:96933c546ff00debd500304305864192fcb51d348e8c41b6a6e1569a051e66ed": "step1"
+                }
+              }
+            ]
+          },
+          "layers": {
+            "step0:0": [
+              [
+                {
+                  "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                  "digest": "sha256:6b59a28fa20117e6048ad0616b8d8c901877ef15ff4c7f18db04e4f01f43bc39",
+                  "size": 4138069
+                }
+              ]
+            ]
+          }
+        },
+        "buildkit_completeness": {
+          "request": true,
+          "resolvedDependencies": true
+        }
+      }
+    }
+  }
+}
