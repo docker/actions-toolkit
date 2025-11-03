@@ -331,7 +331,7 @@ export class Install {
     };
 
     await core.group('Starting lima instance', async () => {
-      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`, `--timeout=15m`];
+      const limaStartArgs = ['start', `--name=${this.limaInstanceName}`, `--timeout=${process.env.LIMA_START_TIMEOUT ?? '15m'}`];
       if (process.env.LIMA_START_ARGS) {
         limaStartArgs.push(process.env.LIMA_START_ARGS);
       }
