@@ -15,10 +15,14 @@
  */
 
 import {describe, expect, it, jest, test} from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
 import * as semver from 'semver';
 
 import {Exec} from '../../src/exec';
 import {Cosign} from '../../src/cosign/cosign';
+
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 describe('isAvailable', () => {
   it('checks Cosign is available', async () => {
@@ -59,5 +63,28 @@ describe('versionSatisfies', () => {
   ])('given %p', async (version, range, expected) => {
     const cosign = new Cosign();
     expect(await cosign.versionSatisfies(range, version)).toBe(expected);
+  });
+});
+
+describe('parseCommandOutput', () => {
+  // prettier-ignore
+  test.each([
+    [path.join(fixturesDir, 'cosign', 'sign-output1.txt')],
+    [path.join(fixturesDir, 'cosign', 'sign-output2.txt')],
+    [path.join(fixturesDir, 'cosign', 'sign-output3.txt')],
+  ])('parsing %p', async (fixturePath: string) => {
+    const signResult = Cosign.parseCommandOutput(fs.readFileSync(fixturePath, 'utf-8'));
+    expect(signResult).toBeDefined();
+    expect(signResult.bundle).toBeDefined();
+  });
+
+  // prettier-ignore
+  test.each([
+    [path.join(fixturesDir, 'cosign', 'verify-output-err1.txt')],
+  ])('parsing %p', async (fixturePath: string) => {
+    const signResult = Cosign.parseCommandOutput(fs.readFileSync(fixturePath, 'utf-8'));
+    expect(signResult).toBeDefined();
+    expect(signResult.bundle).toBeUndefined();
+    expect(signResult.errors).toBeDefined();
   });
 });

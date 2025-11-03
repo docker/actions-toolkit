@@ -21,16 +21,37 @@ import path from 'path';
 import {Endpoints} from '@actions/attest/lib/endpoints';
 import * as core from '@actions/core';
 import {signPayload} from '@actions/attest/lib/sign';
-import {bundleToJSON} from '@sigstore/bundle';
+import {bundleFromJSON, bundleToJSON} from '@sigstore/bundle';
 import {Attestation} from '@actions/attest';
 import {Bundle} from '@sigstore/sign';
 
 import {Cosign} from '../cosign/cosign';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
+import {ImageTools} from '../buildx/imagetools';
 
-import {MEDIATYPE_PAYLOAD as intotoMediatypePayload, Subject} from '../types/intoto/intoto';
+import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto';
 import {FULCIO_URL, REKOR_URL, SEARCH_URL, TSASERVER_URL} from '../types/sigstore/sigstore';
+
+export interface SignAttestationManifestsOpts {
+  imageName: string;
+  imageDigest: string;
+  noTransparencyLog?: boolean;
+}
+
+export interface SignAttestationManifestsResult extends Attestation {
+  imageName: string;
+}
+
+export interface VerifySignedManifestsOpts {
+  certificateIdentityRegexp: string;
+  retries?: number;
+}
+
+export interface VerifySignedManifestsResult {
+  cosignArgs: Array<string>;
+  signatureManifestDigest: string;
+}
 
 export interface SignProvenanceBlobsOpts {
   localExportDir: string;
@@ -54,13 +75,149 @@ export interface VerifySignedArtifactsResult {
 
 export interface SigstoreOpts {
   cosign?: Cosign;
+  imageTools?: ImageTools;
 }
 
 export class Sigstore {
   private readonly cosign: Cosign;
+  private readonly imageTools: ImageTools;
 
   constructor(opts?: SigstoreOpts) {
     this.cosign = opts?.cosign || new Cosign();
+    this.imageTools = opts?.imageTools || new ImageTools();
+  }
+
+  public async signAttestationManifests(opts: SignAttestationManifestsOpts): Promise<Record<string, SignAttestationManifestsResult>> {
+    if (!(await this.cosign.isAvailable())) {
+      throw new Error('Cosign is required to sign attestation manifests');
+    }
+    const result: Record<string, SignAttestationManifestsResult> = {};
+    try {
+      if (!process.env.ACTIONS_ID_TOKEN_REQUEST_URL) {
+        throw new Error('missing "id-token" permission. Please add "permissions: id-token: write" to your workflow.');
+      }
+
+      const endpoints = this.signingEndpoints(opts.noTransparencyLog);
+      core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
+      const noTransparencyLog = Sigstore.noTransparencyLog(opts.noTransparencyLog);
+
+      const attestationDigests = await this.imageTools.attestationDigests(`${opts.imageName}@${opts.imageDigest}`);
+      for (const attestationDigest of attestationDigests) {
+        const attestationRef = `${opts.imageName}@${attestationDigest}`;
+        await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
+          // prettier-ignore
+          const cosignArgs = [
+            '--verbose',
+            'sign',
+            '--yes',
+            '--oidc-provider', 'github-actions',
+            '--registry-referrers-mode', 'oci-1-1',
+            '--new-bundle-format',
+            '--use-signing-config'
+          ];
+          if (noTransparencyLog) {
+            cosignArgs.push('--tlog-upload=false');
+          }
+          core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
+            ignoreReturnCode: true,
+            silent: true,
+            env: Object.assign({}, process.env, {
+              COSIGN_EXPERIMENTAL: '1'
+            }) as {
+              [key: string]: string;
+            }
+          });
+          const signResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+          if (execRes.exitCode != 0) {
+            if (signResult.errors && signResult.errors.length > 0) {
+              const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
+              throw new Error(`Cosign sign command failed with errors:\n${errorMessages}`);
+            } else {
+              throw new Error(`Cosign sign command failed with exit code ${execRes.exitCode}`);
+            }
+          }
+          const attest = Sigstore.toAttestation(bundleFromJSON(signResult.bundle));
+          if (attest.tlogID) {
+            core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
+          }
+          core.info(`Signature manifest pushed: https://oci.dag.dev/?referrers=${attestationRef}`);
+          result[attestationRef] = {
+            ...attest,
+            imageName: opts.imageName
+          };
+        });
+      }
+    } catch (err) {
+      throw new Error(`Signing BuildKit attestation manifests failed: ${(err as Error).message}`);
+    }
+    return result;
+  }
+
+  public async verifySignedManifests(opts: VerifySignedManifestsOpts, signed: Record<string, SignAttestationManifestsResult>): Promise<Record<string, VerifySignedManifestsResult>> {
+    const result: Record<string, VerifySignedManifestsResult> = {};
+    const retries = opts.retries ?? 15;
+
+    if (!(await this.cosign.isAvailable())) {
+      throw new Error('Cosign is required to verify signed manifests');
+    }
+
+    let lastError: Error | undefined;
+    for (const [attestationRef, signedRes] of Object.entries(signed)) {
+      await core.group(`Verifying signature of ${attestationRef}`, async () => {
+        // prettier-ignore
+        const cosignArgs = [
+          '--verbose',
+          'verify',
+          '--experimental-oci11',
+          '--new-bundle-format',
+          '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
+          '--certificate-identity-regexp', opts.certificateIdentityRegexp
+        ];
+        if (!signedRes.tlogID) {
+          // skip tlog verification but still verify the signed timestamp
+          cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
+        }
+        core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+        for (let attempt = 0; attempt < retries; attempt++) {
+          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
+            ignoreReturnCode: true,
+            silent: true,
+            env: Object.assign({}, process.env, {
+              COSIGN_EXPERIMENTAL: '1'
+            }) as {[key: string]: string}
+          });
+          const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+          if (execRes.exitCode === 0) {
+            result[attestationRef] = {
+              cosignArgs: cosignArgs,
+              signatureManifestDigest: verifyResult.signatureManifestDigest!
+            };
+            lastError = undefined;
+            core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
+            break;
+          } else {
+            if (verifyResult.errors && verifyResult.errors.length > 0) {
+              const errorMessages = verifyResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
+              lastError = new Error(`Cosign verify command failed with errors:\n${errorMessages}`);
+              if (verifyResult.errors.some(e => e.code === 'MANIFEST_UNKNOWN')) {
+                core.info(`Cosign verify command failed with MANIFEST_UNKNOWN, retrying attempt ${attempt + 1}/${retries}...\n${errorMessages}`);
+                await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 100));
+              } else {
+                throw lastError;
+              }
+            } else {
+              throw new Error(`Cosign verify command failed: ${execRes.stderr}`);
+            }
+          }
+        }
+      });
+    }
+    if (lastError) {
+      throw lastError;
+    }
+
+    return result;
   }
 
   public async signProvenanceBlobs(opts: SignProvenanceBlobsOpts): Promise<Record<string, SignProvenanceBlobsResult>> {
@@ -70,7 +227,7 @@ export class Sigstore {
         throw new Error('missing "id-token" permission. Please add "permissions: id-token: write" to your workflow.');
       }
 
-      const endpoints = this.signingEndpoints(opts);
+      const endpoints = this.signingEndpoints(opts.noTransparencyLog);
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
 
       const provenanceBlobs = Sigstore.getProvenanceBlobs(opts);
@@ -86,7 +243,7 @@ export class Sigstore {
           const bundle = await signPayload(
             {
               body: blob,
-              type: intotoMediatypePayload
+              type: INTOTO_MEDIATYPE_PAYLOAD
             },
             endpoints
           );
@@ -123,7 +280,7 @@ export class Sigstore {
     }
     for (const [provenancePath, signedRes] of Object.entries(signed)) {
       const baseDir = path.dirname(provenancePath);
-      await core.group(`Verifying ${signedRes.bundlePath}`, async () => {
+      await core.group(`Verifying signature bundle ${signedRes.bundlePath}`, async () => {
         for (const subject of signedRes.subjects) {
           const artifactPath = path.join(baseDir, subject.name);
           core.info(`Verifying signed artifact ${artifactPath}`);
@@ -134,7 +291,7 @@ export class Sigstore {
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp
           ]
-          if (!signedRes.bundle.verificationMaterial || !Array.isArray(signedRes.bundle.verificationMaterial.tlogEntries) || signedRes.bundle.verificationMaterial.tlogEntries.length === 0) {
+          if (!signedRes.tlogID) {
             // if there is no tlog entry, we skip tlog verification but still verify the signed timestamp
             cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
           }
@@ -154,14 +311,18 @@ export class Sigstore {
     return result;
   }
 
-  private signingEndpoints(opts: SignProvenanceBlobsOpts): Endpoints {
-    const noTransparencyLog = opts.noTransparencyLog ?? GitHub.context.payload.repository?.private;
+  private signingEndpoints(noTransparencyLog?: boolean): Endpoints {
+    noTransparencyLog = Sigstore.noTransparencyLog(noTransparencyLog);
     core.info(`Upload to transparency log: ${noTransparencyLog ? 'disabled' : 'enabled'}`);
     return {
       fulcioURL: FULCIO_URL,
       rekorURL: noTransparencyLog ? undefined : REKOR_URL,
       tsaServerURL: TSASERVER_URL
     };
+  }
+
+  private static noTransparencyLog(noTransparencyLog?: boolean): boolean {
+    return noTransparencyLog ?? GitHub.context.payload.repository?.private;
   }
 
   private static getProvenanceBlobs(opts: SignProvenanceBlobsOpts): Record<string, Buffer> {

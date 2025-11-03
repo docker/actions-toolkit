@@ -1,0 +1,329 @@
+25/10/31 12:56:02 --> GET https://index.docker.io/v2/
+2025/10/31 12:56:02 GET /v2/ HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:02 <-- 401 https://index.docker.io/v2/ (66.681248ms)
+2025/10/31 12:56:02 HTTP/2.0 401 Unauthorized
+Content-Length: 87
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:02 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+Www-Authenticate: ***"https://auth.docker.io/token",service="registry.docker.io"
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":null}]}
+
+2025/10/31 12:56:02 --> GET https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io [body redacted: basic token response contains credentials]
+2025/10/31 12:56:02 GET /token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io HTTP/1.1
+Host: auth.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:02 <-- 200 https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io (81.877507ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:56:02 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:02 GMT
+Strict-Transport-Security: max-age=31536000
+X-Trace-Id: 4107d7c67f22212f177f584ddeb842c6
+X-Trace-Sampled: true
+
+
+2025/10/31 12:56:02 --> GET https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+2025/10/31 12:56:02 GET /v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:02 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b (57.419407ms)
+2025/10/31 12:56:02 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:56:02 GMT
+Docker-Content-Digest: sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Ratelimit-Source: d2fd3209-1e2e-451f-b428-29c5bbf3b4b7
+Etag: "sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b"
+Strict-Transport-Security: max-age=31536000
+
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "artifactType": "application/vnd.docker.attestation.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.empty.v1+json",
+    "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "size": 2,
+    "data": "e30="
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:8610c8cf92db274e5228c44ece3bf2468bcfe19e8a92d3adb2afcbbfbb6b169b",
+      "size": 1060,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:1f6a5f284d4750f03d388f000684e3395b6b5006269036d1b2c3369c092aaa94",
+      "size": 81242,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://spdx.dev/Document"
+      }
+    },
+    {
+      "mediaType": "application/vnd.in-toto+json",
+      "digest": "sha256:5ce8b4a314586615e6ae5aea652dbd4ef72086ab77f8b90caacc1a67412804c6",
+      "size": 12957,
+      "annotations": {
+        "in-toto.io/predicate-type": "https://slsa.dev/provenance/v1"
+      }
+    }
+  ],
+  "subject": {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:81d8ebe81024fdaa4e8f1c410346b0db76c655664db654a878565940661722a1",
+    "size": 476
+  }
+}
+Signing artifact...
+2025/10/31 12:56:02 --> GET https://index.docker.io/v2/
+2025/10/31 12:56:02 GET /v2/ HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:03 <-- 401 https://index.docker.io/v2/ (65.403116ms)
+2025/10/31 12:56:03 HTTP/2.0 401 Unauthorized
+Content-Length: 87
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+Www-Authenticate: ***"https://auth.docker.io/token",service="registry.docker.io"
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":null}]}
+
+2025/10/31 12:56:03 --> GET https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io [body redacted: basic token response contains credentials]
+2025/10/31 12:56:03 GET /token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io HTTP/1.1
+Host: auth.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:03 <-- 200 https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io (80.031672ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:56:03 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Strict-Transport-Security: max-age=31536000
+X-Trace-Id: 43bd1078547ea5764a91a11ff441f7ec
+X-Trace-Sampled: true
+
+
+2025/10/31 12:56:03 --> HEAD https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+2025/10/31 12:56:03 HEAD /v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+
+
+2025/10/31 12:56:03 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b (70.096126ms)
+2025/10/31 12:56:03 HTTP/2.0 200 OK
+Content-Length: 1380
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Content-Digest: sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Ratelimit-Source: d2fd3209-1e2e-451f-b428-29c5bbf3b4b7
+Etag: "sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b"
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:03 --> GET https://index.docker.io/v2/
+2025/10/31 12:56:03 GET /v2/ HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:03 <-- 401 https://index.docker.io/v2/ (21.659828ms)
+2025/10/31 12:56:03 HTTP/2.0 401 Unauthorized
+Content-Length: 87
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+Www-Authenticate: ***"https://auth.docker.io/token",service="registry.docker.io"
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":null}]}
+
+2025/10/31 12:56:03 --> GET https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apush%2Cpull&service=registry.docker.io [body redacted: basic token response contains credentials]
+2025/10/31 12:56:03 GET /token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apush%2Cpull&service=registry.docker.io HTTP/1.1
+Host: auth.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:03 <-- 200 https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apush%2Cpull&service=registry.docker.io (38.25606ms) [body redacted: basic token response contains credentials]
+2025/10/31 12:56:03 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Strict-Transport-Security: max-age=31536000
+X-Trace-Id: 20ca8939b8aa180ca68b8bf8ae14b672
+X-Trace-Sampled: false
+
+
+2025/10/31 12:56:03 --> HEAD https://index.docker.io/v2/crazymax/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+2025/10/31 12:56:03 HEAD /v2/crazymax/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:56:03 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/blobs/sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a (27.715324ms)
+2025/10/31 12:56:03 HTTP/2.0 200 OK
+Content-Length: 2
+Accept-Ranges: bytes
+Cache-Control: max-age=31536000
+Content-Type: application/octet-stream
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Content-Digest: sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+Docker-Distribution-Api-Version: registry/2.0
+Etag: "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:03 --> HEAD https://index.docker.io/v2/crazymax/github-builder-test/blobs/sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45
+2025/10/31 12:56:03 HEAD /v2/crazymax/github-builder-test/blobs/sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45 HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+
+
+2025/10/31 12:56:03 <-- 404 https://index.docker.io/v2/crazymax/github-builder-test/blobs/sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45 (51.20231ms)
+2025/10/31 12:56:03 HTTP/2.0 404 Not Found
+Content-Length: 157
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:03 --> POST https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/
+2025/10/31 12:56:03 POST /v2/crazymax/github-builder-test/blobs/uploads/ HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/json
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:03 <-- 202 https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/ (94.44866ms)
+2025/10/31 12:56:03 HTTP/2.0 202 Accepted
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Upload-Uuid: 9c3f2078-4348-41aa-9cf3-85d557d38ad6
+Location: https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=bBYy5kdM6h2HlGzv-TddrUs0L-qgBO_ah3ECjp4nKM57Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MCwiU3RhcnRlZEF0IjoiMjAyNS0xMC0zMVQxMjo1NjowMy4zMTQ3MTgyMDJaIn0%3D
+Range: 0-0
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:03 --> PATCH https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=bBYy5kdM6h2HlGzv-TddrUs0L-qgBO_ah3ECjp4nKM57Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MCwiU3RhcnRlZEF0IjoiMjAyNS0xMC0zMVQxMjo1NjowMy4zMTQ3MTgyMDJaIn0%3D
+2025/10/31 12:56:03 PATCH /v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=bBYy5kdM6h2HlGzv-TddrUs0L-qgBO_ah3ECjp4nKM57Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MCwiU3RhcnRlZEF0IjoiMjAyNS0xMC0zMVQxMjo1NjowMy4zMTQ3MTgyMDJaIn0%3D HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 10317
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","verificationMaterial":{"certificate":{"rawBytes":"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"},"tlogEntries":[{"logIndex":"658989641","logId":{"keyId":"wNI9atQGlz+VWfO6LRygH4QUfY/8W4RFwiT5i5WRgB0="},"kindVersion":{"kind":"dsse","version":"0.0.1"},"integratedTime":"1761915362","inclusionPromise":{"signedEntryTimestamp":"MEQCIDxVZ/2zgObYpalVsMAgUj+rUR1qW32buFsr3KgDvceLAiAJSU2LAPd+jbiSN9DA6LPiDyf7G2/37AICe8iMDnPXTg=="},"inclusionProof":{"logIndex":"537085379","rootHash":"+ObQpMSSkOrB/SlxhyyoeyZylTSYXNyhKRnlpu+RSZc=","treeSize":"537085380","hashes":["TJquZxCv5Ywd0zgaIGEzrcJq8+QnZSIkPIo9Ds3k340=","YfEohF8hcAm/SiqVqBTZEDjs360Pg7bUdhnwcEpJyqU=","NSGoQV9xb1nxz/ZKpuxv2ZcE12MQzvTs+uDEDaVCNtw=","Xf2jrik49h6ay3mY6DWoHSv2h+eA4YQmJ/tuvl6Y/uc=","dwGEDWVAwwO5qLUQvJcsDA/dQ3yHzjTkgI5q8JfnfNA=","UdMwkKFmSY6L+QPsYEaolMhQBawJ9dBw5He8q3PHo0M=","xgGY2FP9Z7OismH3HnTjRm20s0Bhuo+oc7jg4DFfkpE=","UHUFo9bFcCp5sT5XjtU8o75stbZM3KJvW43mulWjw9c=","P6OrPNhquaHIdM/iPT2DlOVW2K/cO02h2h5AGOxNDcE=","T4DqWD42hAtN+vX8jKCWqoC4meE4JekI9LxYGCcPy1M="],"checkpoint":{"envelope":"rekor.sigstore.dev - 1193050959916656506\n537085380\n+ObQpMSSkOrB/SlxhyyoeyZylTSYXNyhKRnlpu+RSZc=\n\n— rekor.sigstore.dev wNI9ajBGAiEA9SlhCo1gNaIFFCk40NpUj/xhXLwKhVBQux9LqO0+S7cCIQCfEa960Z9ruvuLao0XwCRm5HPM9NAmOLZ+NDXB5Qf/mA==\n"}},"canonicalizedBody":"eyJhcGlWZXJzaW9uIjoiMC4wLjEiLCJraW5kIjoiZHNzZSIsInNwZWMiOnsiZW52ZWxvcGVIYXNoIjp7ImFsZ29yaXRobSI6InNoYTI1NiIsInZhbHVlIjoiODMxMDYyNzZmMTdkNDIyMWVhMjNkZjQ1MDNlNTRiNmU4NWM4NmM5YWM3YzcwMTNiM2E1YzIxNDAxZjU5ZmYzZiJ9LCJwYXlsb2FkSGFzaCI6eyJhbGdvcml0aG0iOiJzaGEyNTYiLCJ2YWx1ZSI6ImQ0MmI1ZTQ1NGU0YWYyNmQwMTZjN2IyYmE3NjVhMWI4ZjM3NTAxMzMyYWE1YzMwY2I3ZGE2ZTM2NGJjOTFmNWYifSwic2lnbmF0dXJlcyI6W3sic2lnbmF0dXJlIjoiTUVVQ0lRQ3BmTUpkV3dobU1IeTNJTnh4VW51QWlET013VmNwRFliVzQwZm55U0YraHdJZ1FZUHlJZWlOSExoVGVaUlh4TnBxSS9VdU96SmRVNUVZbk1UZ1FjVzY1U2M9IiwidmVyaWZpZXIiOiJMUzB0TFMxQ1JVZEpUaUJEUlZKVVNVWkpRMEZVUlMwdExTMHRDazFKU1VoSlJFTkRRbkZYWjBGM1NVSkJaMGxWWlZkTWEzTlpRbWhNZG5nMVUyOWtSbGREUzB4aFVuVktablZ6ZDBObldVbExiMXBKZW1vd1JVRjNUWGNLVG5wRlZrMUNUVWRCTVZWRlEyaE5UV015Ykc1ak0xSjJZMjFWZFZwSFZqSk5ValIzU0VGWlJGWlJVVVJGZUZaNllWZGtlbVJIT1hsYVV6RndZbTVTYkFwamJURnNXa2RzYUdSSFZYZElhR05PVFdwVmVFMUVUWGhOVkVreFRtcEJlVmRvWTA1TmFsVjRUVVJOZUUxVVRYZE9ha0Y1VjJwQlFVMUdhM2RGZDFsSUNrdHZXa2w2YWpCRFFWRlpTVXR2V2tsNmFqQkVRVkZqUkZGblFVVnllRmhtWnk5VGVpOU9kVmhJTkZSck5EQTFlWGRpVlZSeGJXeEJRVGd6VFZwTWNFa0tXSEIyVFVJdk9HdElZa0pzVjFvMlVFcGFlVlZ2VW5OMGJYaE5iMUp2YTFoQ1duaDZRVTk0VUZoTFJXTk1LMGMxZUdGUFEwSmpVWGRuWjFoQlRVRTBSd3BCTVZWa1JIZEZRaTkzVVVWQmQwbElaMFJCVkVKblRsWklVMVZGUkVSQlMwSm5aM0pDWjBWR1FsRmpSRUY2UVdSQ1owNVdTRkUwUlVablVWVXhUMlpCQ2twRU1rTkpOVE5IUmtkVE5rWmxNWEJVU0ZCSlVuVlZkMGgzV1VSV1VqQnFRa0puZDBadlFWVXpPVkJ3ZWpGWmEwVmFZalZ4VG1wd1MwWlhhWGhwTkZrS1drUTRkMmRaU1VkQk1WVmtSVkZGUWk5M1VqUk5TR0ZIWkVkb01HUklRbnBQYVRoMldqSnNNR0ZJVm1sTWJVNTJZbE01YTJJeVRuSmFXRWwyV2pKc01BcGhTRlpwVEZkS01XRlhlR3RhV0VsMFdsaG9kMXBZU25CaVYxWjFaRWRHYzB4NU5XNWhXRkp2WkZkSmRtUXlPWGxoTWxwellqTmtla3d5U2pGaFYzaHJDa3h1YkhSaVJVSjVXbGRhZWt3eWFHeFpWMUo2VERKS01XRlhlR3RNV0Vwc1pGaE9hRmx0ZUd4TVdHUjJZMjEwYldKSE9UTk5SR3RIUTJselIwRlJVVUlLWnpjNGQwRlJSVVZMTW1nd1pFaENlazlwT0haa1J6bHlXbGMwZFZsWFRqQmhWemwxWTNrMWJtRllVbTlrVjBveFl6SldlVmt5T1hWa1IxWjFaRU0xYWdwaU1qQjNTSGRaUzB0M1dVSkNRVWRFZG5wQlFrRm5VVkprTWpsNVlUSmFjMkl6WkdaYVIyeDZZMGRHTUZreVozZE9aMWxMUzNkWlFrSkJSMFIyZWtGQ0NrRjNVVzlaVkVFMVdtMU5NbHBYU1RSUFJFMHpXa1JOZDA1VVVUUlplbEpyV1dwSk1rMUVZekJaZWtKcFdYcFpNVTVVUm14UFZFbDRUbFJCVVVKbmIzSUtRbWRGUlVGWlR5OU5RVVZGUWtGS2FtRlVRVzlDWjI5eVFtZEZSVUZaVHk5TlFVVkdRa0p3YTJJeVRuSmFXRWwyV2pKc01HRklWbWxNVjBveFlWZDRhd3BhV0VsMFpFZFdlbVJFUVdSQ1oyOXlRbWRGUlVGWlR5OU5RVVZIUWtFNWVWcFhXbnBNTW1oc1dWZFNla3d5TVdoaFZ6UjNUM2RaUzB0M1dVSkNRVWRFQ25aNlFVSkRRVkYwUkVOMGIyUklVbmRqZW05MlRETlNkbUV5Vm5WTWJVWnFaRWRzZG1KdVRYVmFNbXd3WVVoV2FXUllUbXhqYlU1MlltNVNiR0p1VVhVS1dUSTVkRTFKUjBWQ1oyOXlRbWRGUlVGWlR5OU5RVVZLUWtoWlRXUkhhREJrU0VKNlQyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmRncGFNbXd3WVVoV2FVeFhTakZoVjNocldsaEpkRnBZYUhkYVdFcHdZbGRXZFdSSFJuTk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rb3hDbUZYZUd0TWJteDBZa1ZDZVZwWFducE1NbWhzV1ZkU2Vrd3lTakZoVjNoclRGaEtiR1JZVG1oWmJYaHNURmhrZG1OdGRHMWlSemt6VFVSblIwTnBjMGNLUVZGUlFtYzNPSGRCVVc5RlMyZDNiMDFIVlhkYVJGRXlUbGROTWxwSFRtaE5lbHB0VG5wT2JFMUVZelZQUjFWNlRWZFZNazlVUlRWUFZFSnRUMVJzYkFwT2JWWnFUa1JCWkVKbmIzSkNaMFZGUVZsUEwwMUJSVXhDUVRoTlJGZGtjR1JIYURGWmFURnZZak5PTUZwWFVYZFFVVmxMUzNkWlFrSkJSMFIyZWtGQ0NrUkJVWFpFUXpGdlpFaFNkMk42YjNaTU1tUndaRWRvTVZscE5XcGlNakIyV2tjNWFtRXlWbmxNTW1Sd1pFZG9NVmxwTVdsa1YyeHpXa2RXZVV4WVVtd0tZek5SZDA5QldVdExkMWxDUWtGSFJIWjZRVUpFVVZGeFJFTm9hRTFFYkcxWmVscHNXV3BuTkUxNlpHdE5la0V4VGtSb2FrNUhVbWxOYWxsM1RucFNhZ3BOUjBwcVRtcFZNVTFYVlRWTmFrVXhUVUk0UjBOcGMwZEJVVkZDWnpjNGQwRlJORVZGVVhkUVkyMVdiV041T1c5YVYwWnJZM2s1ZEZsWGJIVk5RbTlIQ2tOcGMwZEJVVkZDWnpjNGQwRlJPRVZFUVhkTFRWUkJNRTFFVlRWT1JFazBUbnBCY0VKbmIzSkNaMFZGUVZsUEwwMUJSVkZDUW5OTlIxZG9NR1JJUW5vS1QyazRkbG95YkRCaFNGWnBURzFPZG1KVE9XdGlNazV5V2xoSmQwWjNXVXRMZDFsQ1FrRkhSSFo2UVVKRlVWRktSRUZqTVU1RVNUVk9SR04zVFVkWlJ3cERhWE5IUVZGUlFtYzNPSGRCVWtsRlYwRjRWMkZJVWpCalNFMDJUSGs1Ym1GWVVtOWtWMGwxV1RJNWRFd3lVblpaTW5Sc1kyazVibUZZVW05a1YwbDBDbGx1Vm5CaVIxSnNZMmt4TUZwWVRqQk1lVFZ1WVZoU2IyUlhTWFprTWpsNVlUSmFjMkl6WkhwTU1rNXdURzVzZEdKRlFubGFWMXA2VERKb2JGbFhVbm9LVERJeGFHRlhOSGRQUVZsTFMzZFpRa0pCUjBSMmVrRkNSWGRSY1VSRGFHaE5SR3h0V1hwYWJGbHFaelJOZW1SclRYcEJNVTVFYUdwT1IxSnBUV3BaZHdwT2VsSnFUVWRLYWs1cVZURk5WMVUxVFdwRk1VMURSVWREYVhOSFFWRlJRbWMzT0hkQlVsRkZSWGQzVW1ReU9YbGhNbHB6WWpOa1pscEhiSHBqUjBZd0Nsa3laM2RaVVZsTFMzZFpRa0pCUjBSMmVrRkNSbEZTVkVSR1JtOWtTRkozWTNwdmRrd3laSEJrUjJneFdXazFhbUl5TUhaYVJ6bHFZVEpXZVV3eVpIQUtaRWRvTVZscE1XbGtWMnh6V2tkV2VVeFlVbXhqTTFGMldWZE9NR0ZYT1hWamVUbDVaRmMxZWt4NlJUUlBWR042VFZSUk0wOUVZM2RNTWtZd1pFZFdkQXBqU0ZKNlRIcEZkMGRCV1V0TGQxbENRa0ZIUkhaNlFVSkdaMUZMUkVGb2NHSnVVbXhqYlRWb1lrUkRRbWwzV1V0TGQxbENRa0ZJVjJWUlNVVkJaMUk1Q2tKSWMwRmxVVUl6UVU0d09VMUhja2Q0ZUVWNVdYaHJaVWhLYkc1T2QwdHBVMncyTkROcWVYUXZOR1ZMWTI5QmRrdGxOazlCUVVGQ2JXcHdWek5OYzBFS1FVRlJSRUZGWjNkU1owbG9RVXR1UmtvNGNubHBjbFZqUlRaYVVsSjJXVzVIZFU1YWJrUjZLMFoyTXk5NGNYbHpXbTk1ZW5sMWJUaEJhVVZCTWs4eWR3bzNNVWhOUm5WdGQwRkNURVp5TWxsVFYwVjVWWEI1YW1reFVuUkRObEkzVWt0aFFsRkxTMWwzUTJkWlNVdHZXa2w2YWpCRlFYZE5SR0ZSUVhkYVowbDRDa0ZMV21sU2NIVXlTblVyUTFKR2JVSlNlR1JYUmtRNWIwOXFibVV3WW1GS1JFRnFOR0pPUVdONVZYWlhNRWxzTkZONlRIUnBiMEZETUN0aVRucFRWMUFLV0dkSmVFRkpOemRyTjNSSFZ6SklSbGxQV0U5RFkzSjFTa1JwZW1OMFdGQjVkVzVNU25kVVR6VlRibUkwU3pGbE5EZHNjRUU0U1VadlJWbHFaMGcwYndwVlRVb3JNMEU5UFFvdExTMHRMVVZPUkNCRFJWSlVTVVpKUTBGVVJTMHRMUzB0Q2c9PSJ9XX19"}],"timestampVerificationData":{"rfc3161Timestamps":[{"signedTimestamp":"MIICyDADAgEAMIICvwYJKoZIhvcNAQcCoIICsDCCAqwCAQMxDTALBglghkgBZQMEAgEwgbcGCyqGSIb3DQEJEAEEoIGnBIGkMIGhAgEBBgkrBgEEAYO/MAIwMTANBglghkgBZQMEAgEFAAQgj7wG18KmJy9RCtzLI9PTCPIPRAfRHh1tTqlhqVhkiaYCFG1zqBv+eMNfEkElod8xs18Q55unGA8yMDI1MTAzMTEyNTYwMlowAwIBAaAypDAwLjEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MRUwEwYDVQQDEwxzaWdzdG9yZS10c2GgADGCAdowggHWAgEBMFEwOTEVMBMGA1UEChMMc2lnc3RvcmUuZGV2MSAwHgYDVQQDExdzaWdzdG9yZS10c2Etc2VsZnNpZ25lZAIUOhNULwyQYe68wUMvy4qOiyojiwwwCwYJYIZIAWUDBAIBoIH8MBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAcBgkqhkiG9w0BCQUxDxcNMjUxMDMxMTI1NjAyWjAvBgkqhkiG9w0BCQQxIgQgKVTgaWhWr7I1zYpmrlqVGyzu4b6Oir3FFDqhAyLPm80wgY4GCyqGSIb3DQEJEAIvMX8wfTB7MHkEIIX5J7wHq2LKw7RDVsEO/IGyxog/2nq55thw2dE6zQW3MFUwPaQ7MDkxFTATBgNVBAoTDHNpZ3N0b3JlLmRldjEgMB4GA1UEAxMXc2lnc3RvcmUtdHNhLXNlbGZzaWduZWQCFDoTVC8MkGHuvMFDL8uKjosqI4sMMAoGCCqGSM49BAMCBGYwZAIwH0nNCWcc2wohSvUuA7n4iyaUsZhfYkNEDLWi4ks/pESeR/exUXFtEFqif7BLFdVUAjBce0IEP7TrMgM5qV+E0RWqzrtBKqUEpcl1QPQl6l7tmuj98m2c0RgvT51d9kIOufs="}]}},"dsseEnvelope":{"payload":"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJkaWdlc3QiOnsic2hhMjU2IjoiMDM3MTA3ZDdmZDc5NjU1MzcwMmY2MTZiZWY2M2Q3ZDU0ZWExZjY2YTMzMDU2NTBiN2I2M2Y0OGFlMGVmODI1YiJ9fV0sInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3NpZ3N0b3JlLmRldi9jb3NpZ24vc2lnbi92MSJ9","payloadType":"application/vnd.in-toto+json","signatures":[{"sig":"MEUCIQCpfMJdWwhmMHy3INxxUnuAiDOMwVcpDYbW40fnySF+hwIgQYPyIeiNHLhTeZRXxNpqI/UuOzJdU5EYnMTgQcW65Sc="}]}}
+2025/10/31 12:56:03 <-- 202 https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=bBYy5kdM6h2HlGzv-TddrUs0L-qgBO_ah3ECjp4nKM57Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MCwiU3RhcnRlZEF0IjoiMjAyNS0xMC0zMVQxMjo1NjowMy4zMTQ3MTgyMDJaIn0%3D (197.874528ms)
+2025/10/31 12:56:03 HTTP/2.0 202 Accepted
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:56:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Upload-Uuid: 9c3f2078-4348-41aa-9cf3-85d557d38ad6
+Location: https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=GjgLb-y2PfTU_gZDztB9ffte4jJ1ijrT7dZUK2anrkp7Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MTAzMTcsIlN0YXJ0ZWRBdCI6IjIwMjUtMTAtMzFUMTI6NTY6MDNaIn0%3D
+Range: 0-10316
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:03 --> PUT https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=GjgLb-y2PfTU_gZDztB9ffte4jJ1ijrT7dZUK2anrkp7Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MTAzMTcsIlN0YXJ0ZWRBdCI6IjIwMjUtMTAtMzFUMTI6NTY6MDNaIn0%3D&digest=sha256%3A3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45
+2025/10/31 12:56:03 PUT /v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=GjgLb-y2PfTU_gZDztB9ffte4jJ1ijrT7dZUK2anrkp7Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MTAzMTcsIlN0YXJ0ZWRBdCI6IjIwMjUtMTAtMzFUMTI6NTY6MDNaIn0%3D&digest=sha256%3A3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45 HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 0
+Authorization: <redacted>
+Content-Type: application/octet-stream
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:04 <-- 201 https://index.docker.io/v2/crazymax/github-builder-test/blobs/uploads/9c3f2078-4348-41aa-9cf3-85d557d38ad6?_state=GjgLb-y2PfTU_gZDztB9ffte4jJ1ijrT7dZUK2anrkp7Ik5hbWUiOiJjcmF6eW1heC9naXRodWItYnVpbGRlci10ZXN0IiwiVVVJRCI6IjljM2YyMDc4LTQzNDgtNDFhYS05Y2YzLTg1ZDU1N2QzOGFkNiIsIk9mZnNldCI6MTAzMTcsIlN0YXJ0ZWRBdCI6IjIwMjUtMTAtMzFUMTI6NTY6MDNaIn0%3D&digest=sha256%3A3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45 (620.97629ms)
+2025/10/31 12:56:04 HTTP/2.0 201 Created
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:56:04 GMT
+Docker-Content-Digest: sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45
+Docker-Distribution-Api-Version: registry/2.0
+Location: https://index.docker.io/v2/crazymax/github-builder-test/blobs/sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:04 --> PUT https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:792fbbfd9fb8577a42115b587583ec25257b81aa276c51ec75f42d18b7f4e622
+2025/10/31 12:56:04 PUT /v2/crazymax/github-builder-test/manifests/sha256:792fbbfd9fb8577a42115b587583ec25257b81aa276c51ec75f42d18b7f4e622 HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Content-Length: 880
+Authorization: <redacted>
+Content-Type: application/vnd.oci.image.manifest.v1+json
+Accept-Encoding: gzip
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.manifest.v1+json","config":{"mediaType":"application/vnd.oci.empty.v1+json","size":2,"digest":"sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"},"layers":[{"mediaType":"application/vnd.dev.sigstore.bundle.v0.3+json","size":10317,"digest":"sha256:3417fe347c7333c5f6e46f507ebd6fe83ef14417676c67827d148c2679e3ab45"}],"annotations":{"dev.sigstore.bundle.content":"dsse-envelope","dev.sigstore.bundle.predicateType":"https://sigstore.dev/cosign/sign/v1","org.opencontainers.image.created":"2025-10-31T12:56:02Z"},"subject":{"mediaType":"application/vnd.oci.image.manifest.v1+json","size":1380,"digest":"sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b"},"artifactType":"application/vnd.dev.sigstore.bundle.v0.3+json"}
+2025/10/31 12:56:04 <-- 201 https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:792fbbfd9fb8577a42115b587583ec25257b81aa276c51ec75f42d18b7f4e622 (289.599089ms)
+2025/10/31 12:56:04 HTTP/2.0 201 Created
+Content-Length: 0
+Date: Fri, 31 Oct 2025 12:56:04 GMT
+Docker-Content-Digest: sha256:792fbbfd9fb8577a42115b587583ec25257b81aa276c51ec75f42d18b7f4e622
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Ratelimit-Source: 135.232.232.34
+Location: https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256:792fbbfd9fb8577a42115b587583ec25257b81aa276c51ec75f42d18b7f4e622
+Oci-Subject: sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+Strict-Transport-Security: max-age=31536000
+
+
+2025/10/31 12:56:04 --> GET https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b
+2025/10/31 12:56:04 GET /v2/crazymax/github-builder-test/referrers/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 12:56:04 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:037107d7fd796553702f616bef63d7d54ea1f66a3305650b7b63f48ae0ef825b (51.087239ms)
+2025/10/31 12:56:04 HTTP/2.0 200 OK
+Content-Length: 89
+Content-Type: application/vnd.oci.image.index.v1+json
+Date: Fri, 31 Oct 2025 12:56:04 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}

@@ -1,0 +1,96 @@
+2025/10/31 13:57:03 --> GET https://index.docker.io/v2/
+2025/10/31 13:57:03 GET /v2/ HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept-Encoding: gzip
+
+
+2025/10/31 13:57:03 <-- 401 https://index.docker.io/v2/ (191.948348ms)
+2025/10/31 13:57:03 HTTP/2.0 401 Unauthorized
+Content-Length: 87
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 13:57:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+Www-Authenticate: ***"https://auth.docker.io/token",service="registry.docker.io"
+
+{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":null}]}
+
+2025/10/31 13:57:03 --> GET https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io [body redacted: basic token response contains credentials]
+2025/10/31 13:57:03 GET /token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io HTTP/1.1
+Host: auth.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 13:57:03 <-- 200 https://auth.docker.io/token?scope=repository%3Acrazymax%2Fgithub-builder-test%3Apull&service=registry.docker.io (180.01561ms) [body redacted: basic token response contains credentials]
+2025/10/31 13:57:03 HTTP/2.0 200 OK
+Connection: close
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 13:57:03 GMT
+Strict-Transport-Security: max-age=31536000
+X-Trace-Id: 8d63fbce36baf5f2a0c5f2542efa7a7a
+X-Trace-Sampled: false
+
+
+2025/10/31 13:57:03 --> GET https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0
+2025/10/31 13:57:03 GET /v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0 HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 13:57:03 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0 (84.160823ms)
+2025/10/31 13:57:03 HTTP/2.0 200 OK
+Content-Length: 89
+Content-Type: application/vnd.oci.image.index.v1+json
+Date: Fri, 31 Oct 2025 13:57:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}
+
+2025/10/31 13:57:03 --> GET https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0
+2025/10/31 13:57:03 GET /v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0 HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 13:57:03 <-- 200 https://index.docker.io/v2/crazymax/github-builder-test/referrers/sha256:6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0 (95.303988ms)
+2025/10/31 13:57:03 HTTP/2.0 200 OK
+Content-Length: 89
+Content-Type: application/vnd.oci.image.index.v1+json
+Date: Fri, 31 Oct 2025 13:57:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Strict-Transport-Security: max-age=31536000
+
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}
+
+2025/10/31 13:57:03 --> GET https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256-6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0.sig
+2025/10/31 13:57:03 GET /v2/crazymax/github-builder-test/manifests/sha256-6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0.sig HTTP/1.1
+Host: index.docker.io
+User-Agent: cosign/v3.0.2 (linux; amd64) go-containerregistry/v0.20.6
+Accept: application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.v1+prettyjws,application/vnd.docker.distribution.manifest.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json
+Authorization: <redacted>
+Accept-Encoding: gzip
+
+
+2025/10/31 13:57:03 <-- 404 https://index.docker.io/v2/crazymax/github-builder-test/manifests/sha256-6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0.sig (66.155995ms)
+2025/10/31 13:57:03 HTTP/2.0 404 Not Found
+Content-Length: 169
+Content-Type: application/json
+Date: Fri, 31 Oct 2025 13:57:03 GMT
+Docker-Distribution-Api-Version: registry/2.0
+Docker-Ratelimit-Source: d2fd3209-1e2e-451f-b428-29c5bbf3b4b7
+Strict-Transport-Security: max-age=31536000
+
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown","detail":"unknown tag=sha256-6cc021c733ae2760b2493f449d9885b1606002962b51a9c4f0d0d1568b6dc5c0.sig"}]}
+
+Error: no signatures found
+error during command execution: no signatures found
