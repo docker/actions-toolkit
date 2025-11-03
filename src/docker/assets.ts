@@ -300,10 +300,17 @@ probes:
   hint: See "/var/log/cloud-init-output.log". in the guest
 
 hostResolver:
+  # Don't use local system resolver
+  enabled: false
   # hostResolver.hosts requires lima 0.8.3 or later. Names defined here will also
   # resolve inside containers, and not just inside the VM itself.
   hosts:
     host.docker.internal: host.lima.internal
+
+# Use custom DNS servers instead of the host's DNS settings
+dns:
+  - 1.1.1.1
+  - 1.0.0.1
 
 portForwards:
 - guestSocket: "/var/run/docker.sock"
