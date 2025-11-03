@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {GitHub} from './github';
 import {Buildx} from './buildx/buildx';
 import {Build as BuildxBuild} from './buildx/build';
 import {Bake as BuildxBake} from './buildx/bake';
@@ -22,8 +23,13 @@ import {Builder} from './buildx/builder';
 import {BuildKit} from './buildkit/buildkit';
 import {Compose} from './compose/compose';
 import {Install as ComposeInstall} from './compose/install';
+import {Cosign} from './cosign/cosign';
+import {Install as CosignInstall} from './cosign/install';
+import {Regctl} from './regclient/regctl';
+import {Install as RegctlInstall} from './regclient/install';
 import {Undock} from './undock/undock';
-import {GitHub} from './github';
+import {Install as UndockInstall} from './undock/install';
+import {Sigstore} from './sigstore/sigstore';
 
 export interface ToolkitOpts {
   /**
@@ -43,7 +49,13 @@ export class Toolkit {
   public buildkit: BuildKit;
   public compose: Compose;
   public composeInstall: ComposeInstall;
+  public cosign: Cosign;
+  public cosignInstall: CosignInstall;
+  public regctl: Regctl;
+  public regctlInstall: RegctlInstall;
+  public sigstore: Sigstore;
   public undock: Undock;
+  public undockInstall: UndockInstall;
 
   constructor(opts: ToolkitOpts = {}) {
     this.github = new GitHub({token: opts.githubToken});
@@ -55,6 +67,12 @@ export class Toolkit {
     this.buildkit = new BuildKit({buildx: this.buildx});
     this.compose = new Compose();
     this.composeInstall = new ComposeInstall();
+    this.cosign = new Cosign();
+    this.cosignInstall = new CosignInstall({buildx: this.buildx});
+    this.regctl = new Regctl();
+    this.regctlInstall = new RegctlInstall();
+    this.sigstore = new Sigstore();
     this.undock = new Undock();
+    this.undockInstall = new UndockInstall();
   }
 }
