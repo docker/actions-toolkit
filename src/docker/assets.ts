@@ -293,7 +293,7 @@ probes:
     #!/bin/bash
     set -eux -o pipefail
     # Don't check for docker CLI as it's not installed in the VM (only on the host)
-    if ! timeout 30s bash -c "until pgrep dockerd; do sleep 3; done"; then
+    if ! timeout 60s bash -c "until pgrep dockerd; do sleep 3; done"; then
       echo >&2 "dockerd is not running"
       exit 1
     fi
