@@ -293,17 +293,24 @@ probes:
     #!/bin/bash
     set -eux -o pipefail
     # Don't check for docker CLI as it's not installed in the VM (only on the host)
-    if ! timeout 30s bash -c "until pgrep dockerd; do sleep 3; done"; then
+    if ! timeout 60s bash -c "until pgrep dockerd; do sleep 3; done"; then
       echo >&2 "dockerd is not running"
       exit 1
     fi
   hint: See "/var/log/cloud-init-output.log". in the guest
 
 hostResolver:
+  # Don't use local system resolver
+  enabled: false
   # hostResolver.hosts requires lima 0.8.3 or later. Names defined here will also
   # resolve inside containers, and not just inside the VM itself.
   hosts:
     host.docker.internal: host.lima.internal
+
+# Use custom DNS servers instead of the host's DNS settings
+dns:
+  - 1.1.1.1
+  - 1.0.0.1
 
 portForwards:
 - guestSocket: "/var/run/docker.sock"
