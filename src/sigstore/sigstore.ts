@@ -34,7 +34,7 @@ import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/i
 import {FULCIO_URL, REKOR_URL, SEARCH_URL, TSASERVER_URL} from '../types/sigstore/sigstore';
 
 export interface SignAttestationManifestsOpts {
-  imageName: string;
+  imageNames: Array<string>;
   imageDigest: string;
   noTransparencyLog?: boolean;
 }
@@ -101,12 +101,13 @@ export class Sigstore {
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
       const noTransparencyLog = Sigstore.noTransparencyLog(opts.noTransparencyLog);
 
-      const attestationDigests = await this.imageTools.attestationDigests(`${opts.imageName}@${opts.imageDigest}`);
-      for (const attestationDigest of attestationDigests) {
-        const attestationRef = `${opts.imageName}@${attestationDigest}`;
-        await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
-          // prettier-ignore
-          const cosignArgs = [
+      for (const imageName of opts.imageNames) {
+        const attestationDigests = await this.imageTools.attestationDigests(`${imageName}@${opts.imageDigest}`);
+        for (const attestationDigest of attestationDigests) {
+          const attestationRef = `${imageName}@${attestationDigest}`;
+          await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
+            // prettier-ignore
+            const cosignArgs = [
             '--verbose',
             'sign',
             '--yes',
@@ -115,38 +116,39 @@ export class Sigstore {
             '--new-bundle-format',
             '--use-signing-config'
           ];
-          if (noTransparencyLog) {
-            cosignArgs.push('--tlog-upload=false');
-          }
-          core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
-          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
-            ignoreReturnCode: true,
-            silent: true,
-            env: Object.assign({}, process.env, {
-              COSIGN_EXPERIMENTAL: '1'
-            }) as {
-              [key: string]: string;
+            if (noTransparencyLog) {
+              cosignArgs.push('--tlog-upload=false');
             }
+            core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+            const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
+              ignoreReturnCode: true,
+              silent: true,
+              env: Object.assign({}, process.env, {
+                COSIGN_EXPERIMENTAL: '1'
+              }) as {
+                [key: string]: string;
+              }
+            });
+            const signResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+            if (execRes.exitCode != 0) {
+              if (signResult.errors && signResult.errors.length > 0) {
+                const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
+                throw new Error(`Cosign sign command failed with errors:\n${errorMessages}`);
+              } else {
+                throw new Error(`Cosign sign command failed with exit code ${execRes.exitCode}`);
+              }
+            }
+            const attest = Sigstore.toAttestation(bundleFromJSON(signResult.bundle));
+            if (attest.tlogID) {
+              core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
+            }
+            core.info(`Signature manifest pushed: https://oci.dag.dev/?referrers=${attestationRef}`);
+            result[attestationRef] = {
+              ...attest,
+              imageName: imageName
+            };
           });
-          const signResult = Cosign.parseCommandOutput(execRes.stderr.trim());
-          if (execRes.exitCode != 0) {
-            if (signResult.errors && signResult.errors.length > 0) {
-              const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
-              throw new Error(`Cosign sign command failed with errors:\n${errorMessages}`);
-            } else {
-              throw new Error(`Cosign sign command failed with exit code ${execRes.exitCode}`);
-            }
-          }
-          const attest = Sigstore.toAttestation(bundleFromJSON(signResult.bundle));
-          if (attest.tlogID) {
-            core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
-          }
-          core.info(`Signature manifest pushed: https://oci.dag.dev/?referrers=${attestationRef}`);
-          result[attestationRef] = {
-            ...attest,
-            imageName: opts.imageName
-          };
-        });
+        }
       }
     } catch (err) {
       throw new Error(`Signing BuildKit attestation manifests failed: ${(err as Error).message}`);
