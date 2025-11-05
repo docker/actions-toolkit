@@ -64,8 +64,12 @@ export class Cache {
 
     if (!this.ghaNoCache && cache.isFeatureAvailable()) {
       if (skipState) {
-        core.debug(`Cache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
-        await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+        try {
+          core.debug(`Cache.save caching ${this.ghaCacheKey} to GitHub Actions cache`);
+          await cache.saveCache([this.cacheDir], this.ghaCacheKey);
+        } catch (e) {
+          core.warning(`Failed to save cache: ${e}`);
+        }
       } else {
         core.debug(`Cache.save sending ${this.ghaCacheKey} to post state`);
         core.saveState(
@@ -82,26 +86,28 @@ export class Cache {
   }
 
   public async find(): Promise<string> {
-    let htcPath = tc.find(this.opts.htcName, this.opts.htcVersion, this.platform());
-    if (htcPath) {
-      core.info(`Restored from hosted tool cache ${htcPath}`);
-      return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
-    }
-
-    if (!this.ghaNoCache && cache.isFeatureAvailable()) {
-      core.debug(`GitHub Actions cache feature available`);
-      if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
-        core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
-        htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
-        core.info(`Cached to hosted tool cache ${htcPath}`);
+    try {
+      let htcPath = tc.find(this.opts.htcName, this.opts.htcVersion, this.platform());
+      if (htcPath) {
+        core.info(`Restored from hosted tool cache ${htcPath}`);
         return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
       }
-    } else if (this.ghaNoCache) {
-      core.info(`GitHub Actions cache disabled`);
-    } else {
-      core.info(`GitHub Actions cache feature not available`);
+      if (!this.ghaNoCache && cache.isFeatureAvailable()) {
+        core.debug(`GitHub Actions cache feature available`);
+        if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
+          core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
+          htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
+          core.info(`Cached to hosted tool cache ${htcPath}`);
+          return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
+        }
+      } else if (this.ghaNoCache) {
+        core.info(`GitHub Actions cache disabled`);
+      } else {
+        core.info(`GitHub Actions cache feature not available`);
+      }
+    } catch (e) {
+      core.warning(`Failed to restore cache: ${e}`);
     }
-
     return '';
   }
 
@@ -120,13 +126,17 @@ export class Cache {
     if (!cacheState.dir || !cacheState.key) {
       throw new Error(`Invalid cache post state: ${state}`);
     }
-    core.info(`Caching ${cacheState.key} to GitHub Actions cache`);
-    await cache.saveCache([cacheState.dir], cacheState.key);
+    try {
+      core.info(`Caching ${cacheState.key} to GitHub Actions cache`);
+      await cache.saveCache([cacheState.dir], cacheState.key);
+    } catch (e) {
+      core.warning(`Failed to save cache: ${e}`);
+    }
     return cacheState;
   }
 
   private copyToCache(file: string): string {
-    core.debug(`Copying ${file} to ${this.cachePath}`);
+    core.info(`Copying ${file} to ${this.cachePath}`);
     fs.copyFileSync(file, this.cachePath);
     return this.cachePath;
   }
