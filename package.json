@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "@actions/artifact": "^4.0.0",
-    "@actions/attest": "^2.0.0",
     "@actions/cache": "^4.1.0",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
@@ -71,7 +70,6 @@
     "tmp": "^0.2.5"
   },
   "devDependencies": {
-    "@sigstore/mock": "^0.10.0",
     "@sigstore/rekor-types": "^3.0.0",
     "@types/gunzip-maybe": "^1.4.2",
     "@types/he": "^1.2.3",

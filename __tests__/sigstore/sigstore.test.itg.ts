@@ -44,11 +44,10 @@ maybe('signProvenanceBlobs', () => {
     const provenancePath = Object.keys(results)[0];
     expect(provenancePath).toEqual(path.join(fixturesDir, 'sigstore', 'single', 'provenance.json'));
     expect(fs.existsSync(results[provenancePath].bundlePath)).toBe(true);
-    expect(results[provenancePath].bundle).toBeDefined();
+    expect(results[provenancePath].payload).toBeDefined();
     expect(results[provenancePath].certificate).toBeDefined();
     expect(results[provenancePath].tlogID).toBeDefined();
-    expect(results[provenancePath].attestationID).not.toBeDefined();
-    console.log(provenancePath, JSON.stringify(results[provenancePath].bundle, null, 2));
+    console.log(provenancePath, JSON.stringify(results[provenancePath].payload, null, 2));
   });
   it('multi-platform', async () => {
     const sigstore = new Sigstore();
@@ -59,11 +58,10 @@ maybe('signProvenanceBlobs', () => {
     for (const [provenancePath, res] of Object.entries(results)) {
       expect(provenancePath).toMatch(/linux_(amd64|arm64)\/provenance.json/);
       expect(fs.existsSync(res.bundlePath)).toBe(true);
-      expect(res.bundle).toBeDefined();
+      expect(res.payload).toBeDefined();
       expect(res.certificate).toBeDefined();
       expect(res.tlogID).toBeDefined();
-      expect(res.attestationID).not.toBeDefined();
-      console.log(provenancePath, JSON.stringify(res.bundle, null, 2));
+      console.log(provenancePath, JSON.stringify(res.payload, null, 2));
     }
   });
 });

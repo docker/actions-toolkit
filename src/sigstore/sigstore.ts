@@ -18,12 +18,9 @@ import {X509Certificate} from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import {Endpoints} from '@actions/attest/lib/endpoints';
 import * as core from '@actions/core';
-import {signPayload} from '@actions/attest/lib/sign';
 import {bundleFromJSON, bundleToJSON} from '@sigstore/bundle';
-import {Attestation} from '@actions/attest';
-import {Bundle} from '@sigstore/sign';
+import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
 
 import {Cosign} from '../cosign/cosign';
 import {Exec} from '../exec';
@@ -31,47 +28,22 @@ import {GitHub} from '../github';
 import {ImageTools} from '../buildx/imagetools';
 
 import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto';
-import {FULCIO_URL, REKOR_URL, SEARCH_URL, TSASERVER_URL} from '../types/sigstore/sigstore';
-
-export interface SignAttestationManifestsOpts {
-  imageNames: Array<string>;
-  imageDigest: string;
-  noTransparencyLog?: boolean;
-}
-
-export interface SignAttestationManifestsResult extends Attestation {
-  imageName: string;
-}
-
-export interface VerifySignedManifestsOpts {
-  certificateIdentityRegexp: string;
-  retries?: number;
-}
-
-export interface VerifySignedManifestsResult {
-  cosignArgs: Array<string>;
-  signatureManifestDigest: string;
-}
-
-export interface SignProvenanceBlobsOpts {
-  localExportDir: string;
-  name?: string;
-  noTransparencyLog?: boolean;
-}
-
-export interface SignProvenanceBlobsResult extends Attestation {
-  bundlePath: string;
-  subjects: Array<Subject>;
-}
-
-export interface VerifySignedArtifactsOpts {
-  certificateIdentityRegexp: string;
-}
-
-export interface VerifySignedArtifactsResult {
-  bundlePath: string;
-  cosignArgs: Array<string>;
-}
+import {
+  Endpoints,
+  FULCIO_URL,
+  ParsedBundle,
+  REKOR_URL,
+  SEARCH_URL,
+  SignAttestationManifestsOpts,
+  SignAttestationManifestsResult,
+  SignProvenanceBlobsOpts,
+  SignProvenanceBlobsResult,
+  TSASERVER_URL,
+  VerifySignedArtifactsOpts,
+  VerifySignedArtifactsResult,
+  VerifySignedManifestsOpts,
+  VerifySignedManifestsResult
+} from '../types/sigstore/sigstore';
 
 export interface SigstoreOpts {
   cosign?: Cosign;
@@ -138,13 +110,13 @@ export class Sigstore {
                 throw new Error(`Cosign sign command failed with exit code ${execRes.exitCode}`);
               }
             }
-            const attest = Sigstore.toAttestation(bundleFromJSON(signResult.bundle));
-            if (attest.tlogID) {
-              core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
+            const parsedBundle = Sigstore.parseBundle(bundleFromJSON(signResult.bundle));
+            if (parsedBundle.tlogID) {
+              core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${parsedBundle.tlogID}`);
             }
             core.info(`Signature manifest pushed: https://oci.dag.dev/?referrers=${attestationRef}`);
             result[attestationRef] = {
-              ...attest,
+              ...parsedBundle,
               imageName: imageName
             };
           });
@@ -242,28 +214,28 @@ export class Sigstore {
             core.warning(`No subjects found in provenance ${p}, skip signing.`);
             return;
           }
-          const bundle = await signPayload(
+          const bundle = await Sigstore.signPayload(
             {
-              body: blob,
+              data: blob,
               type: INTOTO_MEDIATYPE_PAYLOAD
             },
             endpoints
           );
-          const attest = Sigstore.toAttestation(bundle);
+          const parsedBundle = Sigstore.parseBundle(bundle);
           core.info(`Provenance blob signed for:`);
           for (const subject of subjects) {
             const [digestAlg, digestValue] = Object.entries(subject.digest)[0] || [];
             core.info(`  - ${subject.name} (${digestAlg}:${digestValue})`);
           }
-          if (attest.tlogID) {
-            core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${attest.tlogID}`);
+          if (parsedBundle.tlogID) {
+            core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${parsedBundle.tlogID}`);
           }
           core.info(`Writing Sigstore bundle to: ${bundlePath}`);
-          fs.writeFileSync(bundlePath, JSON.stringify(attest.bundle, null, 2), {
+          fs.writeFileSync(bundlePath, JSON.stringify(parsedBundle.payload, null, 2), {
             encoding: 'utf-8'
           });
           result[p] = {
-            ...attest,
+            ...parsedBundle,
             bundlePath: bundlePath,
             subjects: subjects
           };
@@ -359,8 +331,41 @@ export class Sigstore {
     }));
   }
 
-  // https://github.com/actions/toolkit/blob/d3ab50471b4ff1d1274dffb90ef9c5d9949b4886/packages/attest/src/attest.ts#L90
-  private static toAttestation(bundle: Bundle): Attestation {
+  private static async signPayload(artifact: Artifact, endpoints: Endpoints, timeout?: number, retries?: number): Promise<Bundle> {
+    const witnesses: Witness[] = [];
+
+    const signer = new FulcioSigner({
+      identityProvider: new CIContextProvider('sigstore'),
+      fulcioBaseURL: endpoints.fulcioURL,
+      timeout: timeout,
+      retry: retries
+    });
+
+    if (endpoints.rekorURL) {
+      witnesses.push(
+        new RekorWitness({
+          rekorBaseURL: endpoints.rekorURL,
+          fetchOnConflict: true,
+          timeout: timeout,
+          retry: retries
+        })
+      );
+    }
+
+    if (endpoints.tsaServerURL) {
+      witnesses.push(
+        new TSAWitness({
+          tsaBaseURL: endpoints.tsaServerURL,
+          timeout: timeout,
+          retry: retries
+        })
+      );
+    }
+
+    return new DSSEBundleBuilder({signer, witnesses}).create(artifact);
+  }
+
+  private static parseBundle(bundle: Bundle): ParsedBundle {
     let certBytes: Buffer;
     switch (bundle.verificationMaterial.content.$case) {
       case 'x509CertificateChain':
@@ -375,12 +380,12 @@ export class Sigstore {
 
     const signingCert = new X509Certificate(certBytes);
 
-    // Collect transparency log ID if available
+    // collect transparency log ID if available
     const tlogEntries = bundle.verificationMaterial.tlogEntries;
     const tlogID = tlogEntries.length > 0 ? tlogEntries[0].logIndex : undefined;
 
     return {
-      bundle: bundleToJSON(bundle),
+      payload: bundleToJSON(bundle),
       certificate: signingCert.toString(),
       tlogID: tlogID
     };
