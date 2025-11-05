@@ -14,7 +14,63 @@
  * limitations under the License.
  */
 
+import type {SerializedBundle} from '@sigstore/bundle';
+
+import {Subject} from '../intoto/intoto';
+
 export const FULCIO_URL = 'https://fulcio.sigstore.dev';
 export const REKOR_URL = 'https://rekor.sigstore.dev';
 export const TSASERVER_URL = 'https://timestamp.sigstore.dev';
 export const SEARCH_URL = 'https://search.sigstore.dev';
+
+export interface Endpoints {
+  fulcioURL: string;
+  rekorURL?: string;
+  tsaServerURL?: string;
+}
+
+export interface ParsedBundle {
+  payload: SerializedBundle;
+  certificate: string;
+  tlogID?: string;
+}
+
+export interface SignAttestationManifestsOpts {
+  imageNames: Array<string>;
+  imageDigest: string;
+  noTransparencyLog?: boolean;
+}
+
+export interface SignAttestationManifestsResult extends ParsedBundle {
+  imageName: string;
+}
+
+export interface VerifySignedManifestsOpts {
+  certificateIdentityRegexp: string;
+  retries?: number;
+}
+
+export interface VerifySignedManifestsResult {
+  cosignArgs: Array<string>;
+  signatureManifestDigest: string;
+}
+
+export interface SignProvenanceBlobsOpts {
+  localExportDir: string;
+  name?: string;
+  noTransparencyLog?: boolean;
+}
+
+export interface SignProvenanceBlobsResult extends ParsedBundle {
+  bundlePath: string;
+  subjects: Array<Subject>;
+}
+
+export interface VerifySignedArtifactsOpts {
+  certificateIdentityRegexp: string;
+}
+
+export interface VerifySignedArtifactsResult {
+  bundlePath: string;
+  cosignArgs: Array<string>;
+}
