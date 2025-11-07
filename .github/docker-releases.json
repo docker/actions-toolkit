@@ -1,14 +1,26 @@
 {
   "latest": {
-    "id": 252833798,
-    "tag_name": "v28.5.1",
-    "html_url": "https://github.com/moby/moby/releases/tag/v28.5.1",
+    "id": 259852183,
+    "tag_name": "v28.5.2",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.5.2",
     "assets": []
   },
   "edge": {
-    "id": 258289954,
-    "tag_name": "docker-v29.0.0-rc.2",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.0-rc.2",
+    "id": 260452080,
+    "tag_name": "docker-v29.0.0-rc.3",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.0-rc.3",
+    "assets": []
+  },
+  "v29.0.0-rc.3": {
+    "id": 260452080,
+    "tag_name": "docker-v29.0.0-rc.3",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.0-rc.3",
+    "assets": []
+  },
+  "v28.5.2": {
+    "id": 259852183,
+    "tag_name": "v28.5.2",
+    "html_url": "https://github.com/moby/moby/releases/tag/v28.5.2",
     "assets": []
   },
   "v29.0.0-rc.2": {
