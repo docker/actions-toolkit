@@ -17,7 +17,7 @@ on:
 
 jobs:
   generate:
-    uses: crazy-max/.github/.github/workflows/releases-json.yml@34fd436075cac6431d2036d5f6f1c3f3d4687ac5
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@2842b806167c9dbacf5f972e0fcf47204a99d987
     with:
       repository: crazy-max/undock
       artifact_name: undock-releases-json
