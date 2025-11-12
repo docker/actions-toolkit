@@ -80,7 +80,6 @@ export class Sigstore {
           await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
             // prettier-ignore
             const cosignArgs = [
-            '--verbose',
             'sign',
             '--yes',
             '--oidc-provider', 'github-actions',
@@ -92,7 +91,7 @@ export class Sigstore {
               cosignArgs.push('--tlog-upload=false');
             }
             core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
-            const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
+            const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
               ignoreReturnCode: true,
               silent: true,
               env: Object.assign({}, process.env, {
@@ -141,7 +140,6 @@ export class Sigstore {
       await core.group(`Verifying signature of ${attestationRef}`, async () => {
         // prettier-ignore
         const cosignArgs = [
-          '--verbose',
           'verify',
           '--experimental-oci11',
           '--new-bundle-format',
@@ -154,7 +152,7 @@ export class Sigstore {
         }
         core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
         for (let attempt = 0; attempt < retries; attempt++) {
-          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, attestationRef], {
+          const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
             ignoreReturnCode: true,
             silent: true,
             env: Object.assign({}, process.env, {
