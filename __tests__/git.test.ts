@@ -233,6 +233,181 @@ describe('ref', () => {
 
     expect(ref).toEqual('refs/heads/test');
   });
+
+  it('returns mocked detached branch ref checked out by SHA', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD, origin/feature-branch';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/feature-branch');
+  });
+
+  it('infers ref from local branch when detached HEAD returns only "HEAD"', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = 'refs/heads/main\nrefs/heads/develop';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/main');
+  });
+
+  it('infers ref from remote branch when no local branch contains HEAD', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = '';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/remotes/':
+          result = 'refs/remotes/origin/feature';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/feature');
+  });
+
+  it('infers ref from tag when no branch contains HEAD', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = '';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/remotes/':
+          result = '';
+          break;
+        case 'git tag --contains HEAD':
+          result = 'v1.0.0\nv0.9.0';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/tags/v1.0.0');
+  });
+
+  it('throws error when cannot infer ref from detached HEAD', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = '';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/remotes/':
+          result = '';
+          break;
+        case 'git tag --contains HEAD':
+          result = '';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    await expect(Git.ref()).rejects.toThrow('Cannot infer ref from detached HEAD');
+  });
+
+  it('handles remote ref without branch pattern when inferring from remote', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = '';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/remotes/':
+          result = 'refs/remotes/unusual-format';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/remotes/unusual-format');
+  });
 });
 
 describe('fullCommit', () => {
