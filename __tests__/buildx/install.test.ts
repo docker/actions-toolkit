@@ -25,6 +25,9 @@ import {Install} from '../../src/buildx/install';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-install-'));
 
+// needs GitHub REST API to get releases JSON
+jest.unmock('@actions/github');
+
 afterEach(function () {
   rimraf.sync(tmpDir);
 });
