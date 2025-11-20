@@ -23,6 +23,8 @@ import * as rimraf from 'rimraf';
 import {Context} from '../../src/context';
 import {Build} from '../../src/buildx/build';
 
+import {GitContextFormat} from '../../src/types/buildx/build';
+
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));
 const tmpName = path.join(tmpDir, '.tmpname-jest');
@@ -39,6 +41,45 @@ jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
 
 afterEach(() => {
   rimraf.sync(tmpDir);
+});
+
+describe('gitContext', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {
+      ...originalEnv,
+      DOCKER_GIT_CONTEXT_PR_HEAD_REF: ''
+    };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  // prettier-ignore
+  test.each([
+    // no format set
+    ['refs/heads/master', undefined, false, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['master', undefined, false, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', undefined, false, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/merge&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/tags/v1.0.0', undefined, false, 'https://github.com/docker/actions-toolkit.git?ref=refs/tags/v1.0.0&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', undefined, true, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    // query format
+    ['refs/heads/master', 'query', false, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['master', 'query', false, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', 'query', false, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/merge&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/tags/v1.0.0', 'query', false, 'https://github.com/docker/actions-toolkit.git?ref=refs/tags/v1.0.0&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', 'query', true, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
+    // fragment format
+    ['refs/heads/master', 'fragment', false, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['master', 'fragment', false, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', 'fragment', false, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/merge'],
+    ['refs/tags/v1.0.0', 'fragment', false, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    ['refs/pull/15/merge', 'fragment', true, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/head'],
+  ])('given %p and %p, should return %p', async (ref: string, format: string | undefined, prHeadRef: boolean, expected: string) => {
+    process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
+    const build = new Build();
+    expect(await build.gitContext(ref, '860c1904a1ce19322e91ac35af1ab07466440c37', format as GitContextFormat)).toEqual(expected);
+  });
 });
 
 describe('resolveImageID', () => {
