@@ -314,7 +314,9 @@ export class Install {
 
     if (!(await Install.qemuInstalled())) {
       await core.group('Installing QEMU', async () => {
-        await Exec.exec('brew', ['install', 'qemu'], {env: envs});
+        await Exec.exec('brew', ['tap-new', 'my/tap'], {env: envs});
+        await Exec.exec('brew', ['extract', 'qemu', 'my/tap', '--version=10.1.1'], {env: envs});
+        await Exec.exec('brew', ['install', 'my/tap/qemu@10.1.1'], {env: envs});
       });
     }
     const qemuBin = await Install.qemuBin();
