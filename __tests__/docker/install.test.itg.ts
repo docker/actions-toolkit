@@ -28,6 +28,8 @@ import {Exec} from '../../src/exec';
 const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
 
 beforeAll(async () => {
+  process.env.LIMA_START_ARGS = '--cpus 2 --memory 2';
+
   const undockInstall = new UndockInstall();
   const undockBinPath = await undockInstall.download('v0.10.0', true);
   await undockInstall.install(undockBinPath);

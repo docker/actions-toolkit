@@ -109,25 +109,24 @@ jobs:
               for (const os of ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-15-intel', 'windows-latest']) {
                 for (const test of tests) {
                   if (test === 'docker/install.test.itg.ts') {
-                    const allowFailure = os.startsWith('macos');
                     if (os !== 'windows-latest') {
-                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: '27.3.1', allow_failure: allowFailure });
-                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'master', allow_failure: allowFailure });
-                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'latest', allow_failure: allowFailure });
+                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: '27.3.1' });
+                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'master' });
+                      includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'latest' });
                     }
-                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v26.1.4', allow_failure: allowFailure });
-                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'latest', allow_failure: allowFailure });
-                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v29.0.0-rc.1', docker_install_channel: 'test', allow_failure: allowFailure });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v26.1.4' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'latest' });
+                    includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v29.0.0-rc.1', docker_install_channel: 'test' });
                     if (os === 'ubuntu-latest') {
-                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest', allow_failure: allowFailure });
-                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest', allow_failure: allowFailure });
+                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest' });
+                      includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest' });
                     }
                     if (os !== 'windows-latest') {
-                      includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'image', docker_install_version: 'latest', allow_failure: allowFailure });
+                      includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'image', docker_install_version: 'latest' });
                     }
-                    includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'archive', docker_install_version: 'latest', allow_failure: allowFailure });
+                    includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'archive', docker_install_version: 'latest' });
                   } else {
-                    includes.push({ os: os, test: test, allow_failure: false });
+                    includes.push({ os: os, test: test });
                   }
                 }
               }
@@ -141,7 +140,6 @@ jobs:
 
   test-itg:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.allow_failure }}
     needs:
       - prepare-itg
     strategy:
