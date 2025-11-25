@@ -1,8 +1,14 @@
 {
   "latest": {
-    "id": 264058657,
-    "tag_name": "docker-v29.0.3",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.3",
+    "id": 264940208,
+    "tag_name": "docker-v29.0.4",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.4",
+    "assets": []
+  },
+  "v29.0.4": {
+    "id": 264940208,
+    "tag_name": "docker-v29.0.4",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.0.4",
     "assets": []
   },
   "v29.0.3": {
