@@ -424,4 +424,34 @@ export class Bake {
     }
     return false;
   }
+
+  public static hasProvenanceAttestation(def: BakeDefinition): boolean {
+    return Bake.hasAttestationType('provenance', Bake.attestations(def));
+  }
+
+  public static hasSBOMAttestation(def: BakeDefinition): boolean {
+    return Bake.hasAttestationType('sbom', Bake.attestations(def));
+  }
+
+  public static hasAttestationType(name: string, attestations: Array<AttestEntry>): boolean {
+    for (const attestation of attestations) {
+      if (attestation.type == name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static attestations(def: BakeDefinition): Array<AttestEntry> {
+    const attestations = new Array<AttestEntry>();
+    for (const key in def.target) {
+      const target = def.target[key];
+      if (target.attest) {
+        for (const attest of target.attest) {
+          attestations.push(Bake.parseAttestEntry(attest));
+        }
+      }
+    }
+    return attestations;
+  }
 }

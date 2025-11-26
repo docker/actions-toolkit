@@ -485,3 +485,113 @@ describe('hasGitAuthTokenSecret', () => {
     expect(Bake.hasGitAuthTokenSecret(def)).toEqual(expected);
   });
 });
+
+describe('hasProvenanceAttestation', () => {
+  // prettier-ignore
+  test.each([
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "provenance",
+                "mode": "max"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      true
+    ],
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "sbom"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      false
+    ],
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "sbom"
+              },
+              {
+                "type": "provenance",
+                "mode": "max"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      true
+    ]
+  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+    expect(Bake.hasProvenanceAttestation(def)).toEqual(expected);
+  });
+});
+
+describe('hasSBOMAttestation', () => {
+  // prettier-ignore
+  test.each([
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "provenance",
+                "mode": "max"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      false
+    ],
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "sbom"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      true
+    ],
+    [
+      {
+        "target": {
+          "build": {
+            "attest": [
+              {
+                "type": "sbom"
+              },
+              {
+                "type": "provenance",
+                "mode": "max"
+              }
+            ]
+          },
+        }
+      } as unknown as BakeDefinition,
+      true
+    ]
+  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+    expect(Bake.hasSBOMAttestation(def)).toEqual(expected);
+  });
+});
