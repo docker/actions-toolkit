@@ -58,11 +58,26 @@ export class GitHub {
   }
 
   public async releases(name: string, opts: GitHubContentOpts): Promise<Record<string, GitHubRelease>> {
+    let releases: Record<string, GitHubRelease>;
+    try {
+      // try without token first
+      releases = await this.releasesRaw(name, opts);
+    } catch (error) {
+      if (!this.githubToken) {
+        throw error;
+      }
+      // try with token
+      releases = await this.releasesRaw(name, opts, this.githubToken);
+    }
+    return releases;
+  }
+
+  public async releasesRaw(name: string, opts: GitHubContentOpts, token?: string): Promise<Record<string, GitHubRelease>> {
     const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
     const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
     // prettier-ignore
-    const httpResp: httpm.HttpClientResponse = await http.get(url, this.githubToken ? {
-      Authorization: `token ${this.githubToken}`
+    const httpResp: httpm.HttpClientResponse = await http.get(url, token ? {
+      Authorization: `token ${token}`
     } : undefined);
     const dt = await httpResp.readBody();
     const statusCode = httpResp.message.statusCode || 500;
