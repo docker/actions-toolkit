@@ -122,6 +122,11 @@ export class Git {
 
   private static async getDetachedRef(): Promise<string> {
     const res = await Git.exec(['show', '-s', '--pretty=%D']);
+    core.debug(`detached HEAD ref: ${res}`);
+
+    if (res === 'HEAD') {
+      return await Git.inferRefFromHead();
+    }
 
     // Can be "HEAD, <tagname>" or "grafted, HEAD, <tagname>"
     const refMatch = res.match(/^(grafted, )?HEAD, (.*)$/);
@@ -137,16 +142,22 @@ export class Git {
       return `refs/tags/${ref.split(':')[1].trim()}`;
     }
 
-    // Branch refs are formatted as "<origin>/<branch-name>, <branch-name>"
+    // Pull request merge refs are formatted as "pull/<number>/<state>"
+    const prMatch = ref.match(/^pull\/\d+\/(head|merge)$/);
+    if (prMatch) {
+      return `refs/${ref}`;
+    }
+
+    // Branch refs can be formatted as "<origin>/<branch-name>, <branch-name>"
     const branchMatch = ref.match(/^[^/]+\/[^/]+, (.+)$/);
     if (branchMatch) {
       return `refs/heads/${branchMatch[1].trim()}`;
     }
 
-    // Pull request merge refs are formatted as "pull/<number>/<state>"
-    const prMatch = ref.match(/^pull\/\d+\/(head|merge)$/);
-    if (prMatch) {
-      return `refs/${ref}`;
+    // Branch refs checked out by its latest SHA can be formatted as "<origin>/<branch-name>"
+    const shaBranchMatch = ref.match(/^[^/]+\/(.+)$/);
+    if (shaBranchMatch) {
+      return `refs/heads/${shaBranchMatch[1].trim()}`;
     }
 
     throw new Error(`Unsupported detached HEAD ref in "${res}"`);
@@ -162,6 +173,43 @@ export class Git {
       }
       return res.stdout.trim();
     });
+  }
+
+  private static async inferRefFromHead(): Promise<string> {
+    const localRef = await Git.findContainingRef('refs/heads/');
+    if (localRef) {
+      return localRef;
+    }
+
+    const remoteRef = await Git.findContainingRef('refs/remotes/');
+    if (remoteRef) {
+      const remoteMatch = remoteRef.match(/^refs\/remotes\/[^/]+\/(.+)$/);
+      if (remoteMatch) {
+        return `refs/heads/${remoteMatch[1]}`;
+      }
+      return remoteRef;
+    }
+
+    const tagRef = await Git.exec(['tag', '--contains', 'HEAD']);
+    const [firstTag] = tagRef
+      .split('\n')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    if (firstTag) {
+      return `refs/tags/${firstTag}`;
+    }
+
+    throw new Error(`Cannot infer ref from detached HEAD`);
+  }
+
+  private static async findContainingRef(scope: string): Promise<string | undefined> {
+    const refs = await Git.exec(['for-each-ref', '--format=%(refname)', '--contains', 'HEAD', '--sort=-committerdate', scope]);
+
+    const [first] = refs
+      .split('\n')
+      .map(r => r.trim())
+      .filter(r => r.length > 0);
+    return first;
   }
 
   public static async commitDate(ref: string): Promise<Date> {
