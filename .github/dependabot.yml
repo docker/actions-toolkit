@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    open-pull-requests-limit: 20
     directory: "/"
     schedule:
       interval: "daily"
@@ -8,6 +9,7 @@ updates:
       - "dependencies"
       - "bot"
   - package-ecosystem: "npm"
+    open-pull-requests-limit: 20
     directory: "/"
     schedule:
       interval: "daily"
