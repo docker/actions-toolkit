@@ -269,22 +269,12 @@ export class Install {
     await io.mkdirP(limaDir);
     const dockerHost = `unix://${limaDir}/docker.sock`;
 
-    // avoid brew to auto update and upgrade unrelated packages.
-    let envs = Object.assign({}, process.env, {
-      HOMEBREW_NO_AUTO_UPDATE: '1',
-      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
-    }) as {
-      [key: string]: string;
-    };
-
     if (!(await Install.limaInstalled())) {
-      await core.group('Installing lima', async () => {
-        await Exec.exec('brew', ['install', 'lima'], {env: envs});
-      });
+      await this.brewInstall('lima');
     }
 
     await core.group('Lima version', async () => {
-      await Exec.exec('lima', ['--version'], {env: envs});
+      await Exec.exec('lima', ['--version']);
     });
 
     await core.group('Creating lima config', async () => {
@@ -313,9 +303,8 @@ export class Install {
     });
 
     if (!(await Install.qemuInstalled())) {
-      await core.group('Installing QEMU', async () => {
-        await Exec.exec('brew', ['install', 'qemu'], {env: envs});
-      });
+      // FIXME: QEMU 10.1.2 seems to break on GitHub runners. Pin to 10.1.1 in the meantime: https://github.com/docker/actions-toolkit/issues/852
+      await this.brewInstall('qemu', '4a7a2dd5d44d068b3e89ebed5be7b4ada315d221');
     }
     const qemuBin = await Install.qemuBin();
     await core.group('QEMU version', async () => {
@@ -324,7 +313,7 @@ export class Install {
 
     // lima might already be started on the runner so env var added in download
     // method is not expanded to the running process.
-    envs = Object.assign({}, envs, {
+    const envs = Object.assign({}, process.env, {
       PATH: `${this.toolDir}:${process.env.PATH}`
     }) as {
       [key: string]: string;
@@ -750,5 +739,73 @@ EOF`,
       digest: configDigest
     });
     return <Image>JSON.parse(blob);
+  }
+
+  private async brewInstall(packageName: string, revision?: string): Promise<void> {
+    // avoid brew to auto update and upgrade unrelated packages.
+    const envs = Object.assign({}, process.env, {
+      HOMEBREW_NO_AUTO_UPDATE: '1',
+      HOMEBREW_NO_INSTALL_UPGRADE: '1',
+      HOMEBREW_NO_INSTALL_CLEANUP: '1'
+    }) as {
+      [key: string]: string;
+    };
+
+    await core.group(`Installing ${packageName}`, async () => {
+      if (!revision) {
+        await Exec.exec('brew', ['install', packageName]);
+      } else {
+        const dockerTap = 'docker-actions-toolkit/tap';
+        const hasDockerTap = await Exec.getExecOutput('brew', ['tap'], {
+          ignoreReturnCode: true,
+          silent: true,
+          env: envs
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr);
+          }
+          for (const line of res.stdout.trim().split('\n')) {
+            if (line.includes(dockerTap)) {
+              return true;
+            }
+          }
+          return false;
+        });
+        if (!hasDockerTap) {
+          await Exec.exec('brew', ['tap-new', dockerTap], {env: envs});
+        }
+        const brewRepoTapPath = await Exec.getExecOutput('brew', ['--repo', dockerTap], {
+          ignoreReturnCode: true,
+          silent: true,
+          env: envs
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr);
+          }
+          return res.stdout.trim();
+        });
+        const formulaURL = `https://raw.githubusercontent.com/Homebrew/homebrew-core/${revision}/Formula/${packageName.charAt(0)}/${packageName}.rb`;
+        await tc.downloadTool(formulaURL, path.join(brewRepoTapPath, 'Formula', `${packageName}.rb`));
+        const hasFormulaInstalled = await Exec.getExecOutput('brew', ['ls', '-1'], {
+          ignoreReturnCode: true,
+          silent: true,
+          env: envs
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr);
+          }
+          for (const line of res.stdout.trim().split('\n')) {
+            if (line.trim() == packageName) {
+              return true;
+            }
+          }
+          return false;
+        });
+        if (hasFormulaInstalled) {
+          await Exec.exec('brew', ['uninstall', packageName, '--ignore-dependencies'], {env: envs});
+        }
+        await Exec.exec('brew', ['install', `${dockerTap}/${packageName}`], {env: envs});
+      }
+    });
   }
 }
