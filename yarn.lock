@@ -81,6 +81,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@actions/exec@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@actions/exec@npm:2.0.0"
+  dependencies:
+    "@actions/io": "npm:^2.0.0"
+  checksum: 10/61f84e3920eaa898edff3a4de97d353bb8f4379ced229128d7c945cd18c02e0d8d33a22629cec7bb7797a5f8879952ee9d291921ffd02bc849e6a7d4e2e3a52a
+  languageName: node
+  linkType: hard
+
 "@actions/github@npm:^6.0.1":
   version: 6.0.1
   resolution: "@actions/github@npm:6.0.1"
@@ -1131,7 +1140,7 @@ __metadata:
     "@actions/artifact": "npm:^4.0.0"
     "@actions/cache": "npm:^4.1.0"
     "@actions/core": "npm:^1.11.1"
-    "@actions/exec": "npm:^1.1.1"
+    "@actions/exec": "npm:^2.0.0"
     "@actions/github": "npm:^6.0.1"
     "@actions/http-client": "npm:^3.0.0"
     "@actions/io": "npm:^2.0.0"
