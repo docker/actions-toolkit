@@ -303,8 +303,7 @@ export class Install {
     });
 
     if (!(await Install.qemuInstalled())) {
-      // FIXME: QEMU 10.1.2 seems to break on GitHub runners. Pin to 10.1.1 in the meantime: https://github.com/docker/actions-toolkit/issues/852
-      await this.brewInstall('qemu', '4a7a2dd5d44d068b3e89ebed5be7b4ada315d221');
+      await this.brewInstall('qemu');
     }
     const qemuBin = await Install.qemuBin();
     await core.group('QEMU version', async () => {
