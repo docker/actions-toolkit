@@ -32,7 +32,7 @@ import * as github from '@actions/github';
 import {GitHub as Octokit} from '@actions/github/lib/utils';
 import {Context} from '@actions/github/lib/context';
 import * as httpm from '@actions/http-client';
-import {TransferProgressEvent} from '@azure/core-http';
+import {TransferProgressEvent} from '@azure/core-rest-pipeline';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
