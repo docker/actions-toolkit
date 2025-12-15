@@ -46,7 +46,6 @@ describe('isAvailable', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const undock = new Undock();
     await undock.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`undock`, [], {
       silent: true,
       ignoreReturnCode: true

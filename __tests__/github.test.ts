@@ -141,6 +141,7 @@ describe('actionsRuntimeToken', () => {
   it('malformed', async () => {
     process.env.ACTIONS_RUNTIME_TOKEN = 'foo';
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       GitHub.actionsRuntimeToken;
     }).toThrow();
   });

@@ -85,7 +85,7 @@ export class BuildKit {
       if (!bkversion) {
         try {
           bkversion = await this.getVersionWithinImage(node.name || '');
-        } catch (e) {
+        } catch {
           core.debug(`BuildKit.versionSatisfies ${node.name}: can't get version`);
           return false;
         }

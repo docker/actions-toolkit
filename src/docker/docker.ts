@@ -60,7 +60,7 @@ export class Docker {
         silent: true
       });
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

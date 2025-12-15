@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
+import fs = require('fs');
 
 module.exports = results => {
   const allSkipped = results.testResults.every(result => {

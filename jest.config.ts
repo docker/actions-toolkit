@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import fs = require('fs');
+import os = require('os');
+import path = require('path');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
 

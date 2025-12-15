@@ -70,6 +70,9 @@
     "tmp": "^0.2.5"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.0.0",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
     "@sigstore/rekor-types": "^3.0.0",
     "@types/gunzip-maybe": "^1.4.3",
     "@types/he": "^1.2.3",

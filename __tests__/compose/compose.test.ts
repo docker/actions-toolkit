@@ -49,7 +49,6 @@ describe('isAvailable', () => {
       standalone: false
     });
     await compose.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['compose'], {
       silent: true,
       ignoreReturnCode: true
@@ -61,7 +60,6 @@ describe('isAvailable', () => {
       standalone: true
     });
     await compose.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`compose`, [], {
       silent: true,
       ignoreReturnCode: true

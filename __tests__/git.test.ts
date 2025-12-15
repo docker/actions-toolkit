@@ -57,7 +57,7 @@ describe('isInsideWorkTree', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
       await Git.isInsideWorkTree();
-    } catch (err) {
+    } catch {
       // noop
     }
     expect(execSpy).toHaveBeenCalledWith(`git`, ['rev-parse', '--is-inside-work-tree'], {
@@ -81,7 +81,7 @@ describe('remoteURL', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
       await Git.remoteURL();
-    } catch (err) {
+    } catch {
       // noop
     }
     expect(execSpy).toHaveBeenCalledWith(`git`, ['remote', 'get-url', 'origin'], {
@@ -415,7 +415,7 @@ describe('fullCommit', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
       await Git.fullCommit();
-    } catch (err) {
+    } catch {
       // noop
     }
     expect(execSpy).toHaveBeenCalledWith(`git`, ['show', '--format=%H', 'HEAD', '--quiet', '--'], {
@@ -430,7 +430,7 @@ describe('shortCommit', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
       await Git.shortCommit();
-    } catch (err) {
+    } catch {
       // noop
     }
     expect(execSpy).toHaveBeenCalledWith(`git`, ['show', '--format=%h', 'HEAD', '--quiet', '--'], {
@@ -445,7 +445,7 @@ describe('tag', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
       await Git.tag();
-    } catch (err) {
+    } catch {
       // noop
     }
     expect(execSpy).toHaveBeenCalledWith(`git`, ['tag', '--points-at', 'HEAD', '--sort', '-version:creatordate'], {
