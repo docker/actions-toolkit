@@ -12,9 +12,9 @@
     "prettier:fix": "prettier --write \"./**/*.ts\"",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:itg": "jest -c jest.config.itg.ts --runInBand --detectOpenHandles",
-    "test:itg-list": "jest -c jest.config.itg.ts --listTests",
-    "test:itg-coverage": "jest --coverage -c jest.config.itg.ts --runInBand --detectOpenHandles"
+    "test:itg": "jest -c jest.config.itg.js --runInBand",
+    "test:itg-list": "jest -c jest.config.itg.js --listTests",
+    "test:itg-coverage": "jest -c jest.config.itg.js --coverage --runInBand"
   },
   "repository": {
     "type": "git",

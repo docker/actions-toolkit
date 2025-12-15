@@ -14,18 +14,37 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-actions-toolkit-'));
+
+process.env = Object.assign({}, process.env, {
+  TEMP: tmpDir,
+  GITHUB_REPOSITORY: 'docker/actions-toolkit',
+  GITHUB_RUN_ATTEMPT: 2,
+  GITHUB_RUN_ID: 2188748038,
+  GITHUB_RUN_NUMBER: 15,
+  RUNNER_TEMP: path.join(tmpDir, 'runner-temp'),
+  RUNNER_TOOL_CACHE: path.join(tmpDir, 'runner-tool-cache')
+});
+
 module.exports = {
+  clearMocks: true,
   testEnvironment: 'node',
   moduleFileExtensions: ['js', 'ts'],
   setupFiles: ['dotenv/config'],
-  testMatch: ['**/*.test.itg.ts'],
-  testTimeout: 1800000, // 30 minutes
+  testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest'
   },
   moduleNameMapper: {
     '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
   },
-  testResultsProcessor: './__tests__/testResultsProcessor.ts',
-  verbose: false
+  collectCoverageFrom: ['src/**/{!(index.ts),}.ts'],
+  coveragePathIgnorePatterns: ['lib/', 'node_modules/', '__mocks__/', '__tests__/'],
+  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.js',
+  verbose: true
 };
