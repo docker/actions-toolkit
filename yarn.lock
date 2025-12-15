@@ -442,22 +442,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/storage-blob@npm:^12.15.0":
-  version: 12.17.0
-  resolution: "@azure/storage-blob@npm:12.17.0"
-  dependencies:
-    "@azure/abort-controller": "npm:^1.0.0"
-    "@azure/core-http": "npm:^3.0.0"
-    "@azure/core-lro": "npm:^2.2.0"
-    "@azure/core-paging": "npm:^1.1.1"
-    "@azure/core-tracing": "npm:1.0.0-preview.13"
-    "@azure/logger": "npm:^1.0.0"
-    events: "npm:^3.0.0"
-    tslib: "npm:^2.2.0"
-  checksum: 10/6a9279103dae129bd0374a59e2468f45e09e11491b2fdede737956f53c0d42e9e9e06db23d3e619033cfa459a786418d84adaf440b767ea3ea03f5bfd206c8af
-  languageName: node
-  linkType: hard
-
 "@azure/storage-blob@npm:^12.29.1":
   version: 12.29.1
   resolution: "@azure/storage-blob@npm:12.29.1"
@@ -1271,7 +1255,7 @@ __metadata:
     "@actions/http-client": "npm:^3.0.0"
     "@actions/io": "npm:^2.0.0"
     "@actions/tool-cache": "npm:^2.0.2"
-    "@azure/storage-blob": "npm:^12.15.0"
+    "@azure/storage-blob": "npm:^12.29.1"
     "@octokit/core": "npm:^5.2.2"
     "@octokit/plugin-rest-endpoint-methods": "npm:^10.4.1"
     "@sigstore/bundle": "npm:^4.0.0"
