@@ -18,7 +18,6 @@
     "./__mocks__/**/*",
     "./__tests__/**/*",
     "./lib/**/*",
-    "node_modules",
-    "jest.config*.ts"
+    "node_modules"
   ]
 }
