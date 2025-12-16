@@ -27,7 +27,10 @@ describe('download', () => {
     'install cosign %s', async (version) => {
       await expect((async () => {
         const install = new Install();
-        const toolPath = await install.download(version);
+        const toolPath = await install.download({
+          version: version,
+          verifySignature: true
+        });
         if (!fs.existsSync(toolPath)) {
           throw new Error('toolPath does not exist');
         }

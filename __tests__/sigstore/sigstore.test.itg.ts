@@ -30,7 +30,9 @@ jest.unmock('@actions/github');
 
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();
-  const cosignBinPath = await cosignInstall.download('v3.0.2', true);
+  const cosignBinPath = await cosignInstall.download({
+    version: 'v3.0.2'
+  });
   await cosignInstall.install(cosignBinPath);
 }, 100000);
 

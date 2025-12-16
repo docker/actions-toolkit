@@ -38,7 +38,7 @@ describe('download', () => {
   ])(
   'acquires %p of cosign', async (version) => {
     const install = new Install();
-    const toolPath = await install.download(version);
+    const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
     const cosignBin = await install.install(toolPath, tmpDir);
     expect(fs.existsSync(cosignBin)).toBe(true);
@@ -52,7 +52,7 @@ describe('download', () => {
   ])(
   'acquires %p of cosign with cache', async (version) => {
     const install = new Install();
-    const toolPath = await install.download(version);
+    const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
 
@@ -63,7 +63,10 @@ describe('download', () => {
   ])(
   'acquires %p of cosign without cache', async (version) => {
     const install = new Install();
-    const toolPath = await install.download(version, true);
+    const toolPath = await install.download({
+      version: version,
+      ghaNoCache: true
+    });
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
 
@@ -80,7 +83,9 @@ describe('download', () => {
     jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
     jest.spyOn(osm, 'arch').mockImplementation(() => arch);
     const install = new Install();
-    const cosignBin = await install.download('latest');
+    const cosignBin = await install.download({
+      version: 'latest'
+    });
     expect(fs.existsSync(cosignBin)).toBe(true);
   }, 100000);
 });
