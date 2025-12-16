@@ -29,7 +29,6 @@ describe('isAvailable', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const cosign = new Cosign();
     await cosign.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`cosign`, [], {
       silent: true,
       ignoreReturnCode: true

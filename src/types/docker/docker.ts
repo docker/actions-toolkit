@@ -69,7 +69,6 @@ export interface ContextInfo {
   Name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Metadata: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Endpoints: Record<string, EndpointInfo>;
   TLSMaterial: Record<string, Array<string>>;
   Storage: StorageInfo;

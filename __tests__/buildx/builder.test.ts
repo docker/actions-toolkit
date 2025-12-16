@@ -49,7 +49,6 @@ describe('exists', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const builder = new Builder();
     await builder.exists('foo');
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx', 'inspect', 'foo'], {
       silent: true,
       ignoreReturnCode: true

@@ -94,7 +94,6 @@ describe('download', () => {
 });
 
 describe('build', () => {
-  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds refs/pull/648/head', async () => {
     const install = new Install();
     const toolPath = await install.build('https://github.com/docker/buildx.git#refs/pull/648/head');
@@ -103,7 +102,6 @@ describe('build', () => {
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 
-  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
     const install = new Install();
     const toolPath = await install.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14');

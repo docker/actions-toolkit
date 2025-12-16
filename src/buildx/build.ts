@@ -169,7 +169,7 @@ export class Build {
     }
     try {
       return core.getBooleanInput(name) ? `builder-id=${GitHub.workflowRunURL(true)}` : 'false';
-    } catch (err) {
+    } catch {
       // not a valid boolean, so we assume it's a string
       return Build.resolveProvenanceAttrs(input);
     }
@@ -302,7 +302,7 @@ export class Build {
           // https://github.com/docker/buildx/blob/8abef5908705e49f7ba88ef8c957e1127b597a2a/util/buildflags/attests.go#L13-L21
           const v = Util.parseBool(attr);
           res.push(`disabled=${!v}`);
-        } catch (err) {
+        } catch {
           res.push(attr);
         }
       }

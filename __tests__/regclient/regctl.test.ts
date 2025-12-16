@@ -85,7 +85,6 @@ describe('isAvailable', () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     const regctl = new Regctl();
     await regctl.isAvailable();
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(execSpy).toHaveBeenCalledWith(`regctl`, [], {
       silent: true,
       ignoreReturnCode: true

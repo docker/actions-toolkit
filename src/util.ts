@@ -82,7 +82,7 @@ export class Util {
     let url;
     try {
       url = new URL(urlStr);
-    } catch (e) {
+    } catch {
       return false;
     }
     return url.protocol === 'http:' || url.protocol === 'https:';
@@ -115,10 +115,10 @@ export class Util {
     };
   }
 
-  public static isDirectory(p) {
+  public static isDirectory(p: string) {
     try {
       return fs.lstatSync(p).isDirectory();
-    } catch (_) {
+    } catch {
       // noop
     }
     return false;

@@ -148,7 +148,7 @@ export class Buildx {
     let url: URL;
     try {
       url = new URL(endpoint);
-    } catch (e) {
+    } catch {
       return [];
     }
     if (url.protocol != 'tcp:') {
@@ -280,7 +280,7 @@ export class Buildx {
     const fnGitURL = function (inp: string): GitURL | undefined {
       try {
         return Git.parseURL(inp);
-      } catch (e) {
+      } catch {
         // noop
       }
     };
