@@ -19,6 +19,9 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
+import {bundleFromJSON, SerializedBundle} from '@sigstore/bundle';
+import * as tuf from '@sigstore/tuf';
+import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -188,24 +191,32 @@ export class Install {
   }
 
   private async verifySignature(cosignBinPath: string, downloadURL: string): Promise<void> {
-    const cosignBootstrapPath = path.join(Context.tmpDir(), `cosign-bootstrap${os.platform() == 'win32' ? '.exe' : ''}`);
-    fs.copyFileSync(cosignBinPath, cosignBootstrapPath);
-    fs.chmodSync(cosignBootstrapPath, '0755');
-
     const bundleURL = `${downloadURL}.sigstore.json`;
     core.info(`Downloading keyless verification bundle at ${bundleURL}`);
     const bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
     core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
 
-    core.info(`Verifying cosign binary signature with keyless verification bundle`);
-    // prettier-ignore
-    await Exec.exec(cosignBootstrapPath, [
-      'verify-blob',
-      '--certificate-identity', 'keyless@projectsigstore.iam.gserviceaccount.com',
-      '--certificate-oidc-issuer', 'https://accounts.google.com',
-      '--bundle', bundlePath,
-      cosignBinPath
-    ]);
+    core.info(`Verifying keyless verification bundle signature`);
+    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
+    const bundle = bundleFromJSON(parsedBundle);
+
+    core.info(`Fetching Sigstore TUF trusted root metadata`);
+    const trustedRoot = await tuf.getTrustedRoot();
+    const trustMaterial = toTrustMaterial(trustedRoot);
+
+    try {
+      core.info(`Verifying cosign binary signature`);
+      const signedEntity = toSignedEntity(bundle, fs.readFileSync(cosignBinPath));
+      const verifier = new Verifier(trustMaterial);
+      const signer = verifier.verify(signedEntity, {
+        subjectAlternativeName: 'keyless@projectsigstore.iam.gserviceaccount.com',
+        extensions: {issuer: 'https://accounts.google.com'}
+      });
+      core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
+      core.info(`Cosign binary signature verified!`);
+    } catch (err) {
+      throw new Error(`Failed to verify cosign binary signature: ${err}`);
+    }
   }
 
   private filename(): string {
