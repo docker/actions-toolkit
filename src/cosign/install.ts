@@ -19,6 +19,9 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
+import {bundleFromJSON, SerializedBundle} from '@sigstore/bundle';
+import * as tuf from '@sigstore/tuf';
+import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -34,6 +37,13 @@ import {DownloadVersion} from '../types/cosign/cosign';
 import {GitHubRelease} from '../types/github';
 import {dockerfileContent} from './dockerfile';
 
+export interface DownloadOpts {
+  version: string;
+  ghaNoCache?: boolean;
+  skipState?: boolean;
+  verifySignature?: boolean;
+}
+
 export interface InstallOpts {
   githubToken?: string;
   buildx?: Buildx;
@@ -48,8 +58,8 @@ export class Install {
     this.buildx = opts?.buildx || new Buildx();
   }
 
-  public async download(v: string, ghaNoCache?: boolean, skipState?: boolean): Promise<string> {
-    const version: DownloadVersion = await Install.getDownloadVersion(v);
+  public async download(opts: DownloadOpts): Promise<string> {
+    const version: DownloadVersion = await Install.getDownloadVersion(opts.version);
     core.debug(`Install.download version: ${version.version}`);
 
     const release: GitHubRelease = await Install.getRelease(version, this.githubToken);
@@ -68,7 +78,7 @@ export class Install {
       htcVersion: vspec,
       baseCacheDir: path.join(os.homedir(), '.bin'),
       cacheFile: os.platform() == 'win32' ? 'cosign.exe' : 'cosign',
-      ghaNoCache: ghaNoCache
+      ghaNoCache: opts.ghaNoCache
     });
 
     const cacheFoundPath = await installCache.find();
@@ -83,7 +93,11 @@ export class Install {
     const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
-    const cacheSavePath = await installCache.save(htcDownloadPath, skipState);
+    if (opts.verifySignature && semver.satisfies(vspec, '>=3.0.1')) {
+      await this.verifySignature(htcDownloadPath, downloadURL);
+    }
+
+    const cacheSavePath = await installCache.save(htcDownloadPath, opts.skipState);
     core.info(`Cached to ${cacheSavePath}`);
     return cacheSavePath;
   }
@@ -174,6 +188,35 @@ export class Install {
 
     // prettier-ignore
     return await new Buildx({standalone: buildStandalone}).getCommand(args);
+  }
+
+  private async verifySignature(cosignBinPath: string, downloadURL: string): Promise<void> {
+    const bundleURL = `${downloadURL}.sigstore.json`;
+    core.info(`Downloading keyless verification bundle at ${bundleURL}`);
+    const bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
+    core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
+
+    core.info(`Verifying keyless verification bundle signature`);
+    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
+    const bundle = bundleFromJSON(parsedBundle);
+
+    core.info(`Fetching Sigstore TUF trusted root metadata`);
+    const trustedRoot = await tuf.getTrustedRoot();
+    const trustMaterial = toTrustMaterial(trustedRoot);
+
+    try {
+      core.info(`Verifying cosign binary signature`);
+      const signedEntity = toSignedEntity(bundle, fs.readFileSync(cosignBinPath));
+      const verifier = new Verifier(trustMaterial);
+      const signer = verifier.verify(signedEntity, {
+        subjectAlternativeName: 'keyless@projectsigstore.iam.gserviceaccount.com',
+        extensions: {issuer: 'https://accounts.google.com'}
+      });
+      core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
+      core.info(`Cosign binary signature verified!`);
+    } catch (err) {
+      throw new Error(`Failed to verify cosign binary signature: ${err}`);
+    }
   }
 
   private filename(): string {
