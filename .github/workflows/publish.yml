@@ -1,5 +1,9 @@
 name: publish
 
+permissions:
+  id-token: write  # required for OIDC
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -9,17 +13,40 @@ on:
     tags:
       - 'v*'
 
+env:
+  NODE_VERSION: "24" # at least Node 24 is required for Trusted Publishing with OIDC
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        name: Checkout
+        uses: actions/checkout@v6
+      -
+        name: Enable corepack
+        run: |
+          corepack enable
+          yarn --version
+      -
+        name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      -
+        name: Print versions
+        run: |
+          node --version
+          npm --version
+          yarn --version
+      -
+        name: Build
+        run: |
+          yarn install
+          yarn run build
       -
         name: Publish
-        uses: docker/bake-action@v6
-        with:
-          targets: publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        run: |
+          npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
+          npm publish --provenance --access public

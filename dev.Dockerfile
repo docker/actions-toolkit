@@ -101,24 +101,3 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM scratch AS test-coverage
 COPY --from=test /tmp/coverage /
-
-FROM base AS publish
-ARG GITHUB_REF
-RUN --mount=type=bind,target=.,rw \
-    --mount=type=cache,target=/src/.yarn/cache \
-    --mount=type=cache,target=/src/node_modules \
-    --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN <<EOT
-  set -e
-  if ! [[ $GITHUB_REF =~ ^refs/tags/v ]]; then
-    echo "GITHUB_REF is not a tag"
-    exit 1
-  fi
-  yarn install
-  yarn run build
-  npm config set //registry.npmjs.org/:_authToken $NODE_AUTH_TOKEN
-  npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
-  npm publish --access public
-
-  # FIXME: Can't publish with yarn berry atm: https://github.com/changesets/changesets/pull/674
-  #yarn publish --no-git-tag-version --new-version ${GITHUB_REF#refs/tags/v}
-EOT
