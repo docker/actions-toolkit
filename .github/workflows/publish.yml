@@ -34,6 +34,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
+          package-manager-cache: false
       -
         name: Print versions
         run: |
@@ -50,3 +51,12 @@ jobs:
         run: |
           npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
           npm publish --provenance --access public
+      -
+        name: Create Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b  # v2.5.0
+        with:
+          draft: true
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
