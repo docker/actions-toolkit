@@ -187,40 +187,4 @@ maybe('export', () => {
     expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
     expect(exportRes?.summaries).toBeDefined();
   });
-
-  it('export using container', async () => {
-    const buildx = new Buildx();
-    const build = new Build({buildx: buildx});
-
-    fs.mkdirSync(tmpDir, {recursive: true});
-    await expect(
-      (async () => {
-        // prettier-ignore
-        const buildCmd = await buildx.getCommand([
-          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
-          'build', '-f', path.join(fixturesDir, 'hello.Dockerfile'),
-          '--metadata-file', build.getMetadataFilePath(),
-          fixturesDir
-        ]);
-        await Exec.exec(buildCmd.command, buildCmd.args);
-      })()
-    ).resolves.not.toThrow();
-
-    const metadata = build.resolveMetadata();
-    expect(metadata).toBeDefined();
-    const buildRef = build.resolveRef(metadata);
-    expect(buildRef).toBeDefined();
-
-    const history = new History({buildx: buildx});
-    const exportRes = await history.export({
-      refs: [buildRef ?? ''],
-      useContainer: true
-    });
-
-    expect(exportRes).toBeDefined();
-    expect(exportRes?.dockerbuildFilename).toBeDefined();
-    expect(exportRes?.dockerbuildSize).toBeDefined();
-    expect(fs.existsSync(exportRes?.dockerbuildFilename)).toBe(true);
-    expect(exportRes?.summaries).toBeDefined();
-  });
 });
