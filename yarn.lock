@@ -1186,7 +1186,7 @@ __metadata:
     "@sigstore/rekor-types": "npm:^3.0.0"
     "@sigstore/sign": "npm:^4.0.1"
     "@sigstore/tuf": "npm:^4.0.0"
-    "@sigstore/verify": "npm:^3.0.0"
+    "@sigstore/verify": "npm:^3.1.0"
     "@types/gunzip-maybe": "npm:^1.4.3"
     "@types/he": "npm:^1.2.3"
     "@types/js-yaml": "npm:^4.0.9"
@@ -2247,6 +2247,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sigstore/core@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@sigstore/core@npm:3.1.0"
+  checksum: 10/c7a2e2d32f52494b40d9c469bc2241cc5d14d5f93fa028f099dcfe403443713f90ef3178684ee11c32e078a4b9fad79500746dfef10f10044c7fa00c909f3760
+  languageName: node
+  linkType: hard
+
 "@sigstore/protobuf-specs@npm:^0.5.0":
   version: 0.5.0
   resolution: "@sigstore/protobuf-specs@npm:0.5.0"
@@ -2285,14 +2292,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/verify@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@sigstore/verify@npm:3.0.0"
+"@sigstore/verify@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@sigstore/verify@npm:3.1.0"
   dependencies:
     "@sigstore/bundle": "npm:^4.0.0"
-    "@sigstore/core": "npm:^3.0.0"
+    "@sigstore/core": "npm:^3.1.0"
     "@sigstore/protobuf-specs": "npm:^0.5.0"
-  checksum: 10/c5b4891f42586a4c68fb22f127f19dd16b0bda0388ae8a40727cedd2443919006df3ec1ac4d6c3bd2786cff4c3f8d987135e87979262790e718bcc53e8a3a6c1
+  checksum: 10/c85713cc326236ef39608e4b061c1192306fd3edd7a1334237d5d53dbb132f04e3f9d3cfd4bb2d521bf0c95a9f98945a748c97ecb06e5f36cfd09488a0d3d73f
   languageName: node
   linkType: hard
 
