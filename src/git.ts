@@ -124,18 +124,20 @@ export class Git {
     const res = await Git.exec(['show', '-s', '--pretty=%D']);
     core.debug(`detached HEAD ref: ${res}`);
 
-    if (res === 'HEAD') {
+    const normalizedRef = res.replace(/^grafted, /, '').trim();
+
+    if (normalizedRef === 'HEAD') {
       return await Git.inferRefFromHead();
     }
 
     // Can be "HEAD, <tagname>" or "grafted, HEAD, <tagname>"
-    const refMatch = res.match(/^(grafted, )?HEAD, (.*)$/);
+    const refMatch = normalizedRef.match(/^HEAD, (.*)$/);
 
-    if (!refMatch || !refMatch[2]) {
+    if (!refMatch || !refMatch[1]) {
       throw new Error(`Cannot find detached HEAD ref in "${res}"`);
     }
 
-    const ref = refMatch[2].trim();
+    const ref = refMatch[1].trim();
 
     // Tag refs are formatted as "tag: <tagname>"
     if (ref.startsWith('tag: ')) {

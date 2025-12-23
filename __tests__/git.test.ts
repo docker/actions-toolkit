@@ -285,6 +285,33 @@ describe('ref', () => {
     expect(ref).toEqual('refs/heads/main');
   });
 
+  it('infers ref from local branch when detached HEAD returns only "grafted, HEAD"', async () => {
+    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'grafted, HEAD';
+          break;
+        case 'git for-each-ref --format=%(refname) --contains HEAD --sort=-committerdate refs/heads/':
+          result = 'refs/heads/main\nrefs/heads/develop';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+
+    const ref = await Git.ref();
+
+    expect(ref).toEqual('refs/heads/main');
+  });
+
   it('infers ref from remote branch when no local branch contains HEAD', async () => {
     jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
