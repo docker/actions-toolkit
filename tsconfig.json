@@ -3,6 +3,7 @@
     "esModuleInterop": true,
     "target": "es6",
     "module": "node16",
+    "isolatedModules": true,
     "strict": true,
     "declaration": true,
     "sourceMap": true,
