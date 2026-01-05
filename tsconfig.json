@@ -2,7 +2,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "target": "es6",
-    "module": "commonjs",
+    "module": "node16",
     "strict": true,
     "declaration": true,
     "sourceMap": true,
