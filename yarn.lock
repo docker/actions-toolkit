@@ -1183,8 +1183,8 @@ __metadata:
     "@octokit/core": "npm:^5.2.2"
     "@octokit/plugin-rest-endpoint-methods": "npm:^10.4.1"
     "@sigstore/bundle": "npm:^4.0.0"
-    "@sigstore/rekor-types": "npm:^3.0.0"
-    "@sigstore/sign": "npm:^4.0.1"
+    "@sigstore/rekor-types": "npm:^4.0.0"
+    "@sigstore/sign": "npm:^4.1.0"
     "@sigstore/tuf": "npm:^4.0.1"
     "@sigstore/verify": "npm:^3.0.0"
     "@types/gunzip-maybe": "npm:^1.4.3"
@@ -2247,6 +2247,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sigstore/core@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@sigstore/core@npm:3.1.0"
+  checksum: 10/c7a2e2d32f52494b40d9c469bc2241cc5d14d5f93fa028f099dcfe403443713f90ef3178684ee11c32e078a4b9fad79500746dfef10f10044c7fa00c909f3760
+  languageName: node
+  linkType: hard
+
 "@sigstore/protobuf-specs@npm:^0.5.0":
   version: 0.5.0
   resolution: "@sigstore/protobuf-specs@npm:0.5.0"
@@ -2254,24 +2261,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/rekor-types@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@sigstore/rekor-types@npm:3.0.0"
-  checksum: 10/f17a274b230ccbafad9beda6c568a80eeadb0f0c01ae09436522dadfc87839607116ef2855e959a34c02e86785600ea67f0e323cdb01e8cd211c3f72153742e7
+"@sigstore/rekor-types@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@sigstore/rekor-types@npm:4.0.0"
+  checksum: 10/775c261170ea36e50b1803c377be3a12b3df4e59cbe26e7113b8510d4a324b0b492a569e1415fba424d583f10dca2c99e3b6eea2dcee6bd49d53c19b8a5a3592
   languageName: node
   linkType: hard
 
-"@sigstore/sign@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@sigstore/sign@npm:4.0.1"
+"@sigstore/sign@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@sigstore/sign@npm:4.1.0"
   dependencies:
     "@sigstore/bundle": "npm:^4.0.0"
-    "@sigstore/core": "npm:^3.0.0"
+    "@sigstore/core": "npm:^3.1.0"
     "@sigstore/protobuf-specs": "npm:^0.5.0"
-    make-fetch-happen: "npm:^15.0.2"
-    proc-log: "npm:^5.0.0"
+    make-fetch-happen: "npm:^15.0.3"
+    proc-log: "npm:^6.1.0"
     promise-retry: "npm:^2.0.1"
-  checksum: 10/41b2bcb8fb767a6b242e59659b3dc20bd43000637c594a469e9cece5201d24b3a697220b70829edfd527087e1ed7b8c41837031b65de345f7d4c7941d9ef7b35
+  checksum: 10/e5441d4cacf0f203f329e96bb7a3ca77682cfdf90d6448ad368344056fd8d55c01742e2b636545d55364490a87988f767f2b23168b2d9cc52ef3d8fe9e9496aa
   languageName: node
   linkType: hard
 
@@ -7114,7 +7121,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"make-fetch-happen@npm:^15.0.1":
+"make-fetch-happen@npm:^15.0.1, make-fetch-happen@npm:^15.0.3":
   version: 15.0.3
   resolution: "make-fetch-happen@npm:15.0.3"
   dependencies:
@@ -7130,25 +7137,6 @@ __metadata:
     promise-retry: "npm:^2.0.1"
     ssri: "npm:^13.0.0"
   checksum: 10/78da4fc1df83cb596e2bae25aa0653b8a9c6cbdd6674a104894e03be3acfcd08c70b78f06ef6407fbd6b173f6a60672480d78641e693d05eb71c09c13ee35278
-  languageName: node
-  linkType: hard
-
-"make-fetch-happen@npm:^15.0.2":
-  version: 15.0.2
-  resolution: "make-fetch-happen@npm:15.0.2"
-  dependencies:
-    "@npmcli/agent": "npm:^4.0.0"
-    cacache: "npm:^20.0.1"
-    http-cache-semantics: "npm:^4.1.1"
-    minipass: "npm:^7.0.2"
-    minipass-fetch: "npm:^4.0.0"
-    minipass-flush: "npm:^1.0.5"
-    minipass-pipeline: "npm:^1.2.4"
-    negotiator: "npm:^1.0.0"
-    proc-log: "npm:^5.0.0"
-    promise-retry: "npm:^2.0.1"
-    ssri: "npm:^12.0.0"
-  checksum: 10/66097eae91615d1ac817127b9a20b9a17a1cb18c6b52ad24ffa03f45f3a9300af03f3368c52bbe88060ba9bf73c4ec1e0f2a209d1598bb906cdb34f75d3600b4
   languageName: node
   linkType: hard
 
@@ -7290,21 +7278,6 @@ __metadata:
     encoding:
       optional: true
   checksum: 10/8cfc589563ae2a11eebbf79121ef9a526fd078fca949ed3f1e4a51472ca4a4aad89fcea1738982ce9d7d833116ecc9c6ae9ebbd844832a94e3f4a3d4d1b9d3b9
-  languageName: node
-  linkType: hard
-
-"minipass-fetch@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "minipass-fetch@npm:4.0.1"
-  dependencies:
-    encoding: "npm:^0.1.13"
-    minipass: "npm:^7.0.3"
-    minipass-sized: "npm:^1.0.3"
-    minizlib: "npm:^3.0.1"
-  dependenciesMeta:
-    encoding:
-      optional: true
-  checksum: 10/7ddfebdbb87d9866e7b5f7eead5a9e3d9d507992af932a11d275551f60006cf7d9178e66d586dbb910894f3e3458d27c0ddf93c76e94d49d0a54a541ddc1263d
   languageName: node
   linkType: hard
 
@@ -7958,14 +7931,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"proc-log@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "proc-log@npm:5.0.0"
-  checksum: 10/35610bdb0177d3ab5d35f8827a429fb1dc2518d9e639f2151ac9007f01a061c30e0c635a970c9b00c39102216160f6ec54b62377c92fac3b7bfc2ad4b98d195c
-  languageName: node
-  linkType: hard
-
-"proc-log@npm:^6.0.0":
+"proc-log@npm:^6.0.0, proc-log@npm:^6.1.0":
   version: 6.1.0
   resolution: "proc-log@npm:6.1.0"
   checksum: 10/9033f30f168ed5a0991b773d0c50ff88384c4738e9a0a67d341de36bf7293771eed648ab6a0562f62276da12fde91f3bbfc75ffff6e71ad49aafd74fc646be66
