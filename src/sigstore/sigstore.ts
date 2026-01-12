@@ -22,6 +22,7 @@ import * as core from '@actions/core';
 import {bundleFromJSON, bundleToJSON} from '@sigstore/bundle';
 import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
 
+import {Context} from '../context';
 import {Cosign} from '../cosign/cosign';
 import {Exec} from '../exec';
 import {GitHub} from '../github';
@@ -73,6 +74,38 @@ export class Sigstore {
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
       const noTransparencyLog = Sigstore.noTransparencyLog(opts.noTransparencyLog);
 
+      const cosignExtraArgs: string[] = [];
+      if (await this.cosign.versionSatisfies('>=3.0.4')) {
+        await core.group(`Creating Sigstore protobuf signing config`, async () => {
+          const signingConfig = Context.tmpName({
+            template: 'signing-config-XXXXXX.json',
+            tmpdir: Context.tmpDir()
+          });
+          // prettier-ignore
+          const createConfigArgs = [
+            'signing-config',
+            '--with-default-services=true',
+            `--out=${signingConfig}`
+          ];
+          if (noTransparencyLog) {
+            createConfigArgs.push('--no-default-rekor=true');
+          }
+          await Exec.exec('cosign', createConfigArgs, {
+            ignoreReturnCode: true,
+            silent: true,
+            env: Object.assign({}, process.env, {
+              COSIGN_EXPERIMENTAL: '1'
+            }) as {
+              [key: string]: string;
+            }
+          });
+          core.info(JSON.stringify(JSON.parse(fs.readFileSync(signingConfig, {encoding: 'utf-8'})), null, 2));
+          cosignExtraArgs.push(`--signing-config=${signingConfig}`);
+        });
+      } else if (noTransparencyLog) {
+        cosignExtraArgs.push('--tlog-upload=false');
+      }
+
       for (const imageName of opts.imageNames) {
         const attestationDigests = await this.imageTools.attestationDigests(`${imageName}@${opts.imageDigest}`);
         for (const attestationDigest of attestationDigests) {
@@ -80,16 +113,14 @@ export class Sigstore {
           await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
             // prettier-ignore
             const cosignArgs = [
-            'sign',
-            '--yes',
-            '--oidc-provider', 'github-actions',
-            '--registry-referrers-mode', 'oci-1-1',
-            '--new-bundle-format',
-            '--use-signing-config'
-          ];
-            if (noTransparencyLog) {
-              cosignArgs.push('--tlog-upload=false');
-            }
+              'sign',
+              '--yes',
+              '--oidc-provider', 'github-actions',
+              '--registry-referrers-mode', 'oci-1-1',
+              '--new-bundle-format',
+              '--use-signing-config',
+              ...cosignExtraArgs
+            ];
             core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
             const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
               ignoreReturnCode: true,
