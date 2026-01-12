@@ -19,6 +19,9 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
+import {bundleFromJSON, SerializedBundle} from '@sigstore/bundle';
+import * as tuf from '@sigstore/tuf';
+import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -33,6 +36,14 @@ import {Util} from '../util.js';
 
 import {DownloadVersion} from '../types/buildx/buildx.js';
 import {GitHubRelease} from '../types/github.js';
+
+export interface DownloadOpts {
+  version: string;
+  ghaNoCache?: boolean;
+  disableHtc?: boolean;
+  skipState?: boolean;
+  verifySignature?: boolean;
+}
 
 export interface InstallOpts {
   standalone?: boolean;
@@ -54,8 +65,8 @@ export class Install {
    * @param ghaNoCache: disable binary caching in GitHub Actions cache backend
    * @returns path to the buildx binary
    */
-  public async download(v: string, ghaNoCache?: boolean): Promise<string> {
-    const version: DownloadVersion = await Install.getDownloadVersion(v);
+  public async download(opts: DownloadOpts): Promise<string> {
+    const version: DownloadVersion = await Install.getDownloadVersion(opts.version);
     core.debug(`Install.download version: ${version.version}`);
 
     const release: GitHubRelease = await Install.getRelease(version, this.githubToken);
@@ -74,11 +85,11 @@ export class Install {
       htcVersion: vspec,
       baseCacheDir: path.join(Buildx.configDir, '.bin'),
       cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx',
-      ghaNoCache: ghaNoCache
+      ghaNoCache: opts.ghaNoCache
     });
 
     const cacheFoundPath = await installCache.find();
-    if (cacheFoundPath) {
+    if (!opts.disableHtc && cacheFoundPath) {
       core.info(`Buildx binary found in ${cacheFoundPath}`);
       return cacheFoundPath;
     }
@@ -89,7 +100,11 @@ export class Install {
     const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
-    const cacheSavePath = await installCache.save(htcDownloadPath);
+    if (opts.verifySignature && semver.satisfies(vspec, '>=0.31.0-0', {includePrerelease: true})) {
+      await this.verifySignature(htcDownloadPath, downloadURL);
+    }
+
+    const cacheSavePath = await installCache.save(htcDownloadPath, opts.skipState);
     core.info(`Cached to ${cacheSavePath}`);
     return cacheSavePath;
   }
@@ -211,6 +226,36 @@ export class Install {
     const standalone = this.standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
+  }
+
+  private async verifySignature(binPath: string, downloadURL: string): Promise<void> {
+    const bundleURL = `${downloadURL.replace(/\.exe$/, '')}.sigstore.json`;
+    core.info(`Downloading keyless verification bundle at ${bundleURL}`);
+    const bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
+    core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
+
+    core.info(`Verifying keyless verification bundle signature`);
+    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
+    const bundle = bundleFromJSON(parsedBundle);
+
+    core.info(`Fetching Sigstore TUF trusted root metadata`);
+    const trustedRoot = await tuf.getTrustedRoot();
+    const trustMaterial = toTrustMaterial(trustedRoot);
+
+    try {
+      core.info(`Verifying Buildx binary signature`);
+      const signedEntity = toSignedEntity(bundle, fs.readFileSync(binPath));
+      const verifier = new Verifier(trustMaterial);
+      const signer = verifier.verify(signedEntity, {
+        // FIXME: uncomment when subjectAlternativeName check with regex is supported: https://github.com/docker/actions-toolkit/pull/929#discussion_r2682150413
+        //subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/build\.yml.*$/,
+        extensions: {issuer: 'https://token.actions.githubusercontent.com'}
+      });
+      core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
+      core.info(`Buildx binary signature verified!`);
+    } catch (err) {
+      throw new Error(`Failed to verify Buildx binary signature: ${err}`);
+    }
   }
 
   private filename(version: string): string {

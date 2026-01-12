@@ -29,7 +29,12 @@ maybe('download', () => {
         const install = new Install({
           standalone: true
         });
-        const toolPath = await install.download(version);
+        const toolPath = await install.download({
+          version: version,
+          verifySignature: true,
+          ghaNoCache: true,
+          disableHtc: true
+        });
         if (!fs.existsSync(toolPath)) {
           throw new Error('toolPath does not exist');
         }
