@@ -149,6 +149,7 @@ jobs:
     permissions:
       contents: read
       id-token: write # needed for signing with GitHub OIDC Token
+      packages: write # needed for pushing to GitHub Container Registry
     steps:
       -
         name: Checkout
