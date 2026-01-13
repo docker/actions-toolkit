@@ -48,7 +48,7 @@ export interface SignAttestationManifestsResult extends ParsedBundle {
 export interface VerifySignedManifestsOpts {
   certificateIdentityRegexp: string;
   noTransparencyLog?: boolean;
-  retries?: number;
+  retryOnManifestUnknown?: boolean;
 }
 
 export interface VerifySignedManifestsResult {

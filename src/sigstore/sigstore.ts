@@ -135,7 +135,7 @@ export class Sigstore {
         const verifyResult = await this.verifyImageAttestation(attestationRef, {
           noTransparencyLog: opts.noTransparencyLog || !signedRes.tlogID,
           certificateIdentityRegexp: opts.certificateIdentityRegexp,
-          retries: opts.retries
+          retryOnManifestUnknown: opts.retryOnManifestUnknown
         });
         core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
         result[attestationRef] = verifyResult;
@@ -164,8 +164,6 @@ export class Sigstore {
   }
 
   public async verifyImageAttestation(attestationRef: string, opts: VerifySignedManifestsOpts): Promise<VerifySignedManifestsResult> {
-    const retries = opts.retries ?? 15;
-
     if (!(await this.cosign.isAvailable())) {
       throw new Error('Cosign is required to verify signed manifests');
     }
@@ -183,6 +181,27 @@ export class Sigstore {
       cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
     }
 
+    if (!opts.retryOnManifestUnknown) {
+      core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+      const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
+        ignoreReturnCode: true,
+        silent: true,
+        env: Object.assign({}, process.env, {
+          COSIGN_EXPERIMENTAL: '1'
+        }) as {[key: string]: string}
+      });
+      if (execRes.exitCode !== 0) {
+        // prettier-ignore
+        throw new Error(`Cosign verify command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+      }
+      const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+      return {
+        cosignArgs: cosignArgs,
+        signatureManifestDigest: verifyResult.signatureManifestDigest!
+      };
+    }
+
+    const retries = 15;
     let lastError: Error | undefined;
     core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
     for (let attempt = 0; attempt < retries; attempt++) {
