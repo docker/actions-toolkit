@@ -142,13 +142,10 @@ export class Cosign {
         bundlePayload = obj as SerializedBundle;
       }
 
-      if (bundlePayload && signatureManifestDigest) {
+      if (bundlePayload && (signatureManifestDigest || signatureManifestFallbackDigest)) {
+        errors = undefined; // clear errors if we have both payload and manifest digest
         break;
       }
-    }
-
-    if (!errors && !bundlePayload) {
-      throw new Error(`Cannot find signature bundle from cosign command output: ${logs}`);
     }
 
     return {
