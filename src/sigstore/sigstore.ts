@@ -106,7 +106,8 @@ export class Sigstore {
                 const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
                 throw new Error(`Cosign sign command failed with errors:\n${errorMessages}`);
               } else {
-                throw new Error(`Cosign sign command failed with exit code ${execRes.exitCode}`);
+                // prettier-ignore
+                throw new Error(`Cosign sign command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
               }
             }
             const parsedBundle = Sigstore.parseBundle(bundleFromJSON(signResult.bundle));
@@ -209,7 +210,8 @@ export class Sigstore {
             throw lastError;
           }
         } else {
-          throw new Error(`Cosign verify command failed: ${execRes.stderr}`);
+          // prettier-ignore
+          throw new Error(`Cosign verify command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
         }
       }
     }
