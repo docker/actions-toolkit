@@ -47,6 +47,7 @@ export interface SignAttestationManifestsResult extends ParsedBundle {
 
 export interface VerifySignedManifestsOpts {
   certificateIdentityRegexp: string;
+  noTransparencyLog?: boolean;
   retries?: number;
 }
 
@@ -68,6 +69,7 @@ export interface SignProvenanceBlobsResult extends ParsedBundle {
 
 export interface VerifySignedArtifactsOpts {
   certificateIdentityRegexp: string;
+  noTransparencyLog?: boolean;
 }
 
 export interface VerifySignedArtifactsResult {

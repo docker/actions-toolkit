@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it, beforeAll} from '@jest/globals';
+import {beforeAll, describe, expect, jest, it, test} from '@jest/globals';
 import fs from 'fs';
 import * as path from 'path';
 
@@ -23,7 +23,10 @@ import {Sigstore} from '../../src/sigstore/sigstore';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
-const maybe = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'true' && process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu') ? describe : describe.skip;
+const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu');
+
+const maybe = runTest ? describe : describe.skip;
+const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
 
 // needs current GitHub repo info
 jest.unmock('@actions/github');
@@ -36,7 +39,29 @@ beforeAll(async () => {
   await cosignInstall.install(cosignBinPath);
 }, 100000);
 
-maybe('signProvenanceBlobs', () => {
+maybe('verifyImageAttestations', () => {
+  test.each([
+    ['moby/buildkit:master@sha256:84014da3581b2ff2c14cb4f60029cf9caa272b79e58f2e89c651ea6966d7a505', `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`],
+    ['docker/dockerfile-upstream:master@sha256:3e8cd5ebf48acd1a1939649ad1c62ca44c029852b22493c16a9307b654334958', `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`]
+  ])(
+    'given %p',
+    async (image, certificateIdentityRegexp) => {
+      const sigstore = new Sigstore();
+      const verifyResults = await sigstore.verifyImageAttestations(image, {
+        certificateIdentityRegexp: certificateIdentityRegexp
+      });
+      expect(Object.keys(verifyResults).length).toBeGreaterThan(0);
+      for (const [attestationRef, res] of Object.entries(verifyResults)) {
+        expect(attestationRef).toBeDefined();
+        expect(res.cosignArgs).toBeDefined();
+        expect(res.signatureManifestDigest).toBeDefined();
+      }
+    },
+    60000
+  );
+});
+
+maybeIdToken('signProvenanceBlobs', () => {
   it('single platform', async () => {
     const sigstore = new Sigstore();
     const results = await sigstore.signProvenanceBlobs({
@@ -68,7 +93,7 @@ maybe('signProvenanceBlobs', () => {
   });
 });
 
-maybe('verifySignedArtifacts', () => {
+maybeIdToken('verifySignedArtifacts', () => {
   it('sign and verify', async () => {
     const sigstore = new Sigstore();
     const signResults = await sigstore.signProvenanceBlobs({
@@ -76,12 +101,9 @@ maybe('verifySignedArtifacts', () => {
     });
     expect(Object.keys(signResults).length).toEqual(2);
 
-    const verifyResults = await sigstore.verifySignedArtifacts(
-      {
-        certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
-      },
-      signResults
-    );
+    const verifyResults = await sigstore.verifySignedArtifacts(signResults, {
+      certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
+    });
     expect(Object.keys(verifyResults).length).toEqual(2);
     for (const [artifactPath, res] of Object.entries(verifyResults)) {
       expect(fs.existsSync(artifactPath)).toBe(true);

@@ -80,13 +80,13 @@ export class Sigstore {
           await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
             // prettier-ignore
             const cosignArgs = [
-            'sign',
-            '--yes',
-            '--oidc-provider', 'github-actions',
-            '--registry-referrers-mode', 'oci-1-1',
-            '--new-bundle-format',
-            '--use-signing-config'
-          ];
+              'sign',
+              '--yes',
+              '--oidc-provider', 'github-actions',
+              '--registry-referrers-mode', 'oci-1-1',
+              '--new-bundle-format',
+              '--use-signing-config'
+            ];
             if (noTransparencyLog) {
               cosignArgs.push('--tlog-upload=false');
             }
@@ -127,69 +127,94 @@ export class Sigstore {
     return result;
   }
 
-  public async verifySignedManifests(opts: VerifySignedManifestsOpts, signed: Record<string, SignAttestationManifestsResult>): Promise<Record<string, VerifySignedManifestsResult>> {
+  public async verifySignedManifests(signedManifestsResult: Record<string, SignAttestationManifestsResult>, opts: VerifySignedManifestsOpts): Promise<Record<string, VerifySignedManifestsResult>> {
     const result: Record<string, VerifySignedManifestsResult> = {};
+    for (const [attestationRef, signedRes] of Object.entries(signedManifestsResult)) {
+      await core.group(`Verifying signature of ${attestationRef}`, async () => {
+        const verifyResult = await this.verifyImageAttestation(attestationRef, {
+          noTransparencyLog: opts.noTransparencyLog || !signedRes.tlogID,
+          certificateIdentityRegexp: opts.certificateIdentityRegexp,
+          retries: opts.retries
+        });
+        core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
+        result[attestationRef] = verifyResult;
+      });
+    }
+    return result;
+  }
+
+  public async verifyImageAttestations(image: string, opts: VerifySignedManifestsOpts): Promise<Record<string, VerifySignedManifestsResult>> {
+    const result: Record<string, VerifySignedManifestsResult> = {};
+
+    const attestationDigests = await this.imageTools.attestationDigests(image);
+    if (attestationDigests.length === 0) {
+      throw new Error(`No attestation manifests found for ${image}`);
+    }
+
+    const imageName = image.split(':', 1)[0];
+    for (const attestationDigest of attestationDigests) {
+      const attestationRef = `${imageName}@${attestationDigest}`;
+      const verifyResult = await this.verifyImageAttestation(attestationRef, opts);
+      core.info(`Signature manifest verified: https://oci.dag.dev/?image=${imageName}@${verifyResult.signatureManifestDigest}`);
+      result[attestationRef] = verifyResult;
+    }
+
+    return result;
+  }
+
+  public async verifyImageAttestation(attestationRef: string, opts: VerifySignedManifestsOpts): Promise<VerifySignedManifestsResult> {
     const retries = opts.retries ?? 15;
 
     if (!(await this.cosign.isAvailable())) {
       throw new Error('Cosign is required to verify signed manifests');
     }
 
-    let lastError: Error | undefined;
-    for (const [attestationRef, signedRes] of Object.entries(signed)) {
-      await core.group(`Verifying signature of ${attestationRef}`, async () => {
-        // prettier-ignore
-        const cosignArgs = [
-          'verify',
-          '--experimental-oci11',
-          '--new-bundle-format',
-          '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
-          '--certificate-identity-regexp', opts.certificateIdentityRegexp
-        ];
-        if (!signedRes.tlogID) {
-          // skip tlog verification but still verify the signed timestamp
-          cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
-        }
-        core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
-        for (let attempt = 0; attempt < retries; attempt++) {
-          const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
-            ignoreReturnCode: true,
-            silent: true,
-            env: Object.assign({}, process.env, {
-              COSIGN_EXPERIMENTAL: '1'
-            }) as {[key: string]: string}
-          });
-          const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
-          if (execRes.exitCode === 0) {
-            result[attestationRef] = {
-              cosignArgs: cosignArgs,
-              signatureManifestDigest: verifyResult.signatureManifestDigest!
-            };
-            lastError = undefined;
-            core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
-            break;
-          } else {
-            if (verifyResult.errors && verifyResult.errors.length > 0) {
-              const errorMessages = verifyResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
-              lastError = new Error(`Cosign verify command failed with errors:\n${errorMessages}`);
-              if (verifyResult.errors.some(e => e.code === 'MANIFEST_UNKNOWN')) {
-                core.info(`Cosign verify command failed with MANIFEST_UNKNOWN, retrying attempt ${attempt + 1}/${retries}...\n${errorMessages}`);
-                await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 100));
-              } else {
-                throw lastError;
-              }
-            } else {
-              throw new Error(`Cosign verify command failed: ${execRes.stderr}`);
-            }
-          }
-        }
-      });
-    }
-    if (lastError) {
-      throw lastError;
+    // prettier-ignore
+    const cosignArgs = [
+      'verify',
+      '--experimental-oci11',
+      '--new-bundle-format',
+      '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
+      '--certificate-identity-regexp', opts.certificateIdentityRegexp
+    ];
+    if (opts.noTransparencyLog) {
+      // skip tlog verification but still verify the signed timestamp
+      cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
     }
 
-    return result;
+    let lastError: Error | undefined;
+    core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+    for (let attempt = 0; attempt < retries; attempt++) {
+      const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
+        ignoreReturnCode: true,
+        silent: true,
+        env: Object.assign({}, process.env, {
+          COSIGN_EXPERIMENTAL: '1'
+        }) as {[key: string]: string}
+      });
+      const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+      if (execRes.exitCode === 0) {
+        return {
+          cosignArgs: cosignArgs,
+          signatureManifestDigest: verifyResult.signatureManifestDigest!
+        };
+      } else {
+        if (verifyResult.errors && verifyResult.errors.length > 0) {
+          const errorMessages = verifyResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
+          lastError = new Error(`Cosign verify command failed with errors:\n${errorMessages}`);
+          if (verifyResult.errors.some(e => e.code === 'MANIFEST_UNKNOWN')) {
+            core.info(`Cosign verify command failed with MANIFEST_UNKNOWN, retrying attempt ${attempt + 1}/${retries}...\n${errorMessages}`);
+            await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 100));
+          } else {
+            throw lastError;
+          }
+        } else {
+          throw new Error(`Cosign verify command failed: ${execRes.stderr}`);
+        }
+      }
+    }
+
+    throw lastError;
   }
 
   public async signProvenanceBlobs(opts: SignProvenanceBlobsOpts): Promise<Record<string, SignProvenanceBlobsResult>> {
@@ -245,12 +270,12 @@ export class Sigstore {
     return result;
   }
 
-  public async verifySignedArtifacts(opts: VerifySignedArtifactsOpts, signed: Record<string, SignProvenanceBlobsResult>): Promise<Record<string, VerifySignedArtifactsResult>> {
+  public async verifySignedArtifacts(signedArtifactsResult: Record<string, SignProvenanceBlobsResult>, opts: VerifySignedArtifactsOpts): Promise<Record<string, VerifySignedArtifactsResult>> {
     const result: Record<string, VerifySignedArtifactsResult> = {};
     if (!(await this.cosign.isAvailable())) {
       throw new Error('Cosign is required to verify signed artifacts');
     }
-    for (const [provenancePath, signedRes] of Object.entries(signed)) {
+    for (const [provenancePath, signedRes] of Object.entries(signedArtifactsResult)) {
       const baseDir = path.dirname(provenancePath);
       await core.group(`Verifying signature bundle ${signedRes.bundlePath}`, async () => {
         for (const subject of signedRes.subjects) {
@@ -263,7 +288,7 @@ export class Sigstore {
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp
           ]
-          if (!signedRes.tlogID) {
+          if (opts.noTransparencyLog || !signedRes.tlogID) {
             // if there is no tlog entry, we skip tlog verification but still verify the signed timestamp
             cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
           }
