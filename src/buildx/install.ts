@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {X509Certificate} from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -245,10 +246,14 @@ export class Install {
     try {
       core.info(`Verifying Buildx binary signature`);
       const signedEntity = toSignedEntity(bundle, fs.readFileSync(binPath));
+      const signingCert = new X509Certificate(signedEntity.signature.signature);
+      if (!signingCert.subjectAltName?.match(/^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/)) {
+        throw new Error(`Signing certificate subjectAlternativeName "${signingCert.subjectAltName}" does not match expected pattern`);
+      }
       const verifier = new Verifier(trustMaterial);
       const signer = verifier.verify(signedEntity, {
         // FIXME: uncomment when subjectAlternativeName check with regex is supported: https://github.com/docker/actions-toolkit/pull/929#discussion_r2682150413
-        //subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/build\.yml.*$/,
+        //subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/,
         extensions: {issuer: 'https://token.actions.githubusercontent.com'}
       });
       core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
