@@ -133,8 +133,8 @@ export class Sigstore {
     for (const [attestationRef, signedRes] of Object.entries(signedManifestsResult)) {
       await core.group(`Verifying signature of ${attestationRef}`, async () => {
         const verifyResult = await this.verifyImageAttestation(attestationRef, {
-          noTransparencyLog: opts.noTransparencyLog || !signedRes.tlogID,
           certificateIdentityRegexp: opts.certificateIdentityRegexp,
+          noTransparencyLog: opts.noTransparencyLog || !signedRes.tlogID,
           retryOnManifestUnknown: opts.retryOnManifestUnknown
         });
         core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
@@ -147,7 +147,7 @@ export class Sigstore {
   public async verifyImageAttestations(image: string, opts: VerifySignedManifestsOpts): Promise<Record<string, VerifySignedManifestsResult>> {
     const result: Record<string, VerifySignedManifestsResult> = {};
 
-    const attestationDigests = await this.imageTools.attestationDigests(image);
+    const attestationDigests = await this.imageTools.attestationDigests(image, opts.platform);
     if (attestationDigests.length === 0) {
       throw new Error(`No attestation manifests found for ${image}`);
     }
