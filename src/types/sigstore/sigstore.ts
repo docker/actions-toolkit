@@ -17,6 +17,7 @@
 import type {SerializedBundle} from '@sigstore/bundle';
 
 import {Subject} from '../intoto/intoto';
+import {Platform} from '../oci/descriptor';
 
 export const FULCIO_URL = 'https://fulcio.sigstore.dev';
 export const REKOR_URL = 'https://rekor.sigstore.dev';
@@ -47,6 +48,7 @@ export interface SignAttestationManifestsResult extends ParsedBundle {
 
 export interface VerifySignedManifestsOpts {
   certificateIdentityRegexp: string;
+  platform?: Platform;
   noTransparencyLog?: boolean;
   retryOnManifestUnknown?: boolean;
 }

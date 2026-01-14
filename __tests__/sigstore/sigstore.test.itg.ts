@@ -23,6 +23,7 @@ import {Build} from '../../src/buildx/build';
 import {Install as CosignInstall} from '../../src/cosign/install';
 import {Docker} from '../../src/docker/docker';
 import {Exec} from '../../src/exec';
+import {OCI} from '../../src/oci/oci';
 import {Sigstore} from '../../src/sigstore/sigstore';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
@@ -114,6 +115,20 @@ maybe('verifyImageAttestations', () => {
     },
     60000
   );
+
+  it('default platform', async () => {
+    const sigstore = new Sigstore();
+    const verifyResults = await sigstore.verifyImageAttestations('moby/buildkit:master@sha256:84014da3581b2ff2c14cb4f60029cf9caa272b79e58f2e89c651ea6966d7a505', {
+      certificateIdentityRegexp: `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`,
+      platform: OCI.defaultPlatform()
+    });
+    expect(Object.keys(verifyResults).length).toEqual(1);
+    for (const [attestationRef, res] of Object.entries(verifyResults)) {
+      expect(attestationRef).toBeDefined();
+      expect(res.cosignArgs).toBeDefined();
+      expect(res.signatureManifestDigest).toBeDefined();
+    }
+  });
 });
 
 maybeIdToken('signProvenanceBlobs', () => {
