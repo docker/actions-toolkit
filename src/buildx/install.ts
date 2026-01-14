@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import {X509Certificate} from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
+import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
-import {bundleFromJSON, SerializedBundle} from '@sigstore/bundle';
-import * as tuf from '@sigstore/tuf';
-import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -33,10 +30,12 @@ import {Exec} from '../exec.js';
 import {Docker} from '../docker/docker.js';
 import {Git} from '../git.js';
 import {GitHub} from '../github.js';
+import {Sigstore} from '../sigstore/sigstore.js';
 import {Util} from '../util.js';
 
 import {DownloadVersion} from '../types/buildx/buildx.js';
 import {GitHubRelease} from '../types/github.js';
+import {SEARCH_URL} from '../types/sigstore/sigstore.js';
 
 export interface DownloadOpts {
   version: string;
@@ -49,15 +48,18 @@ export interface DownloadOpts {
 export interface InstallOpts {
   standalone?: boolean;
   githubToken?: string;
+  sigstore?: Sigstore;
 }
 
 export class Install {
   private readonly standalone: boolean | undefined;
   private readonly githubToken: string | undefined;
+  private readonly sigstore: Sigstore;
 
   constructor(opts?: InstallOpts) {
     this.standalone = opts?.standalone;
     this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
+    this.sigstore = opts?.sigstore || new Sigstore();
   }
 
   /*
@@ -232,35 +234,26 @@ export class Install {
   private async verifySignature(binPath: string, downloadURL: string): Promise<void> {
     const bundleURL = `${downloadURL.replace(/\.exe$/, '')}.sigstore.json`;
     core.info(`Downloading keyless verification bundle at ${bundleURL}`);
-    const bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
-    core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
 
-    core.info(`Verifying keyless verification bundle signature`);
-    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
-    const bundle = bundleFromJSON(parsedBundle);
-
-    core.info(`Fetching Sigstore TUF trusted root metadata`);
-    const trustedRoot = await tuf.getTrustedRoot();
-    const trustMaterial = toTrustMaterial(trustedRoot);
-
+    let bundlePath: string;
     try {
-      core.info(`Verifying Buildx binary signature`);
-      const signedEntity = toSignedEntity(bundle, fs.readFileSync(binPath));
-      const signingCert = new X509Certificate(signedEntity.signature.signature);
-      if (!signingCert.subjectAltName?.match(/^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/)) {
-        throw new Error(`Signing certificate subjectAlternativeName "${signingCert.subjectAltName}" does not match expected pattern`);
+      bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
+      core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
+    } catch (e) {
+      if (e.message && e.message.statusCode === httpm.HttpCodes.NotFound) {
+        core.info(`No signature bundle found at ${bundleURL}, skipping verification`);
+        return;
       }
-      const verifier = new Verifier(trustMaterial);
-      const signer = verifier.verify(signedEntity, {
-        // FIXME: uncomment when subjectAlternativeName check with regex is supported: https://github.com/docker/actions-toolkit/pull/929#discussion_r2682150413
-        //subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/,
-        extensions: {issuer: 'https://token.actions.githubusercontent.com'}
-      });
-      core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
-      core.info(`Buildx binary signature verified!`);
-    } catch (err) {
-      throw new Error(`Failed to verify Buildx binary signature: ${err}`);
+      throw e;
     }
+
+    const verifyResult = await this.sigstore.verifyArtifact(binPath, bundlePath, {
+      // TODO: add githubWorkflowRepository , runnerEnvironment and sourceRepositoryURI extensions when supported by sigstore module
+      subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/,
+      issuer: 'https://token.actions.githubusercontent.com'
+    });
+
+    core.info(`Buildx binary signature verified! ${verifyResult.tlogID ? `${SEARCH_URL}?logIndex=${verifyResult.tlogID}` : ''}`);
   }
 
   private filename(version: string): string {
