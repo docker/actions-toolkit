@@ -105,13 +105,7 @@ export class Bake {
   public async getDefinition(cmdOpts: BakeCmdOpts, execOptions?: ExecOptions): Promise<BakeDefinition> {
     execOptions = execOptions || {ignoreReturnCode: true};
     execOptions.ignoreReturnCode = true;
-    if (cmdOpts.githubToken) {
-      execOptions.env = Object.assign({}, process.env, {
-        BUILDX_BAKE_GIT_AUTH_TOKEN: cmdOpts.githubToken
-      }) as {
-        [key: string]: string;
-      };
-    }
+    execOptions.env = Object.assign({}, process.env, execOptions.env || {}, cmdOpts.githubToken ? {BUILDX_BAKE_GIT_AUTH_TOKEN: cmdOpts.githubToken} : {});
 
     const args = ['bake'];
 
