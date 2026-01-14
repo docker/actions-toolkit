@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import fs from 'fs';
+import os from 'os';
 import gunzip from 'gunzip-maybe';
 import * as path from 'path';
 import {Readable} from 'stream';
@@ -21,12 +22,59 @@ import * as tar from 'tar-stream';
 
 import {Archive, LoadArchiveOpts} from '../types/oci/oci';
 import {Index} from '../types/oci';
+import {Platform} from '../types/oci/descriptor';
 import {Manifest} from '../types/oci/manifest';
 import {Image} from '../types/oci/config';
 import {IMAGE_BLOBS_DIR_V1, IMAGE_INDEX_FILE_V1, IMAGE_LAYOUT_FILE_V1, ImageLayout} from '../types/oci/layout';
 import {MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from '../types/oci/mediatype';
 
 export class OCI {
+  public static defaultPlatform(): Platform {
+    const nodePlatform = os.platform();
+    const nodeArch = os.arch();
+
+    const goosMap: Record<string, string> = {
+      win32: 'windows',
+      sunos: 'solaris'
+      // others (linux, darwin, freebsd, openbsd, netbsd, aix, android) match Go already
+    };
+
+    const goArchMap: Record<string, string> = {
+      x64: 'amd64',
+      ia32: '386',
+      arm: 'arm',
+      arm64: 'arm64',
+      ppc64: 'ppc64le',
+      s390x: 's390x',
+      riscv64: 'riscv64',
+      loong64: 'loong64',
+      mips: 'mips',
+      mipsel: 'mipsle',
+      mips64: 'mips64',
+      mips64el: 'mips64le'
+    };
+
+    const goos = goosMap[nodePlatform] ?? nodePlatform;
+    const goarch = goArchMap[nodeArch] ?? nodeArch;
+
+    let variant: string | undefined;
+    if (goarch === 'arm') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const armVersionRaw = (process.config.variables as any)?.arm_version;
+      const armVersion = Number(armVersionRaw);
+      // Go only recognizes v5/v6/v7 for GOARM. Do not emit v8+ (that would be arm64).
+      if ([5, 6, 7].includes(armVersion)) {
+        variant = `v${armVersion}`;
+      }
+    }
+
+    return {
+      architecture: goarch,
+      os: goos,
+      variant: variant
+    };
+  }
+
   public static loadArchive(opts: LoadArchiveOpts): Promise<Archive> {
     return new Promise<Archive>((resolve, reject) => {
       const tarex: tar.Extract = tar.extract();
