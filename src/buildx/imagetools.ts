@@ -19,7 +19,7 @@ import {Exec} from '../exec';
 
 import {Manifest as ImageToolsManifest} from '../types/buildx/imagetools';
 import {Image} from '../types/oci/config';
-import {Descriptor} from '../types/oci/descriptor';
+import {Descriptor, Platform} from '../types/oci/descriptor';
 import {Digest} from '../types/oci/digest';
 
 export interface ImageToolsOpts {
@@ -83,15 +83,39 @@ export class ImageTools {
     });
   }
 
-  public async attestationDescriptors(name: string): Promise<Array<Descriptor>> {
+  public async attestationDescriptors(name: string, platform?: Platform): Promise<Array<Descriptor>> {
     const manifest = await this.inspectManifest(name);
-    if (typeof manifest === 'object' && manifest !== null && 'manifests' in manifest && Array.isArray(manifest.manifests)) {
-      return manifest.manifests.filter(m => m.annotations && m.annotations['vnd.docker.reference.type'] === 'attestation-manifest');
+
+    if (typeof manifest !== 'object' || manifest === null || !('manifests' in manifest) || !Array.isArray(manifest.manifests)) {
+      throw new Error(`No descriptor found for ${name}`);
     }
-    throw new Error(`No attestation descriptors found for ${name}`);
+
+    const attestations = manifest.manifests.filter(m => m.annotations?.['vnd.docker.reference.type'] === 'attestation-manifest');
+    if (!platform) {
+      return attestations;
+    }
+
+    const manifestByDigest = new Map<string, Descriptor>();
+    for (const m of manifest.manifests) {
+      if (m.digest) {
+        manifestByDigest.set(m.digest, m);
+      }
+    }
+
+    return attestations.filter(attestation => {
+      const refDigest = attestation.annotations?.['vnd.docker.reference.digest'];
+      if (!refDigest) {
+        return false;
+      }
+      const referencedManifest = manifestByDigest.get(refDigest);
+      if (!referencedManifest) {
+        return false;
+      }
+      return referencedManifest.platform?.os === platform.os && referencedManifest.platform?.architecture === platform.architecture && (referencedManifest.platform?.variant ?? '') === (platform.variant ?? '');
+    });
   }
 
-  public async attestationDigests(name: string): Promise<Array<Digest>> {
-    return (await this.attestationDescriptors(name)).map(attestation => attestation.digest);
+  public async attestationDigests(name: string, platform?: Platform): Promise<Array<Digest>> {
+    return (await this.attestationDescriptors(name, platform)).map(attestation => attestation.digest);
   }
 }
