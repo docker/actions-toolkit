@@ -1,0 +1,15 @@
+[
+  {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:0709528fae1747ce17638ad2978ee7936b38a294136eaadaf692e415f64b1e03",
+    "size": 1113,
+    "annotations": {
+      "vnd.docker.reference.digest": "sha256:1b6bce668653f08e2d0f9f7c9b646675b2cbce94ce8abdf4eb0eabaef4353045",
+      "vnd.docker.reference.type": "attestation-manifest"
+    },
+    "platform": {
+      "architecture": "unknown",
+      "os": "unknown"
+    }
+  }
+]
