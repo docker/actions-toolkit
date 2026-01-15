@@ -23,7 +23,7 @@ const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'tr
 
 maybe('download', () => {
   // prettier-ignore
-  test.each(['latest'])(
+  test.each(['v0.31.0-rc1'])(
     'install buildx %s', async (version) => {
       await expect((async () => {
         const install = new Install({
