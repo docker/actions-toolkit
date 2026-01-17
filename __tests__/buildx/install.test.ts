@@ -38,7 +38,7 @@ describe('download', () => {
   ])(
   'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
     const install = new Install({standalone: standalone});
-    const toolPath = await install.download(version);
+    const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
     let buildxBin: string;
     if (standalone) {
@@ -57,7 +57,7 @@ describe('download', () => {
   ])(
   'acquires %p of buildx with cache', async (version) => {
     const install = new Install({standalone: false});
-    const toolPath = await install.download(version);
+    const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
 
@@ -68,7 +68,7 @@ describe('download', () => {
   ])(
   'acquires %p of buildx without cache', async (version) => {
     const install = new Install({standalone: false});
-    const toolPath = await install.download(version, true);
+    const toolPath = await install.download({version: version, ghaNoCache: true});
     expect(fs.existsSync(toolPath)).toBe(true);
   }, 100000);
 
@@ -88,7 +88,7 @@ describe('download', () => {
     jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
     jest.spyOn(osm, 'arch').mockImplementation(() => arch);
     const install = new Install();
-    const buildxBin = await install.download('latest');
+    const buildxBin = await install.download({version: 'latest'});
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });

@@ -78,3 +78,14 @@ export interface VerifySignedArtifactsResult {
   bundlePath: string;
   cosignArgs: Array<string>;
 }
+
+export interface VerifyArtifactOpts {
+  subjectAlternativeName: string | RegExp;
+  issuer?: string;
+}
+
+export interface VerifyArtifactResult {
+  payload: SerializedBundle;
+  certificate: string;
+  tlogID?: string;
+}

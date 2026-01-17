@@ -23,13 +23,18 @@ const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'tr
 
 maybe('download', () => {
   // prettier-ignore
-  test.each(['latest'])(
+  test.each(['v0.31.0-rc1'])(
     'install buildx %s', async (version) => {
       await expect((async () => {
         const install = new Install({
           standalone: true
         });
-        const toolPath = await install.download(version);
+        const toolPath = await install.download({
+          version: version,
+          verifySignature: true,
+          ghaNoCache: true,
+          disableHtc: true
+        });
         if (!fs.existsSync(toolPath)) {
           throw new Error('toolPath does not exist');
         }
