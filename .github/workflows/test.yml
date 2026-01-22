@@ -15,7 +15,7 @@ on:
 
 env:
   NODE_VERSION: "20"
-  BUILDX_VERSION: "edge"
+  BUILDX_VERSION: "v0.31.0"
   BUILDKIT_IMAGE: "moby/buildkit:v0.26.3"
 
 jobs:
