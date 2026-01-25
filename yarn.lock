@@ -1224,7 +1224,6 @@ __metadata:
     "@sigstore/verify": "npm:^3.1.0"
     "@types/gunzip-maybe": "npm:^1.4.3"
     "@types/he": "npm:^1.2.3"
-    "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.19.27"
     "@types/semver": "npm:^7.7.1"
     "@types/tar-stream": "npm:^3.1.4"
@@ -1243,7 +1242,6 @@ __metadata:
     handlebars: "npm:^4.7.8"
     he: "npm:^1.2.0"
     jest: "npm:^30.2.0"
-    js-yaml: "npm:^4.1.1"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.7.4"
     rimraf: "npm:^6.1.2"
@@ -2510,13 +2508,6 @@ __metadata:
   dependencies:
     "@types/istanbul-lib-report": "npm:*"
   checksum: 10/93eb18835770b3431f68ae9ac1ca91741ab85f7606f310a34b3586b5a34450ec038c3eed7ab19266635499594de52ff73723a54a72a75b9f7d6a956f01edee95
-  languageName: node
-  linkType: hard
-
-"@types/js-yaml@npm:^4.0.9":
-  version: 4.0.9
-  resolution: "@types/js-yaml@npm:4.0.9"
-  checksum: 10/a0ce595db8a987904badd21fc50f9f444cb73069f4b95a76cc222e0a17b3ff180669059c763ec314bc4c3ce284379177a9da80e83c5f650c6c1310cafbfaa8e6
   languageName: node
   linkType: hard
 
