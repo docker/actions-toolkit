@@ -178,6 +178,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@actions/http-client@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@actions/http-client@npm:3.0.2"
+  dependencies:
+    tunnel: "npm:^0.0.6"
+    undici: "npm:^6.23.0"
+  checksum: 10/36431245545cd54e2e2b25b333732801a904170a426cdcb6611423b9da70daeba2742d7258e7fb5a370e216082d3a416d04f47ea810d5e9d6cda8e6928466079
+  languageName: node
+  linkType: hard
+
 "@actions/io@npm:^1.0.1":
   version: 1.1.3
   resolution: "@actions/io@npm:1.1.3"
@@ -1208,7 +1218,7 @@ __metadata:
     "@actions/core": "npm:^2.0.2"
     "@actions/exec": "npm:^2.0.0"
     "@actions/github": "npm:^7.0.0"
-    "@actions/http-client": "npm:^3.0.1"
+    "@actions/http-client": "npm:^3.0.2"
     "@actions/io": "npm:^2.0.0"
     "@actions/tool-cache": "npm:^3.0.0"
     "@azure/storage-blob": "npm:^12.29.1"
@@ -9449,6 +9459,13 @@ __metadata:
   dependencies:
     "@fastify/busboy": "npm:^2.0.0"
   checksum: 10/0ceca8924a32acdcc0cfb8dd2d368c217840970aa3f5e314fc169608474be6341c5b8e50cad7bd257dbe3b4e432bc5d0a0d000f83644b54fa11a48735ec52b93
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.23.0":
+  version: 6.23.0
+  resolution: "undici@npm:6.23.0"
+  checksum: 10/56950995e7b628e62c996430445d17995ca9b70f6f2afe760a63da54205660d968bd08f0741b6f4fb008f40aa35c69cce979cd96ced399585d8c897a76a4f1d1
   languageName: node
   linkType: hard
 
