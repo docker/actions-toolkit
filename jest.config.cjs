@@ -38,7 +38,7 @@ module.exports = {
   setupFiles: ['dotenv/config'],
   testMatch: ['**/*.test.ts'],
   transform: {
-    '^.+\\.ts$': [
+    '^.+\\.[tj]s$': [
       'ts-jest',
       {
         useESM: true,
@@ -46,7 +46,7 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@octokit|universal-user-agent)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },

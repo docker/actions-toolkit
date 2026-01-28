@@ -21,7 +21,7 @@ module.exports = {
   testMatch: ['**/*.test.itg.ts'],
   testTimeout: 1800000, // 30 minutes
   transform: {
-    '^.+\\.ts$': [
+    '^.+\\.[tj]s$': [
       'ts-jest',
       {
         useESM: true,
@@ -29,7 +29,7 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@octokit|universal-user-agent)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
