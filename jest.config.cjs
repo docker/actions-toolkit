@@ -38,7 +38,7 @@ module.exports = {
   setupFiles: ['dotenv/config'],
   testMatch: ['**/*.test.ts'],
   transform: {
-    '^.+\\.ts$': [
+    '^.+\\.[tj]s$': [
       'ts-jest',
       {
         useESM: true,
@@ -46,7 +46,9 @@ module.exports = {
       }
     ]
   },
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/github|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
+    '^@actions/github$': '<rootDir>/node_modules/@actions/github/lib/github.js',
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   extensionsToTreatAsEsm: ['.ts'],

@@ -16,9 +16,6 @@
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import {Octokit} from '@octokit/core';
-import {restEndpointMethods} from '@octokit/plugin-rest-endpoint-methods';
-
 import {Exec} from './exec.js';
 import {GitHub} from './github.js';
 
@@ -47,9 +44,9 @@ export class Git {
     // if we have a token and this is a GitHub repo we can use the GitHub API
     if (token && repoMatch) {
       core.setSecret(token);
-      const octokit = new (Octokit.plugin(restEndpointMethods).defaults({
+      const octokit = github.getOctokit(token, {
         baseUrl: GitHub.apiURL
-      }))({auth: token});
+      });
       const [owner, repoName] = repoMatch.slice(1, 3);
       try {
         return (

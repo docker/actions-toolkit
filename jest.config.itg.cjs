@@ -21,7 +21,7 @@ module.exports = {
   testMatch: ['**/*.test.itg.ts'],
   testTimeout: 1800000, // 30 minutes
   transform: {
-    '^.+\\.ts$': [
+    '^.+\\.[tj]s$': [
       'ts-jest',
       {
         useESM: true,
@@ -29,7 +29,9 @@ module.exports = {
       }
     ]
   },
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/github|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
+    '^@actions/github$': '<rootDir>/node_modules/@actions/github/lib/github.js',
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   extensionsToTreatAsEsm: ['.ts'],
