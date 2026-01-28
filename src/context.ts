@@ -18,9 +18,6 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as tmp from 'tmp';
-import * as github from '@actions/github';
-
-import {GitHub} from './github';
 
 export class Context {
   private static readonly _tmpDir = fs.mkdtempSync(path.join(Context.ensureDirExists(process.env.RUNNER_TEMP || os.tmpdir()), 'docker-actions-toolkit-'));
@@ -36,26 +33,5 @@ export class Context {
 
   public static tmpName(options?: tmp.TmpNameOptions): string {
     return tmp.tmpNameSync(options);
-  }
-
-  public static gitRef(): string {
-    return Context.parseGitRef(github.context.ref, github.context.sha);
-  }
-
-  public static parseGitRef(ref: string, sha: string): string {
-    const setPullRequestHeadRef: boolean = !!(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF && process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF === 'true');
-    if (sha && ref && !ref.startsWith('refs/')) {
-      ref = `refs/heads/${ref}`;
-    }
-    if (sha && !ref.startsWith(`refs/pull/`)) {
-      ref = sha;
-    } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
-      ref = ref.replace(/\/merge$/g, '/head');
-    }
-    return ref;
-  }
-
-  public static gitContext(): string {
-    return `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git#${Context.gitRef()}`;
   }
 }

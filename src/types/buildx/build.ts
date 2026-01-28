@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export type GitContextFormat = 'fragment' | 'query';
+
 export type BuildMetadata = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
