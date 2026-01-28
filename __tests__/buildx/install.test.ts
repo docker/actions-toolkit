@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, afterEach} from '@jest/globals';
+import {describe, expect, it, test, afterEach} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
-import osm = require('os');
+
+import {mockArch, mockPlatform} from '../.helpers/os';
 
 import {Install} from '../../src/buildx/install';
 
@@ -85,8 +86,8 @@ describe('download', () => {
     ['linux', 's390x'],
   ])(
   'acquires buildx for %s/%s', async (os, arch) => {
-    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    mockPlatform(os as NodeJS.Platform);
+    mockArch(arch);
     const install = new Install();
     const buildxBin = await install.download('latest');
     expect(fs.existsSync(buildxBin)).toBe(true);

@@ -19,7 +19,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
-import osm = require('os');
+
+import {mockArch, mockPlatform} from '../.helpers/os';
 
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
 
@@ -60,8 +61,8 @@ describe('download', () => {
     [image('27.3.1'), 'win32'],
   ])(
   'acquires %p of docker (%s)', async (source, platformOS) => {
-    jest.spyOn(osm, 'platform').mockImplementation(() => platformOS as NodeJS.Platform);
-    jest.spyOn(osm, 'arch').mockImplementation(() => 'x64');
+    mockPlatform(platformOS as NodeJS.Platform);
+    mockArch('x64');
     const install = new Install({
       source: source,
       runDir: tmpDir

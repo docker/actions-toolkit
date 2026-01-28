@@ -19,8 +19,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as io from '@actions/io';
-import osm = require('os');
 import * as rimraf from 'rimraf';
+
+import {mockHomedir} from '../.helpers/os';
 
 import {Docker} from '../../src/docker/docker';
 
@@ -47,7 +48,7 @@ describe('configDir', () => {
   });
   it('returns default', async () => {
     process.env.DOCKER_CONFIG = '';
-    jest.spyOn(osm, 'homedir').mockImplementation(() => path.join('/tmp', 'home'));
+    mockHomedir(path.join('/tmp', 'home'));
     expect(Docker.configDir).toEqual(path.join('/tmp', 'home', '.docker'));
   });
   it('returns from env', async () => {

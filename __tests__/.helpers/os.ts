@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 actions-toolkit authors
+ * Copyright 2025 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-module.exports = {
-  testEnvironment: 'node',
-  moduleFileExtensions: ['js', 'ts'],
-  setupFiles: ['dotenv/config'],
-  testMatch: ['**/*.test.itg.ts'],
-  testTimeout: 1800000, // 30 minutes
-  transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-        tsconfig: '<rootDir>/tsconfig.test.json'
-      }
-    ]
-  },
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  },
-  extensionsToTreatAsEsm: ['.ts'],
-  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.cjs',
-  verbose: false
+import {jest} from '@jest/globals';
+import os from 'os';
+
+export const mockPlatform = (platform: NodeJS.Platform) => {
+  return jest.spyOn(os, 'platform').mockImplementation(() => platform);
+};
+
+export const mockArch = (arch: string) => {
+  return jest.spyOn(os, 'arch').mockImplementation(() => arch);
+};
+
+export const mockHomedir = (dir: string) => {
+  return jest.spyOn(os, 'homedir').mockImplementation(() => dir);
 };

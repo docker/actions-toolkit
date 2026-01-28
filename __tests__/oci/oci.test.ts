@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {afterEach, describe, expect, jest, test} from '@jest/globals';
+import {afterEach, describe, expect, test} from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
-import osm = require('os');
+
+import {mockArch, mockPlatform} from '../.helpers/os';
 
 import {OCI} from '../../src/oci/oci';
 
@@ -44,8 +45,8 @@ describe('defaultPlatform', () => {
     ['linux', 'ppc64', {architecture: 'ppc64le', os: 'linux'}],
     ['linux', 's390x', {architecture: 's390x', os: 'linux'}]
   ])('default platform for %s/%s', async (os: string, arch: string, expected: Platform) => {
-    jest.spyOn(osm, 'platform').mockImplementation(() => os as NodeJS.Platform);
-    jest.spyOn(osm, 'arch').mockImplementation(() => arch);
+    mockPlatform(os as NodeJS.Platform);
+    mockArch(arch);
     const res = OCI.defaultPlatform();
     expect(res).toEqual(expected);
   });
