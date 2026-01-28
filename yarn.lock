@@ -12,13 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/artifact@npm:^5.0.2":
-  version: 5.0.2
-  resolution: "@actions/artifact@npm:5.0.2"
+"@actions/artifact@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "@actions/artifact@npm:5.0.3"
   dependencies:
     "@actions/core": "npm:^2.0.0"
     "@actions/github": "npm:^6.0.1"
-    "@actions/http-client": "npm:^3.0.1"
+    "@actions/http-client": "npm:^3.0.2"
     "@azure/storage-blob": "npm:^12.29.1"
     "@octokit/core": "npm:^5.2.1"
     "@octokit/plugin-request-log": "npm:^1.0.4"
@@ -29,7 +29,7 @@ __metadata:
     archiver: "npm:^7.0.1"
     jwt-decode: "npm:^3.1.2"
     unzip-stream: "npm:^0.3.1"
-  checksum: 10/c712842af195b89a41ffc0445aa887ff671d95e8596598f82bedab2ee3b98f309b7c076bb5284187527aec667faf24ea2b909079d0fdc60d81f4e39947253343
+  checksum: 10/eda1744afabd3bb7ab7010acd732ad3d6411002d8176a58f4c210a22f4a8fdb396225228fd8c81b30b86aaed2dc7b279fe22a44ae71220540fbaaa4fd117c2a6
   languageName: node
   linkType: hard
 
@@ -1188,7 +1188,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
-    "@actions/artifact": "npm:^5.0.2"
+    "@actions/artifact": "npm:^5.0.3"
     "@actions/cache": "npm:^5.0.5"
     "@actions/core": "npm:^2.0.3"
     "@actions/exec": "npm:^2.0.0"
