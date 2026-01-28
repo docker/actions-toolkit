@@ -27,7 +27,6 @@ import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
 import * as core from '@actions/core';
-import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
 import * as httpm from '@actions/http-client';
 import {TransferProgressEvent} from '@azure/core-rest-pipeline';
@@ -36,7 +35,7 @@ import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {Util} from './util.js';
 
-import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github.js';
+import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, SummaryTableCell, UploadArtifactOpts, UploadArtifactResponse} from './types/github.js';
 
 export interface GitHubOpts {
   token?: string;
