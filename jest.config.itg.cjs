@@ -29,6 +29,7 @@ module.exports = {
       }
     ]
   },
+  transformIgnorePatterns: ['/node_modules/(?!(?:@octokit|universal-user-agent)/)'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
