@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Digest} from './digest';
-import {Platform} from './descriptor';
+import {Digest} from './digest.js';
+import {Platform} from './descriptor.js';
 
 export interface ImageConfig {
   User?: string;

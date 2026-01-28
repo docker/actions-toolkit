@@ -16,10 +16,10 @@
 
 import * as core from '@actions/core';
 
-import {Buildx} from './buildx';
-import {Exec} from '../exec';
+import {Buildx} from './buildx.js';
+import {Exec} from '../exec.js';
 
-import {BuilderInfo, Device, GCPolicy, NodeInfo} from '../types/buildx/builder';
+import {BuilderInfo, Device, GCPolicy, NodeInfo} from '../types/buildx/builder.js';
 
 export interface BuilderOpts {
   buildx?: Buildx;

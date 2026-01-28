@@ -18,7 +18,7 @@ import * as core from '@actions/core';
 import * as httpm from '@actions/http-client';
 import {HttpCodes} from '@actions/http-client';
 
-import {RepositoryRequest, RepositoryResponse, RepositoryTagsRequest, RepositoryTagsResponse, TokenRequest, TokenResponse, UpdateRepoDescriptionRequest} from './types/dockerhub';
+import {RepositoryRequest, RepositoryResponse, RepositoryTagsRequest, RepositoryTagsResponse, TokenRequest, TokenResponse, UpdateRepoDescriptionRequest} from './types/dockerhub.js';
 
 export interface DockerHubOpts {
   credentials: TokenRequest;

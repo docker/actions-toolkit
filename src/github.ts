@@ -36,9 +36,9 @@ import {TransferProgressEvent} from '@azure/core-rest-pipeline';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
-import {Util} from './util';
+import {Util} from './util.js';
 
-import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github';
+import {BuildSummaryOpts, GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo, UploadArtifactOpts, UploadArtifactResponse} from './types/github.js';
 
 export interface GitHubOpts {
   token?: string;

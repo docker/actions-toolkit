@@ -38,13 +38,20 @@ module.exports = {
   setupFiles: ['dotenv/config'],
   testMatch: ['**/*.test.ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest'
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true
+      }
+    ]
   },
   moduleNameMapper: {
-    '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
+    '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs',
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
+  extensionsToTreatAsEsm: ['.ts'],
   collectCoverageFrom: ['src/**/{!(index.ts),}.ts'],
   coveragePathIgnorePatterns: ['lib/', 'node_modules/', '__mocks__/', '__tests__/'],
-  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.js',
+  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.cjs',
   verbose: true
 };

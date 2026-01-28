@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GitHubContentOpts} from '../github';
+import {GitHubContentOpts} from '../github.js';
 
 export interface Cert {
   cacert?: string;

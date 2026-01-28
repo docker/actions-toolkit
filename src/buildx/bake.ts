@@ -18,15 +18,15 @@ import fs from 'fs';
 import path from 'path';
 import {parse} from 'csv-parse/sync';
 
-import {Buildx} from './buildx';
-import {Context} from '../context';
-import {Exec} from '../exec';
-import {Util} from '../util';
+import {Buildx} from './buildx.js';
+import {Context} from '../context.js';
+import {Exec} from '../exec.js';
+import {Util} from '../util.js';
 
 import {ExecOptions} from '@actions/exec';
-import {AttestEntry, BakeDefinition, CacheEntry, ExportEntry, SecretEntry, SSHEntry} from '../types/buildx/bake';
-import {BuildMetadata} from '../types/buildx/build';
-import {VertexWarning} from '../types/buildkit/client';
+import {AttestEntry, BakeDefinition, CacheEntry, ExportEntry, SecretEntry, SSHEntry} from '../types/buildx/bake.js';
+import {BuildMetadata} from '../types/buildx/build.js';
+import {VertexWarning} from '../types/buildkit/client.js';
 
 export interface BakeOpts {
   buildx?: Buildx;

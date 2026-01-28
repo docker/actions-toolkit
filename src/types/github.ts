@@ -18,8 +18,8 @@ import {AnnotationProperties} from '@actions/core';
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
-import {BakeDefinition} from './buildx/bake';
-import {ExportResponse} from './buildx/history';
+import {BakeDefinition} from './buildx/bake.js';
+import {ExportResponse} from './buildx/history.js';
 
 export interface GitHubRelease {
   id: number;

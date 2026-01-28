@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Descriptor} from './descriptor';
-import {Versioned} from './versioned';
+import {Descriptor} from './descriptor.js';
+import {Versioned} from './versioned.js';
 
 export interface Manifest extends Versioned {
   mediaType?: string;

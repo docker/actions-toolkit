@@ -18,11 +18,11 @@ import * as core from '@actions/core';
 import {Octokit} from '@octokit/core';
 import {restEndpointMethods} from '@octokit/plugin-rest-endpoint-methods';
 
-import {Exec} from './exec';
-import {GitHub} from './github';
+import {Exec} from './exec.js';
+import {GitHub} from './github.js';
 import {Context} from '@actions/github/lib/context';
 
-import {Context as GitContext} from './types/git';
+import {Context as GitContext} from './types/git.js';
 
 export class Git {
   public static async context(): Promise<GitContext> {

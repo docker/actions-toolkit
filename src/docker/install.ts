@@ -25,18 +25,18 @@ import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 
-import {Context} from '../context';
-import {Docker} from './docker';
-import {Exec} from '../exec';
-import {GitHub} from '../github';
-import {Regctl} from '../regclient/regctl';
-import {Undock} from '../undock/undock';
-import {Util} from '../util';
+import {Context} from '../context.js';
+import {Docker} from './docker.js';
+import {Exec} from '../exec.js';
+import {GitHub} from '../github.js';
+import {Regctl} from '../regclient/regctl.js';
+import {Undock} from '../undock/undock.js';
+import {Util} from '../util.js';
 
-import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets';
+import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets.js';
 
-import {GitHubRelease} from '../types/github';
-import {Image} from '../types/oci/config';
+import {GitHubRelease} from '../types/github.js';
+import {Image} from '../types/oci/config.js';
 
 export interface InstallSourceImage {
   type: 'image';

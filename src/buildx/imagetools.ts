@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Buildx} from './buildx';
-import {Exec} from '../exec';
+import {Buildx} from './buildx.js';
+import {Exec} from '../exec.js';
 
-import {Manifest as ImageToolsManifest} from '../types/buildx/imagetools';
-import {Image} from '../types/oci/config';
-import {Descriptor, Platform} from '../types/oci/descriptor';
-import {Digest} from '../types/oci/digest';
+import {Manifest as ImageToolsManifest} from '../types/buildx/imagetools.js';
+import {Image} from '../types/oci/config.js';
+import {Descriptor, Platform} from '../types/oci/descriptor.js';
+import {Digest} from '../types/oci/digest.js';
 
 export interface ImageToolsOpts {
   buildx?: Buildx;

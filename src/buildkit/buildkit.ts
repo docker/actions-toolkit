@@ -17,12 +17,12 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import {Buildx} from '../buildx/buildx';
-import {Builder} from '../buildx/builder';
-import {Docker} from '../docker/docker';
-import {Config} from './config';
+import {Buildx} from '../buildx/buildx.js';
+import {Builder} from '../buildx/builder.js';
+import {Docker} from '../docker/docker.js';
+import {Config} from './config.js';
 
-import {BuilderInfo, NodeInfo} from '../types/buildx/builder';
+import {BuilderInfo, NodeInfo} from '../types/buildx/builder.js';
 
 export interface BuildKitOpts {
   buildx?: Buildx;

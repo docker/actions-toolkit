@@ -17,7 +17,7 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import {Exec} from '../exec';
+import {Exec} from '../exec.js';
 
 export interface UndockOpts {
   binPath?: string;

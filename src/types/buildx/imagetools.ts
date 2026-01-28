@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Versioned} from '../oci/versioned';
-import {Descriptor} from '../oci/descriptor';
-import {Digest} from '../oci/digest';
+import {Versioned} from '../oci/versioned.js';
+import {Descriptor} from '../oci/descriptor.js';
+import {Digest} from '../oci/digest.js';
 
 // https://github.com/docker/buildx/blob/62857022a08552bee5cad0c3044a9a3b185f0b32/util/imagetools/printers.go#L109-L123
 export interface Manifest extends Versioned {

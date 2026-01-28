@@ -19,16 +19,16 @@ import path from 'path';
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import {Git} from '../buildkit/git';
-import {Docker} from '../docker/docker';
-import {GitHub} from '../github';
-import {Exec} from '../exec';
-import {Util} from '../util';
+import {Git} from '../buildkit/git.js';
+import {Docker} from '../docker/docker.js';
+import {GitHub} from '../github.js';
+import {Exec} from '../exec.js';
+import {Util} from '../util.js';
 
-import {VertexWarning} from '../types/buildkit/client';
-import {GitURL} from '../types/buildkit/git';
-import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx/buildx';
-import {GitHubAnnotation} from '../types/github';
+import {VertexWarning} from '../types/buildkit/client.js';
+import {GitURL} from '../types/buildkit/git.js';
+import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx/buildx.js';
+import {GitHubAnnotation} from '../types/github.js';
 
 export interface BuildxOpts {
   standalone?: boolean;

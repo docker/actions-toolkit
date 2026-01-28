@@ -22,13 +22,13 @@ import * as core from '@actions/core';
 import {bundleFromJSON, bundleToJSON} from '@sigstore/bundle';
 import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
 
-import {Context} from '../context';
-import {Cosign} from '../cosign/cosign';
-import {Exec} from '../exec';
-import {GitHub} from '../github';
-import {ImageTools} from '../buildx/imagetools';
+import {Context} from '../context.js';
+import {Cosign} from '../cosign/cosign.js';
+import {Exec} from '../exec.js';
+import {GitHub} from '../github.js';
+import {ImageTools} from '../buildx/imagetools.js';
 
-import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto';
+import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto.js';
 import {
   Endpoints,
   FULCIO_URL,
@@ -44,7 +44,7 @@ import {
   VerifySignedArtifactsResult,
   VerifySignedManifestsOpts,
   VerifySignedManifestsResult
-} from '../types/sigstore/sigstore';
+} from '../types/sigstore/sigstore.js';
 
 export interface SigstoreOpts {
   cosign?: Cosign;

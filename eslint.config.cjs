@@ -62,7 +62,7 @@ module.exports = defineConfig([
       },
       parser: tsParser,
       ecmaVersion: 2023,
-      sourceType: 'commonjs'
+      sourceType: 'module'
     },
 
     rules: {
@@ -75,7 +75,7 @@ module.exports = defineConfig([
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['csv-parse/sync', '@octokit/openapi-types']
+          ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods']
         }
       ],
       'jest/no-disabled-tests': 0

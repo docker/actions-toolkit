@@ -19,14 +19,14 @@ import path from 'path';
 import * as core from '@actions/core';
 import {parse} from 'csv-parse/sync';
 
-import {Buildx} from './buildx';
-import {Context} from '../context';
-import {GitHub} from '../github';
-import {Util} from '../util';
+import {Buildx} from './buildx.js';
+import {Context} from '../context.js';
+import {GitHub} from '../github.js';
+import {Util} from '../util.js';
 
-import {BuildMetadata} from '../types/buildx/build';
-import {VertexWarning} from '../types/buildkit/client';
-import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance';
+import {BuildMetadata} from '../types/buildx/build.js';
+import {VertexWarning} from '../types/buildkit/client.js';
+import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance.js';
 
 export interface BuildOpts {
   buildx?: Buildx;

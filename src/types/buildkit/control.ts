@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Descriptor} from '../oci/descriptor';
-import {Digest} from '../oci/digest';
-import {ProgressGroup, Range, SourceInfo} from './ops';
-import {RpcStatus} from './rpc';
+import {Descriptor} from '../oci/descriptor.js';
+import {Digest} from '../oci/digest.js';
+import {ProgressGroup, Range, SourceInfo} from './ops.js';
+import {RpcStatus} from './rpc.js';
 
 // https://github.com/moby/buildkit/blob/v0.14.0/api/services/control/control.pb.go#L1504-L1525
 export interface BuildHistoryRecord {
