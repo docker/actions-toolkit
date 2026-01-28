@@ -1200,8 +1200,6 @@ __metadata:
     "@eslint/compat": "npm:^2.0.0"
     "@eslint/eslintrc": "npm:^3.3.3"
     "@eslint/js": "npm:^9.39.2"
-    "@octokit/core": "npm:^7.0.6"
-    "@octokit/plugin-rest-endpoint-methods": "npm:^17.0.0"
     "@sigstore/bundle": "npm:^4.0.0"
     "@sigstore/rekor-types": "npm:^4.0.0"
     "@sigstore/sign": "npm:^4.1.0"

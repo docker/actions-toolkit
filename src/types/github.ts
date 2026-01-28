@@ -16,7 +16,7 @@
 
 import * as core from '@actions/core';
 import {AnnotationProperties} from '@actions/core';
-import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
+import type {getOctokit} from '@actions/github';
 import {JwtPayload} from 'jwt-decode';
 
 import {BakeDefinition} from './buildx/bake.js';
@@ -39,7 +39,8 @@ export interface GitHubContentOpts {
   path: string;
 }
 
-export type GitHubRepo = OctoOpenApiTypes['schemas']['repository'];
+type Octokit = ReturnType<typeof getOctokit>;
+export type GitHubRepo = Awaited<ReturnType<Octokit['rest']['repos']['get']>>['data'];
 
 export interface GitHubActionsRuntimeToken extends JwtPayload {
   ac?: string;

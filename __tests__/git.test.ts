@@ -16,7 +16,7 @@
 
 import {beforeEach, describe, expect, it, jest} from '@jest/globals';
 
-import {Git} from '../src/git';
+import {Git as GitMocked} from '../src/git';
 import {Exec} from '../src/exec';
 import {ExecOutput} from '@actions/exec';
 
@@ -46,7 +46,7 @@ describe('context', () => {
         exitCode: 0
       });
     });
-    const ctx = await Git.context();
+    const ctx = await GitMocked.context();
     expect(ctx.ref).toEqual('refs/heads/test');
     expect(ctx.sha).toEqual('test-sha');
   });
@@ -56,7 +56,7 @@ describe('isInsideWorkTree', () => {
   it('have been called', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      await Git.isInsideWorkTree();
+      await GitMocked.isInsideWorkTree();
     } catch {
       // noop
     }
@@ -69,9 +69,12 @@ describe('isInsideWorkTree', () => {
 
 describe('remoteSha', () => {
   it('returns sha using git ls-remote', async () => {
-    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
+    expect(await GitMocked.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
   });
   it('returns sha using github api', async () => {
+    jest.resetModules();
+    jest.unmock('@actions/github');
+    const {Git} = await import('../src/git');
     expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head', process.env.GITHUB_TOKEN)).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
   });
 });
@@ -80,7 +83,7 @@ describe('remoteURL', () => {
   it('have been called', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      await Git.remoteURL();
+      await GitMocked.remoteURL();
     } catch {
       // noop
     }
@@ -111,7 +114,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/test');
   });
@@ -135,7 +138,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/tags/8.0.0');
   });
@@ -159,7 +162,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/tags/8.0.0');
   });
@@ -183,7 +186,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/pull/221/merge');
   });
@@ -207,7 +210,7 @@ describe('ref', () => {
       });
     });
 
-    await expect(Git.ref()).rejects.toThrow('Cannot find detached HEAD ref in "wrong, HEAD, tag: 8.0.0"');
+    await expect(GitMocked.ref()).rejects.toThrow('Cannot find detached HEAD ref in "wrong, HEAD, tag: 8.0.0"');
   });
 
   it('returns mocked detached branch ref', async () => {
@@ -229,7 +232,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/test');
   });
@@ -253,7 +256,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/feature-branch');
   });
@@ -280,7 +283,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/main');
   });
@@ -307,7 +310,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/main');
   });
@@ -337,7 +340,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/heads/feature');
   });
@@ -370,7 +373,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/tags/v1.0.0');
   });
@@ -403,7 +406,7 @@ describe('ref', () => {
       });
     });
 
-    await expect(Git.ref()).rejects.toThrow('Cannot infer ref from detached HEAD');
+    await expect(GitMocked.ref()).rejects.toThrow('Cannot infer ref from detached HEAD');
   });
 
   it('handles remote ref without branch pattern when inferring from remote', async () => {
@@ -431,7 +434,7 @@ describe('ref', () => {
       });
     });
 
-    const ref = await Git.ref();
+    const ref = await GitMocked.ref();
 
     expect(ref).toEqual('refs/remotes/unusual-format');
   });
@@ -441,7 +444,7 @@ describe('fullCommit', () => {
   it('have been called', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      await Git.fullCommit();
+      await GitMocked.fullCommit();
     } catch {
       // noop
     }
@@ -456,7 +459,7 @@ describe('shortCommit', () => {
   it('have been called', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      await Git.shortCommit();
+      await GitMocked.shortCommit();
     } catch {
       // noop
     }
@@ -471,7 +474,7 @@ describe('tag', () => {
   it('have been called', async () => {
     const execSpy = jest.spyOn(Exec, 'getExecOutput');
     try {
-      await Git.tag();
+      await GitMocked.tag();
     } catch {
       // noop
     }
@@ -484,7 +487,7 @@ describe('tag', () => {
 
 describe('getCommitDate', () => {
   it('head', async () => {
-    const date = await Git.commitDate('HEAD');
+    const date = await GitMocked.commitDate('HEAD');
     await expect(date).toBeInstanceOf(Date);
   });
 });

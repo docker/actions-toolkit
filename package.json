@@ -55,8 +55,6 @@
     "@actions/io": "^2.0.0",
     "@actions/tool-cache": "^3.0.1",
     "@azure/storage-blob": "^12.29.1",
-    "@octokit/core": "^7.0.6",
-    "@octokit/plugin-rest-endpoint-methods": "^17.0.0",
     "@sigstore/bundle": "^4.0.0",
     "@sigstore/sign": "^4.1.0",
     "@sigstore/tuf": "^4.0.1",
