@@ -23,14 +23,40 @@ import {GitHub} from '../src/github';
 import {GitHubRepo} from '../src/types/github';
 
 import repoFixture from './.fixtures/github-repo.json';
-jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
-  return <Promise<GitHubRepo>>(repoFixture as unknown);
-});
 
 describe('repoData', () => {
   it('returns GitHub repo data', async () => {
+    jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
+      return <Promise<GitHubRepo>>(repoFixture as unknown);
+    });
     const github = new GitHub();
     expect((await github.repoData()).name).toEqual('Hello-World');
+  });
+});
+
+describe('repoData (api)', () => {
+  it('returns docker/actions-toolkit', async () => {
+    if (!process.env.GITHUB_TOKEN) {
+      return;
+    }
+
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      GITHUB_REPOSITORY: 'docker/actions-toolkit'
+    };
+
+    try {
+      jest.resetModules();
+      jest.unmock('@actions/github');
+      const {GitHub} = await import('../src/github');
+      const github = new GitHub({token: process.env.GITHUB_TOKEN});
+      const repo = await github.repoData();
+      const fullName = repo.full_name ?? `${repo.owner?.login}/${repo.name}`;
+      expect(fullName).toEqual('docker/actions-toolkit');
+    } finally {
+      process.env = originalEnv;
+    }
   });
 });
 
