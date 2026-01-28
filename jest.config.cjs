@@ -46,7 +46,6 @@ module.exports = {
     ]
   },
   moduleNameMapper: {
-    '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs',
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   extensionsToTreatAsEsm: ['.ts'],
