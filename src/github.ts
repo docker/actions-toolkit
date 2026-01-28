@@ -29,8 +29,6 @@ import {InvalidResponseError, NetworkError} from '@actions/artifact';
 import * as core from '@actions/core';
 import {SummaryTableCell} from '@actions/core/lib/summary';
 import * as github from '@actions/github';
-import {GitHub as Octokit} from '@actions/github/lib/utils';
-import {Context} from '@actions/github/lib/context';
 import * as httpm from '@actions/http-client';
 import {TransferProgressEvent} from '@azure/core-rest-pipeline';
 import {BlobClient, BlobHTTPHeaders} from '@azure/storage-blob';
@@ -46,7 +44,7 @@ export interface GitHubOpts {
 
 export class GitHub {
   private readonly githubToken?: string;
-  public readonly octokit: InstanceType<typeof Octokit>;
+  public readonly octokit: ReturnType<typeof github.getOctokit>;
 
   constructor(opts?: GitHubOpts) {
     this.githubToken = opts?.token || process.env.GITHUB_TOKEN;
@@ -87,7 +85,7 @@ export class GitHub {
     return <Record<string, GitHubRelease>>JSON.parse(dt);
   }
 
-  static get context(): Context {
+  static get context(): typeof github.context {
     return github.context;
   }
 
