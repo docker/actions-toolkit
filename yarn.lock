@@ -212,16 +212,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/tool-cache@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@actions/tool-cache@npm:3.0.0"
+"@actions/tool-cache@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@actions/tool-cache@npm:3.0.1"
   dependencies:
     "@actions/core": "npm:^2.0.1"
     "@actions/exec": "npm:^2.0.0"
-    "@actions/http-client": "npm:^3.0.1"
+    "@actions/http-client": "npm:^3.0.2"
     "@actions/io": "npm:^2.0.0"
     semver: "npm:^6.1.0"
-  checksum: 10/9e881d280cc627f950745696c508e63570db04773e8ce027ce7824192a1c32a00417d029fd27ad8b5dd2bdfc81ebcc551c9204b87a757d3d5685aa2c9255e784
+  checksum: 10/db5d3872c88ece3b59925773ded322c2d578fd175859ae89b8963175dae35054d6a28f3a4d2a0d70ac35f1ab6eaf4df9756ab24ebd86d7a8cda6ef65867f9f54
   languageName: node
   linkType: hard
 
@@ -1230,7 +1230,7 @@ __metadata:
     "@actions/github": "npm:^7.0.0"
     "@actions/http-client": "npm:^3.0.2"
     "@actions/io": "npm:^2.0.0"
-    "@actions/tool-cache": "npm:^3.0.0"
+    "@actions/tool-cache": "npm:^3.0.1"
     "@azure/storage-blob": "npm:^12.29.1"
     "@eslint/compat": "npm:^2.0.0"
     "@eslint/eslintrc": "npm:^3.3.3"
