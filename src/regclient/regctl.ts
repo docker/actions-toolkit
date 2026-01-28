@@ -17,9 +17,9 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import {Exec} from '../exec';
+import {Exec} from '../exec.js';
 
-import {Manifest} from '../types/oci/manifest';
+import {Manifest} from '../types/oci/manifest.js';
 
 export interface RegctlOpts {
   binPath?: string;

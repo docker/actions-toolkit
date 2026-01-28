@@ -15,7 +15,7 @@
  */
 
 import fs from 'fs';
-import {Context} from '../context';
+import {Context} from '../context.js';
 
 export const setupDockerWinPs1 = (): string => {
   return get('docker-setup-win.ps1', setupDockerWinPs1Data);

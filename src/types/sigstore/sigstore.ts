@@ -16,8 +16,8 @@
 
 import type {SerializedBundle} from '@sigstore/bundle';
 
-import {Subject} from '../intoto/intoto';
-import {Platform} from '../oci/descriptor';
+import {Subject} from '../intoto/intoto.js';
+import {Platform} from '../oci/descriptor.js';
 
 export const FULCIO_URL = 'https://fulcio.sigstore.dev';
 export const REKOR_URL = 'https://rekor.sigstore.dev';

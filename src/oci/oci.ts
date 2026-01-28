@@ -20,13 +20,13 @@ import * as path from 'path';
 import {Readable} from 'stream';
 import * as tar from 'tar-stream';
 
-import {Archive, LoadArchiveOpts} from '../types/oci/oci';
-import {Index} from '../types/oci';
-import {Platform} from '../types/oci/descriptor';
-import {Manifest} from '../types/oci/manifest';
-import {Image} from '../types/oci/config';
-import {IMAGE_BLOBS_DIR_V1, IMAGE_INDEX_FILE_V1, IMAGE_LAYOUT_FILE_V1, ImageLayout} from '../types/oci/layout';
-import {MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from '../types/oci/mediatype';
+import {Archive, LoadArchiveOpts} from '../types/oci/oci.js';
+import {Index} from '../types/oci/index.js';
+import {Platform} from '../types/oci/descriptor.js';
+import {Manifest} from '../types/oci/manifest.js';
+import {Image} from '../types/oci/config.js';
+import {IMAGE_BLOBS_DIR_V1, IMAGE_INDEX_FILE_V1, IMAGE_LAYOUT_FILE_V1, ImageLayout} from '../types/oci/layout.js';
+import {MEDIATYPE_IMAGE_INDEX_V1, MEDIATYPE_IMAGE_MANIFEST_V1} from '../types/oci/mediatype.js';
 
 export class OCI {
   public static defaultPlatform(): Platform {

@@ -17,9 +17,9 @@
 import * as core from '@actions/core';
 import {BUNDLE_V03_MEDIA_TYPE, SerializedBundle} from '@sigstore/bundle';
 
-import {Exec} from '../exec';
+import {Exec} from '../exec.js';
 import * as semver from 'semver';
-import {MEDIATYPE_EMPTY_JSON_V1} from '../types/oci/mediatype';
+import {MEDIATYPE_EMPTY_JSON_V1} from '../types/oci/mediatype.js';
 
 export interface CosignOpts {
   binPath?: string;

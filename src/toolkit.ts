@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {GitHub} from './github';
-import {Buildx} from './buildx/buildx';
-import {Build as BuildxBuild} from './buildx/build';
-import {Bake as BuildxBake} from './buildx/bake';
-import {Install as BuildxInstall} from './buildx/install';
-import {Builder} from './buildx/builder';
-import {BuildKit} from './buildkit/buildkit';
-import {Compose} from './compose/compose';
-import {Install as ComposeInstall} from './compose/install';
-import {Cosign} from './cosign/cosign';
-import {Install as CosignInstall} from './cosign/install';
-import {Regctl} from './regclient/regctl';
-import {Install as RegctlInstall} from './regclient/install';
-import {Undock} from './undock/undock';
-import {Install as UndockInstall} from './undock/install';
-import {Sigstore} from './sigstore/sigstore';
+import {GitHub} from './github.js';
+import {Buildx} from './buildx/buildx.js';
+import {Build as BuildxBuild} from './buildx/build.js';
+import {Bake as BuildxBake} from './buildx/bake.js';
+import {Install as BuildxInstall} from './buildx/install.js';
+import {Builder} from './buildx/builder.js';
+import {BuildKit} from './buildkit/buildkit.js';
+import {Compose} from './compose/compose.js';
+import {Install as ComposeInstall} from './compose/install.js';
+import {Cosign} from './cosign/cosign.js';
+import {Install as CosignInstall} from './cosign/install.js';
+import {Regctl} from './regclient/regctl.js';
+import {Install as RegctlInstall} from './regclient/install.js';
+import {Undock} from './undock/undock.js';
+import {Install as UndockInstall} from './undock/install.js';
+import {Sigstore} from './sigstore/sigstore.js';
 
 export interface ToolkitOpts {
   /**

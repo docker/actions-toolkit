@@ -21,12 +21,12 @@ import * as core from '@actions/core';
 import {ExecOptions, ExecOutput} from '@actions/exec';
 import * as io from '@actions/io';
 
-import {Context} from '../context';
-import {Cache} from '../cache';
-import {Exec} from '../exec';
-import {Util} from '../util';
+import {Context} from '../context.js';
+import {Cache} from '../cache.js';
+import {Exec} from '../exec.js';
+import {Util} from '../util.js';
 
-import {ConfigFile, ContextInfo} from '../types/docker/docker';
+import {ConfigFile, ContextInfo} from '../types/docker/docker.js';
 
 export class Docker {
   static get configDir(): string {

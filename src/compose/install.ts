@@ -22,13 +22,13 @@ import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
-import {Cache} from '../cache';
-import {Context} from '../context';
-import {Docker} from '../docker/docker';
-import {GitHub} from '../github';
+import {Cache} from '../cache.js';
+import {Context} from '../context.js';
+import {Docker} from '../docker/docker.js';
+import {GitHub} from '../github.js';
 
-import {DownloadVersion} from '../types/compose/compose';
-import {GitHubRelease} from '../types/github';
+import {DownloadVersion} from '../types/compose/compose.js';
+import {GitHubRelease} from '../types/github.js';
 
 export interface InstallOpts {
   standalone?: boolean;

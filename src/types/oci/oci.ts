@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Index} from './index';
-import {ImageLayout} from './layout';
-import {Manifest} from './manifest';
-import {Image} from './config';
+import {Index} from './index.js';
+import {ImageLayout} from './layout.js';
+import {Manifest} from './manifest.js';
+import {Image} from './config.js';
 
 export interface LoadArchiveOpts {
   file: string;

@@ -21,14 +21,14 @@ import path from 'path';
 import {Readable, Writable} from 'stream';
 import * as core from '@actions/core';
 
-import {Buildx} from './buildx';
-import {Context} from '../context';
-import {Docker} from '../docker/docker';
-import {Exec} from '../exec';
-import {GitHub} from '../github';
-import {Util} from '../util';
+import {Buildx} from './buildx.js';
+import {Context} from '../context.js';
+import {Docker} from '../docker/docker.js';
+import {Exec} from '../exec.js';
+import {GitHub} from '../github.js';
+import {Util} from '../util.js';
 
-import {ExportOpts, ExportResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history';
+import {ExportOpts, ExportResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history.js';
 
 export interface HistoryOpts {
   buildx?: Buildx;

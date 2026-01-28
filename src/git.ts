@@ -15,18 +15,18 @@
  */
 
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import {Octokit} from '@octokit/core';
 import {restEndpointMethods} from '@octokit/plugin-rest-endpoint-methods';
 
-import {Exec} from './exec';
-import {GitHub} from './github';
-import {Context} from '@actions/github/lib/context';
+import {Exec} from './exec.js';
+import {GitHub} from './github.js';
 
-import {Context as GitContext} from './types/git';
+export type GitContext = typeof github.context;
 
 export class Git {
   public static async context(): Promise<GitContext> {
-    const ctx = new Context();
+    const ctx = {...github.context} as GitContext;
     ctx.ref = await Git.ref();
     ctx.sha = await Git.fullCommit();
     return ctx;

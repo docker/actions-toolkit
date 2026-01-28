@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GitRef, GitURL, GitURLFragment, URLUserInfo} from '../types/buildkit/git';
+import {GitRef, GitURL, GitURLFragment, URLUserInfo} from '../types/buildkit/git.js';
 
 export class Git {
   private static protoRegexp = new RegExp('^[a-zA-Z0-9]+://');

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Digest} from './digest';
+import {Digest} from './digest.js';
 
-import {MEDIATYPE_EMPTY_JSON_V1} from './mediatype';
+import {MEDIATYPE_EMPTY_JSON_V1} from './mediatype.js';
 
 export interface Descriptor {
   mediaType: string;

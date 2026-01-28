@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import * as core from '@actions/core';
 import {AnnotationProperties} from '@actions/core';
 import {components as OctoOpenApiTypes} from '@octokit/openapi-types';
 import {JwtPayload} from 'jwt-decode';
 
-import {BakeDefinition} from './buildx/bake';
-import {ExportResponse} from './buildx/history';
+import {BakeDefinition} from './buildx/bake.js';
+import {ExportResponse} from './buildx/history.js';
+
+export type SummaryTableRow = Parameters<typeof core.summary.addTable>[0][number];
+export type SummaryTableCell = Exclude<SummaryTableRow[number], string>;
 
 export interface GitHubRelease {
   id: number;

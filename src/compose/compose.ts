@@ -16,8 +16,8 @@
 
 import * as core from '@actions/core';
 
-import {Docker} from '../docker/docker';
-import {Exec} from '../exec';
+import {Docker} from '../docker/docker.js';
+import {Exec} from '../exec.js';
 
 export interface ComposeOpts {
   standalone?: boolean;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Versioned} from './versioned';
-import {Descriptor} from './descriptor';
+import {Versioned} from './versioned.js';
+import {Descriptor} from './descriptor.js';
 
 export interface Index extends Versioned {
   mediaType?: string;

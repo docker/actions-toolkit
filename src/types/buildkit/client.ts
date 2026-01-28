@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Digest} from '../oci/digest';
-import {ProgressGroup, Range, SourceInfo} from './ops';
+import {Digest} from '../oci/digest.js';
+import {ProgressGroup, Range, SourceInfo} from './ops.js';
 
 // https://github.com/moby/buildkit/blob/v0.14.0/client/graph.go#L10-L19
 export interface Vertex {

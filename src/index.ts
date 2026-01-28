@@ -16,7 +16,7 @@
 
 import * as core from '@actions/core';
 
-import {Cache} from './cache';
+import {Cache} from './cache.js';
 
 const isPost = !!process.env['STATE_isPost'];
 if (!isPost) {

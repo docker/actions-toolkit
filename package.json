@@ -2,6 +2,7 @@
   "name": "@docker/actions-toolkit",
   "version": "0.0.0+unknown",
   "description": "Toolkit for Docker (GitHub) Actions",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "lint": "yarn run prettier && yarn run eslint",
@@ -12,9 +13,9 @@
     "prettier:fix": "prettier --write \"./**/*.ts\"",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:itg": "jest -c jest.config.itg.js --runInBand",
-    "test:itg-list": "jest -c jest.config.itg.js --listTests",
-    "test:itg-coverage": "jest -c jest.config.itg.js --coverage --runInBand"
+    "test:itg": "jest -c jest.config.itg.cjs --runInBand",
+    "test:itg-list": "jest -c jest.config.itg.cjs --listTests",
+    "test:itg-coverage": "jest -c jest.config.itg.cjs --coverage --runInBand"
   },
   "repository": {
     "type": "git",

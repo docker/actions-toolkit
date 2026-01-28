@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
+    "module": "es2020",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "target": "es6",
-    "module": "node16",
     "isolatedModules": true,
     "strict": true,
     "declaration": true,
@@ -14,6 +14,7 @@
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
   },
   "exclude": [
     "./__mocks__/**/*",

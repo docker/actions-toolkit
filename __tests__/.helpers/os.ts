@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 actions-toolkit authors
+ * Copyright 2025 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-import {Context as GitHubContext} from '@actions/github/lib/context';
+import {jest} from '@jest/globals';
+import os from 'os';
 
-export type Context = GitHubContext;
+export const mockPlatform = (platform: NodeJS.Platform) => {
+  return jest.spyOn(os, 'platform').mockImplementation(() => platform);
+};
+
+export const mockArch = (arch: string) => {
+  return jest.spyOn(os, 'arch').mockImplementation(() => arch);
+};
+
+export const mockHomedir = (dir: string) => {
+  return jest.spyOn(os, 'homedir').mockImplementation(() => dir);
+};

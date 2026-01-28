@@ -21,11 +21,18 @@ module.exports = {
   testMatch: ['**/*.test.itg.ts'],
   testTimeout: 1800000, // 30 minutes
   transform: {
-    '^.+\\.ts$': 'ts-jest'
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: '<rootDir>/tsconfig.test.json'
+      }
+    ]
   },
   moduleNameMapper: {
-    '^csv-parse/sync': '<rootDir>/node_modules/csv-parse/dist/cjs/sync.cjs'
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
-  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.js',
+  extensionsToTreatAsEsm: ['.ts'],
+  testResultsProcessor: '<rootDir>/__tests__/testResultsProcessor.cjs',
   verbose: false
 };

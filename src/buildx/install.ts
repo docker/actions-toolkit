@@ -22,17 +22,17 @@ import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
 
-import {Buildx} from './buildx';
-import {Cache} from '../cache';
-import {Context} from '../context';
-import {Exec} from '../exec';
-import {Docker} from '../docker/docker';
-import {Git} from '../git';
-import {GitHub} from '../github';
-import {Util} from '../util';
+import {Buildx} from './buildx.js';
+import {Cache} from '../cache.js';
+import {Context} from '../context.js';
+import {Exec} from '../exec.js';
+import {Docker} from '../docker/docker.js';
+import {Git} from '../git.js';
+import {GitHub} from '../github.js';
+import {Util} from '../util.js';
 
-import {DownloadVersion} from '../types/buildx/buildx';
-import {GitHubRelease} from '../types/github';
+import {DownloadVersion} from '../types/buildx/buildx.js';
+import {GitHubRelease} from '../types/github.js';
 
 export interface InstallOpts {
   standalone?: boolean;

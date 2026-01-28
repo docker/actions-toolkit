@@ -16,7 +16,7 @@
 
 import fs from 'fs';
 
-import {Context} from '../context';
+import {Context} from '../context.js';
 
 export class Config {
   public resolveFromString(s: string): string {
