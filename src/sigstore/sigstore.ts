@@ -19,8 +19,10 @@ import fs from 'fs';
 import path from 'path';
 
 import * as core from '@actions/core';
-import {bundleFromJSON, bundleToJSON} from '@sigstore/bundle';
+import {bundleFromJSON, bundleToJSON, SerializedBundle} from '@sigstore/bundle';
 import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
+import * as tuf from '@sigstore/tuf';
+import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 
 import {Context} from '../context.js';
 import {Cosign} from '../cosign/cosign.js';
@@ -40,6 +42,8 @@ import {
   SignProvenanceBlobsOpts,
   SignProvenanceBlobsResult,
   TSASERVER_URL,
+  VerifyArtifactOpts,
+  VerifyArtifactResult,
   VerifySignedArtifactsOpts,
   VerifySignedArtifactsResult,
   VerifySignedManifestsOpts,
@@ -361,6 +365,51 @@ export class Sigstore {
     return result;
   }
 
+  public async verifyArtifact(artifactPath: string, bundlePath: string, opts?: VerifyArtifactOpts): Promise<VerifyArtifactResult> {
+    core.info(`Verifying keyless verification bundle signature`);
+    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
+    const bundle = bundleFromJSON(parsedBundle);
+
+    core.info(`Fetching Sigstore TUF trusted root metadata`);
+    const trustedRoot = await tuf.getTrustedRoot();
+    const trustMaterial = toTrustMaterial(trustedRoot);
+
+    try {
+      core.info(`Verifying artifact signature`);
+      const signedEntity = toSignedEntity(bundle, fs.readFileSync(artifactPath));
+      const signingCert = Sigstore.parseCertificate(bundle);
+
+      // collect transparency log ID if available
+      const tlogEntries = bundle.verificationMaterial.tlogEntries;
+      const tlogID = tlogEntries.length > 0 ? tlogEntries[0].logIndex : undefined;
+
+      // TODO: remove when subjectAlternativeName check with regex is supported: https://github.com/sigstore/sigstore-js/pull/1556
+      if (opts?.subjectAlternativeName && opts?.subjectAlternativeName instanceof RegExp) {
+        const subjectAltName = signingCert.subjectAltName?.replace(/^uri:/i, '');
+        if (!subjectAltName) {
+          throw new Error('Signing certificate does not contain subjectAltName');
+        } else if (!subjectAltName.match(opts.subjectAlternativeName)) {
+          throw new Error(`Signing certificate subjectAlternativeName "${subjectAltName}" does not match expected pattern`);
+        }
+      }
+
+      const verifier = new Verifier(trustMaterial);
+      const signer = verifier.verify(signedEntity, {
+        subjectAlternativeName: opts?.subjectAlternativeName && typeof opts.subjectAlternativeName === 'string' ? opts.subjectAlternativeName : undefined,
+        extensions: opts?.issuer ? {issuer: opts.issuer} : undefined
+      });
+      core.debug(`Sigstore.verifyArtifact signer: ${JSON.stringify(signer)}`);
+
+      return {
+        payload: parsedBundle,
+        certificate: signingCert.toString(),
+        tlogID: tlogID
+      };
+    } catch (err) {
+      throw new Error(`Failed to verify artifact signature: ${err}`);
+    }
+  }
+
   private signingEndpoints(noTransparencyLog?: boolean): Endpoints {
     noTransparencyLog = Sigstore.noTransparencyLog(noTransparencyLog);
     core.info(`Upload to transparency log: ${noTransparencyLog ? 'disabled' : 'enabled'}`);
@@ -442,6 +491,20 @@ export class Sigstore {
   }
 
   private static parseBundle(bundle: Bundle): ParsedBundle {
+    const signingCert = Sigstore.parseCertificate(bundle);
+
+    // collect transparency log ID if available
+    const tlogEntries = bundle.verificationMaterial.tlogEntries;
+    const tlogID = tlogEntries.length > 0 ? tlogEntries[0].logIndex : undefined;
+
+    return {
+      payload: bundleToJSON(bundle),
+      certificate: signingCert.toString(),
+      tlogID: tlogID
+    };
+  }
+
+  private static parseCertificate(bundle: Bundle): X509Certificate {
     let certBytes: Buffer;
     switch (bundle.verificationMaterial.content.$case) {
       case 'x509CertificateChain':
@@ -453,17 +516,6 @@ export class Sigstore {
       default:
         throw new Error('Bundle must contain an x509 certificate');
     }
-
-    const signingCert = new X509Certificate(certBytes);
-
-    // collect transparency log ID if available
-    const tlogEntries = bundle.verificationMaterial.tlogEntries;
-    const tlogID = tlogEntries.length > 0 ? tlogEntries[0].logIndex : undefined;
-
-    return {
-      payload: bundleToJSON(bundle),
-      certificate: signingCert.toString(),
-      tlogID: tlogID
-    };
+    return new X509Certificate(certBytes);
   }
 }
