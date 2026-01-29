@@ -61,16 +61,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/core@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "@actions/core@npm:2.0.2"
-  dependencies:
-    "@actions/exec": "npm:^2.0.0"
-    "@actions/http-client": "npm:^3.0.1"
-  checksum: 10/37547d3668c7df0b498b7f4596e190a9bf27d3d24f9c9b8b9718c6e79f3d550ef7bab9b2e517d54de163e36f0e1fdc51cc688753130caf3240cefb9ac37cd0b3
-  languageName: node
-  linkType: hard
-
 "@actions/core@npm:^2.0.3":
   version: 2.0.3
   resolution: "@actions/core@npm:2.0.3"
@@ -169,16 +159,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/http-client@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@actions/http-client@npm:3.0.1"
-  dependencies:
-    tunnel: "npm:^0.0.6"
-    undici: "npm:^5.28.5"
-  checksum: 10/aac5a88023a44bd0ea658a31308a73ab6a3da9dd36ded5d7311adf5e41f4379d37091aa9390de654d8d5a81435c02c2b5316ff3166066cd14eec5e66f1e0c3d0
-  languageName: node
-  linkType: hard
-
 "@actions/http-client@npm:^3.0.2":
   version: 3.0.2
   resolution: "@actions/http-client@npm:3.0.2"
@@ -206,23 +186,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/io@npm:^3.0.2":
+"@actions/io@npm:^3.0.0, @actions/io@npm:^3.0.2":
   version: 3.0.2
   resolution: "@actions/io@npm:3.0.2"
   checksum: 10/ef17cb4ec0a2b640d5f4851446ad1c12bf4b2b1cf83741c5eecee4e8f50b3ca3ac9ae4084027dcaa1bf0c016d653dbc0e5fe20daedd39ee5fb6edb671f6e45b5
   languageName: node
   linkType: hard
 
-"@actions/tool-cache@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@actions/tool-cache@npm:3.0.1"
+"@actions/tool-cache@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@actions/tool-cache@npm:4.0.0"
   dependencies:
-    "@actions/core": "npm:^2.0.1"
-    "@actions/exec": "npm:^2.0.0"
-    "@actions/http-client": "npm:^3.0.2"
-    "@actions/io": "npm:^2.0.0"
-    semver: "npm:^6.1.0"
-  checksum: 10/db5d3872c88ece3b59925773ded322c2d578fd175859ae89b8963175dae35054d6a28f3a4d2a0d70ac35f1ab6eaf4df9756ab24ebd86d7a8cda6ef65867f9f54
+    "@actions/core": "npm:^3.0.0"
+    "@actions/exec": "npm:^3.0.0"
+    "@actions/http-client": "npm:^4.0.0"
+    "@actions/io": "npm:^3.0.0"
+    semver: "npm:^7.7.3"
+  checksum: 10/a01b2739843096a894d51c3f77c69a93d88597a0d3cf001f3dac2178087e590bdb1052261b43c36cbc45b0fdeeb060a44bbb8408739697a3ae98efdc4acb302b
   languageName: node
   linkType: hard
 
@@ -1231,7 +1211,7 @@ __metadata:
     "@actions/github": "npm:^9.0.0"
     "@actions/http-client": "npm:^4.0.0"
     "@actions/io": "npm:^3.0.2"
-    "@actions/tool-cache": "npm:^3.0.1"
+    "@actions/tool-cache": "npm:^4.0.0"
     "@azure/storage-blob": "npm:^12.29.1"
     "@eslint/compat": "npm:^2.0.0"
     "@eslint/eslintrc": "npm:^3.3.3"
@@ -8477,7 +8457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^6.0.0, semver@npm:^6.1.0, semver@npm:^6.3.0":
+"semver@npm:^6.0.0, semver@npm:^6.3.0":
   version: 6.3.0
   resolution: "semver@npm:6.3.0"
   bin:
