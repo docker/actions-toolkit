@@ -46,7 +46,7 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/core|@actions/exec|@actions/github|@actions/http-client|@actions/io|@octokit|universal-user-agent|before-after-hook)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/core|@actions/exec|@actions/github|@actions/http-client|@actions/io|@actions/tool-cache|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
     '^@actions/core': '<rootDir>/node_modules/@actions/core/lib/core.js',
     '^@actions/exec$': '<rootDir>/node_modules/@actions/exec/lib/exec.js',
@@ -56,6 +56,7 @@ module.exports = {
     '^@actions/http-client/lib/interfaces$': '<rootDir>/node_modules/@actions/http-client/lib/interfaces.js',
     '^@actions/io$': '<rootDir>/node_modules/@actions/io/lib/io.js',
     '^@actions/io/lib/io-util$': '<rootDir>/node_modules/@actions/io/lib/io-util.js',
+    '^@actions/tool-cache$': '<rootDir>/node_modules/@actions/tool-cache/lib/tool-cache.js',
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   extensionsToTreatAsEsm: ['.ts'],
