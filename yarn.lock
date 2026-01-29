@@ -177,6 +177,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@actions/io@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@actions/io@npm:3.0.2"
+  checksum: 10/ef17cb4ec0a2b640d5f4851446ad1c12bf4b2b1cf83741c5eecee4e8f50b3ca3ac9ae4084027dcaa1bf0c016d653dbc0e5fe20daedd39ee5fb6edb671f6e45b5
+  languageName: node
+  linkType: hard
+
 "@actions/tool-cache@npm:^3.0.1":
   version: 3.0.1
   resolution: "@actions/tool-cache@npm:3.0.1"
@@ -1194,7 +1201,7 @@ __metadata:
     "@actions/exec": "npm:^2.0.0"
     "@actions/github": "npm:^9.0.0"
     "@actions/http-client": "npm:^3.0.2"
-    "@actions/io": "npm:^2.0.0"
+    "@actions/io": "npm:^3.0.2"
     "@actions/tool-cache": "npm:^3.0.1"
     "@azure/storage-blob": "npm:^12.29.1"
     "@eslint/compat": "npm:^2.0.0"
