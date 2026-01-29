@@ -33,21 +33,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^5.0.5":
-  version: 5.0.5
-  resolution: "@actions/cache@npm:5.0.5"
+"@actions/cache@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@actions/cache@npm:6.0.0"
   dependencies:
-    "@actions/core": "npm:^2.0.0"
-    "@actions/exec": "npm:^2.0.0"
-    "@actions/glob": "npm:^0.5.1"
-    "@actions/http-client": "npm:^3.0.2"
-    "@actions/io": "npm:^2.0.0"
-    "@azure/abort-controller": "npm:^1.1.0"
+    "@actions/core": "npm:^3.0.0"
+    "@actions/exec": "npm:^3.0.0"
+    "@actions/glob": "npm:^0.6.1"
+    "@actions/http-client": "npm:^4.0.0"
+    "@actions/io": "npm:^3.0.0"
     "@azure/core-rest-pipeline": "npm:^1.22.0"
-    "@azure/storage-blob": "npm:^12.29.1"
+    "@azure/storage-blob": "npm:^12.30.0"
     "@protobuf-ts/runtime-rpc": "npm:^2.11.1"
-    semver: "npm:^6.3.1"
-  checksum: 10/008cd7005ddd2f2c7b531836695200131ef0d6a71d3e179d8d17a01afce2d4a14340e5e750161bd247c5da033e3ca197d64431f91f183846b725d97990c035a4
+    semver: "npm:^7.7.3"
+  checksum: 10/91609983f6ed5829018c6afea9b692762acd34604e44479be3ff25c76f5b869d6727766847193ab9f0724de84cd6043759a55553c500c3538af9951494ca14b6
   languageName: node
   linkType: hard
 
@@ -58,16 +57,6 @@ __metadata:
     "@actions/exec": "npm:^2.0.0"
     "@actions/http-client": "npm:^3.0.0"
   checksum: 10/a3376a89886c7144d5db0cd7f897ab397c1f9eaa7b291e052b87d0bd5096e4ccc1046084b26b5d764cb29c7980098c202af8ec3a5928183a8e52d3421c4210f6
-  languageName: node
-  linkType: hard
-
-"@actions/core@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "@actions/core@npm:2.0.3"
-  dependencies:
-    "@actions/exec": "npm:^2.0.0"
-    "@actions/http-client": "npm:^3.0.2"
-  checksum: 10/d7660656fda81f379faf004d4a8e9f06e4ca8e7401d9f9cda492a2e2394d2804d3582b86c912f1dd681030a80b3a9fdffb13f8244ccca3bd3b8ebc9a154b97e4
   languageName: node
   linkType: hard
 
@@ -129,13 +118,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/glob@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@actions/glob@npm:0.5.1"
+"@actions/glob@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@actions/glob@npm:0.6.1"
   dependencies:
-    "@actions/core": "npm:^2.0.3"
+    "@actions/core": "npm:^3.0.0"
     minimatch: "npm:^3.0.4"
-  checksum: 10/a23e3631ea497e3c0b96933c4cbedff4433433bf9e8d03e6853dc57fb7fd68dee70ebbbf0eaf8c9283460f687a1384ba632222c97ed89fdd1c4a69c7781c678d
+  checksum: 10/343ca2ef8343fd5488fe277dc268b84017bb8b0c5e352215c4ce7181d07c86f0e1951b97e273b5a133a39596a6a8f1a5f06dbc87214fc440d729d3f03daa3b61
   languageName: node
   linkType: hard
 
@@ -215,7 +204,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/abort-controller@npm:^1.0.0, @azure/abort-controller@npm:^1.1.0":
+"@azure/abort-controller@npm:^1.0.0":
   version: 1.1.0
   resolution: "@azure/abort-controller@npm:1.1.0"
   dependencies:
@@ -387,6 +376,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/storage-blob@npm:^12.30.0":
+  version: 12.30.0
+  resolution: "@azure/storage-blob@npm:12.30.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-client": "npm:^1.9.3"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-lro": "npm:^2.2.0"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/core-xml": "npm:^1.4.5"
+    "@azure/logger": "npm:^1.1.4"
+    "@azure/storage-common": "npm:^12.2.0"
+    events: "npm:^3.0.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/2fe2190aa6f637b4a525a2f2d129fefd9182670b59d2bfdcb4a8fb3b6cd2d10e9970ab9ebc3a3ddcf45a7143553f3ae19f800142b7218087bb8d02c91cb7b59d
+  languageName: node
+  linkType: hard
+
 "@azure/storage-common@npm:^12.1.1":
   version: 12.1.1
   resolution: "@azure/storage-common@npm:12.1.1"
@@ -401,6 +412,23 @@ __metadata:
     events: "npm:^3.3.0"
     tslib: "npm:^2.8.1"
   checksum: 10/1fc3b5f3c57e0e7e925442c5731486c8eba9f34a793f6551a649e1f560c152133d10f9850fe53fd4042dd354a82aba69e591edc75be41e40c4bceb4fa8d41d5c
+  languageName: node
+  linkType: hard
+
+"@azure/storage-common@npm:^12.2.0":
+  version: 12.2.0
+  resolution: "@azure/storage-common@npm:12.2.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/logger": "npm:^1.1.4"
+    events: "npm:^3.3.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/d178748f5c0c8b2d6be51ae56aad00085fd355f83e62b379bb8cd6656a5e2c4172ccf81c5e5d78d5296dc05cda84d8b58b5d75236d6661730c2911c1e39c157d
   languageName: node
   linkType: hard
 
@@ -1205,7 +1233,7 @@ __metadata:
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
     "@actions/artifact": "npm:^5.0.3"
-    "@actions/cache": "npm:^5.0.5"
+    "@actions/cache": "npm:^6.0.0"
     "@actions/core": "npm:^3.0.0"
     "@actions/exec": "npm:^3.0.0"
     "@actions/github": "npm:^9.0.0"
