@@ -46,10 +46,12 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/github|@actions/io|@octokit|universal-user-agent|before-after-hook)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/exec|@actions/github|@actions/io|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
+    '^@actions/exec$': '<rootDir>/node_modules/@actions/exec/lib/exec.js',
     '^@actions/github$': '<rootDir>/node_modules/@actions/github/lib/github.js',
     '^@actions/io$': '<rootDir>/node_modules/@actions/io/lib/io.js',
+    '^@actions/io/lib/io-util$': '<rootDir>/node_modules/@actions/io/lib/io-util.js',
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   extensionsToTreatAsEsm: ['.ts'],
