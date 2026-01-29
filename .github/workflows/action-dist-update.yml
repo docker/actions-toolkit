@@ -1,0 +1,48 @@
+# reusable workflow to build action and commit the updated dist/ folder using bake
+name: action-dist-update
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: 'Bake target to build the action'
+        required: false
+        type: string
+    secrets:
+      github-token:
+        required: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.github-token || github.token }}
+      -
+        name: Build
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          targets: ${{ inputs.bake-target }}
+      -
+        name: Commit and push dist
+        run: |
+          if [ -n "$(git status --porcelain -- dist)" ]; then
+            (
+              set -x
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add dist
+              git commit -m "chore: update generated content"
+              git push
+            )
+          else
+            echo "No changes in dist"
+          fi
