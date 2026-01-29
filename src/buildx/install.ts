@@ -18,6 +18,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
+import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 import * as semver from 'semver';
 import * as util from 'util';
@@ -29,23 +30,36 @@ import {Exec} from '../exec.js';
 import {Docker} from '../docker/docker.js';
 import {Git} from '../git.js';
 import {GitHub} from '../github.js';
+import {Sigstore} from '../sigstore/sigstore.js';
 import {Util} from '../util.js';
 
 import {DownloadVersion} from '../types/buildx/buildx.js';
 import {GitHubRelease} from '../types/github.js';
+import {SEARCH_URL} from '../types/sigstore/sigstore.js';
+
+export interface DownloadOpts {
+  version: string;
+  ghaNoCache?: boolean;
+  disableHtc?: boolean;
+  skipState?: boolean;
+  verifySignature?: boolean;
+}
 
 export interface InstallOpts {
   standalone?: boolean;
   githubToken?: string;
+  sigstore?: Sigstore;
 }
 
 export class Install {
   private readonly standalone: boolean | undefined;
   private readonly githubToken: string | undefined;
+  private readonly sigstore: Sigstore;
 
   constructor(opts?: InstallOpts) {
     this.standalone = opts?.standalone;
     this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
+    this.sigstore = opts?.sigstore || new Sigstore();
   }
 
   /*
@@ -54,8 +68,8 @@ export class Install {
    * @param ghaNoCache: disable binary caching in GitHub Actions cache backend
    * @returns path to the buildx binary
    */
-  public async download(v: string, ghaNoCache?: boolean): Promise<string> {
-    const version: DownloadVersion = await Install.getDownloadVersion(v);
+  public async download(opts: DownloadOpts): Promise<string> {
+    const version: DownloadVersion = await Install.getDownloadVersion(opts.version);
     core.debug(`Install.download version: ${version.version}`);
 
     const release: GitHubRelease = await Install.getRelease(version, this.githubToken);
@@ -74,11 +88,11 @@ export class Install {
       htcVersion: vspec,
       baseCacheDir: path.join(Buildx.configDir, '.bin'),
       cacheFile: os.platform() == 'win32' ? 'docker-buildx.exe' : 'docker-buildx',
-      ghaNoCache: ghaNoCache
+      ghaNoCache: opts.ghaNoCache
     });
 
     const cacheFoundPath = await installCache.find();
-    if (cacheFoundPath) {
+    if (!opts.disableHtc && cacheFoundPath) {
       core.info(`Buildx binary found in ${cacheFoundPath}`);
       return cacheFoundPath;
     }
@@ -89,7 +103,11 @@ export class Install {
     const htcDownloadPath = await tc.downloadTool(downloadURL, undefined, this.githubToken);
     core.debug(`Install.download htcDownloadPath: ${htcDownloadPath}`);
 
-    const cacheSavePath = await installCache.save(htcDownloadPath);
+    if (opts.verifySignature && semver.satisfies(vspec, '>=0.31.0-0', {includePrerelease: true})) {
+      await this.verifySignature(htcDownloadPath, downloadURL);
+    }
+
+    const cacheSavePath = await installCache.save(htcDownloadPath, opts.skipState);
     core.info(`Cached to ${cacheSavePath}`);
     return cacheSavePath;
   }
@@ -211,6 +229,31 @@ export class Install {
     const standalone = this.standalone ?? !(await Docker.isAvailable());
     core.debug(`Install.isStandalone: ${standalone}`);
     return standalone;
+  }
+
+  private async verifySignature(binPath: string, downloadURL: string): Promise<void> {
+    const bundleURL = `${downloadURL.replace(/\.exe$/, '')}.sigstore.json`;
+    core.info(`Downloading keyless verification bundle at ${bundleURL}`);
+
+    let bundlePath: string;
+    try {
+      bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
+      core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
+    } catch (e) {
+      if (e.message && e.message.statusCode === httpm.HttpCodes.NotFound) {
+        core.info(`No signature bundle found at ${bundleURL}, skipping verification`);
+        return;
+      }
+      throw e;
+    }
+
+    const verifyResult = await this.sigstore.verifyArtifact(binPath, bundlePath, {
+      // TODO: add githubWorkflowRepository , runnerEnvironment and sourceRepositoryURI extensions when supported by sigstore module
+      subjectAlternativeName: /^https:\/\/github\.com\/docker\/(github-builder-experimental|github-builder)\/\.github\/workflows\/bake\.yml.*$/,
+      issuer: 'https://token.actions.githubusercontent.com'
+    });
+
+    core.info(`Buildx binary signature verified! ${verifyResult.tlogID ? `${SEARCH_URL}?logIndex=${verifyResult.tlogID}` : ''}`);
   }
 
   private filename(version: string): string {

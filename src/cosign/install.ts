@@ -19,9 +19,6 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
-import {bundleFromJSON, SerializedBundle} from '@sigstore/bundle';
-import * as tuf from '@sigstore/tuf';
-import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import * as semver from 'semver';
 import * as util from 'util';
 
@@ -31,11 +28,13 @@ import {Context} from '../context.js';
 import {Exec} from '../exec.js';
 import {Git} from '../git.js';
 import {GitHub} from '../github.js';
+import {Sigstore} from '../sigstore/sigstore.js';
 import {Util} from '../util.js';
 
 import {DownloadVersion} from '../types/cosign/cosign.js';
 import {GitHubRelease} from '../types/github.js';
 import {dockerfileContent} from './dockerfile.js';
+import {SEARCH_URL} from '../types/sigstore/sigstore.js';
 
 export interface DownloadOpts {
   version: string;
@@ -47,15 +46,18 @@ export interface DownloadOpts {
 export interface InstallOpts {
   githubToken?: string;
   buildx?: Buildx;
+  sigstore?: Sigstore;
 }
 
 export class Install {
   private readonly githubToken: string | undefined;
   private readonly buildx: Buildx;
+  private readonly sigstore: Sigstore;
 
   constructor(opts?: InstallOpts) {
     this.githubToken = opts?.githubToken || process.env.GITHUB_TOKEN;
     this.buildx = opts?.buildx || new Buildx();
+    this.sigstore = opts?.sigstore || new Sigstore();
   }
 
   public async download(opts: DownloadOpts): Promise<string> {
@@ -196,27 +198,12 @@ export class Install {
     const bundlePath = await tc.downloadTool(bundleURL, undefined, this.githubToken);
     core.debug(`Install.verifySignature bundlePath: ${bundlePath}`);
 
-    core.info(`Verifying keyless verification bundle signature`);
-    const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
-    const bundle = bundleFromJSON(parsedBundle);
+    const verifyResult = await this.sigstore.verifyArtifact(cosignBinPath, bundlePath, {
+      subjectAlternativeName: 'keyless@projectsigstore.iam.gserviceaccount.com',
+      issuer: 'https://accounts.google.com'
+    });
 
-    core.info(`Fetching Sigstore TUF trusted root metadata`);
-    const trustedRoot = await tuf.getTrustedRoot();
-    const trustMaterial = toTrustMaterial(trustedRoot);
-
-    try {
-      core.info(`Verifying cosign binary signature`);
-      const signedEntity = toSignedEntity(bundle, fs.readFileSync(cosignBinPath));
-      const verifier = new Verifier(trustMaterial);
-      const signer = verifier.verify(signedEntity, {
-        subjectAlternativeName: 'keyless@projectsigstore.iam.gserviceaccount.com',
-        extensions: {issuer: 'https://accounts.google.com'}
-      });
-      core.debug(`Install.verifySignature signer: ${JSON.stringify(signer)}`);
-      core.info(`Cosign binary signature verified!`);
-    } catch (err) {
-      throw new Error(`Failed to verify cosign binary signature: ${err}`);
-    }
+    core.info(`Cosign binary signature verified! ${verifyResult.tlogID ? `${SEARCH_URL}?logIndex=${verifyResult.tlogID}` : ''}`);
   }
 
   private filename(): string {
