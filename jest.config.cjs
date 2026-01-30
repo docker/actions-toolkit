@@ -46,8 +46,9 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/core|@actions/exec|@actions/github|@actions/http-client|@actions/io|@actions/tool-cache|@octokit|universal-user-agent|before-after-hook)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/cache|@actions/core|@actions/exec|@actions/github|@actions/http-client|@actions/io|@actions/tool-cache|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
+    '^@actions/cache$': '<rootDir>/node_modules/@actions/cache/lib/cache.js',
     '^@actions/core': '<rootDir>/node_modules/@actions/core/lib/core.js',
     '^@actions/exec$': '<rootDir>/node_modules/@actions/exec/lib/exec.js',
     '^@actions/github$': '<rootDir>/node_modules/@actions/github/lib/github.js',
