@@ -46,12 +46,13 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/cache|@actions/core|@actions/exec|@actions/github|@actions/http-client|@actions/io|@actions/tool-cache|@octokit|universal-user-agent|before-after-hook)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(?:@actions/cache|@actions/core|@actions/exec|@actions/github|@actions/glob|@actions/http-client|@actions/io|@actions/tool-cache|@octokit|universal-user-agent|before-after-hook)/)'],
   moduleNameMapper: {
     '^@actions/cache$': '<rootDir>/node_modules/@actions/cache/lib/cache.js',
     '^@actions/core': '<rootDir>/node_modules/@actions/core/lib/core.js',
     '^@actions/exec$': '<rootDir>/node_modules/@actions/exec/lib/exec.js',
     '^@actions/github$': '<rootDir>/node_modules/@actions/github/lib/github.js',
+    '^@actions/glob$': '<rootDir>/node_modules/@actions/glob/lib/glob.js',
     '^@actions/http-client$': '<rootDir>/node_modules/@actions/http-client/lib/index.js',
     '^@actions/http-client/lib/auth$': '<rootDir>/node_modules/@actions/http-client/lib/auth.js',
     '^@actions/http-client/lib/interfaces$': '<rootDir>/node_modules/@actions/http-client/lib/interfaces.js',
