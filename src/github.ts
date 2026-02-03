@@ -22,7 +22,6 @@ import os from 'os';
 import path from 'path';
 import {CreateArtifactRequest, FinalizeArtifactRequest, StringValue} from '@actions/artifact/lib/generated';
 import {internalArtifactTwirpClient} from '@actions/artifact/lib/internal/shared/artifact-twirp-client';
-import {isGhes} from '@actions/artifact/lib/internal/shared/config';
 import {getBackendIdsFromToken} from '@actions/artifact/lib/internal/shared/util';
 import {getExpiration} from '@actions/artifact/lib/internal/upload/retention';
 import {InvalidResponseError, NetworkError} from '@actions/artifact';
@@ -96,10 +95,16 @@ export class GitHub {
     return process.env.GITHUB_API_URL || 'https://api.github.com';
   }
 
+  // Can't use the isGhes() func from @actions/artifact due to @actions/artifact/lib/internal/shared/config
+  // being internal since ESM-only packages do not support internal exports.
+  // https://github.com/actions/toolkit/blob/8351a5d84d862813d1bb8bdeef87b215f8a946f9/packages/artifact/src/internal/shared/config.ts#L27
   static get isGHES(): boolean {
-    // FIXME: we are using the function from GitHub artifact module but should
-    //  be within core module when available.
-    return isGhes();
+    const ghURL = new URL(GitHub.serverURL);
+    const hostname = ghURL.hostname.trimEnd().toUpperCase();
+    const isGitHubHost = hostname === 'GITHUB.COM';
+    const isGitHubEnterpriseCloudHost = hostname.endsWith('.GHE.COM');
+    const isLocalHost = hostname.endsWith('.LOCALHOST');
+    return !isGitHubHost && !isGitHubEnterpriseCloudHost && !isLocalHost;
   }
 
   static get repository(): string {
