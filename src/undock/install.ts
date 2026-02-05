@@ -24,9 +24,9 @@ import * as util from 'util';
 
 import {Cache} from '../cache.js';
 import {Context} from '../context.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 
-import {GitHubRelease} from '../types/github.js';
+import {GitHubRelease} from '../types/github/github.js';
 import {DownloadVersion} from '../types/undock/undock.js';
 
 export interface InstallOpts {

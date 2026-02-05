@@ -29,12 +29,12 @@ import {Context} from '../context.js';
 import {Exec} from '../exec.js';
 import {Docker} from '../docker/docker.js';
 import {Git} from '../git.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {Sigstore} from '../sigstore/sigstore.js';
 import {Util} from '../util.js';
 
 import {DownloadVersion} from '../types/buildx/buildx.js';
-import {GitHubRelease} from '../types/github.js';
+import {GitHubRelease} from '../types/github/github.js';
 import {SEARCH_URL} from '../types/sigstore/sigstore.js';
 
 export interface DownloadOpts {

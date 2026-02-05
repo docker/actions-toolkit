@@ -19,33 +19,18 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Buildx} from '../src/buildx/buildx';
-import {Bake} from '../src/buildx/bake';
-import {Build} from '../src/buildx/build';
-import {Exec} from '../src/exec';
-import {GitHub} from '../src/github';
-import {History} from '../src/buildx/history';
-import {Util} from '../src/util';
+import {Buildx} from '../../src/buildx/buildx';
+import {Bake} from '../../src/buildx/bake';
+import {Build} from '../../src/buildx/build';
+import {Exec} from '../../src/exec';
+import {GitHubArtifact} from '../../src/github/artifact';
+import {GitHubSummary} from '../../src/github/summary';
+import {History} from '../../src/buildx/history';
 
-const fixturesDir = path.join(__dirname, '.fixtures');
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'github-itg-'));
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
-
-maybe('uploadArtifact', () => {
-  it('uploads an artifact', async () => {
-    const filename = path.join(tmpDir, `github-repo-${Util.generateRandomString()}.json`);
-    fs.copyFileSync(path.join(fixturesDir, `github-repo.json`), filename);
-    const res = await GitHub.uploadArtifact({
-      filename: filename,
-      mimeType: 'application/json',
-      retentionDays: 1
-    });
-    expect(res).toBeDefined();
-    console.log('uploadArtifactResponse', res);
-    expect(res?.url).toBeDefined();
-  });
-});
 
 maybe('writeBuildSummary', () => {
   // prettier-ignore
@@ -98,7 +83,7 @@ maybe('writeBuildSummary', () => {
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(exportRes?.summaries).toBeDefined();
 
-    const uploadRes = await GitHub.uploadArtifact({
+    const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
       mimeType: 'application/gzip',
       retentionDays: 1
@@ -106,7 +91,7 @@ maybe('writeBuildSummary', () => {
     expect(uploadRes).toBeDefined();
     expect(uploadRes?.url).toBeDefined();
 
-    await GitHub.writeBuildSummary({
+    await GitHubSummary.writeBuildSummary({
       exportRes: exportRes,
       uploadRes: uploadRes,
       inputs: {
@@ -178,7 +163,7 @@ maybe('writeBuildSummary', () => {
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(exportRes?.summaries).toBeDefined();
 
-    const uploadRes = await GitHub.uploadArtifact({
+    const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
       mimeType: 'application/gzip',
       retentionDays: 1
@@ -186,7 +171,7 @@ maybe('writeBuildSummary', () => {
     expect(uploadRes).toBeDefined();
     expect(uploadRes?.url).toBeDefined();
 
-    await GitHub.writeBuildSummary({
+    await GitHubSummary.writeBuildSummary({
       exportRes: exportRes,
       uploadRes: uploadRes,
       inputs: {
@@ -233,7 +218,7 @@ maybe('writeBuildSummary', () => {
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(exportRes?.summaries).toBeDefined();
 
-    const uploadRes = await GitHub.uploadArtifact({
+    const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
       mimeType: 'application/gzip',
       retentionDays: 1
@@ -241,7 +226,7 @@ maybe('writeBuildSummary', () => {
     expect(uploadRes).toBeDefined();
     expect(uploadRes?.url).toBeDefined();
 
-    await GitHub.writeBuildSummary({
+    await GitHubSummary.writeBuildSummary({
       exportRes: exportRes,
       uploadRes: uploadRes,
       inputs: {
@@ -288,7 +273,7 @@ maybe('writeBuildSummary', () => {
     expect(exportRes?.dockerbuildSize).toBeDefined();
     expect(exportRes?.summaries).toBeDefined();
 
-    await GitHub.writeBuildSummary({
+    await GitHubSummary.writeBuildSummary({
       exportRes: exportRes,
       inputs: {
         context: fixturesDir,

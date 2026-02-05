@@ -21,14 +21,14 @@ import * as semver from 'semver';
 
 import {Git} from '../buildkit/git.js';
 import {Docker} from '../docker/docker.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {Exec} from '../exec.js';
 import {Util} from '../util.js';
 
 import {VertexWarning} from '../types/buildkit/client.js';
 import {GitURL} from '../types/buildkit/git.js';
 import {Cert, LocalRefsOpts, LocalRefsResponse, LocalState} from '../types/buildx/buildx.js';
-import {GitHubAnnotation} from '../types/github.js';
+import {GitHubAnnotation} from '../types/github/github.js';
 
 export interface BuildxOpts {
   standalone?: boolean;

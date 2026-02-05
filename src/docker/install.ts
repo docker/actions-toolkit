@@ -28,14 +28,14 @@ import * as tc from '@actions/tool-cache';
 import {Context} from '../context.js';
 import {Docker} from './docker.js';
 import {Exec} from '../exec.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {Regctl} from '../regclient/regctl.js';
 import {Undock} from '../undock/undock.js';
 import {Util} from '../util.js';
 
 import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets.js';
 
-import {GitHubRelease} from '../types/github.js';
+import {GitHubRelease} from '../types/github/github.js';
 import {Image} from '../types/oci/config.js';
 
 export interface InstallSourceImage {

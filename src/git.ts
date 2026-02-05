@@ -17,7 +17,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Exec} from './exec.js';
-import {GitHub} from './github.js';
+import {GitHub} from './github/github.js';
 
 export type GitContext = typeof github.context;
 

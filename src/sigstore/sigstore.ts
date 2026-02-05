@@ -27,7 +27,7 @@ import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 import {Context} from '../context.js';
 import {Cosign} from '../cosign/cosign.js';
 import {Exec} from '../exec.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {ImageTools} from '../buildx/imagetools.js';
 
 import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto.js';

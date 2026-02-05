@@ -19,10 +19,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
 
-import {GitHub} from '../src/github';
-import {GitHubRepo} from '../src/types/github';
+import {GitHub} from '../../src/github/github';
+import {GitHubRepo} from '../../src/types/github/github';
 
-import repoFixture from './.fixtures/github-repo.json';
+import repoFixture from '../.fixtures/github-repo.json';
+
+const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 describe('repoData', () => {
   it('returns GitHub repo data', async () => {
@@ -49,7 +51,7 @@ describe('repoData (api)', () => {
     try {
       jest.resetModules();
       jest.unmock('@actions/github');
-      const {GitHub} = await import('../src/github');
+      const {GitHub} = await import('../../src/github/github');
       const github = new GitHub({token: process.env.GITHUB_TOKEN});
       const repo = await github.repoData();
       const fullName = repo.full_name ?? `${repo.owner?.login}/${repo.name}`;
@@ -172,10 +174,7 @@ describe('actionsRuntimeToken', () => {
     }).toThrow();
   });
   it('fixture', async () => {
-    process.env.ACTIONS_RUNTIME_TOKEN = fs
-      .readFileSync(path.join(__dirname, '.fixtures', 'runtimeToken.txt'))
-      .toString()
-      .trim();
+    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(fixturesDir, 'runtimeToken.txt')).toString().trim();
     const runtimeToken = GitHub.actionsRuntimeToken;
     expect(runtimeToken?.ac).toEqual('[{"Scope":"refs/heads/master","Permission":3}]');
     expect(runtimeToken?.iss).toEqual('vstoken.actions.githubusercontent.com');
@@ -203,10 +202,7 @@ describe('printActionsRuntimeTokenACs', () => {
   });
   it('refs/heads/master', async () => {
     const infoSpy = jest.spyOn(core, 'info');
-    process.env.ACTIONS_RUNTIME_TOKEN = fs
-      .readFileSync(path.join(__dirname, '.fixtures', 'runtimeToken.txt'))
-      .toString()
-      .trim();
+    process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(fixturesDir, 'runtimeToken.txt')).toString().trim();
     await GitHub.printActionsRuntimeTokenACs();
     expect(infoSpy).toHaveBeenCalledTimes(1);
     expect(infoSpy).toHaveBeenCalledWith(`refs/heads/master: read/write`);

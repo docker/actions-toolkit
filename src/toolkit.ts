@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GitHub} from './github.js';
+import {GitHub} from './github/github.js';
 import {Buildx} from './buildx/buildx.js';
 import {Build as BuildxBuild} from './buildx/build.js';
 import {Bake as BuildxBake} from './buildx/bake.js';

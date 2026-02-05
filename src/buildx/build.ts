@@ -21,7 +21,7 @@ import {parse} from 'csv-parse/sync';
 
 import {Buildx} from './buildx.js';
 import {Context} from '../context.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {Util} from '../util.js';
 
 import {BuildMetadata} from '../types/buildx/build.js';
