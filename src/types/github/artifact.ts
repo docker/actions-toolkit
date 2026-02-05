@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 actions-toolkit authors
+ * Copyright 2026 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {GitHubContentOpts} from '../github/github.js';
+export interface UploadOpts {
+  filename: string;
+  mimeType?: string;
+  retentionDays?: number;
+}
 
-export interface DownloadVersion {
-  version: string;
-  downloadURL: string;
-  contentOpts: GitHubContentOpts;
+export interface UploadResponse {
+  id: number;
+  filename: string;
+  size: number;
+  url: string;
 }

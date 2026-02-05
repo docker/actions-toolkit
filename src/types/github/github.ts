@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import * as core from '@actions/core';
 import {AnnotationProperties} from '@actions/core';
 import type {getOctokit} from '@actions/github';
 import {JwtPayload} from 'jwt-decode';
-
-import {BakeDefinition} from './buildx/bake.js';
-import {ExportResponse} from './buildx/history.js';
-
-export type SummaryTableRow = Parameters<typeof core.summary.addTable>[0][number];
-export type SummaryTableCell = Exclude<SummaryTableRow[number], string>;
 
 export interface GitHubRelease {
   id: number;
@@ -53,28 +46,4 @@ export interface GitHubActionsRuntimeTokenAC {
 
 export interface GitHubAnnotation extends AnnotationProperties {
   message: string;
-}
-
-export interface UploadArtifactOpts {
-  filename: string;
-  mimeType?: string;
-  retentionDays?: number;
-}
-
-export interface UploadArtifactResponse {
-  id: number;
-  filename: string;
-  size: number;
-  url: string;
-}
-
-export interface BuildSummaryOpts {
-  exportRes: ExportResponse;
-  uploadRes?: UploadArtifactResponse;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs?: any;
-  bakeDefinition?: BakeDefinition;
-  // builder options
-  driver?: string;
-  endpoint?: string;
 }

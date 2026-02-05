@@ -20,7 +20,7 @@ import path from 'path';
 import * as tmp from 'tmp';
 import * as github from '@actions/github';
 
-import {GitHub} from './github.js';
+import {GitHub} from './github/github.js';
 
 export class Context {
   private static readonly _tmpDir = fs.mkdtempSync(path.join(Context.ensureDirExists(process.env.RUNNER_TEMP || os.tmpdir()), 'docker-actions-toolkit-'));

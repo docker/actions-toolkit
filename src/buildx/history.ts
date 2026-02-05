@@ -25,7 +25,7 @@ import {Buildx} from './buildx.js';
 import {Context} from '../context.js';
 import {Docker} from '../docker/docker.js';
 import {Exec} from '../exec.js';
-import {GitHub} from '../github.js';
+import {GitHub} from '../github/github.js';
 import {Util} from '../util.js';
 
 import {ExportOpts, ExportResponse, InspectOpts, InspectResponse, Summaries} from '../types/buildx/history.js';

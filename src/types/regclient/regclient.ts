@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GitHubContentOpts} from '../github.js';
+import {GitHubContentOpts} from '../github/github.js';
 
 export interface DownloadVersion {
   version: string;
