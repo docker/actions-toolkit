@@ -348,10 +348,11 @@ describe('resolveAttestationAttrs', () => {
 describe('hasGitAuthTokenSecret', () => {
   // prettier-ignore
   test.each([
-    [['A_SECRET=abcdef0123456789'], false],
-    [['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789'], true],
-  ])('given %p secret', async (kvp: Array<string>, expected: boolean) => {
-    expect(Build.hasGitAuthTokenSecret(kvp)).toBe(expected);
+    [['A_SECRET=abcdef0123456789'], undefined, false],
+    [['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789'], undefined, true],
+    [['GIT_AUTH_TOKEN.github.com=abcdefghijklmno=0123456789'], 'github.com', true],
+  ])('given %p secret', async (kvp: Array<string>, domain: string | undefined, expected: boolean) => {
+    expect(Build.hasGitAuthTokenSecret(kvp, domain)).toBe(expected);
   });
 });
 

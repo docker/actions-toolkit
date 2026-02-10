@@ -310,9 +310,11 @@ export class Build {
     return res.join(',');
   }
 
-  public static hasGitAuthTokenSecret(secrets: string[]): boolean {
+  public static hasGitAuthTokenSecret(secrets: string[], domain?: string): boolean {
     for (const secret of secrets) {
-      if (secret.startsWith('GIT_AUTH_TOKEN=')) {
+      if (domain && secret.startsWith(`GIT_AUTH_TOKEN.${domain}=`)) {
+        return true;
+      } else if (secret.startsWith('GIT_AUTH_TOKEN=')) {
         return true;
       }
     }
