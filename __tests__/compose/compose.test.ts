@@ -21,10 +21,10 @@ import path from 'path';
 import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
-import {Context} from '../../src/context';
-import {Exec} from '../../src/exec';
+import {Context} from '../../src/context.js';
+import {Exec} from '../../src/exec.js';
 
-import {Compose} from '../../src/compose/compose';
+import {Compose} from '../../src/compose/compose.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'compose-compose-'));
 const tmpName = path.join(tmpDir, '.tmpname-vi');

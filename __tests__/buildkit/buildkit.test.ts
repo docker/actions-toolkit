@@ -16,10 +16,10 @@
 
 import {describe, expect, it, vi, test} from 'vitest';
 
-import {BuildKit} from '../../src/buildkit/buildkit';
-import {Builder} from '../../src/buildx/builder';
+import {BuildKit} from '../../src/buildkit/buildkit.js';
+import {Builder} from '../../src/buildx/builder.js';
 
-import {BuilderInfo} from '../../src/types/buildx/builder';
+import {BuilderInfo} from '../../src/types/buildx/builder.js';
 
 vi.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {

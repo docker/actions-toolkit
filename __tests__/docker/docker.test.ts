@@ -21,11 +21,11 @@ import path from 'path';
 import * as io from '@actions/io';
 import * as rimraf from 'rimraf';
 
-import {mockHomedir} from '../.helpers/os';
+import {mockHomedir} from '../.helpers/os.js';
 
-import {Docker} from '../../src/docker/docker';
+import {Docker} from '../../src/docker/docker.js';
 
-import {ConfigFile} from '../../src/types/docker/docker';
+import {ConfigFile} from '../../src/types/docker/docker.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-docker-'));

@@ -21,11 +21,11 @@ import path from 'path';
 import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
-import {Buildx} from '../../src/buildx/buildx';
-import {Context} from '../../src/context';
-import {Exec} from '../../src/exec';
+import {Buildx} from '../../src/buildx/buildx.js';
+import {Context} from '../../src/context.js';
+import {Exec} from '../../src/exec.js';
 
-import {Cert, LocalState} from '../../src/types/buildx/buildx';
+import {Cert, LocalState} from '../../src/types/buildx/buildx.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-buildx-'));

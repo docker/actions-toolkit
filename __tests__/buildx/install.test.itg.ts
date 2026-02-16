@@ -17,7 +17,7 @@
 import {describe, expect, test} from 'vitest';
 import * as fs from 'fs';
 
-import {Install} from '../../src/buildx/install';
+import {Install} from '../../src/buildx/install.js';
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 

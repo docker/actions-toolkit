@@ -16,7 +16,7 @@
 
 import {describe, expect, it, vi} from 'vitest';
 
-import {Exec} from '../src/exec';
+import {Exec} from '../src/exec.js';
 
 describe('exec', () => {
   it('returns docker version', async () => {

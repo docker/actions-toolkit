@@ -17,10 +17,10 @@
 import {describe, expect, it, vi, test} from 'vitest';
 import * as semver from 'semver';
 
-import {Exec} from '../../src/exec';
-import {Regctl} from '../../src/regclient/regctl';
+import {Exec} from '../../src/exec.js';
+import {Regctl} from '../../src/regclient/regctl.js';
 
-import {Image} from '../../src/types/oci/config';
+import {Image} from '../../src/types/oci/config.js';
 
 describe('manifestGet', () => {
   // prettier-ignore

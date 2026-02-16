@@ -20,11 +20,11 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {mockArch, mockPlatform} from '../.helpers/os';
+import {mockArch, mockPlatform} from '../.helpers/os.js';
 
-import {OCI} from '../../src/oci/oci';
+import {OCI} from '../../src/oci/oci.js';
 
-import {Platform} from '../../src/types/oci/descriptor';
+import {Platform} from '../../src/types/oci/descriptor.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'oci-oci-'));

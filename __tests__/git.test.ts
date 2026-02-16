@@ -16,8 +16,8 @@
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
-import {Git as GitMocked} from '../src/git';
-import {Exec} from '../src/exec';
+import {Git as GitMocked} from '../src/git.js';
+import {Exec} from '../src/exec.js';
 import {ExecOutput} from '@actions/exec';
 
 beforeEach(() => {
@@ -74,7 +74,7 @@ describe('remoteSha', () => {
   it('returns sha using github api', async () => {
     vi.resetModules();
     vi.unmock('@actions/github');
-    const {Git} = await import('../src/git');
+    const {Git} = await import('../src/git.js');
     expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head', process.env.GITHUB_TOKEN)).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
   });
 });

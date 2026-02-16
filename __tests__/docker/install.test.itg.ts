@@ -19,11 +19,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Install, InstallSource, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
-import {Docker} from '../../src/docker/docker';
-import {Install as RegclientInstall} from '../../src/regclient/install';
-import {Install as UndockInstall} from '../../src/undock/install';
-import {Exec} from '../../src/exec';
+import {Install, InstallSource, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install.js';
+import {Docker} from '../../src/docker/docker.js';
+import {Install as RegclientInstall} from '../../src/regclient/install.js';
+import {Install as UndockInstall} from '../../src/undock/install.js';
+import {Exec} from '../../src/exec.js';
 
 const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-itg-'));
 

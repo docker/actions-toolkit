@@ -20,8 +20,8 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {Context} from '../../src/context';
-import {Build} from '../../src/buildx/build';
+import {Context} from '../../src/context.js';
+import {Build} from '../../src/buildx/build.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));

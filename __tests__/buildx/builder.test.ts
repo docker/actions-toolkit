@@ -18,10 +18,10 @@ import {describe, expect, it, vi, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Builder} from '../../src/buildx/builder';
-import {Exec} from '../../src/exec';
+import {Builder} from '../../src/buildx/builder.js';
+import {Exec} from '../../src/exec.js';
 
-import {BuilderInfo} from '../../src/types/buildx/builder';
+import {BuilderInfo} from '../../src/types/buildx/builder.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 

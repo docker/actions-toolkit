@@ -17,7 +17,7 @@
 import {describe, expect, test} from 'vitest';
 import * as fs from 'fs';
 
-import {Install} from '../../src/undock/install';
+import {Install} from '../../src/undock/install.js';
 
 describe('download', () => {
   // prettier-ignore

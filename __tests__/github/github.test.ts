@@ -19,10 +19,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
 
-import {GitHub} from '../../src/github/github';
-import {GitHubRepo} from '../../src/types/github/github';
+import {GitHub} from '../../src/github/github.js';
+import {GitHubRepo} from '../../src/types/github/github.js';
 
-import repoFixture from '../.fixtures/github-repo.json';
+import repoFixture from '../.fixtures/github-repo.json' with {type: 'json'};
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
@@ -51,7 +51,7 @@ describe('repoData (api)', () => {
     try {
       vi.resetModules();
       vi.unmock('@actions/github');
-      const {GitHub} = await import('../../src/github/github');
+      const {GitHub} = await import('../../src/github/github.js');
       const github = new GitHub({token: process.env.GITHUB_TOKEN});
       const repo = await github.repoData();
       const fullName = repo.full_name ?? `${repo.owner?.login}/${repo.name}`;

@@ -19,7 +19,7 @@ import {dump as yamldump} from 'js-yaml';
 import os from 'os';
 import * as core from '@actions/core';
 
-import {GitHub} from './github';
+import {GitHub} from './github.js';
 import {Util} from '../util.js';
 
 import {BuildSummaryOpts, SummaryTableCell} from '../types/github/summary.js';

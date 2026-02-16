@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "es2020",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "isolatedModules": true,
     "strict": true,
@@ -12,13 +12,13 @@
     "rootDir": "./src",
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
-    "resolveJsonModule": true,
     "useUnknownInCatchVariables": false,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
-    "./__mocks__/**/*",
-    "./__tests__/**/*",
     "./lib/**/*",
     "node_modules"
   ]

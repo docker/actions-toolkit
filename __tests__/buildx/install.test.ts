@@ -20,9 +20,9 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {mockArch, mockPlatform} from '../.helpers/os';
+import {mockArch, mockPlatform} from '../.helpers/os.js';
 
-import {Install} from '../../src/buildx/install';
+import {Install} from '../../src/buildx/install.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-install-'));
 

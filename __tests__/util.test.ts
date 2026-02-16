@@ -18,7 +18,7 @@ import {describe, expect, it, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Util} from '../src/util';
+import {Util} from '../src/util.js';
 
 describe('getInputList', () => {
   it('single line correctly', async () => {

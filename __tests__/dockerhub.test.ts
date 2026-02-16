@@ -18,12 +18,12 @@ import {describe, expect, vi, it} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {DockerHub} from '../src/dockerhub';
-import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
+import {DockerHub} from '../src/dockerhub.js';
+import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub.js';
 
-import repoInfoFixture from './.fixtures/dockerhub-repoinfo.json';
-import repoTagsFixture from './.fixtures/dockerhub-repotags.json';
-import repoAllTagsFixture from './.fixtures/dockerhub-repoalltags.json';
+import repoInfoFixture from './.fixtures/dockerhub-repoinfo.json' with {type: 'json'};
+import repoTagsFixture from './.fixtures/dockerhub-repotags.json' with {type: 'json'};
+import repoAllTagsFixture from './.fixtures/dockerhub-repoalltags.json' with {type: 'json'};
 
 describe('getRepository', () => {
   it('returns repo info', async () => {

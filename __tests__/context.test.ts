@@ -20,7 +20,7 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {Context} from '../src/context';
+import {Context} from '../src/context.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'context-'));
 const tmpName = path.join(tmpDir, '.tmpname-vi');

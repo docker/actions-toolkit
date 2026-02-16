@@ -17,12 +17,12 @@
 import {beforeAll, describe, expect, vi, it} from 'vitest';
 import * as path from 'path';
 
-import {Buildx} from '../../src/buildx/buildx';
-import {Build} from '../../src/buildx/build';
-import {Install as CosignInstall} from '../../src/cosign/install';
-import {Docker} from '../../src/docker/docker';
-import {Exec} from '../../src/exec';
-import {Sigstore} from '../../src/sigstore/sigstore';
+import {Buildx} from '../../src/buildx/buildx.js';
+import {Build} from '../../src/buildx/build.js';
+import {Install as CosignInstall} from '../../src/cosign/install.js';
+import {Docker} from '../../src/docker/docker.js';
+import {Exec} from '../../src/exec.js';
+import {Sigstore} from '../../src/sigstore/sigstore.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 

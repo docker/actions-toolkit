@@ -35,16 +35,7 @@ module.exports = defineConfig([
   globalIgnores(['.yarn/**/*', 'lib/**/*', 'coverage/**/*', 'node_modules/**/*']),
   {
     extends: fixupConfigRules(
-      compat.extends(
-        'eslint:recommended',
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended',
-        'plugin:import/errors',
-        'plugin:import/typescript',
-        'plugin:import/warnings',
-        'plugin:vitest/recommended',
-        'plugin:prettier/recommended'
-      )
+      compat.extends('eslint:recommended', 'plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended', 'plugin:import/errors', 'plugin:import/typescript', 'plugin:import/warnings', 'plugin:prettier/recommended')
     ),
 
     plugins: {
@@ -72,9 +63,10 @@ module.exports = defineConfig([
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods']
+          ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods', 'vitest/config']
         }
       ],
+      'vitest/no-conditional-expect': 'error',
       'vitest/no-disabled-tests': 0
     }
   }

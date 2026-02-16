@@ -20,8 +20,8 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {BuildKit} from '../../src/buildkit/buildkit';
-import {Context} from '../../src/context';
+import {BuildKit} from '../../src/buildkit/buildkit.js';
+import {Context} from '../../src/context.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildkit-config-'));

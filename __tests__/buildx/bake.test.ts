@@ -20,12 +20,12 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {Bake} from '../../src/buildx/bake';
-import {Context} from '../../src/context';
+import {Bake} from '../../src/buildx/bake.js';
+import {Context} from '../../src/context.js';
 
 import {ExecOptions} from '@actions/exec';
-import {BakeDefinition} from '../../src/types/buildx/bake';
-import {BuildMetadata} from '../../src/types/buildx/build';
+import {BakeDefinition} from '../../src/types/buildx/bake.js';
+import {BuildMetadata} from '../../src/types/buildx/build.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-bake-'));

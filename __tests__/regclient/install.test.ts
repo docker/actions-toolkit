@@ -20,9 +20,9 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {mockArch, mockPlatform} from '../.helpers/os';
+import {mockArch, mockPlatform} from '../.helpers/os.js';
 
-import {Install} from '../../src/regclient/install';
+import {Install} from '../../src/regclient/install.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'regclient-install-'));
 

@@ -16,9 +16,9 @@
 
 import {beforeEach, describe, expect, vi, test} from 'vitest';
 
-import {Git} from '../../src/buildkit/git';
+import {Git} from '../../src/buildkit/git.js';
 
-import {GitRef, GitURL} from '../../src/types/buildkit/git';
+import {GitRef, GitURL} from '../../src/types/buildkit/git.js';
 
 beforeEach(() => {
   vi.restoreAllMocks();

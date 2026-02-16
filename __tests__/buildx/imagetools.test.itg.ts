@@ -18,11 +18,11 @@ import {describe, expect, it} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {ImageTools} from '../../src/buildx/imagetools';
+import {ImageTools} from '../../src/buildx/imagetools.js';
 
-import {Manifest as ImageToolsManifest} from '../../src/types/buildx/imagetools';
-import {Image} from '../../src/types/oci/config';
-import {Descriptor} from '../../src/types/oci/descriptor';
+import {Manifest as ImageToolsManifest} from '../../src/types/buildx/imagetools.js';
+import {Image} from '../../src/types/oci/config.js';
+import {Descriptor} from '../../src/types/oci/descriptor.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 

@@ -19,8 +19,8 @@ import fs from 'fs';
 import path from 'path';
 import * as semver from 'semver';
 
-import {Exec} from '../../src/exec';
-import {Cosign} from '../../src/cosign/cosign';
+import {Exec} from '../../src/exec.js';
+import {Cosign} from '../../src/cosign/cosign.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 

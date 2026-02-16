@@ -20,9 +20,9 @@ import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {mockArch, mockPlatform} from '../.helpers/os';
+import {mockArch, mockPlatform} from '../.helpers/os.js';
 
-import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install';
+import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
 

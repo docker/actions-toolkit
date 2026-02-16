@@ -19,13 +19,13 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Buildx} from '../../src/buildx/buildx';
-import {Bake} from '../../src/buildx/bake';
-import {Build} from '../../src/buildx/build';
-import {Exec} from '../../src/exec';
-import {GitHubArtifact} from '../../src/github/artifact';
-import {GitHubSummary} from '../../src/github/summary';
-import {History} from '../../src/buildx/history';
+import {Buildx} from '../../src/buildx/buildx.js';
+import {Bake} from '../../src/buildx/bake.js';
+import {Build} from '../../src/buildx/build.js';
+import {Exec} from '../../src/exec.js';
+import {GitHubArtifact} from '../../src/github/artifact.js';
+import {GitHubSummary} from '../../src/github/summary.js';
+import {History} from '../../src/buildx/history.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'github-itg-'));
