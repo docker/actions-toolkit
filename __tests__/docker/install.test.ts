@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, beforeEach, afterEach, it} from '@jest/globals';
+import {describe, expect, vi, test, beforeEach, afterEach, it} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -103,7 +103,7 @@ describe('getRelease', () => {
 describe('limaImage', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       LIMA_IMAGES: `x86_64:https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-23.10-server-cloudimg-amd64.img@sha256:f6529be56da3429a56e4f5ef202bf4958201bc63f8541e478caa6e8eb712e635

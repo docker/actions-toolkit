@@ -11,11 +11,11 @@
     "eslint:fix": "eslint --fix .",
     "prettier": "prettier --check \"./**/*.ts\"",
     "prettier:fix": "prettier --write \"./**/*.ts\"",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:itg": "jest -c jest.config.itg.cjs --runInBand",
-    "test:itg-list": "jest -c jest.config.itg.cjs --listTests",
-    "test:itg-coverage": "jest -c jest.config.itg.cjs --coverage --runInBand"
+    "test": "vitest run -c vitest.config.ts",
+    "test:coverage": "vitest run -c vitest.config.ts --coverage",
+    "test:itg": "vitest run -c vitest.config.itg.ts --maxWorkers=1",
+    "test:itg-list": "node ./__tests__/.setup/list-itg-tests.mjs",
+    "test:itg-coverage": "vitest run -c vitest.config.itg.ts --coverage --maxWorkers=1"
   },
   "repository": {
     "type": "git",
@@ -83,17 +83,16 @@
     "@types/tmp": "^0.2.6",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jest": "^29.5.0",
     "eslint-plugin-prettier": "^5.5.4",
-    "jest": "^30.2.0",
     "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
-    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

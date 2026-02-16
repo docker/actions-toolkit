@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, vi, test} from 'vitest';
 
 import {BuildKit} from '../../src/buildkit/buildkit';
 import {Builder} from '../../src/buildx/builder';
 
 import {BuilderInfo} from '../../src/types/buildx/builder';
 
-jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
+vi.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {
     name: 'builder2',
     driver: 'docker-container',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -37,7 +37,7 @@ afterEach(function () {
 describe('configDir', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       DOCKER_CONFIG: '/var/docker/config'
@@ -59,7 +59,7 @@ describe('configDir', () => {
 describe('configFile', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     if (!fs.existsSync(tmpDir)) {
       fs.mkdirSync(tmpDir, {recursive: true});
     }
@@ -97,7 +97,7 @@ describe('configFile', () => {
 
 describe('isAvailable', () => {
   it('cli', async () => {
-    const ioWhichSpy = jest.spyOn(io, 'which');
+    const ioWhichSpy = vi.spyOn(io, 'which');
     await Docker.isAvailable();
     expect(ioWhichSpy).toHaveBeenCalledTimes(1);
     expect(ioWhichSpy).toHaveBeenCalledWith('docker', true);
@@ -106,7 +106,7 @@ describe('isAvailable', () => {
 
 describe('exec', () => {
   it('returns docker version', async () => {
-    const execSpy = jest.spyOn(Docker, 'exec');
+    const execSpy = vi.spyOn(Docker, 'exec');
     await Docker.exec(['version'], {
       ignoreReturnCode: true,
       silent: true
@@ -133,7 +133,7 @@ describe('exec', () => {
 
 describe('getExecOutput', () => {
   it('returns docker version', async () => {
-    const execSpy = jest.spyOn(Docker, 'getExecOutput');
+    const execSpy = vi.spyOn(Docker, 'getExecOutput');
     await Docker.getExecOutput(['version'], {
       ignoreReturnCode: true,
       silent: true
@@ -160,7 +160,7 @@ describe('getExecOutput', () => {
 
 describe('context', () => {
   it('call docker context show', async () => {
-    const execSpy = jest.spyOn(Docker, 'getExecOutput');
+    const execSpy = vi.spyOn(Docker, 'getExecOutput');
     await Docker.context().catch(() => {
       // noop
     });
@@ -182,7 +182,7 @@ describe('context', () => {
 
 describe('contextInspect', () => {
   it('call docker context inspect', async () => {
-    const execSpy = jest.spyOn(Docker, 'getExecOutput');
+    const execSpy = vi.spyOn(Docker, 'getExecOutput');
     await Docker.contextInspect('foo').catch(() => {
       // noop
     });
@@ -204,7 +204,7 @@ describe('contextInspect', () => {
 
 describe('printVersion', () => {
   it('call docker version', async () => {
-    const execSpy = jest.spyOn(Docker, 'exec');
+    const execSpy = vi.spyOn(Docker, 'exec');
     await Docker.printVersion().catch(() => {
       // noop
     });
@@ -220,7 +220,7 @@ describe('printVersion', () => {
 
 describe('printInfo', () => {
   it('call docker info', async () => {
-    const execSpy = jest.spyOn(Docker, 'exec');
+    const execSpy = vi.spyOn(Docker, 'exec');
     await Docker.printInfo().catch(() => {
       // noop
     });

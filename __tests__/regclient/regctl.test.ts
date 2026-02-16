@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, vi, test} from 'vitest';
 import * as semver from 'semver';
 
 import {Exec} from '../../src/exec';
@@ -82,7 +82,7 @@ describe('image config', () => {
 
 describe('isAvailable', () => {
   it('checks regctl is available', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const regctl = new Regctl();
     await regctl.isAvailable();
     expect(execSpy).toHaveBeenCalledWith(`regctl`, [], {
@@ -94,7 +94,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('prints regctl version', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const regctl = new Regctl();
     await regctl.printVersion();
     expect(execSpy).toHaveBeenCalledWith(`regctl`, ['version'], {

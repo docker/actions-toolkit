@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, describe, expect, it, jest, test} from '@jest/globals';
+import {afterEach, describe, expect, it, vi, test} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -29,15 +29,15 @@ import {BuildMetadata} from '../../src/types/buildx/build';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-bake-'));
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-bake.json'), 'utf-8'));
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 

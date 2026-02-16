@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, test, expect} from '@jest/globals';
+import {beforeAll, describe, test, expect} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';

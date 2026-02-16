@@ -18,7 +18,6 @@
 const {defineConfig, globalIgnores} = require('eslint/config');
 const {fixupConfigRules, fixupPluginRules} = require('@eslint/compat');
 const typescriptEslint = require('@typescript-eslint/eslint-plugin');
-const jestPlugin = require('eslint-plugin-jest');
 const prettier = require('eslint-plugin-prettier');
 const globals = require('globals');
 const tsParser = require('@typescript-eslint/parser');
@@ -43,22 +42,20 @@ module.exports = defineConfig([
         'plugin:import/errors',
         'plugin:import/typescript',
         'plugin:import/warnings',
-        'plugin:jest/recommended',
+        'plugin:vitest/recommended',
         'plugin:prettier/recommended'
       )
     ),
 
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
-      jest: fixupPluginRules(jestPlugin),
       prettier: fixupPluginRules(prettier)
     },
 
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.mocha,
-        ...globals.jest
+        ...globals.mocha
       },
       parser: tsParser,
       ecmaVersion: 2023,
@@ -78,7 +75,7 @@ module.exports = defineConfig([
           ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods']
         }
       ],
-      'jest/no-disabled-tests': 0
+      'vitest/no-disabled-tests': 0
     }
   }
 ]);

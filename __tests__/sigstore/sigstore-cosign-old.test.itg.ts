@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, expect, jest, it} from '@jest/globals';
+import {beforeAll, describe, expect, vi, it} from 'vitest';
 import * as path from 'path';
 
 import {Buildx} from '../../src/buildx/buildx';
@@ -31,7 +31,7 @@ const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'tr
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
 
 // needs current GitHub repo info
-jest.unmock('@actions/github');
+vi.unmock('@actions/github');
 
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();

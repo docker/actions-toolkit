@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {beforeEach, describe, expect, vi, test} from 'vitest';
 
 import {Git} from '../../src/buildkit/git';
 
 import {GitRef, GitURL} from '../../src/types/buildkit/git';
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('parseURL', () => {
@@ -195,7 +195,7 @@ describe('parseURL', () => {
       if (!expectedErr) {
         console.log(err);
       }
-      // eslint-disable-next-line jest/no-conditional-expect
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect(expectedErr).toBeTruthy();
     }
   });
@@ -337,7 +337,7 @@ describe('parseRef', () => {
       if (expected) {
         console.log(err);
       }
-      // eslint-disable-next-line jest/no-conditional-expect
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect(expected).toBeUndefined();
     }
   });

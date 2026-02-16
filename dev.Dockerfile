@@ -96,8 +96,8 @@ RUN --mount=type=bind,target=.,rw \
     --mount=type=bind,from=undock,source=/usr/local/bin/undock,target=/usr/bin/undock \
     --mount=type=bind,from=regctl,source=/regctl,target=/usr/bin/regctl \
     --mount=type=bind,from=cosign,source=/ko-app/cosign,target=/usr/bin/cosign \
-    --mount=type=secret,id=GITHUB_TOKEN \
-  GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN) yarn run test:coverage --coverageDirectory=/tmp/coverage
+    --mount=type=secret,id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+  yarn run test:coverage --coverage.reportsDirectory=/tmp/coverage
 
 FROM scratch AS test-coverage
 COPY --from=test /tmp/coverage /

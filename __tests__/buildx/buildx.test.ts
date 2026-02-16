@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, beforeEach, afterEach} from '@jest/globals';
+import {describe, expect, it, vi, test, beforeEach, afterEach} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -29,14 +29,14 @@ import {Cert, LocalState} from '../../src/types/buildx/buildx';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-buildx-'));
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -47,7 +47,7 @@ afterEach(() => {
 describe('configDir', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       BUILDX_CONFIG: '/var/docker/buildx',
@@ -69,7 +69,7 @@ describe('configDir', () => {
 describe('certsDir', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       BUILDX_CONFIG: '/var/docker/buildx'
@@ -86,7 +86,7 @@ describe('certsDir', () => {
 
 describe('isAvailable', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const buildx = new Buildx({
       standalone: false
     });
@@ -97,7 +97,7 @@ describe('isAvailable', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const buildx = new Buildx({
       standalone: true
     });
@@ -111,7 +111,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const buildx = new Buildx({
       standalone: false
     });
@@ -121,7 +121,7 @@ describe('printVersion', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const buildx = new Buildx({
       standalone: true
     });
@@ -164,7 +164,7 @@ describe('versionSatisfies', () => {
 describe('resolveCertsDriverOpts', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       BUILDX_CONFIG: path.join(tmpDir, 'resolveCertsDriverOpts', 'buildx')

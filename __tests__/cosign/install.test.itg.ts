@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, test} from '@jest/globals';
+import {describe, expect, it, test} from 'vitest';
 import * as fs from 'fs';
 
 import {Install} from '../../src/cosign/install';

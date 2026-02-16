@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 actions-toolkit authors
+ * Copyright 2026 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-const fs = require('fs');
+import {vi} from 'vitest';
 
-module.exports = results => {
-  const allSkipped = results.testResults.every(result => result.skipped);
-  if (allSkipped) {
-    console.log('All tests were skipped!');
-    fs.mkdirSync('./coverage', {recursive: true});
-    fs.closeSync(fs.openSync('./coverage/allSkipped.txt', 'w'));
-  }
-  return results;
-};
+vi.mock('@actions/github');

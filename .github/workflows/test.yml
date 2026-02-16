@@ -48,7 +48,7 @@ jobs:
       -
         name: Check coverage
         run: |
-          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
+          if [ -f ./coverage/clover.xml ]; then
             echo "RUN_CODECOV=true" >> $GITHUB_ENV
           else
             echo "RUN_CODECOV=false" >> $GITHUB_ENV
@@ -206,7 +206,7 @@ jobs:
             if (testName) {
               args.push(`--testNamePattern=^${testName} `);
             }
-            args.push(`--runTestsByPath`, `__tests__/${{ matrix.test }}`, `--coverageDirectory=./coverage`);
+            args.push(`__tests__/${{ matrix.test }}`, `--coverage.reportsDirectory=./coverage`);
             await exec.exec('yarn', args);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -218,7 +218,7 @@ jobs:
       -
         name: Check coverage
         run: |
-          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
+          if [ -f ./coverage/clover.xml ]; then
             echo "RUN_CODECOV=true" >> $GITHUB_ENV
           else
             echo "RUN_CODECOV=false" >> $GITHUB_ENV
