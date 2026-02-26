@@ -27,7 +27,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['clover'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/index.ts', 'lib/**', 'node_modules/**', '__mocks__/**', '__tests__/**']
+      exclude: ['src/**/index.ts']
     }
   }
 });

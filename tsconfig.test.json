@@ -7,10 +7,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "__tests__/**/*.ts"
-  ],
-  "exclude": [
-    "lib",
-    "node_modules"
+    "__tests__/**/*.ts",
+    "__mocks__/**/*.ts"
   ]
 }

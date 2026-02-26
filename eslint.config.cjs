@@ -18,7 +18,9 @@
 const {defineConfig, globalIgnores} = require('eslint/config');
 const {fixupConfigRules, fixupPluginRules} = require('@eslint/compat');
 const typescriptEslint = require('@typescript-eslint/eslint-plugin');
+const eslintPluginImport = require('eslint-plugin-import');
 const prettier = require('eslint-plugin-prettier');
+const vitest = require('@vitest/eslint-plugin');
 const globals = require('globals');
 const tsParser = require('@typescript-eslint/parser');
 const js = require('@eslint/js');
@@ -32,27 +34,35 @@ const compat = new FlatCompat({
 });
 
 module.exports = defineConfig([
-  globalIgnores(['.yarn/**/*', 'lib/**/*', 'coverage/**/*', 'node_modules/**/*']),
+  globalIgnores([
+    // prettier-ignore
+    '.yarn/**/*',
+    'coverage/**/*',
+    'lib/**/*'
+  ]),
   {
     extends: fixupConfigRules(
-      compat.extends('eslint:recommended', 'plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended', 'plugin:import/errors', 'plugin:import/typescript', 'plugin:import/warnings', 'plugin:prettier/recommended')
+      compat.extends(
+        // prettier-ignore
+        'eslint:recommended',
+        'plugin:@typescript-eslint/eslint-recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:prettier/recommended'
+      )
     ),
-
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
+      import: fixupPluginRules(eslintPluginImport),
       prettier: fixupPluginRules(prettier)
     },
-
     languageOptions: {
       globals: {
-        ...globals.node,
-        ...globals.mocha
+        ...globals.node
       },
       parser: tsParser,
       ecmaVersion: 2023,
       sourceType: 'module'
     },
-
     rules: {
       '@typescript-eslint/no-require-imports': [
         'error',
@@ -65,7 +75,14 @@ module.exports = defineConfig([
         {
           ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods', 'vitest/config']
         }
-      ],
+      ]
+    }
+  },
+  {
+    files: ['__tests__/**'],
+    ...vitest.configs.recommended,
+    rules: {
+      ...vitest.configs.recommended.rules,
       'vitest/no-conditional-expect': 'error',
       'vitest/no-disabled-tests': 0
     }
