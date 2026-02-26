@@ -1141,7 +1141,6 @@ __metadata:
     "@actions/http-client": "npm:^4.0.0"
     "@actions/io": "npm:^3.0.2"
     "@actions/tool-cache": "npm:^4.0.0"
-    "@azure/storage-blob": "npm:^12.30.0"
     "@eslint/compat": "npm:^2.0.0"
     "@eslint/eslintrc": "npm:^3.3.3"
     "@eslint/js": "npm:^9.39.2"

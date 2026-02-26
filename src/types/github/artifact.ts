@@ -16,13 +16,13 @@
 
 export interface UploadOpts {
   filename: string;
-  mimeType?: string;
   retentionDays?: number;
 }
 
 export interface UploadResponse {
   id: number;
   filename: string;
+  digest: string;
   size: number;
   url: string;
 }

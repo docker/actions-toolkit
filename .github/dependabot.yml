@@ -16,10 +16,6 @@ updates:
     versioning-strategy: "increase"
     allow:
       - dependency-type: "production"
-    ignore:
-      - # we want to match the same version as the one used by @actions/artifact
-        # https://github.com/actions/toolkit/blob/ae38557bb0dba824cdda26ce787bd6b66cf07a83/packages/artifact/package.json#L46
-        dependency-name: "@azure/storage-blob"
     labels:
       - "dependencies"
       - "bot"
