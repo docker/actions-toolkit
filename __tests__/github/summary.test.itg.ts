@@ -85,7 +85,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();
@@ -165,7 +164,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();
@@ -220,7 +218,6 @@ maybe('writeBuildSummary', () => {
 
     const uploadRes = await GitHubArtifact.upload({
       filename: exportRes?.dockerbuildFilename,
-      mimeType: 'application/gzip',
       retentionDays: 1
     });
     expect(uploadRes).toBeDefined();

@@ -33,7 +33,6 @@ maybe('upload', () => {
     fs.copyFileSync(path.join(fixturesDir, `github-repo.json`), filename);
     const res = await GitHubArtifact.upload({
       filename: filename,
-      mimeType: 'application/json',
       retentionDays: 1
     });
     expect(res).toBeDefined();
