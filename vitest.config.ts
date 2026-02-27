@@ -23,7 +23,6 @@ export default defineConfig({
     setupFiles: ['./__tests__/.setup/setup.unit.ts'],
     include: ['**/*.test.ts'],
     coverage: {
-      all: true,
       provider: 'v8',
       reporter: ['clover'],
       include: ['src/**/*.ts'],

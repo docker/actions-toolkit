@@ -23,7 +23,6 @@ export default defineConfig({
     include: ['**/*.test.itg.ts'],
     testTimeout: 1800000,
     coverage: {
-      all: true,
       provider: 'v8',
       reporter: ['clover'],
       include: ['src/**/*.ts'],

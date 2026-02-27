@@ -30,7 +30,6 @@ jobs:
         node_version:
           - 24
           - 20
-          - 18
     steps:
       -
         name: Checkout
