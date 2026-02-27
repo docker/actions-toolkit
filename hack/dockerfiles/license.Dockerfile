@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG ADDLICENSE_VERSION="v1.1.1"
-ARG ALPINE_VERSION="3.21"
-ARG GO_VERSION="1.23"
-ARG XX_VERSION="1.6.1"
+ARG ADDLICENSE_VERSION="v1.2.0"
+ARG ALPINE_VERSION="3.23"
+ARG GO_VERSION="1.26"
+ARG XX_VERSION="1.9.0"
 
 ARG LICENSE_HOLDER="actions-toolkit authors"
 ARG LICENSE_TYPE="apache"
-ARG LICENSE_FILES=".*\(Dockerfile\|Makefile\|\.js\|\.ts\|\.hcl\|\.sh|\.ps1\)"
+ARG LICENSE_FILES=".*\(Dockerfile\|Makefile\|\.js\|\.cjs\|\.mjs\|\.ts\|\.hcl\|\.sh|\.ps1\)"
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 
@@ -52,9 +52,9 @@ ARG LICENSE_TYPE
 ARG LICENSE_FILES
 RUN --mount=type=bind,target=.,rw \
     --mount=from=addlicense,source=/out/addlicense,target=/usr/bin/addlicense \
-    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | xargs addlicense -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE" && \
+    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./lib/*" -not -path "./node_modules/*" | xargs addlicense -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE" && \
     mkdir /out && \
-    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | cpio -pdm /out
+    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./lib/*"  -not -path "./node_modules/*" | cpio -pdm /out
 
 FROM scratch AS update
 COPY --from=set /out /
@@ -65,4 +65,4 @@ ARG LICENSE_TYPE
 ARG LICENSE_FILES
 RUN --mount=type=bind,target=. \
     --mount=from=addlicense,source=/out/addlicense,target=/usr/bin/addlicense \
-    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./node_modules/*" | xargs addlicense -check -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE"
+    find . -regex "${LICENSE_FILES}" -not -path "./.yarn/*" -not -path "./lib/*" -not -path "./node_modules/*" | xargs addlicense -check -c "$LICENSE_HOLDER" -l "$LICENSE_TYPE"
