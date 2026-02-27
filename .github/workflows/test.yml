@@ -30,7 +30,6 @@ jobs:
         node_version:
           - 24
           - 20
-          - 18
     steps:
       -
         name: Checkout
@@ -48,7 +47,7 @@ jobs:
       -
         name: Check coverage
         run: |
-          if [ -f ./coverage/clover.xml ]; then
+          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
             echo "RUN_CODECOV=true" >> $GITHUB_ENV
           else
             echo "RUN_CODECOV=false" >> $GITHUB_ENV
@@ -218,7 +217,7 @@ jobs:
       -
         name: Check coverage
         run: |
-          if [ -f ./coverage/clover.xml ]; then
+          if [ -f ./coverage/clover.xml ] && [ ! -f ./coverage/allSkipped.txt ]; then
             echo "RUN_CODECOV=true" >> $GITHUB_ENV
           else
             echo "RUN_CODECOV=false" >> $GITHUB_ENV

@@ -15,6 +15,7 @@
  */
 
 import {defineConfig} from 'vitest/config';
+import {vitestAllSkippedReporter} from './__tests__/.setup/skipped-reporter.mjs';
 
 export default defineConfig({
   test: {
@@ -22,12 +23,12 @@ export default defineConfig({
     environment: 'node',
     include: ['**/*.test.itg.ts'],
     testTimeout: 1800000,
+    reporters: ['default', vitestAllSkippedReporter()],
     coverage: {
-      all: true,
       provider: 'v8',
       reporter: ['clover'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/index.ts']
+      exclude: ['src/**/index.ts', '__tests__/**', 'lib/**']
     }
   }
 });
