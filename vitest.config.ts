@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     clearMocks: true,
     environment: 'node',
-    setupFiles: ['dotenv/config', './__tests__/.setup/setup.unit.ts'],
+    setupFiles: ['./__tests__/.setup/setup.unit.ts'],
     include: ['**/*.test.ts'],
     coverage: {
       all: true,
