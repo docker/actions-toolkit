@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     clearMocks: true,
     environment: 'node',
-    setupFiles: ['dotenv/config', './__tests__/.setup/setup.unit.ts'],
+    setupFiles: ['dotenv/config'],
     include: ['**/*.test.itg.ts'],
     testTimeout: 1800000,
     coverage: {

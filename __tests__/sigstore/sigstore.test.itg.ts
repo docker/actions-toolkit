@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, expect, vi, it, test} from 'vitest';
+import {beforeAll, describe, expect, it, test} from 'vitest';
 import fs from 'fs';
 import * as path from 'path';
 
@@ -32,9 +32,6 @@ const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'tr
 
 const maybe = runTest ? describe : describe.skip;
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
-
-// needs current GitHub repo info
-vi.unmock('@actions/github');
 
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();

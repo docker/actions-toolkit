@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, expect, vi, it} from 'vitest';
+import {beforeAll, describe, expect, it} from 'vitest';
 import * as path from 'path';
 
 import {Buildx} from '../../src/buildx/buildx.js';
@@ -29,9 +29,6 @@ const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu');
 
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
-
-// needs current GitHub repo info
-vi.unmock('@actions/github');
 
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();

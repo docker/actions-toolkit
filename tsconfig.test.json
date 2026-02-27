@@ -7,7 +7,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "__tests__/**/*.ts",
-    "__mocks__/**/*.ts"
+    "__tests__/**/*.ts"
   ]
 }
