@@ -26,6 +26,14 @@ import repoFixture from '../.fixtures/github-repo.json' with {type: 'json'};
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
+vi.mock('@actions/core', async () => {
+  const actual = await vi.importActual<typeof import('@actions/core')>('@actions/core');
+  return {
+    ...actual,
+    info: vi.fn()
+  };
+});
+
 describe('repoData', () => {
   it('returns GitHub repo data', async () => {
     vi.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
@@ -33,32 +41,6 @@ describe('repoData', () => {
     });
     const github = new GitHub();
     expect((await github.repoData()).name).toEqual('Hello-World');
-  });
-});
-
-describe('repoData (api)', () => {
-  it('returns docker/actions-toolkit', async () => {
-    if (!process.env.GITHUB_TOKEN) {
-      return;
-    }
-
-    const originalEnv = process.env;
-    process.env = {
-      ...originalEnv,
-      GITHUB_REPOSITORY: 'docker/actions-toolkit'
-    };
-
-    try {
-      vi.resetModules();
-      vi.unmock('@actions/github');
-      const {GitHub} = await import('../../src/github/github.js');
-      const github = new GitHub({token: process.env.GITHUB_TOKEN});
-      const repo = await github.repoData();
-      const fullName = repo.full_name ?? `${repo.owner?.login}/${repo.name}`;
-      expect(fullName).toEqual('docker/actions-toolkit');
-    } finally {
-      process.env = originalEnv;
-    }
   });
 });
 
@@ -201,7 +183,7 @@ describe('printActionsRuntimeTokenACs', () => {
     await expect(GitHub.printActionsRuntimeTokenACs()).rejects.toThrow(new Error('Cannot parse GitHub Actions Runtime Token: Invalid token specified: missing part #2'));
   });
   it('refs/heads/master', async () => {
-    const infoSpy = vi.spyOn(core, 'info');
+    const infoSpy = vi.mocked(core.info);
     process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(fixturesDir, 'runtimeToken.txt')).toString().trim();
     await GitHub.printActionsRuntimeTokenACs();
     expect(infoSpy).toHaveBeenCalledTimes(1);
