@@ -5,12 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "lint": "yarn run prettier && yarn run eslint",
-    "format": "yarn run prettier:fix && yarn run eslint:fix",
-    "eslint": "eslint --max-warnings=0 .",
-    "eslint:fix": "eslint --fix .",
-    "prettier": "prettier --check \"./**/*.ts\"",
-    "prettier:fix": "prettier --write \"./**/*.ts\"",
+    "lint": "eslint --max-warnings=0 .",
+    "format": "eslint --fix .",
     "test": "vitest run -c vitest.config.ts",
     "test:coverage": "vitest run -c vitest.config.ts --coverage",
     "test:itg": "vitest run -c vitest.config.itg.ts --maxWorkers=1",
@@ -70,8 +66,6 @@
     "tmp": "^0.2.5"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.0.0",
-    "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@types/gunzip-maybe": "^1.4.3",
     "@types/he": "^1.2.3",
@@ -86,8 +80,8 @@
     "@vitest/eslint-plugin": "^1.6.9",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^14.0.0",
     "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
     "typescript": "^5.9.3",
