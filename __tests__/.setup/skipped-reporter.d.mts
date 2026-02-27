@@ -14,21 +14,6 @@
  * limitations under the License.
  */
 
-import {defineConfig} from 'vitest/config';
-import {vitestAllSkippedReporter} from './__tests__/.setup/skipped-reporter.mjs';
+import type {Reporter} from 'vitest/node';
 
-export default defineConfig({
-  test: {
-    clearMocks: true,
-    environment: 'node',
-    setupFiles: ['./__tests__/.setup/setup.unit.ts'],
-    include: ['**/*.test.ts'],
-    reporters: ['default', vitestAllSkippedReporter()],
-    coverage: {
-      provider: 'v8',
-      reporter: ['clover'],
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/index.ts', '__tests__/**', 'lib/**']
-    }
-  }
-});
+export declare const vitestAllSkippedReporter: () => Reporter;
