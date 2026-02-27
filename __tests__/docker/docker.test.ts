@@ -27,6 +27,14 @@ import {Docker} from '../../src/docker/docker.js';
 
 import {ConfigFile} from '../../src/types/docker/docker.js';
 
+vi.mock('@actions/io', async () => {
+  const actual = await vi.importActual<typeof import('@actions/io')>('@actions/io');
+  return {
+    ...actual,
+    which: vi.fn()
+  };
+});
+
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-docker-'));
 
@@ -97,7 +105,7 @@ describe('configFile', () => {
 
 describe('isAvailable', () => {
   it('cli', async () => {
-    const ioWhichSpy = vi.spyOn(io, 'which');
+    const ioWhichSpy = vi.mocked(io.which).mockResolvedValue('/usr/bin/docker');
     await Docker.isAvailable();
     expect(ioWhichSpy).toHaveBeenCalledTimes(1);
     expect(ioWhichSpy).toHaveBeenCalledWith('docker', true);
