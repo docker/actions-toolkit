@@ -20,7 +20,7 @@ import {DefaultArtifactClient, InvalidResponseError} from '@actions/artifact';
 import * as core from '@actions/core';
 
 import {UploadOpts, UploadResponse} from '../types/github/artifact.js';
-import {GitHub} from './github';
+import {GitHub} from './github.js';
 
 export class GitHubArtifact {
   public static async upload(opts: UploadOpts): Promise<UploadResponse> {

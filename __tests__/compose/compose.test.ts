@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test, afterEach} from '@jest/globals';
+import {describe, expect, it, vi, test, afterEach} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 import * as semver from 'semver';
 
-import {Context} from '../../src/context';
-import {Exec} from '../../src/exec';
+import {Context} from '../../src/context.js';
+import {Exec} from '../../src/exec.js';
 
-import {Compose} from '../../src/compose/compose';
+import {Compose} from '../../src/compose/compose.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'compose-compose-'));
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -44,7 +44,7 @@ afterEach(() => {
 
 describe('isAvailable', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const compose = new Compose({
       standalone: false
     });
@@ -55,7 +55,7 @@ describe('isAvailable', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const compose = new Compose({
       standalone: true
     });
@@ -69,7 +69,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('docker cli', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const compose = new Compose({
       standalone: false
     });
@@ -79,7 +79,7 @@ describe('printVersion', () => {
     });
   });
   it('standalone', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const compose = new Compose({
       standalone: true
     });

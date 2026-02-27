@@ -17,11 +17,11 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, vi, test} from 'vitest';
 import * as semver from 'semver';
 
-import {Exec} from '../../src/exec';
-import {Undock} from '../../src/undock/undock';
+import {Exec} from '../../src/exec.js';
+import {Undock} from '../../src/undock/undock.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-undock-'));
 
@@ -43,7 +43,7 @@ describe('run', () => {
 
 describe('isAvailable', () => {
   it('checks undock is available', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const undock = new Undock();
     await undock.isAvailable();
     expect(execSpy).toHaveBeenCalledWith(`undock`, [], {
@@ -55,7 +55,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('prints undock version', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const undock = new Undock();
     await undock.printVersion();
     expect(execSpy).toHaveBeenCalledWith(`undock`, ['--version'], {

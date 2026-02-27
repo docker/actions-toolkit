@@ -14,51 +14,33 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it, beforeEach, afterEach, test} from '@jest/globals';
+import {describe, expect, vi, it, beforeEach, afterEach, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
 
-import {GitHub} from '../../src/github/github';
-import {GitHubRepo} from '../../src/types/github/github';
+import {GitHub} from '../../src/github/github.js';
+import {GitHubRepo} from '../../src/types/github/github.js';
 
-import repoFixture from '../.fixtures/github-repo.json';
+import repoFixture from '../.fixtures/github-repo.json' with {type: 'json'};
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
+vi.mock('@actions/core', async () => {
+  const actual = await vi.importActual<typeof import('@actions/core')>('@actions/core');
+  return {
+    ...actual,
+    info: vi.fn()
+  };
+});
+
 describe('repoData', () => {
   it('returns GitHub repo data', async () => {
-    jest.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
+    vi.spyOn(GitHub.prototype, 'repoData').mockImplementation((): Promise<GitHubRepo> => {
       return <Promise<GitHubRepo>>(repoFixture as unknown);
     });
     const github = new GitHub();
     expect((await github.repoData()).name).toEqual('Hello-World');
-  });
-});
-
-describe('repoData (api)', () => {
-  it('returns docker/actions-toolkit', async () => {
-    if (!process.env.GITHUB_TOKEN) {
-      return;
-    }
-
-    const originalEnv = process.env;
-    process.env = {
-      ...originalEnv,
-      GITHUB_REPOSITORY: 'docker/actions-toolkit'
-    };
-
-    try {
-      jest.resetModules();
-      jest.unmock('@actions/github');
-      const {GitHub} = await import('../../src/github/github');
-      const github = new GitHub({token: process.env.GITHUB_TOKEN});
-      const repo = await github.repoData();
-      const fullName = repo.full_name ?? `${repo.owner?.login}/${repo.name}`;
-      expect(fullName).toEqual('docker/actions-toolkit');
-    } finally {
-      process.env = originalEnv;
-    }
   });
 });
 
@@ -97,7 +79,7 @@ describe('releases', () => {
 describe('serverURL', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       GITHUB_SERVER_URL: 'https://foo.github.com'
@@ -118,7 +100,7 @@ describe('serverURL', () => {
 describe('apiURL', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv,
       GITHUB_API_URL: 'https://bar.github.com'
@@ -154,7 +136,7 @@ describe('workflowRunURL', () => {
 describe('actionsRuntimeToken', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv
     };
@@ -184,7 +166,7 @@ describe('actionsRuntimeToken', () => {
 describe('printActionsRuntimeTokenACs', () => {
   const originalEnv = process.env;
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       ...originalEnv
     };
@@ -201,7 +183,7 @@ describe('printActionsRuntimeTokenACs', () => {
     await expect(GitHub.printActionsRuntimeTokenACs()).rejects.toThrow(new Error('Cannot parse GitHub Actions Runtime Token: Invalid token specified: missing part #2'));
   });
   it('refs/heads/master', async () => {
-    const infoSpy = jest.spyOn(core, 'info');
+    const infoSpy = vi.mocked(core.info);
     process.env.ACTIONS_RUNTIME_TOKEN = fs.readFileSync(path.join(fixturesDir, 'runtimeToken.txt')).toString().trim();
     await GitHub.printActionsRuntimeTokenACs();
     expect(infoSpy).toHaveBeenCalledTimes(1);

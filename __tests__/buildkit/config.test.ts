@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, test, afterEach} from '@jest/globals';
+import {describe, expect, vi, test, afterEach} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {BuildKit} from '../../src/buildkit/buildkit';
-import {Context} from '../../src/context';
+import {BuildKit} from '../../src/buildkit/buildkit.js';
+import {Context} from '../../src/context.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildkit-config-'));
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -66,7 +66,7 @@ describe('resolve', () => {
       const configValue = fs.readFileSync(tmpName, 'utf-8');
       expect(configValue).toEqual(exValue);
     } catch (e) {
-      // eslint-disable-next-line jest/no-conditional-expect
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect(e.message).toEqual(error?.message);
     }
   });

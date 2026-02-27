@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {describe, expect, it} from '@jest/globals';
+import {describe, expect, it} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {GitHubArtifact} from '../../src/github/artifact';
-import {Util} from '../../src/util';
+import {GitHubArtifact} from '../../src/github/artifact.js';
+import {Util} from '../../src/util.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'github-itg-'));

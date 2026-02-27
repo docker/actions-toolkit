@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 actions-toolkit authors
+ * Copyright 2026 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import {vi} from 'vitest';
-import os from 'os';
+import {defineConfig} from 'vitest/config';
 
-export const mockPlatform = (platform: NodeJS.Platform) => {
-  return vi.spyOn(os, 'platform').mockImplementation(() => platform);
-};
-
-export const mockArch = (arch: string) => {
-  return vi.spyOn(os, 'arch').mockImplementation(() => arch);
-};
-
-export const mockHomedir = (dir: string) => {
-  return vi.spyOn(os, 'homedir').mockImplementation(() => dir);
-};
+export default defineConfig({
+  test: {
+    clearMocks: true,
+    environment: 'node',
+    include: ['**/*.test.itg.ts'],
+    testTimeout: 1800000,
+    coverage: {
+      all: true,
+      provider: 'v8',
+      reporter: ['clover'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/index.ts']
+    }
+  }
+});

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {describe, expect, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Bake} from '../../src/buildx/bake';
-import {BakeDefinition} from '../../src/types/buildx/bake';
+import {Bake} from '../../src/buildx/bake.js';
+import {BakeDefinition} from '../../src/types/buildx/bake.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 

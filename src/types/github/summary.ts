@@ -16,9 +16,9 @@
 
 import * as core from '@actions/core';
 
-import {UploadResponse} from './artifact';
-import {BakeDefinition} from '../buildx/bake';
-import {ExportResponse} from '../buildx/history';
+import {UploadResponse} from './artifact.js';
+import {BakeDefinition} from '../buildx/bake.js';
+import {ExportResponse} from '../buildx/history.js';
 
 export type SummaryTableRow = Parameters<typeof core.summary.addTable>[0][number];
 export type SummaryTableCell = Exclude<SummaryTableRow[number], string>;

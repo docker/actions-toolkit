@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, test} from '@jest/globals';
+import {describe, expect, it, test} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import {Buildx} from '../../src/buildx/buildx';
-import {Bake} from '../../src/buildx/bake';
-import {Build} from '../../src/buildx/build';
-import {History} from '../../src/buildx/history';
-import {Exec} from '../../src/exec';
+import {Buildx} from '../../src/buildx/buildx.js';
+import {Bake} from '../../src/buildx/bake.js';
+import {Build} from '../../src/buildx/build.js';
+import {History} from '../../src/buildx/history.js';
+import {Exec} from '../../src/exec.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-history-itg-'));

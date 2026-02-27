@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, test, afterEach} from '@jest/globals';
+import {describe, expect, it, test, afterEach} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {mockArch, mockPlatform} from '../.helpers/os';
+import {mockArch, mockPlatform} from '../.helpers/os.js';
 
-import {Install} from '../../src/undock/install';
+import {Install} from '../../src/undock/install.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'undock-install-'));
 

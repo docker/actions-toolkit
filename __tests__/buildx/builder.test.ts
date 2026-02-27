@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, vi, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Builder} from '../../src/buildx/builder';
-import {Exec} from '../../src/exec';
+import {Builder} from '../../src/buildx/builder.js';
+import {Exec} from '../../src/exec.js';
 
-import {BuilderInfo} from '../../src/types/buildx/builder';
+import {BuilderInfo} from '../../src/types/buildx/builder.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
-jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
+vi.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<BuilderInfo> => {
   return {
     name: 'builder2',
     driver: 'docker-container',
@@ -46,7 +46,7 @@ jest.spyOn(Builder.prototype, 'inspect').mockImplementation(async (): Promise<Bu
 
 describe('exists', () => {
   it('valid', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const builder = new Builder();
     await builder.exists('foo');
     expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx', 'inspect', 'foo'], {

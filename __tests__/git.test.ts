@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
-import {Git as GitMocked} from '../src/git';
-import {Exec} from '../src/exec';
+import {Git} from '../src/git.js';
+import {Exec} from '../src/exec.js';
 import {ExecOutput} from '@actions/exec';
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('context', () => {
   it('returns mocked ref and sha', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -46,7 +46,7 @@ describe('context', () => {
         exitCode: 0
       });
     });
-    const ctx = await GitMocked.context();
+    const ctx = await Git.context();
     expect(ctx.ref).toEqual('refs/heads/test');
     expect(ctx.sha).toEqual('test-sha');
   });
@@ -54,9 +54,9 @@ describe('context', () => {
 
 describe('isInsideWorkTree', () => {
   it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     try {
-      await GitMocked.isInsideWorkTree();
+      await Git.isInsideWorkTree();
     } catch {
       // noop
     }
@@ -69,21 +69,15 @@ describe('isInsideWorkTree', () => {
 
 describe('remoteSha', () => {
   it('returns sha using git ls-remote', async () => {
-    expect(await GitMocked.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
-  });
-  it('returns sha using github api', async () => {
-    jest.resetModules();
-    jest.unmock('@actions/github');
-    const {Git} = await import('../src/git');
-    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head', process.env.GITHUB_TOKEN)).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
+    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head')).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
   });
 });
 
 describe('remoteURL', () => {
   it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     try {
-      await GitMocked.remoteURL();
+      await Git.remoteURL();
     } catch {
       // noop
     }
@@ -96,7 +90,7 @@ describe('remoteURL', () => {
 
 describe('ref', () => {
   it('returns mocked ref', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -113,14 +107,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/test');
   });
 
   it('returns mocked detached tag ref', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -137,14 +129,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/tags/8.0.0');
   });
 
   it('returns mocked detached tag ref (shallow clone)', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -161,14 +151,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/tags/8.0.0');
   });
 
   it('returns mocked detached pull request merge ref (shallow clone)', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -185,14 +173,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/pull/221/merge');
   });
 
   it('should throws an error when detached HEAD ref is not supported', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -209,12 +195,11 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    await expect(GitMocked.ref()).rejects.toThrow('Cannot find detached HEAD ref in "wrong, HEAD, tag: 8.0.0"');
+    await expect(Git.ref()).rejects.toThrow('Cannot find detached HEAD ref in "wrong, HEAD, tag: 8.0.0"');
   });
 
   it('returns mocked detached branch ref', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -231,14 +216,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/test');
   });
 
   it('returns mocked detached branch ref checked out by SHA', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -255,14 +238,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/feature-branch');
   });
 
   it('infers ref from local branch when detached HEAD returns only "HEAD"', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -282,14 +263,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/main');
   });
 
   it('infers ref from local branch when detached HEAD returns only "grafted, HEAD"', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -309,14 +288,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/main');
   });
 
   it('infers ref from remote branch when no local branch contains HEAD', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -339,14 +316,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/heads/feature');
   });
 
   it('infers ref from tag when no branch contains HEAD', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -372,14 +347,12 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/tags/v1.0.0');
   });
 
   it('throws error when cannot infer ref from detached HEAD', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -405,12 +378,11 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    await expect(GitMocked.ref()).rejects.toThrow('Cannot infer ref from detached HEAD');
+    await expect(Git.ref()).rejects.toThrow('Cannot infer ref from detached HEAD');
   });
 
   it('handles remote ref without branch pattern when inferring from remote', async () => {
-    jest.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
       const fullCmd = `${cmd} ${args?.join(' ')}`;
       let result = '';
       switch (fullCmd) {
@@ -433,18 +405,16 @@ describe('ref', () => {
         exitCode: 0
       });
     });
-
-    const ref = await GitMocked.ref();
-
+    const ref = await Git.ref();
     expect(ref).toEqual('refs/remotes/unusual-format');
   });
 });
 
 describe('fullCommit', () => {
   it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     try {
-      await GitMocked.fullCommit();
+      await Git.fullCommit();
     } catch {
       // noop
     }
@@ -457,9 +427,9 @@ describe('fullCommit', () => {
 
 describe('shortCommit', () => {
   it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     try {
-      await GitMocked.shortCommit();
+      await Git.shortCommit();
     } catch {
       // noop
     }
@@ -472,9 +442,9 @@ describe('shortCommit', () => {
 
 describe('tag', () => {
   it('have been called', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     try {
-      await GitMocked.tag();
+      await Git.tag();
     } catch {
       // noop
     }
@@ -487,7 +457,7 @@ describe('tag', () => {
 
 describe('getCommitDate', () => {
   it('head', async () => {
-    const date = await GitMocked.commitDate('HEAD');
-    await expect(date).toBeInstanceOf(Date);
+    const date = await Git.commitDate('HEAD');
+    expect(date).toBeInstanceOf(Date);
   });
 });

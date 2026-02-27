@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest, test} from '@jest/globals';
+import {describe, expect, it, vi, test} from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import * as semver from 'semver';
 
-import {Exec} from '../../src/exec';
-import {Cosign} from '../../src/cosign/cosign';
+import {Exec} from '../../src/exec.js';
+import {Cosign} from '../../src/cosign/cosign.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
 describe('isAvailable', () => {
   it('checks Cosign is available', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     const cosign = new Cosign();
     await cosign.isAvailable();
     expect(execSpy).toHaveBeenCalledWith(`cosign`, [], {
@@ -38,7 +38,7 @@ describe('isAvailable', () => {
 
 describe('printVersion', () => {
   it('prints Cosign version', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     const cosign = new Cosign();
     await cosign.printVersion();
     expect(execSpy).toHaveBeenCalledWith(`cosign`, ['version', '--json'], {

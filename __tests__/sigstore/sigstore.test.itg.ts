@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, expect, jest, it, test} from '@jest/globals';
+import {beforeAll, describe, expect, it, test} from 'vitest';
 import fs from 'fs';
 import * as path from 'path';
 
-import {Buildx} from '../../src/buildx/buildx';
-import {Build} from '../../src/buildx/build';
-import {Install as CosignInstall} from '../../src/cosign/install';
-import {Docker} from '../../src/docker/docker';
-import {Exec} from '../../src/exec';
-import {OCI} from '../../src/oci/oci';
-import {Sigstore} from '../../src/sigstore/sigstore';
+import {Buildx} from '../../src/buildx/buildx.js';
+import {Build} from '../../src/buildx/build.js';
+import {Install as CosignInstall} from '../../src/cosign/install.js';
+import {Docker} from '../../src/docker/docker.js';
+import {Exec} from '../../src/exec.js';
+import {OCI} from '../../src/oci/oci.js';
+import {Sigstore} from '../../src/sigstore/sigstore.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 
@@ -32,9 +32,6 @@ const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'tr
 
 const maybe = runTest ? describe : describe.skip;
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
-
-// needs current GitHub repo info
-jest.unmock('@actions/github');
 
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();

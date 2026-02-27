@@ -18,8 +18,9 @@
 const {defineConfig, globalIgnores} = require('eslint/config');
 const {fixupConfigRules, fixupPluginRules} = require('@eslint/compat');
 const typescriptEslint = require('@typescript-eslint/eslint-plugin');
-const jestPlugin = require('eslint-plugin-jest');
+const eslintPluginImport = require('eslint-plugin-import');
 const prettier = require('eslint-plugin-prettier');
+const vitest = require('@vitest/eslint-plugin');
 const globals = require('globals');
 const tsParser = require('@typescript-eslint/parser');
 const js = require('@eslint/js');
@@ -33,38 +34,35 @@ const compat = new FlatCompat({
 });
 
 module.exports = defineConfig([
-  globalIgnores(['.yarn/**/*', 'lib/**/*', 'coverage/**/*', 'node_modules/**/*']),
+  globalIgnores([
+    // prettier-ignore
+    '.yarn/**/*',
+    'coverage/**/*',
+    'lib/**/*'
+  ]),
   {
     extends: fixupConfigRules(
       compat.extends(
+        // prettier-ignore
         'eslint:recommended',
         'plugin:@typescript-eslint/eslint-recommended',
         'plugin:@typescript-eslint/recommended',
-        'plugin:import/errors',
-        'plugin:import/typescript',
-        'plugin:import/warnings',
-        'plugin:jest/recommended',
         'plugin:prettier/recommended'
       )
     ),
-
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
-      jest: fixupPluginRules(jestPlugin),
+      import: fixupPluginRules(eslintPluginImport),
       prettier: fixupPluginRules(prettier)
     },
-
     languageOptions: {
       globals: {
-        ...globals.node,
-        ...globals.mocha,
-        ...globals.jest
+        ...globals.node
       },
       parser: tsParser,
       ecmaVersion: 2023,
       sourceType: 'module'
     },
-
     rules: {
       '@typescript-eslint/no-require-imports': [
         'error',
@@ -75,10 +73,18 @@ module.exports = defineConfig([
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods']
+          ignore: ['\\.js$', 'csv-parse/sync', '@octokit/openapi-types', '@octokit/core', '@octokit/plugin-rest-endpoint-methods', 'vitest/config']
         }
-      ],
-      'jest/no-disabled-tests': 0
+      ]
+    }
+  },
+  {
+    files: ['__tests__/**'],
+    ...vitest.configs.recommended,
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/no-conditional-expect': 'error',
+      'vitest/no-disabled-tests': 0
     }
   }
 ]);

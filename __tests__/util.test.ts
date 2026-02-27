@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, test} from '@jest/globals';
+import {describe, expect, it, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {Util} from '../src/util';
+import {Util} from '../src/util.js';
 
 describe('getInputList', () => {
   it('single line correctly', async () => {
@@ -326,10 +326,10 @@ describe('parseBool', () => {
   ].forEach(({input, expected, throwsError}) => {
     test(`parseBool("${input}")`, () => {
       if (throwsError) {
-        // eslint-disable-next-line jest/no-conditional-expect
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(() => Util.parseBool(input)).toThrow();
       } else {
-        // eslint-disable-next-line jest/no-conditional-expect
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(Util.parseBool(input)).toBe(expected);
       }
     });

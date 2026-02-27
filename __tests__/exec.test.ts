@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, jest} from '@jest/globals';
+import {describe, expect, it, vi} from 'vitest';
 
-import {Exec} from '../src/exec';
+import {Exec} from '../src/exec.js';
 
 describe('exec', () => {
   it('returns docker version', async () => {
-    const execSpy = jest.spyOn(Exec, 'exec');
+    const execSpy = vi.spyOn(Exec, 'exec');
     await Exec.exec('docker', ['version'], {
       ignoreReturnCode: true,
       silent: true
@@ -34,7 +34,7 @@ describe('exec', () => {
 
 describe('getExecOutput', () => {
   it('returns docker version', async () => {
-    const execSpy = jest.spyOn(Exec, 'getExecOutput');
+    const execSpy = vi.spyOn(Exec, 'getExecOutput');
     await Exec.getExecOutput('docker', ['version'], {
       ignoreReturnCode: true,
       silent: true

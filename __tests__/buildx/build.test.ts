@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {afterEach, beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, vi, test} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
-import {Context} from '../../src/context';
-import {Build} from '../../src/buildx/build';
+import {Context} from '../../src/context.js';
+import {Build} from '../../src/buildx/build.js';
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'buildx-build-'));
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 const metadata = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'metadata-build.json'), 'utf-8'));
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   fs.mkdirSync(tmpDir, {recursive: true});
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
@@ -191,7 +191,7 @@ describe('resolveSecret', () => {
       expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
       expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
     } catch (e) {
-      // eslint-disable-next-line jest/no-conditional-expect
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect(e.message).toEqual(error?.message);
     }
   });
@@ -206,7 +206,7 @@ describe('resolveSecret', () => {
       const secret = Build.resolveSecretEnv(kvp);
       expect(secret).toEqual(`id=${exKey},env=${exValue}`);
     } catch (e) {
-      // eslint-disable-next-line jest/no-conditional-expect
+      // eslint-disable-next-line vitest/no-conditional-expect
       expect(e.message).toEqual(error?.message);
     }
   });

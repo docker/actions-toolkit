@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 actions-toolkit authors
+ * Copyright 2026 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import {vi} from 'vitest';
-import os from 'os';
+import {describe, expect, it} from 'vitest';
 
-export const mockPlatform = (platform: NodeJS.Platform) => {
-  return vi.spyOn(os, 'platform').mockImplementation(() => platform);
-};
+import {Git} from '../src/git.js';
 
-export const mockArch = (arch: string) => {
-  return vi.spyOn(os, 'arch').mockImplementation(() => arch);
-};
-
-export const mockHomedir = (dir: string) => {
-  return vi.spyOn(os, 'homedir').mockImplementation(() => dir);
-};
+describe('remoteSha', () => {
+  it('returns sha using github api', async () => {
+    expect(await Git.remoteSha('https://github.com/docker/buildx.git', 'refs/pull/648/head', process.env.GITHUB_TOKEN)).toEqual('f11797113e5a9b86bd976329c5dbb8a8bfdfadfa');
+  });
+});

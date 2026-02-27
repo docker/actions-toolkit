@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {describe, expect, jest, it} from '@jest/globals';
+import {describe, expect, vi, it} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {DockerHub} from '../src/dockerhub';
-import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub';
+import {DockerHub} from '../src/dockerhub.js';
+import {RepositoryResponse, RepositoryTagsResponse} from '../src/types/dockerhub.js';
 
-import repoInfoFixture from './.fixtures/dockerhub-repoinfo.json';
-import repoTagsFixture from './.fixtures/dockerhub-repotags.json';
-import repoAllTagsFixture from './.fixtures/dockerhub-repoalltags.json';
+import repoInfoFixture from './.fixtures/dockerhub-repoinfo.json' with {type: 'json'};
+import repoTagsFixture from './.fixtures/dockerhub-repotags.json' with {type: 'json'};
+import repoAllTagsFixture from './.fixtures/dockerhub-repoalltags.json' with {type: 'json'};
 
 describe('getRepository', () => {
   it('returns repo info', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepository').mockImplementation((): Promise<RepositoryResponse> => {
+    vi.spyOn(DockerHub.prototype, 'getRepository').mockImplementation((): Promise<RepositoryResponse> => {
       return <Promise<RepositoryResponse>>(repoInfoFixture as unknown);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
+    vi.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
     const dockerhub = await DockerHub.build({
       credentials: {
         username: 'foo',
@@ -50,11 +50,11 @@ describe('getRepository', () => {
 
 describe('getRepositoryTags', () => {
   it('return repo tags', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepositoryTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
+    vi.spyOn(DockerHub.prototype, 'getRepositoryTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
       return <Promise<RepositoryTagsResponse>>(repoTagsFixture as unknown);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
+    vi.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
     const dockerhub = await DockerHub.build({
       credentials: {
         username: 'foo',
@@ -74,11 +74,11 @@ describe('getRepositoryTags', () => {
 
 describe('getRepositoryAllTags', () => {
   it('return repo all tags', async () => {
-    jest.spyOn(DockerHub.prototype, 'getRepositoryAllTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
+    vi.spyOn(DockerHub.prototype, 'getRepositoryAllTags').mockImplementation((): Promise<RepositoryTagsResponse> => {
       return <Promise<RepositoryTagsResponse>>(repoAllTagsFixture as unknown);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jest.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
+    vi.spyOn(DockerHub as any, 'login').mockReturnValue('jwt_token');
     const dockerhub = await DockerHub.build({
       credentials: {
         username: 'foo',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 actions-toolkit authors
+ * Copyright 2026 actions-toolkit authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-const fs = require('fs');
+import {defineConfig} from 'vitest/config';
 
-module.exports = results => {
-  const allSkipped = results.testResults.every(result => result.skipped);
-  if (allSkipped) {
-    console.log('All tests were skipped!');
-    fs.mkdirSync('./coverage', {recursive: true});
-    fs.closeSync(fs.openSync('./coverage/allSkipped.txt', 'w'));
+export default defineConfig({
+  test: {
+    clearMocks: true,
+    environment: 'node',
+    setupFiles: ['./__tests__/.setup/setup.unit.ts'],
+    include: ['**/*.test.ts'],
+    coverage: {
+      all: true,
+      provider: 'v8',
+      reporter: ['clover'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/index.ts']
+    }
   }
-  return results;
-};
+});

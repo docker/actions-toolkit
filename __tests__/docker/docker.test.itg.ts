@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {describe, expect, it, test} from '@jest/globals';
+import {describe, expect, it, test} from 'vitest';
 
-import {Docker} from '../../src/docker/docker';
+import {Docker} from '../../src/docker/docker.js';
 
 const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'true' && process.env.ImageOS && process.env.ImageOS.startsWith('ubuntu')) ? describe : describe.skip;
 
@@ -55,7 +55,7 @@ maybe('pull', () => {
         if (err === undefined) {
           throw new Error(`Expected no error, but got: ${e.message}`);
         }
-        // eslint-disable-next-line jest/no-conditional-expect
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(e.message).toContain(err);
       }
     }, 600000);

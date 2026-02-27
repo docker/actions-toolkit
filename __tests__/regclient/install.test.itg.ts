@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {describe, expect, test} from '@jest/globals';
+import {describe, expect, test} from 'vitest';
 import * as fs from 'fs';
 
-import {Install} from '../../src/regclient/install';
+import {Install} from '../../src/regclient/install.js';
 
 describe('download', () => {
   // prettier-ignore
