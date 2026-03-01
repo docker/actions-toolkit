@@ -36,7 +36,7 @@ describe('download', () => {
     ['v0.8.2'],
     ['latest']
   ])(
-  'acquires %p of regclient', async (version) => {
+  'acquires %o of regclient', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -49,7 +49,7 @@ describe('download', () => {
     // following versions are already cached to htc from previous test cases
     ['v0.8.2'],
   ])(
-  'acquires %p of regclient with cache', async (version) => {
+  'acquires %o of regclient with cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -59,7 +59,7 @@ describe('download', () => {
   test.each([
     ['v0.8.1'],
   ])(
-  'acquires %p of regclient without cache', async (version) => {
+  'acquires %o of regclient without cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);

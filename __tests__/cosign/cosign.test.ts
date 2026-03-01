@@ -59,7 +59,7 @@ describe('versionSatisfies', () => {
     ['v0.4.1', '>=0.3.2', true],
     ['v0.8.0', '>0.6.0', true],
     ['v0.8.0', '<0.3.0', false]
-  ])('given %p', async (version, range, expected) => {
+  ])('given %o', async (version, range, expected) => {
     const cosign = new Cosign();
     expect(await cosign.versionSatisfies(range, version)).toBe(expected);
   });
@@ -71,7 +71,7 @@ describe('parseCommandOutput', () => {
     [path.join(fixturesDir, 'cosign', 'sign-output1.txt')],
     [path.join(fixturesDir, 'cosign', 'sign-output2.txt')],
     [path.join(fixturesDir, 'cosign', 'sign-output3.txt')],
-  ])('parsing %p', async (fixturePath: string) => {
+  ])('parsing %o', async (fixturePath: string) => {
     const signResult = Cosign.parseCommandOutput(fs.readFileSync(fixturePath, 'utf-8'));
     expect(signResult).toBeDefined();
     expect(signResult.bundle).toBeDefined();
@@ -80,7 +80,7 @@ describe('parseCommandOutput', () => {
   // prettier-ignore
   test.each([
     [path.join(fixturesDir, 'cosign', 'verify-output-err1.txt')],
-  ])('parsing %p', async (fixturePath: string) => {
+  ])('parsing %o', async (fixturePath: string) => {
     const signResult = Cosign.parseCommandOutput(fs.readFileSync(fixturePath, 'utf-8'));
     expect(signResult).toBeDefined();
     expect(signResult.bundle).toBeUndefined();

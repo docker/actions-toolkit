@@ -66,7 +66,7 @@ describe('parseGitRef', () => {
     ['refs/tags/v1.0.0', '', false, 'refs/tags/v1.0.0'],
     ['refs/pull/15/merge', '', false, 'refs/pull/15/merge'],
     ['refs/pull/15/merge', '', true, 'refs/pull/15/head'],
-  ])('given %p and %p, should return %p', async (ref: string, sha: string, prHeadRef: boolean, expected: string) => {
+  ])('given %o and %o, should return %o', async (ref: string, sha: string, prHeadRef: boolean, expected: string) => {
     process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
     expect(Context.parseGitRef(ref, sha)).toEqual(expected);
   });

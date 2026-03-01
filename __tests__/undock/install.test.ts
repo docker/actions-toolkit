@@ -37,7 +37,7 @@ describe('download', () => {
     ['v0.7.0'],
     ['latest']
   ])(
-  'acquires %p of undock', async (version) => {
+  'acquires %o of undock', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -51,7 +51,7 @@ describe('download', () => {
     ['v0.4.0'],
     ['v0.7.0'],
   ])(
-  'acquires %p of undock with cache', async (version) => {
+  'acquires %o of undock with cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -62,7 +62,7 @@ describe('download', () => {
     ['v0.5.0'],
     ['v0.6.0'],
   ])(
-  'acquires %p of undock without cache', async (version) => {
+  'acquires %o of undock without cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);

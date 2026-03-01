@@ -37,7 +37,7 @@ describe('download', () => {
     ['v3.0.1'],
     ['latest']
   ])(
-  'acquires %p of cosign', async (version) => {
+  'acquires %o of cosign', async (version) => {
     const install = new Install();
     const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -51,7 +51,7 @@ describe('download', () => {
     ['v2.6.1'],
     ['v3.0.1'],
   ])(
-  'acquires %p of cosign with cache', async (version) => {
+  'acquires %o of cosign with cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -62,7 +62,7 @@ describe('download', () => {
     ['v2.5.3'],
     ['v2.6.0'],
   ])(
-  'acquires %p of cosign without cache', async (version) => {
+  'acquires %o of cosign without cache', async (version) => {
     const install = new Install();
     const toolPath = await install.download({
       version: version,

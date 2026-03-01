@@ -27,7 +27,7 @@ describe('manifestGet', () => {
   test.each([
     ['moby/moby-bin:28.1.0-rc.2'],
     ['crazymax/diun:4.17.0'],
-  ])('given %p', async image => {
+  ])('given %o', async image => {
     const regctl = new Regctl();
     const manifest = await regctl.manifestGet({
       image: image,
@@ -45,7 +45,7 @@ describe('blobGet', () => {
   test.each([
     ['moby/moby-bin', 'sha256:234fccbd13fde0ba978a19f728cbdc67e29bc76247ac560822bb6ae5236c0bf0'],
     ['crazymax/diun', 'sha256:1e4881f66e0ec0f1710b837002107050bbbc0a231d8a42d7f422b56a139900bb'],
-  ])('given %p', async (repo, digest) => {
+  ])('given %o', async (repo, digest) => {
     const regctl = new Regctl();
     const blob = await regctl.blobGet({
       repository: repo,
@@ -60,7 +60,7 @@ describe('image config', () => {
   test.each([
     ['moby/moby-bin:28.1.0-rc.2'],
     ['crazymax/diun:4.17.0'],
-  ])('given %p', async image => {
+  ])('given %o', async image => {
     const regctl = new Regctl();
     const manifest = await regctl.manifestGet({
       image: image,
@@ -115,7 +115,7 @@ describe('versionSatisfies', () => {
     ['v0.8.2', '>=0.6.0', true],
     ['v0.8.0', '>0.6.0', true],
     ['v0.8.0', '<0.3.0', false]
-  ])('given %p', async (version, range, expected) => {
+  ])('given %o', async (version, range, expected) => {
     const regctl = new Regctl();
     expect(await regctl.versionSatisfies(range, version)).toBe(expected);
   });

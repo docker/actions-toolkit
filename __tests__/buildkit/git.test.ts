@@ -181,7 +181,7 @@ describe('parseURL', () => {
       } as GitURL,
       false
     ],
-  ])('given %p', async (ref: string, expected: GitURL, expectedErr: boolean) => {
+  ])('given %o', async (ref: string, expected: GitURL, expectedErr: boolean) => {
     try {
       const got = Git.parseURL(ref);
       expect(got.scheme).toEqual(expected.scheme);
@@ -329,7 +329,7 @@ describe('parseRef', () => {
       '.git',
       undefined
     ],
-  ])('given %p', async (ref: string, expected: GitRef | undefined) => {
+  ])('given %o', async (ref: string, expected: GitRef | undefined) => {
     try {
       const got = Git.parseRef(ref);
       expect(got).toEqual(expected);

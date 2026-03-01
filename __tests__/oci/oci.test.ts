@@ -56,7 +56,7 @@ describe('loadArchive', () => {
   // prettier-ignore
   test.each(fs.readdirSync(path.join(fixturesDir, 'oci-archive')).filter(file => {
       return fs.statSync(path.join(path.join(fixturesDir, 'oci-archive'), file)).isFile();
-    }).map(filename => [filename]))('extracting %p', async (filename) => {
+    }).map(filename => [filename]))('extracting %o', async (filename) => {
     const res = await OCI.loadArchive({
       file: path.join(fixturesDir, 'oci-archive', filename)
     });

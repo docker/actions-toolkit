@@ -136,7 +136,7 @@ describe('getProvenanceInput', () => {
       '',
       ''
     ],
-  ])('given input %p', async (input: string, expected: string) => {
+  ])('given input %o', async (input: string, expected: string) => {
     setInput('provenance', input);
     expect(Build.getProvenanceInput('provenance')).toEqual(expected);
   });
@@ -165,7 +165,7 @@ describe('resolveProvenanceAttrs', () => {
       '',
       'builder-id=https://github.com/docker/actions-toolkit/actions/runs/2188748038/attempts/2'
     ],
-  ])('given %p', async (input: string, expected: string) => {
+  ])('given %o', async (input: string, expected: string) => {
     expect(Build.resolveProvenanceAttrs(input)).toEqual(expected);
   });
 });
@@ -180,7 +180,7 @@ describe('resolveSecret', () => {
     ['=bbbbbbb', false, '', '', new Error('=bbbbbbb is not a valid secret')],
     [`foo=${path.join(fixturesDir, 'secret.txt')}`, true, 'foo', 'bar', null],
     [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
-  ])('given %p key and %p secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error | null) => {
+  ])('given %o key and %o secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error | null) => {
     try {
       let secret: string;
       if (file) {
@@ -201,7 +201,7 @@ describe('resolveSecret', () => {
     ['FOO=', 'FOO', '', new Error('FOO= is not a valid secret')],
     ['=bar', '', '', new Error('=bar is not a valid secret')],
     ['FOO=bar=baz', 'FOO', 'bar=baz', null]
-  ])('given %p key and %p env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
+  ])('given %o key and %o env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
     try {
       const secret = Build.resolveSecretEnv(kvp);
       expect(secret).toEqual(`id=${exKey},env=${exValue}`);
@@ -255,7 +255,7 @@ describe('resolveCacheToAttrs', () => {
       'abcd1234',
       'type=gha,repository=foo/bar,mode=max,ghtoken=abcd1234',
     ],
-  ])('given %p', async (input: string, githubToken: string | undefined, expected: string) => {
+  ])('given %o', async (input: string, githubToken: string | undefined, expected: string) => {
     expect(Build.resolveCacheToAttrs(input, githubToken)).toEqual(expected);
   });
 });
@@ -271,7 +271,7 @@ describe('hasLocalExporter', () => {
     [['"type=tar","dest=/tmp/image.tar"'], false],
     [['" type= local" , dest=./release-out'], true],
     [['.'], true]
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+  ])('given %o returns %o', async (exporters: Array<string>, expected: boolean) => {
     expect(Build.hasLocalExporter(exporters)).toEqual(expected);
   });
 });
@@ -287,7 +287,7 @@ describe('hasTarExporter', () => {
     [['"type=tar","dest=/tmp/image.tar"'], true],
     [['" type= local" , dest=./release-out'], false],
     [['.'], false]
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean) => {
+  ])('given %o returns %o', async (exporters: Array<string>, expected: boolean) => {
     expect(Build.hasTarExporter(exporters)).toEqual(expected);
   });
 });
@@ -305,7 +305,7 @@ describe('hasDockerExporter', () => {
     [['type=docker'], true, false],
     [['type=docker'], true, true],
     [['.'], true, true],
-  ])('given %p returns %p', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
+  ])('given %o returns %o', async (exporters: Array<string>, expected: boolean, load: boolean | undefined) => {
     expect(Build.hasDockerExporter(exporters, load)).toEqual(expected);
   });
 });
@@ -316,7 +316,7 @@ describe('hasAttestationType', () => {
     ['type=provenance,mode=min', 'provenance', true],
     ['type=sbom,true', 'sbom', true],
     ['type=foo,bar', 'provenance', false],
-  ])('given %p for %p returns %p', async (attrs: string, name: string, expected: boolean) => {
+  ])('given %o for %o returns %o', async (attrs: string, name: string, expected: boolean) => {
     expect(Build.hasAttestationType(name, attrs)).toEqual(expected);
   });
 });
@@ -340,7 +340,7 @@ describe('resolveAttestationAttrs', () => {
       '',
       ''
     ],
-  ])('given %p', async (input: string, expected: string) => {
+  ])('given %o', async (input: string, expected: string) => {
     expect(Build.resolveAttestationAttrs(input)).toEqual(expected);
   });
 });
@@ -351,7 +351,7 @@ describe('hasGitAuthTokenSecret', () => {
     [['A_SECRET=abcdef0123456789'], undefined, false],
     [['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789'], undefined, true],
     [['GIT_AUTH_TOKEN.github.com=abcdefghijklmno=0123456789'], 'github.com', true],
-  ])('given %p secret', async (kvp: Array<string>, domain: string | undefined, expected: boolean) => {
+  ])('given %o secret', async (kvp: Array<string>, domain: string | undefined, expected: boolean) => {
     expect(Build.hasGitAuthTokenSecret(kvp, domain)).toBe(expected);
   });
 });
