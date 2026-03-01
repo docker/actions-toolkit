@@ -37,7 +37,7 @@ describe('download', () => {
     ['v2.32.4', true],
     ['latest', true]
   ])(
-  'acquires %p of compose (standalone: %p)', async (version, standalone) => {
+  'acquires %o of compose (standalone: %o)', async (version, standalone) => {
     const install = new Install({standalone: standalone});
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -56,7 +56,7 @@ describe('download', () => {
     ['v2.31.0'],
     ['v2.32.4'],
   ])(
-  'acquires %p of compose with cache', async (version) => {
+  'acquires %o of compose with cache', async (version) => {
     const install = new Install({standalone: false});
     const toolPath = await install.download(version);
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -67,7 +67,7 @@ describe('download', () => {
     ['v2.27.1'],
     ['v2.28.0'],
   ])(
-  'acquires %p of compose without cache', async (version) => {
+  'acquires %o of compose without cache', async (version) => {
     const install = new Install({standalone: false});
     const toolPath = await install.download(version, true);
     expect(fs.existsSync(toolPath)).toBe(true);

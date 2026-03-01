@@ -76,7 +76,7 @@ describe('versionSatisfies', () => {
     ['v0.4.1', '>=0.3.2', true],
     ['v0.8.0', '>0.6.0', true],
     ['v0.8.0', '<0.3.0', false]
-  ])('given %p', async (version, range, expected) => {
+  ])('given %o', async (version, range, expected) => {
     const undock = new Undock();
     expect(await undock.versionSatisfies(range, version)).toBe(expected);
   });

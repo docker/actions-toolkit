@@ -63,7 +63,7 @@ describe('releases', () => {
     ['.github/docker-releases.json'],
     ['.github/regclient-releases.json'],
     ['.github/undock-releases.json'],
-  ])('returns %p', async (path: string) => {
+  ])('returns %o', async (path: string) => {
     const github = new GitHub();
     const releases = await github.releases('App', {
       owner: 'docker',

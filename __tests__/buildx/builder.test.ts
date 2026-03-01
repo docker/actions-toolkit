@@ -548,7 +548,7 @@ baz = qux
        ]
      }
     ],
-  ])('given %p', async (inspectFile, expected) => {
+  ])('given %o', async (inspectFile, expected) => {
     expect(await Builder.parseInspect(fs.readFileSync(path.join(fixturesDir, inspectFile)).toString())).toEqual(expected);
   });
 });

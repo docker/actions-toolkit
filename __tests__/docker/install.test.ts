@@ -60,7 +60,7 @@ describe('download', () => {
     [image('27.3.1'), 'linux'],
     [image('27.3.1'), 'win32'],
   ])(
-  'acquires %p of docker (%s)', async (source, platformOS) => {
+  'acquires %o of docker (%s)', async (source, platformOS) => {
     mockPlatform(platformOS as NodeJS.Platform);
     mockArch('x64');
     const install = new Install({

@@ -37,7 +37,7 @@ describe('download', () => {
     ['v0.10.5', true],
     ['latest', true]
   ])(
-  'acquires %p of buildx (standalone: %p)', async (version, standalone) => {
+  'acquires %o of buildx (standalone: %o)', async (version, standalone) => {
     const install = new Install({standalone: standalone});
     const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -56,7 +56,7 @@ describe('download', () => {
     ['v0.9.0'],
     ['v0.10.5'],
   ])(
-  'acquires %p of buildx with cache', async (version) => {
+  'acquires %o of buildx with cache', async (version) => {
     const install = new Install({standalone: false});
     const toolPath = await install.download({version});
     expect(fs.existsSync(toolPath)).toBe(true);
@@ -67,7 +67,7 @@ describe('download', () => {
     ['v0.11.2'],
     ['v0.12.0'],
   ])(
-  'acquires %p of buildx without cache', async (version) => {
+  'acquires %o of buildx without cache', async (version) => {
     const install = new Install({standalone: false});
     const toolPath = await install.download({version: version, ghaNoCache: true});
     expect(fs.existsSync(toolPath)).toBe(true);

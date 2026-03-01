@@ -102,7 +102,7 @@ describe('getDefinition', () => {
       undefined,
       path.join(fixturesDir, 'bake-03-default.json')
     ],
-  ])('given %p', async (files: string[], targets: string[], overrides: string[], execOptions: ExecOptions | undefined, out: string) => {
+  ])('given %o', async (files: string[], targets: string[], overrides: string[], execOptions: ExecOptions | undefined, out: string) => {
     const bake = new Bake();
     const expectedDef = <BakeDefinition>JSON.parse(fs.readFileSync(out, {encoding: 'utf-8'}).trim())
     expect(await bake.getDefinition({
@@ -185,7 +185,7 @@ describe('hasLocalExporter', () => {
       } as unknown as BakeDefinition,
       true
     ]
-  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+  ])('given %o returns %o', async (def: BakeDefinition, expected: boolean) => {
     expect(Bake.hasLocalExporter(def)).toEqual(expected);
   });
 });
@@ -285,7 +285,7 @@ describe('hasTarExporter', () => {
       } as unknown as BakeDefinition,
       false
     ],
-  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+  ])('given %o returns %o', async (def: BakeDefinition, expected: boolean) => {
     expect(Bake.hasTarExporter(def)).toEqual(expected);
   });
 });
@@ -440,7 +440,7 @@ describe('hasDockerExporter', () => {
       true,
       true
     ],
-  ])('given %o and load:%p returns %p', async (def: BakeDefinition, expected: boolean, load: boolean | undefined) => {
+  ])('given %o and load: %o returns %o', async (def: BakeDefinition, expected: boolean, load: boolean | undefined) => {
     expect(Bake.hasDockerExporter(def, load)).toEqual(expected);
   });
 });
@@ -481,7 +481,7 @@ describe('hasGitAuthTokenSecret', () => {
       } as unknown as BakeDefinition,
       true
     ],
-  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+  ])('given %o returns %o', async (def: BakeDefinition, expected: boolean) => {
     expect(Bake.hasGitAuthTokenSecret(def)).toEqual(expected);
   });
 });
@@ -536,7 +536,7 @@ describe('hasProvenanceAttestation', () => {
       } as unknown as BakeDefinition,
       true
     ]
-  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+  ])('given %o returns %o', async (def: BakeDefinition, expected: boolean) => {
     expect(Bake.hasProvenanceAttestation(def)).toEqual(expected);
   });
 });
@@ -591,7 +591,7 @@ describe('hasSBOMAttestation', () => {
       } as unknown as BakeDefinition,
       true
     ]
-  ])('given %o returns %p', async (def: BakeDefinition, expected: boolean) => {
+  ])('given %o returns %o', async (def: BakeDefinition, expected: boolean) => {
     expect(Bake.hasSBOMAttestation(def)).toEqual(expected);
   });
 });

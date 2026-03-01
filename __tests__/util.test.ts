@@ -247,7 +247,7 @@ describe('isValidURL', () => {
     ['git://github.com/user/repo.git', false],
     ['github.com/moby/buildkit.git#main', false],
     ['v0.4.1', false]
-  ])('given %p', async (url, expected) => {
+  ])('given %o', async (url, expected) => {
     expect(Util.isValidURL(url)).toEqual(expected);
   });
 });
@@ -260,7 +260,7 @@ describe('isValidRef', () => {
     ['git://github.com/user/repo.git', true],
     ['github.com/moby/buildkit.git#main', true],
     ['v0.4.1', false]
-  ])('given %p', async (url, expected) => {
+  ])('given %o', async (url, expected) => {
     expect(Util.isValidRef(url)).toEqual(expected);
   });
 });
@@ -278,7 +278,7 @@ describe('trimPrefix', () => {
     ['abcdabc', 'abc', 'dabc'],
     ['abcabc', 'abc', 'abc'],
     ['abcdabc', 'd', 'abcdabc']
-  ])('given %p', async (str, prefix, expected) => {
+  ])('given %o', async (str, prefix, expected) => {
     expect(Util.trimPrefix(str, prefix)).toEqual(expected);
   });
 });
@@ -295,7 +295,7 @@ describe('trimSuffix', () => {
     ['abcdabc', 'abc', 'abcd'],
     ['abcabc', 'abc', 'abc'],
     ['abcdabc', 'd', 'abcdabc']
-  ])('given %p', async (str, suffix, expected) => {
+  ])('given %o', async (str, suffix, expected) => {
     expect(Util.trimSuffix(str, suffix)).toEqual(expected);
   });
 });

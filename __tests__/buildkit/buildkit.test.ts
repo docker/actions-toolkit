@@ -54,7 +54,7 @@ describe('satisfies', () => {
   test.each([
     ['builder2', '>=0.10.0', true],
     ['builder2', '>0.11.0', false]
-  ])('given %p', async (builderName, range, expected) => {
+  ])('given %o', async (builderName, range, expected) => {
     const buildkit = new BuildKit();
     expect(await buildkit.versionSatisfies(builderName, range)).toBe(expected);
   });

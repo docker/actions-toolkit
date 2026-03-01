@@ -41,7 +41,7 @@ maybe('getDefinition', () => {
     //   path.join(fixturesDir, 'bake-test-docker-action-remote-private.json'),
     //   true,
     // ]
-  ])('given %p', async (source: string, targets: string[], out: string, auth) => {
+  ])('given %o', async (source: string, targets: string[], out: string, auth) => {
     const gitAuthToken = process.env.GITHUB_TOKEN || '';
     if (auth && !gitAuthToken) {
       console.log(`Git auth token not available, skipping test`);

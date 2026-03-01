@@ -101,7 +101,7 @@ describe('parseVersion', () => {
   // prettier-ignore
   test.each([
     ['Docker Compose version v2.31.0', '2.31.0'],
-  ])('given %p', async (stdout, expected) => {
+  ])('given %o', async (stdout, expected) => {
     expect(Compose.parseVersion(stdout)).toEqual(expected);
   });
 });

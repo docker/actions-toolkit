@@ -145,7 +145,7 @@ describe('parseVersion', () => {
     ['github.com/docker/buildx v0.4.1 bda4882a65349ca359216b135896bddc1d92461c', '0.4.1'],
     ['github.com/docker/buildx v0.4.2 fb7b670b764764dc4716df3eba07ffdae4cc47b2', '0.4.2'],
     ['github.com/docker/buildx f117971 f11797113e5a9b86bd976329c5dbb8a8bfdfadfa', 'f117971']
-  ])('given %p', async (stdout, expected) => {
+  ])('given %o', async (stdout, expected) => {
     expect(Buildx.parseVersion(stdout)).toEqual(expected);
   });
 });
@@ -155,7 +155,7 @@ describe('versionSatisfies', () => {
     ['0.4.1', '>=0.3.2', true],
     ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
     ['f117971', '>0.6.0', true]
-  ])('given %p', async (version, range, expected) => {
+  ])('given %o', async (version, range, expected) => {
     const buildx = new Buildx();
     expect(await buildx.versionSatisfies(range, version)).toBe(expected);
   });
@@ -236,7 +236,7 @@ describe('resolveCertsDriverOpts', () => {
       ],
       []
     ],
-  ])('%p. given %p endpoint, %p driver', async (id: number, endpoint: string, driver: string, cert: Cert, expectedFiles: Array<string>, expectedOpts: Array<string>) => {
+  ])('%o. given %o endpoint, %o driver', async (id: number, endpoint: string, driver: string, cert: Cert, expectedFiles: Array<string>, expectedOpts: Array<string>) => {
     fs.mkdirSync(Buildx.certsDir, {recursive: true});
     expect(Buildx.resolveCertsDriverOpts(driver, endpoint, cert)).toEqual(expectedOpts);
     for (const k in expectedFiles) {
@@ -298,7 +298,7 @@ describe('localState', () => {
         DockerfilePath: '-'
       } as LocalState,
     ]
-  ])('given %p', async (ref: string, expected: LocalState) => {
+  ])('given %o', async (ref: string, expected: LocalState) => {
     const localState = Buildx.localState(ref, path.join(fixturesDir, 'buildx-refs'));
     expect(localState).toEqual(expected);
   });
