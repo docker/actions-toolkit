@@ -14,7 +14,7 @@ on:
       - 'v*'
 
 env:
-  NODE_VERSION: "24" # at least Node 24 is required for Trusted Publishing with OIDC
+  NODE_VERSION: "24"
 
 jobs:
   publish:
