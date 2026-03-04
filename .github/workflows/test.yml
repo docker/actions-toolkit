@@ -15,8 +15,8 @@ on:
 
 env:
   NODE_VERSION: "24"
-  BUILDX_VERSION: "v0.32.0-rc2"
-  BUILDKIT_IMAGE: "moby/buildkit:v0.28.0-rc2"
+  BUILDX_VERSION: "v0.32.1"
+  BUILDKIT_IMAGE: "moby/buildkit:v0.28.0"
 
 jobs:
   test:
