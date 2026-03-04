@@ -24,6 +24,7 @@ import {parse} from 'csv-parse/sync';
 export interface ListOpts {
   ignoreComma?: boolean;
   comment?: string;
+  commentNoInfix?: boolean;
   quote?: string | boolean | Buffer | null;
 }
 
@@ -42,6 +43,7 @@ export class Util {
       columns: false,
       relaxQuotes: true,
       comment: opts?.comment,
+      comment_no_infix: opts?.commentNoInfix,
       relaxColumnCount: true,
       skipEmptyLines: true,
       quote: opts?.quote

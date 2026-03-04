@@ -87,6 +87,12 @@ describe('getInputList', () => {
     expect(res).toEqual(['foo=bar', 'bar=qux']);
   });
 
+  it('multiline with comment and no infix comment', async () => {
+    setInput('labels', '# ignore this\nfoo=bar\nbar=qux#baz');
+    const res = Util.getInputList('labels', {comment: '#', commentNoInfix: true});
+    expect(res).toEqual(['foo=bar', 'bar=qux#baz']);
+  });
+
   it('different new lines and ignoring comma correctly', async () => {
     setInput('cache-from', 'user/app:cache\r\ntype=local,src=path/to/dir');
     const res = Util.getInputList('cache-from', {ignoreComma: true});
