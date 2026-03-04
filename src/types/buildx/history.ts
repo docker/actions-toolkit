@@ -107,7 +107,6 @@ export interface ExportOpts {
   refs: Array<string>;
   noSummaries?: boolean;
   image?: string;
-  useContainer?: boolean;
 }
 
 export interface ExportResponse {
