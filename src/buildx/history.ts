@@ -70,6 +70,10 @@ export class History {
   }
 
   public async export(opts: ExportOpts): Promise<ExportResponse> {
+    if (!(await this.buildx.versionSatisfies('>=0.23.0'))) {
+      throw new Error('Buildx >= 0.23.0 is required to export a build record');
+    }
+
     let builderName: string = '';
     let nodeName: string = '';
     const refs: Array<string> = [];
