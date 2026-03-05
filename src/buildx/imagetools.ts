@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
 import {Buildx} from './buildx.js';
+import {Context} from '../context.js';
 import {Exec} from '../exec.js';
 
-import {Manifest as ImageToolsManifest} from '../types/buildx/imagetools.js';
+import {CreateOpts, CreateResponse, CreateResult, Manifest as ImageToolsManifest} from '../types/buildx/imagetools.js';
 import {Image} from '../types/oci/config.js';
 import {Descriptor, Platform} from '../types/oci/descriptor.js';
 import {Digest} from '../types/oci/digest.js';
@@ -39,6 +41,10 @@ export class ImageTools {
 
   public async getInspectCommand(args: Array<string>) {
     return await this.getCommand(['inspect', ...args]);
+  }
+
+  public async getCreateCommand(args: Array<string>) {
+    return await this.getCommand(['create', ...args]);
   }
 
   public async inspectImage(name: string): Promise<Record<string, Image> | Image> {
@@ -117,5 +123,73 @@ export class ImageTools {
 
   public async attestationDigests(name: string, platform?: Platform): Promise<Array<Digest>> {
     return (await this.attestationDescriptors(name, platform)).map(attestation => attestation.digest);
+  }
+
+  public async create(opts: CreateOpts): Promise<CreateResult | undefined> {
+    const args: Array<string> = [];
+
+    const metadataFile = Context.tmpName({tmpdir: Context.tmpDir(), template: 'imagetools-metadata-XXXXXX'});
+    const fileSources: Array<string> = [];
+    const sources: Array<string> = [];
+    for (const source of opts.sources) {
+      if (source.startsWith('cwd://')) {
+        const fileSource = source.substring('cwd://'.length);
+        if (fileSource.length > 0) {
+          fileSources.push(fileSource);
+        }
+        continue;
+      }
+      sources.push(source);
+    }
+    if (opts.tags) {
+      for (const tag of opts.tags) {
+        args.push('--tag', tag);
+      }
+    }
+    if (opts.platforms) {
+      for (const platform of opts.platforms) {
+        args.push('--platform', platform);
+      }
+    }
+    if (opts.dryRun) {
+      args.push('--dry-run');
+    } else {
+      args.push('--metadata-file', metadataFile);
+    }
+    for (const fileSource of fileSources) {
+      args.push('--file', fileSource);
+    }
+    for (const source of sources) {
+      args.push(source);
+    }
+
+    const cmd = await this.getCreateCommand(args);
+    return await Exec.getExecOutput(cmd.command, cmd.args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      if (!opts.dryRun) {
+        if (!fs.existsSync(metadataFile)) {
+          return undefined;
+        }
+        const dt = fs.readFileSync(metadataFile, {encoding: 'utf-8'}).trim();
+        if (dt === '' || dt === 'null') {
+          return undefined;
+        }
+        const response = <CreateResponse>JSON.parse(dt);
+        const descriptor = response['containerimage.descriptor'];
+        if (!descriptor) {
+          return undefined;
+        }
+        return {
+          digest: response['containerimage.digest'] || descriptor.digest,
+          descriptor: descriptor,
+          imageNames: response['image.name'] ? response['image.name'].split(',').map(name => name.trim()) : []
+        };
+      }
+    });
   }
 }

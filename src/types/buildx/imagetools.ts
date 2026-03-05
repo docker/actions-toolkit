@@ -26,3 +26,23 @@ export interface Manifest extends Versioned {
   manifests?: Descriptor[];
   annotations?: Record<string, string>;
 }
+
+// https://docs.docker.com/reference/cli/docker/buildx/imagetools/create/#options
+export interface CreateOpts {
+  sources: Array<string>;
+  tags?: Array<string>;
+  platforms?: Array<string>;
+  dryRun?: boolean;
+}
+
+export interface CreateResponse {
+  'containerimage.digest'?: Digest;
+  'containerimage.descriptor'?: Descriptor;
+  'image.name'?: string;
+}
+
+export interface CreateResult {
+  digest: Digest;
+  descriptor: Descriptor;
+  imageNames: Array<string>;
+}
