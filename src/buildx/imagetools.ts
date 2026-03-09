@@ -15,6 +15,8 @@
  */
 
 import fs from 'fs';
+import * as core from '@actions/core';
+
 import {Buildx} from './buildx.js';
 import {Context} from '../context.js';
 import {Exec} from '../exec.js';
@@ -164,9 +166,15 @@ export class ImageTools {
     }
 
     const cmd = await this.getCreateCommand(args);
+    if (opts.skipExec) {
+      core.info(`[command]${cmd.command} ${cmd.args.join(' ')}`);
+      core.info(`Skipped create command`);
+      return undefined;
+    }
+
     return await Exec.getExecOutput(cmd.command, cmd.args, {
       ignoreReturnCode: true,
-      silent: true
+      silent: opts.silent
     }).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
         throw new Error(res.stderr.trim());

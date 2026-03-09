@@ -33,6 +33,8 @@ export interface CreateOpts {
   tags?: Array<string>;
   platforms?: Array<string>;
   dryRun?: boolean;
+  silent?: boolean;
+  skipExec?: boolean;
 }
 
 export interface CreateResponse {
