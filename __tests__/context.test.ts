@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {describe, expect, vi, it, afterEach, beforeEach, test} from 'vitest';
+import {describe, expect, it, afterEach} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -23,57 +23,35 @@ import * as rimraf from 'rimraf';
 import {Context} from '../src/context.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'context-'));
-const tmpName = path.join(tmpDir, '.tmpname-vi');
-
-vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
-  fs.mkdirSync(tmpDir, {recursive: true});
-  return tmpDir;
-});
-
-vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
-  return tmpName;
-});
 
 afterEach(() => {
   rimraf.sync(tmpDir);
+  fs.mkdirSync(tmpDir, {recursive: true});
 });
 
-describe('gitRef', () => {
-  it('returns refs/heads/master', async () => {
-    expect(Context.gitRef()).toEqual('refs/heads/master');
-  });
-});
-
-describe('parseGitRef', () => {
-  const originalEnv = process.env;
-  beforeEach(() => {
-    vi.resetModules();
-    process.env = {
-      ...originalEnv,
-      DOCKER_GIT_CONTEXT_PR_HEAD_REF: ''
-    };
-  });
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-  // prettier-ignore
-  test.each([
-    ['refs/heads/master', '860c1904a1ce19322e91ac35af1ab07466440c37', false, '860c1904a1ce19322e91ac35af1ab07466440c37'],
-    ['master', '860c1904a1ce19322e91ac35af1ab07466440c37', false, '860c1904a1ce19322e91ac35af1ab07466440c37'],
-    ['refs/pull/15/merge', '860c1904a1ce19322e91ac35af1ab07466440c37', false, 'refs/pull/15/merge'],
-    ['refs/heads/master', '', false, 'refs/heads/master'],
-    ['master', '', false, 'master'],
-    ['refs/tags/v1.0.0', '', false, 'refs/tags/v1.0.0'],
-    ['refs/pull/15/merge', '', false, 'refs/pull/15/merge'],
-    ['refs/pull/15/merge', '', true, 'refs/pull/15/head'],
-  ])('given %o and %o, should return %o', async (ref: string, sha: string, prHeadRef: boolean, expected: string) => {
-    process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
-    expect(Context.parseGitRef(ref, sha)).toEqual(expected);
+describe('tmpDir', () => {
+  it('returns an existing directory and keeps it stable', () => {
+    const dir = Context.tmpDir();
+    expect(fs.existsSync(dir)).toBe(true);
+    expect(fs.statSync(dir).isDirectory()).toBe(true);
+    expect(Context.tmpDir()).toEqual(dir);
   });
 });
 
-describe('gitContext', () => {
-  it('returns refs/heads/master', async () => {
-    expect(Context.gitContext()).toEqual('https://github.com/docker/actions-toolkit.git#refs/heads/master');
+describe('tmpName', () => {
+  it('returns a path for the provided tmpdir and template', () => {
+    const name = Context.tmpName({
+      tmpdir: tmpDir,
+      template: '.tmpname-XXXXXX'
+    });
+    expect(path.dirname(name)).toEqual(tmpDir);
+    expect(path.basename(name)).toMatch(/^\.tmpname-/);
+    expect(fs.existsSync(name)).toBe(false);
+  });
+
+  it('returns different paths on consecutive calls', () => {
+    const first = Context.tmpName({tmpdir: tmpDir, template: '.tmpname-XXXXXX'});
+    const second = Context.tmpName({tmpdir: tmpDir, template: '.tmpname-XXXXXX'});
+    expect(first).not.toEqual(second);
   });
 });

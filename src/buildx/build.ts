@@ -17,6 +17,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import {parse} from 'csv-parse/sync';
 
 import {Buildx} from './buildx.js';
@@ -24,7 +25,7 @@ import {Context} from '../context.js';
 import {GitHub} from '../github/github.js';
 import {Util} from '../util.js';
 
-import {BuildMetadata} from '../types/buildx/build.js';
+import {BuildMetadata, GitContextFormat} from '../types/buildx/build.js';
 import {VertexWarning} from '../types/buildkit/client.js';
 import {ProvenancePredicate} from '../types/intoto/slsa_provenance/v0.2/provenance.js';
 
@@ -46,6 +47,33 @@ export class Build {
     this.buildx = opts?.buildx || new Buildx();
     this.iidFilename = `build-iidfile-${Util.generateRandomString()}.txt`;
     this.metadataFilename = `build-metadata-${Util.generateRandomString()}.json`;
+  }
+
+  public async gitContext(ref?: string, sha?: string, format?: GitContextFormat): Promise<string> {
+    const setPullRequestHeadRef = Util.parseBoolOrDefault(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF);
+    ref = ref || github.context.ref;
+    sha = sha || github.context.sha;
+    if (!ref.startsWith('refs/')) {
+      ref = `refs/heads/${ref}`;
+    } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
+      ref = ref.replace(/\/merge$/g, '/head');
+    }
+    const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
+    if (!format) {
+      const sendGitQueryAsInput = Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT);
+      if (sendGitQueryAsInput && (await this.buildx.versionSatisfies('>=0.29.0'))) {
+        format = 'query';
+      } else {
+        format = 'fragment';
+      }
+    }
+    if (format === 'query') {
+      return `${baseURL}?ref=${ref}${sha ? `&checksum=${sha}` : ''}`;
+    }
+    if (sha && !ref.startsWith(`refs/pull/`)) {
+      return `${baseURL}#${sha}`;
+    }
+    return `${baseURL}#${ref}`;
   }
 
   public getImageIDFilePath(): string {
