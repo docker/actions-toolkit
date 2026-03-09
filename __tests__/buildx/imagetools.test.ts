@@ -70,7 +70,8 @@ describe('create', () => {
 
     const result = await new ImageTools({buildx}).create({
       sources: ['cwd://descriptor.json', 'docker.io/library/alpine:latest'],
-      tags: ['docker.io/user/app:latest']
+      tags: ['docker.io/user/app:latest'],
+      silent: true
     });
 
     expect(getCommand).toHaveBeenCalledWith(['imagetools', 'create', '--tag', 'docker.io/user/app:latest', '--metadata-file', metadataFile, '--file', 'descriptor.json', 'docker.io/library/alpine:latest']);
@@ -104,7 +105,8 @@ describe('create', () => {
 
     const result = await new ImageTools({buildx}).create({
       sources: ['docker.io/library/alpine:latest'],
-      dryRun: true
+      dryRun: true,
+      silent: true
     });
 
     expect(getCommand).toHaveBeenCalledWith(['imagetools', 'create', '--dry-run', 'docker.io/library/alpine:latest']);
@@ -112,6 +114,28 @@ describe('create', () => {
       ignoreReturnCode: true,
       silent: true
     });
+    expect(result).toBeUndefined();
+  });
+
+  it('skips command execution when skipExec is enabled', async () => {
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'create']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+    const execSpy = vi.spyOn(Exec, 'getExecOutput').mockResolvedValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: ''
+    });
+
+    const result = await new ImageTools({buildx}).create({
+      sources: ['docker.io/library/alpine:latest'],
+      skipExec: true
+    });
+
+    expect(getCommand).toHaveBeenCalledWith(['imagetools', 'create', '--metadata-file', metadataFile, 'docker.io/library/alpine:latest']);
+    expect(execSpy).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
   });
 });

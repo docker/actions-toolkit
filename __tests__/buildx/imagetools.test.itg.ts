@@ -94,3 +94,14 @@ maybe('attestationDigests', () => {
     expect(digests).toEqual(['sha256:0709528fae1747ce17638ad2978ee7936b38a294136eaadaf692e415f64b1e03']);
   });
 });
+
+maybe('create', () => {
+  it('skips create command execution when skipExec is set', async () => {
+    const result = await new ImageTools().create({
+      sources: ['sha256:0709528fae1747ce17638ad2978ee7936b38a294136eaadaf692e415f64b1e03'],
+      tags: ['docker.io/user/app', 'docker.io/user/app2'],
+      skipExec: true
+    });
+    expect(result).toBeUndefined();
+  });
+});
