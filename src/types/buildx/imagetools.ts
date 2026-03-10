@@ -32,6 +32,7 @@ export interface CreateOpts {
   sources: Array<string>;
   tags?: Array<string>;
   platforms?: Array<string>;
+  annotations?: Array<string>;
   dryRun?: boolean;
   silent?: boolean;
   skipExec?: boolean;

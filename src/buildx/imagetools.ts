@@ -153,6 +153,11 @@ export class ImageTools {
         args.push('--platform', platform);
       }
     }
+    if (opts.annotations) {
+      for (const annotation of opts.annotations) {
+        args.push('--annotation', annotation);
+      }
+    }
     if (opts.dryRun) {
       args.push('--dry-run');
     } else {
