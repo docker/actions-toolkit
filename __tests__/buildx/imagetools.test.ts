@@ -117,6 +117,43 @@ describe('create', () => {
     expect(result).toBeUndefined();
   });
 
+  it('passes annotations to imagetools create', async () => {
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'create']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+
+    const execSpy = vi.spyOn(Exec, 'getExecOutput').mockResolvedValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: ''
+    });
+
+    const result = await new ImageTools({buildx}).create({
+      sources: ['docker.io/library/alpine:latest'],
+      annotations: ['index:org.opencontainers.image.title=Alpine', 'manifest-descriptor:org.opencontainers.image.description=Base image'],
+      silent: true
+    });
+
+    expect(getCommand).toHaveBeenCalledWith([
+      'imagetools',
+      'create',
+      '--annotation',
+      'index:org.opencontainers.image.title=Alpine',
+      '--annotation',
+      'manifest-descriptor:org.opencontainers.image.description=Base image',
+      '--metadata-file',
+      metadataFile,
+      'docker.io/library/alpine:latest'
+    ]);
+    expect(execSpy).toHaveBeenCalledWith('docker', ['buildx', 'imagetools', 'create'], {
+      ignoreReturnCode: true,
+      silent: true
+    });
+    expect(result).toBeUndefined();
+  });
+
   it('skips command execution when skipExec is enabled', async () => {
     const getCommand = vi.fn().mockResolvedValue({
       command: 'docker',
