@@ -15,8 +15,18 @@
  */
 
 import {Versioned} from '../oci/versioned.js';
-import {Descriptor} from '../oci/descriptor.js';
+import {Descriptor, Platform} from '../oci/descriptor.js';
 import {Digest} from '../oci/digest.js';
+
+export interface InspectOpts {
+  name: string;
+  retryOnManifestUnknown?: boolean;
+  retryLimit?: number;
+}
+
+export interface AttestationInspectOpts extends InspectOpts {
+  platform?: Platform;
+}
 
 // https://github.com/docker/buildx/blob/62857022a08552bee5cad0c3044a9a3b185f0b32/util/imagetools/printers.go#L109-L123
 export interface Manifest extends Versioned {

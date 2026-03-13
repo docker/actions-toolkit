@@ -30,12 +30,12 @@ const maybe = !process.env.GITHUB_ACTIONS || (process.env.GITHUB_ACTIONS === 'tr
 
 maybe('inspectImage', () => {
   it('inspect single platform', async () => {
-    const image = await new ImageTools().inspectImage('moby/buildkit:latest@sha256:5769c54b98840147b74128f38fb0b0a049e24b11a75bd81664131edd2854593f');
+    const image = await new ImageTools().inspectImage({name: 'moby/buildkit:latest@sha256:5769c54b98840147b74128f38fb0b0a049e24b11a75bd81664131edd2854593f'});
     const expectedImage = <Image>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-01.json'), {encoding: 'utf-8'}).trim());
     expect(image).toEqual(expectedImage);
   });
   it('inspect multi platform', async () => {
-    const image = await new ImageTools().inspectImage('moby/buildkit:latest@sha256:86c0ad9d1137c186e9d455912167df20e530bdf7f7c19de802e892bb8ca16552');
+    const image = await new ImageTools().inspectImage({name: 'moby/buildkit:latest@sha256:86c0ad9d1137c186e9d455912167df20e530bdf7f7c19de802e892bb8ca16552'});
     const expectedImage = <Record<string, Image>>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-02.json'), {encoding: 'utf-8'}).trim());
     expect(image).toEqual(expectedImage);
   });
@@ -43,12 +43,12 @@ maybe('inspectImage', () => {
 
 maybe('inspectManifest', () => {
   it('inspect descriptor', async () => {
-    const manifest = await new ImageTools().inspectManifest('moby/buildkit:latest@sha256:dccc69dd895968c4f21aa9e43e715f25f0cedfce4b17f1014c88c307928e22fc');
+    const manifest = await new ImageTools().inspectManifest({name: 'moby/buildkit:latest@sha256:dccc69dd895968c4f21aa9e43e715f25f0cedfce4b17f1014c88c307928e22fc'});
     const expectedManifest = <Descriptor>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-03.json'), {encoding: 'utf-8'}).trim());
     expect(manifest).toEqual(expectedManifest);
   });
   it('inspect index', async () => {
-    const manifest = await new ImageTools().inspectManifest('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6');
+    const manifest = await new ImageTools().inspectManifest({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6'});
     const expectedManifest = <ImageToolsManifest>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-04.json'), {encoding: 'utf-8'}).trim());
     expect(manifest).toEqual(expectedManifest);
   });
@@ -56,17 +56,17 @@ maybe('inspectManifest', () => {
 
 maybe('attestationDescriptors', () => {
   it('returns buildkit attestations descriptors', async () => {
-    const attestations = await new ImageTools().attestationDescriptors('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6');
+    const attestations = await new ImageTools().attestationDescriptors({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6'});
     const expectedAttestations = <Array<Descriptor>>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-05.json'), {encoding: 'utf-8'}).trim());
     expect(attestations).toEqual(expectedAttestations);
   });
   it('returns buildkit attestations descriptors for linux/amd64', async () => {
-    const attestations = await new ImageTools().attestationDescriptors('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', {os: 'linux', architecture: 'amd64'});
+    const attestations = await new ImageTools().attestationDescriptors({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', platform: {os: 'linux', architecture: 'amd64'}});
     const expectedAttestations = <Array<Descriptor>>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-06.json'), {encoding: 'utf-8'}).trim());
     expect(attestations).toEqual(expectedAttestations);
   });
   it('returns buildkit attestations descriptors for linux/arm/v7', async () => {
-    const attestations = await new ImageTools().attestationDescriptors('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', {os: 'linux', architecture: 'arm', variant: 'v7'});
+    const attestations = await new ImageTools().attestationDescriptors({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', platform: {os: 'linux', architecture: 'arm', variant: 'v7'}});
     const expectedAttestations = <Array<Descriptor>>JSON.parse(fs.readFileSync(path.join(fixturesDir, 'imagetools-07.json'), {encoding: 'utf-8'}).trim());
     expect(attestations).toEqual(expectedAttestations);
   });
@@ -74,7 +74,7 @@ maybe('attestationDescriptors', () => {
 
 maybe('attestationDigests', () => {
   it('returns buildkit attestations digests', async () => {
-    const digests = await new ImageTools().attestationDigests('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6');
+    const digests = await new ImageTools().attestationDigests({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6'});
     // prettier-ignore
     expect(digests).toEqual([
       'sha256:2ba4ad6eae1efcafee73a971953093c7c32b6938f2f9fd4998c8bf4d0fbe76f2',
@@ -86,11 +86,11 @@ maybe('attestationDigests', () => {
     ]);
   });
   it('returns buildkit attestations digests for linux/amd64', async () => {
-    const digests = await new ImageTools().attestationDigests('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', {os: 'linux', architecture: 'amd64'});
+    const digests = await new ImageTools().attestationDigests({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', platform: {os: 'linux', architecture: 'amd64'}});
     expect(digests).toEqual(['sha256:2ba4ad6eae1efcafee73a971953093c7c32b6938f2f9fd4998c8bf4d0fbe76f2']);
   });
   it('returns buildkit attestations digests for linux/arm/v7', async () => {
-    const digests = await new ImageTools().attestationDigests('moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', {os: 'linux', architecture: 'arm', variant: 'v7'});
+    const digests = await new ImageTools().attestationDigests({name: 'moby/buildkit:latest@sha256:79cc6476ab1a3371c9afd8b44e7c55610057c43e18d9b39b68e2b0c2475cc1b6', platform: {os: 'linux', architecture: 'arm', variant: 'v7'}});
     expect(digests).toEqual(['sha256:0709528fae1747ce17638ad2978ee7936b38a294136eaadaf692e415f64b1e03']);
   });
 });

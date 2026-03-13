@@ -21,9 +21,9 @@ import {Buildx} from './buildx.js';
 import {Context} from '../context.js';
 import {Exec} from '../exec.js';
 
-import {CreateOpts, CreateResponse, CreateResult, Manifest as ImageToolsManifest} from '../types/buildx/imagetools.js';
+import {AttestationInspectOpts, CreateOpts, CreateResponse, CreateResult, InspectOpts, Manifest as ImageToolsManifest} from '../types/buildx/imagetools.js';
 import {Image} from '../types/oci/config.js';
-import {Descriptor, Platform} from '../types/oci/descriptor.js';
+import {Descriptor} from '../types/oci/descriptor.js';
 import {Digest} from '../types/oci/digest.js';
 
 export interface ImageToolsOpts {
@@ -49,16 +49,8 @@ export class ImageTools {
     return await this.getCommand(['create', ...args]);
   }
 
-  public async inspectImage(name: string): Promise<Record<string, Image> | Image> {
-    const cmd = await this.getInspectCommand([name, '--format', '{{json .Image}}']);
-    return await Exec.getExecOutput(cmd.command, cmd.args, {
-      ignoreReturnCode: true,
-      silent: true
-    }).then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(res.stderr.trim());
-      }
-      const parsedOutput = JSON.parse(res.stdout);
+  public async inspectImage(opts: InspectOpts): Promise<Record<string, Image> | Image> {
+    return await this.inspect(opts, '{{json .Image}}', parsedOutput => {
       if (typeof parsedOutput === 'object' && !Array.isArray(parsedOutput) && parsedOutput !== null) {
         if (Object.prototype.hasOwnProperty.call(parsedOutput, 'config')) {
           return <Image>parsedOutput;
@@ -70,16 +62,8 @@ export class ImageTools {
     });
   }
 
-  public async inspectManifest(name: string): Promise<ImageToolsManifest | Descriptor> {
-    const cmd = await this.getInspectCommand([name, '--format', '{{json .Manifest}}']);
-    return await Exec.getExecOutput(cmd.command, cmd.args, {
-      ignoreReturnCode: true,
-      silent: true
-    }).then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(res.stderr.trim());
-      }
-      const parsedOutput = JSON.parse(res.stdout);
+  public async inspectManifest(opts: InspectOpts): Promise<ImageToolsManifest | Descriptor> {
+    return await this.inspect(opts, '{{json .Manifest}}', parsedOutput => {
       if (typeof parsedOutput === 'object' && !Array.isArray(parsedOutput) && parsedOutput !== null) {
         if (Object.prototype.hasOwnProperty.call(parsedOutput, 'manifests')) {
           return <ImageToolsManifest>parsedOutput;
@@ -91,17 +75,18 @@ export class ImageTools {
     });
   }
 
-  public async attestationDescriptors(name: string, platform?: Platform): Promise<Array<Descriptor>> {
-    const manifest = await this.inspectManifest(name);
+  public async attestationDescriptors(opts: AttestationInspectOpts): Promise<Array<Descriptor>> {
+    const manifest = await this.inspectManifest(opts);
 
     if (typeof manifest !== 'object' || manifest === null || !('manifests' in manifest) || !Array.isArray(manifest.manifests)) {
-      throw new Error(`No descriptor found for ${name}`);
+      throw new Error(`No descriptor found for ${opts.name}`);
     }
 
     const attestations = manifest.manifests.filter(m => m.annotations?.['vnd.docker.reference.type'] === 'attestation-manifest');
-    if (!platform) {
+    if (!opts.platform) {
       return attestations;
     }
+    const platform = opts.platform;
 
     const manifestByDigest = new Map<string, Descriptor>();
     for (const m of manifest.manifests) {
@@ -123,8 +108,8 @@ export class ImageTools {
     });
   }
 
-  public async attestationDigests(name: string, platform?: Platform): Promise<Array<Digest>> {
-    return (await this.attestationDescriptors(name, platform)).map(attestation => attestation.digest);
+  public async attestationDigests(opts: AttestationInspectOpts): Promise<Array<Digest>> {
+    return (await this.attestationDescriptors(opts)).map(attestation => attestation.digest);
   }
 
   public async create(opts: CreateOpts): Promise<CreateResult | undefined> {
@@ -204,5 +189,45 @@ export class ImageTools {
         };
       }
     });
+  }
+
+  private async inspect<T>(opts: InspectOpts, format: string, parser: (parsedOutput: unknown) => T): Promise<T> {
+    const cmd = await this.getInspectCommand([opts.name, '--format', format]);
+    if (!opts.retryOnManifestUnknown) {
+      return await this.execInspect(cmd.command, cmd.args, parser);
+    }
+
+    const retries = opts.retryLimit ?? 15;
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        return await this.execInspect(cmd.command, cmd.args, parser);
+      } catch (err) {
+        lastError = err as Error;
+        if (!ImageTools.isManifestUnknownError(lastError.message) || attempt === retries - 1) {
+          throw lastError;
+        }
+        core.info(`buildx imagetools inspect command failed with MANIFEST_UNKNOWN, retrying attempt ${attempt + 1}/${retries}...\n${lastError.message}`);
+        await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 100));
+      }
+    }
+
+    throw lastError ?? new Error(`ImageTools inspect command failed for ${opts.name}`);
+  }
+
+  private async execInspect<T>(command: string, args: Array<string>, parser: (parsedOutput: unknown) => T): Promise<T> {
+    return await Exec.getExecOutput(command, args, {
+      ignoreReturnCode: true,
+      silent: true
+    }).then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return parser(JSON.parse(res.stdout));
+    });
+  }
+
+  private static isManifestUnknownError(message: string): boolean {
+    return /(MANIFEST_UNKNOWN|manifest unknown|not found: not found)/i.test(message);
   }
 }
