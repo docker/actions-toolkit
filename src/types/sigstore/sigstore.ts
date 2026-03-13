@@ -40,6 +40,8 @@ export interface SignAttestationManifestsOpts {
   imageNames: Array<string>;
   imageDigest: string;
   noTransparencyLog?: boolean;
+  retryOnManifestUnknown?: boolean;
+  retryLimit?: number;
 }
 
 export interface SignAttestationManifestsResult extends ParsedBundle {
@@ -51,6 +53,7 @@ export interface VerifySignedManifestsOpts {
   platform?: Platform;
   noTransparencyLog?: boolean;
   retryOnManifestUnknown?: boolean;
+  retryLimit?: number;
 }
 
 export interface VerifySignedManifestsResult {

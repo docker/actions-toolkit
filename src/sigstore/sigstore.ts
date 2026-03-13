@@ -113,7 +113,11 @@ export class Sigstore {
       }
 
       for (const imageName of opts.imageNames) {
-        const attestationDigests = await this.imageTools.attestationDigests(`${imageName}@${opts.imageDigest}`);
+        const attestationDigests = await this.imageTools.attestationDigests({
+          name: `${imageName}@${opts.imageDigest}`,
+          retryOnManifestUnknown: opts.retryOnManifestUnknown,
+          retryLimit: opts.retryLimit
+        });
         for (const attestationDigest of attestationDigests) {
           const attestationRef = `${imageName}@${attestationDigest}`;
           await core.group(`Signing attestation manifest ${attestationRef}`, async () => {
@@ -183,7 +187,12 @@ export class Sigstore {
   public async verifyImageAttestations(image: string, opts: VerifySignedManifestsOpts): Promise<Record<string, VerifySignedManifestsResult>> {
     const result: Record<string, VerifySignedManifestsResult> = {};
 
-    const attestationDigests = await this.imageTools.attestationDigests(image, opts.platform);
+    const attestationDigests = await this.imageTools.attestationDigests({
+      name: image,
+      platform: opts.platform,
+      retryOnManifestUnknown: opts.retryOnManifestUnknown,
+      retryLimit: opts.retryLimit
+    });
     if (attestationDigests.length === 0) {
       throw new Error(`No attestation manifests found for ${image}`);
     }
@@ -237,7 +246,7 @@ export class Sigstore {
       };
     }
 
-    const retries = 15;
+    const retries = opts.retryLimit ?? 15;
     let lastError: Error | undefined;
     core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
     for (let attempt = 0; attempt < retries; attempt++) {

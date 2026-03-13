@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -38,8 +38,131 @@ vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.clearAllMocks();
   rimraf.sync(tmpDir);
+});
+
+beforeEach(() => {
+  vi.useRealTimers();
+  fs.mkdirSync(tmpDir, {recursive: true});
+});
+
+describe('inspectManifest', () => {
+  it('retries transient manifest unknown errors when requested', async () => {
+    vi.useFakeTimers();
+
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'inspect']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+    const execSpy = vi
+      .spyOn(Exec, 'getExecOutput')
+      .mockResolvedValueOnce({
+        exitCode: 1,
+        stdout: '',
+        stderr: 'ERROR: MANIFEST_UNKNOWN: manifest unknown'
+      })
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: JSON.stringify({
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: []
+        }),
+        stderr: ''
+      });
+
+    const inspectPromise = new ImageTools({buildx}).inspectManifest({
+      name: 'docker.io/library/alpine:latest',
+      retryOnManifestUnknown: true,
+      retryLimit: 2
+    });
+
+    await vi.runAllTimersAsync();
+
+    expect(await inspectPromise).toEqual({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+      manifests: []
+    });
+    expect(getCommand).toHaveBeenCalledWith(['imagetools', 'inspect', 'docker.io/library/alpine:latest', '--format', '{{json .Manifest}}']);
+    expect(execSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry non-manifest errors', async () => {
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'inspect']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+    const execSpy = vi.spyOn(Exec, 'getExecOutput').mockResolvedValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'ERROR: unauthorized'
+    });
+
+    const result = await new ImageTools({buildx})
+      .inspectManifest({
+        name: 'docker.io/library/alpine:latest',
+        retryOnManifestUnknown: true
+      })
+      .then(
+        value => ({value, error: undefined}),
+        error => ({value: undefined, error: error as Error})
+      );
+
+    expect(result.value).toBeUndefined();
+    expect(result.error).toBeInstanceOf(Error);
+    expect(result.error?.message).toContain('ERROR: unauthorized');
+
+    expect(execSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('inspectImage', () => {
+  it('retries transient manifest unknown errors when requested', async () => {
+    vi.useFakeTimers();
+
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'inspect']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+    const execSpy = vi
+      .spyOn(Exec, 'getExecOutput')
+      .mockResolvedValueOnce({
+        exitCode: 1,
+        stdout: '',
+        stderr: 'ERROR: MANIFEST_UNKNOWN: manifest unknown'
+      })
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: JSON.stringify({
+          config: {
+            digest: 'sha256:test'
+          }
+        }),
+        stderr: ''
+      });
+
+    const inspectPromise = new ImageTools({buildx}).inspectImage({
+      name: 'docker.io/library/alpine:latest',
+      retryOnManifestUnknown: true,
+      retryLimit: 2
+    });
+
+    await vi.runAllTimersAsync();
+
+    expect(await inspectPromise).toEqual({
+      config: {
+        digest: 'sha256:test'
+      }
+    });
+    expect(getCommand).toHaveBeenCalledWith(['imagetools', 'inspect', 'docker.io/library/alpine:latest', '--format', '{{json .Image}}']);
+    expect(execSpy).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('create', () => {
