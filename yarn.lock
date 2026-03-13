@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/artifact@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@actions/artifact@npm:6.2.0"
+"@actions/artifact@npm:^6.2.1":
+  version: 6.2.1
+  resolution: "@actions/artifact@npm:6.2.1"
   dependencies:
     "@actions/core": "npm:^3.0.0"
     "@actions/github": "npm:^9.0.0"
@@ -30,7 +30,7 @@ __metadata:
     archiver: "npm:^7.0.1"
     jwt-decode: "npm:^4.0.0"
     unzip-stream: "npm:^0.3.1"
-  checksum: 10/fa931b1222c0e08bca85d3cb18c2cd5ae912cce3f09ab3acd4ec3486e864337d65177089a14aef124d9696b9dd5309b273a9251e230172c79c2444af2c43443e
+  checksum: 10/1fad9b079ee2ab07f964b93bf7b4fc594d115199219baed74ac3bf2a8675e0b7ea57252eccbcdaaaa8fc8375742d23585cbd054f3b2d029c091817e0f257ce93
   languageName: node
   linkType: hard
 
@@ -370,7 +370,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
-    "@actions/artifact": "npm:^6.2.0"
+    "@actions/artifact": "npm:^6.2.1"
     "@actions/cache": "npm:^6.0.0"
     "@actions/core": "npm:^3.0.0"
     "@actions/exec": "npm:^3.0.0"
