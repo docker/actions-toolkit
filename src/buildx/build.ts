@@ -38,6 +38,15 @@ export interface ResolveSecretsOpts {
   redact?: boolean;
 }
 
+export interface GitContextOpts {
+  ref?: string;
+  checksum?: string;
+  subdir?: string;
+  keepGitDir?: boolean;
+  submodules?: boolean;
+  format?: GitContextFormat;
+}
+
 export class Build {
   private readonly buildx: Buildx;
   private readonly iidFilename: string;
@@ -49,31 +58,45 @@ export class Build {
     this.metadataFilename = `build-metadata-${Util.generateRandomString()}.json`;
   }
 
-  public async gitContext(ref?: string, sha?: string, format?: GitContextFormat): Promise<string> {
+  public async gitContext(opts?: GitContextOpts): Promise<string> {
     const setPullRequestHeadRef = Util.parseBoolOrDefault(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF);
-    ref = ref || github.context.ref;
-    sha = sha || github.context.sha;
+    const gitChecksum = opts?.checksum || github.context.sha;
+    let ref = opts?.ref || github.context.ref;
     if (!ref.startsWith('refs/')) {
       ref = `refs/heads/${ref}`;
     } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
       ref = ref.replace(/\/merge$/g, '/head');
     }
     const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
+    let format = opts?.format;
     if (!format) {
       const sendGitQueryAsInput = Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT);
-      if (sendGitQueryAsInput && (await this.buildx.versionSatisfies('>=0.29.0'))) {
+      if (opts?.keepGitDir || typeof opts?.submodules !== 'undefined') {
+        format = 'query';
+      } else if (sendGitQueryAsInput && (await this.buildx.versionSatisfies('>=0.29.0'))) {
         format = 'query';
       } else {
         format = 'fragment';
       }
     }
     if (format === 'query') {
-      return `${baseURL}?ref=${ref}${sha ? `&checksum=${sha}` : ''}`;
+      const query = [`ref=${ref}`];
+      if (gitChecksum) {
+        query.push(`checksum=${gitChecksum}`);
+      }
+      if (opts?.subdir) {
+        query.push(`subdir=${opts.subdir}`);
+      }
+      if (typeof opts?.keepGitDir !== 'undefined') {
+        query.push(`keep-git-dir=${opts.keepGitDir}`);
+      }
+      if (typeof opts?.submodules !== 'undefined') {
+        query.push(`submodules=${opts.submodules}`);
+      }
+      return `${baseURL}?${query.join('&')}`;
     }
-    if (sha && !ref.startsWith(`refs/pull/`)) {
-      return `${baseURL}#${sha}`;
-    }
-    return `${baseURL}#${ref}`;
+    const fragmentRef = gitChecksum && !ref.startsWith(`refs/pull/`) ? gitChecksum : ref;
+    return `${baseURL}#${fragmentRef}${opts?.subdir ? `:${opts.subdir}` : ''}`;
   }
 
   public getImageIDFilePath(): string {
