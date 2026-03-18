@@ -381,7 +381,7 @@ __metadata:
     "@eslint/js": "npm:^9.39.3"
     "@sigstore/bundle": "npm:^4.0.0"
     "@sigstore/sign": "npm:^4.1.0"
-    "@sigstore/tuf": "npm:^4.0.1"
+    "@sigstore/tuf": "npm:^4.0.2"
     "@sigstore/verify": "npm:^3.1.0"
     "@types/gunzip-maybe": "npm:^1.4.3"
     "@types/he": "npm:^1.2.3"
@@ -1255,13 +1255,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/tuf@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@sigstore/tuf@npm:4.0.1"
+"@sigstore/tuf@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "@sigstore/tuf@npm:4.0.2"
   dependencies:
     "@sigstore/protobuf-specs": "npm:^0.5.0"
     tuf-js: "npm:^4.1.0"
-  checksum: 10/1a9725aa95eba55badf24442fe8a71c6d68f8b7d17a6b2a5e4b5590117f0181881b3485cfa57ea375b7c3a38421dbffdfcbe86e6623d903e17e3a8359837e268
+  checksum: 10/14882b8e71be4185ec417744b97a47392a50da00aafd4207a46bb74b40aa019ebf22d928052fd2d31a8da0da1efe7ebebac5a70898b31a74239a1ada997be754
   languageName: node
   linkType: hard
 
