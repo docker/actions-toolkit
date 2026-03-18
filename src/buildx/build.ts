@@ -84,7 +84,7 @@ export class Build {
       if (gitChecksum) {
         query.push(`checksum=${gitChecksum}`);
       }
-      if (opts?.subdir) {
+      if (opts?.subdir && opts.subdir !== '.') {
         query.push(`subdir=${opts.subdir}`);
       }
       if (typeof opts?.keepGitDir !== 'undefined') {
@@ -96,7 +96,7 @@ export class Build {
       return `${baseURL}?${query.join('&')}`;
     }
     const fragmentRef = gitChecksum && !ref.startsWith(`refs/pull/`) ? gitChecksum : ref;
-    return `${baseURL}#${fragmentRef}${opts?.subdir ? `:${opts.subdir}` : ''}`;
+    return `${baseURL}#${fragmentRef}${opts?.subdir && opts.subdir !== '.' ? `:${opts.subdir}` : ''}`;
   }
 
   public getImageIDFilePath(): string {
