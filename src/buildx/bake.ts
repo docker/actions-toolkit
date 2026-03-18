@@ -44,6 +44,7 @@ export interface BakeCmdOpts {
   sbom?: string;
   source?: string;
   targets?: Array<string>;
+  vars?: Array<string>;
 
   githubToken?: string; // for auth with remote definitions on private repos
 }
@@ -136,6 +137,11 @@ export class Bake {
     if (cmdOpts.overrides) {
       for (const override of cmdOpts.overrides) {
         args.push('--set', override);
+      }
+    }
+    if (cmdOpts.vars) {
+      for (const v of cmdOpts.vars) {
+        args.push('--var', v);
       }
     }
     if (cmdOpts.allow) {
