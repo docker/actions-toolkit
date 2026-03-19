@@ -60,13 +60,14 @@ describe('gitContext', () => {
 
   type GitContextTestCase = {
     ref: string;
+    checksum?: string;
+    subdir?: string;
+    attrs?: Record<string, string>;
     format: GitContextFormat | undefined;
+
     prHeadRef: boolean;
     sendGitQueryAsInput: boolean;
     buildxQuerySupport: boolean;
-    subdir?: string;
-    keepGitDir?: boolean;
-    submodules?: boolean;
   };
 
   // prettier-ignore
@@ -82,10 +83,15 @@ describe('gitContext', () => {
     [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: false, sendGitQueryAsInput: true, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/merge&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/pull/15/merge', format: undefined, prHeadRef: true, sendGitQueryAsInput: true, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: true, buildxQuerySupport: false}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
-    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, keepGitDir: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&keep-git-dir=true'],
-    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: false, keepGitDir: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&keep-git-dir=true'],
-    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, submodules: false}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
-    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: false, submodules: false}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {}}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/heads/master', checksum: undefined, format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {checksum: 'cafebabe'}}, 'https://github.com/docker/actions-toolkit.git#cafebabe'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {subdir: 'subdir'}}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37:subdir'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {ref: 'refs/tags/v1.0.0'}}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {'keep-git-dir': 'true'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&keep-git-dir=true'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: false, attrs: {'keep-git-dir': 'true'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&keep-git-dir=true'],
+    [{ref: 'refs/heads/master', checksum: undefined, format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {checksum: 'cafebabe', 'keep-git-dir': 'true'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=cafebabe&keep-git-dir=true'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {submodules: 'false'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
+    [{ref: 'refs/heads/master', format: undefined, prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: false, attrs: {submodules: 'false'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
     // query format
     [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
@@ -94,22 +100,26 @@ describe('gitContext', () => {
     [{ref: 'refs/pull/15/merge', format: 'query', prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/pull/15/head&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: 'subdir'}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&subdir=subdir'],
     [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: '.'}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37'],
-    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: 'subdir', keepGitDir: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&subdir=subdir&keep-git-dir=true'],
-    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, submodules: true}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=true'],
-    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, submodules: false}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
+    [{ref: 'refs/heads/master', checksum: undefined, format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {ref: 'refs/tags/v1.0.0', checksum: 'cafebabe', subdir: 'subdir', submodules: 'false'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=cafebabe&subdir=subdir&submodules=false'],
+    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: 'subdir', attrs: {'keep-git-dir': 'true'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&subdir=subdir&keep-git-dir=true'],
+    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {submodules: 'true'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=true'],
+    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {submodules: 'false'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&submodules=false'],
+    [{ref: 'refs/heads/master', format: 'query', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {'keep-git-dir': 'true', submodules: 'false'}}, 'https://github.com/docker/actions-toolkit.git?ref=refs/heads/master&checksum=860c1904a1ce19322e91ac35af1ab07466440c37&keep-git-dir=true&submodules=false'],
     // fragment format
     [{ref: 'refs/heads/master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/pull/15/merge', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/merge'],
     [{ref: 'refs/tags/v1.0.0', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/pull/15/merge', format: 'fragment', prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/head'],
+    [{ref: 'refs/heads/master', checksum: undefined, format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {checksum: 'cafebabe', subdir: 'subdir', ref: 'refs/tags/v1.0.0'}}, 'https://github.com/docker/actions-toolkit.git#cafebabe:subdir'],
+    [{ref: 'refs/heads/master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, attrs: {'keep-git-dir': 'true'}}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/heads/master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: 'subdir'}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37:subdir'],
     [{ref: 'refs/heads/master', format: 'fragment', prHeadRef: false, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: '.'}, 'https://github.com/docker/actions-toolkit.git#860c1904a1ce19322e91ac35af1ab07466440c37'],
     [{ref: 'refs/pull/15/merge', format: 'fragment', prHeadRef: true, sendGitQueryAsInput: false, buildxQuerySupport: true, subdir: 'subdir'}, 'https://github.com/docker/actions-toolkit.git#refs/pull/15/head:subdir'],
   ];
 
   test.each(gitContextCases)('given %o should return %o', async (input: GitContextTestCase, expected: string) => {
-    const {ref, format, prHeadRef, sendGitQueryAsInput, buildxQuerySupport, subdir, keepGitDir, submodules} = input;
+    const {ref, checksum, format, prHeadRef, sendGitQueryAsInput, buildxQuerySupport, subdir, attrs} = input;
     process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF = prHeadRef ? 'true' : '';
     process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT = sendGitQueryAsInput ? 'true' : '';
     const buildx = new Buildx();
@@ -118,11 +128,10 @@ describe('gitContext', () => {
     expect(
       await build.gitContext({
         ref,
-        checksum: '860c1904a1ce19322e91ac35af1ab07466440c37',
+        ...('checksum' in input ? {checksum} : {checksum: '860c1904a1ce19322e91ac35af1ab07466440c37'}),
         format,
         subdir,
-        keepGitDir,
-        submodules
+        attrs
       })
     ).toEqual(expected);
   });

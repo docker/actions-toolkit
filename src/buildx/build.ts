@@ -42,8 +42,7 @@ export interface GitContextOpts {
   ref?: string;
   checksum?: string;
   subdir?: string;
-  keepGitDir?: boolean;
-  submodules?: boolean;
+  attrs?: Record<string, string>;
   format?: GitContextFormat;
 }
 
@@ -59,19 +58,29 @@ export class Build {
   }
 
   public async gitContext(opts?: GitContextOpts): Promise<string> {
+    const gitContextCommonAttrs = new Set(['ref', 'checksum', 'subdir']);
     const setPullRequestHeadRef = Util.parseBoolOrDefault(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF);
-    const gitChecksum = opts?.checksum || github.context.sha;
-    let ref = opts?.ref || github.context.ref;
+    const commonAttrs = {
+      ref: opts?.attrs?.ref,
+      checksum: opts?.attrs?.checksum,
+      subdir: opts?.attrs?.subdir
+    };
+
+    const gitChecksum = opts?.checksum || commonAttrs.checksum || github.context.sha;
+    let ref = opts?.ref || commonAttrs.ref || github.context.ref;
+    const subdir = opts?.subdir || commonAttrs.subdir;
+    const attrs = Object.entries(opts?.attrs || {}).filter(([name]) => !gitContextCommonAttrs.has(name));
     if (!ref.startsWith('refs/')) {
       ref = `refs/heads/${ref}`;
     } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
       ref = ref.replace(/\/merge$/g, '/head');
     }
+
     const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
     let format = opts?.format;
     if (!format) {
       const sendGitQueryAsInput = Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT);
-      if (opts?.keepGitDir || typeof opts?.submodules !== 'undefined') {
+      if (attrs.length > 0) {
         format = 'query';
       } else if (sendGitQueryAsInput && (await this.buildx.versionSatisfies('>=0.29.0'))) {
         format = 'query';
@@ -84,19 +93,16 @@ export class Build {
       if (gitChecksum) {
         query.push(`checksum=${gitChecksum}`);
       }
-      if (opts?.subdir && opts.subdir !== '.') {
-        query.push(`subdir=${opts.subdir}`);
+      if (subdir && subdir !== '.') {
+        query.push(`subdir=${subdir}`);
       }
-      if (typeof opts?.keepGitDir !== 'undefined') {
-        query.push(`keep-git-dir=${opts.keepGitDir}`);
-      }
-      if (typeof opts?.submodules !== 'undefined') {
-        query.push(`submodules=${opts.submodules}`);
+      for (const [name, value] of attrs) {
+        query.push(`${name}=${value}`);
       }
       return `${baseURL}?${query.join('&')}`;
     }
     const fragmentRef = gitChecksum && !ref.startsWith(`refs/pull/`) ? gitChecksum : ref;
-    return `${baseURL}#${fragmentRef}${opts?.subdir && opts.subdir !== '.' ? `:${opts.subdir}` : ''}`;
+    return `${baseURL}#${fragmentRef}${subdir && subdir !== '.' ? `:${subdir}` : ''}`;
   }
 
   public getImageIDFilePath(): string {
