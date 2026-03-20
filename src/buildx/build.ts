@@ -206,15 +206,14 @@ export class Build {
 
   public static resolveSecret(kvp: string, opts?: ResolveSecretsOpts): [string, string] {
     const [key, value] = Build.parseSecretKvp(kvp, opts?.redact);
-    const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
     if (opts?.asFile) {
       if (!fs.existsSync(value)) {
         throw new Error(`secret file ${value} not found`);
       }
-      fs.copyFileSync(value, secretFile);
-    } else {
-      fs.writeFileSync(secretFile, value);
+      return [key, value];
     }
+    const secretFile = Context.tmpName({tmpdir: Context.tmpDir()});
+    fs.writeFileSync(secretFile, value);
     return [key, secretFile];
   }
 

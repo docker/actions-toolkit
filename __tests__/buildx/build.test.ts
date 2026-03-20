@@ -267,44 +267,63 @@ describe('resolveProvenanceAttrs', () => {
 });
 
 describe('resolveSecret', () => {
+  // prettier-ignore
   test.each([
-    ['A_SECRET=abcdef0123456789', false, 'A_SECRET', 'abcdef0123456789', null],
-    ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', false, 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789', null],
-    ['MY_KEY=c3RyaW5nLXdpdGgtZXF1YWxzCg==', false, 'MY_KEY', 'c3RyaW5nLXdpdGgtZXF1YWxzCg==', null],
-    ['aaaaaaaa', false, '', '', new Error('aaaaaaaa is not a valid secret')],
-    ['aaaaaaaa=', false, '', '', new Error('aaaaaaaa= is not a valid secret')],
-    ['=bbbbbbb', false, '', '', new Error('=bbbbbbb is not a valid secret')],
-    [`foo=${path.join(fixturesDir, 'secret.txt')}`, true, 'foo', 'bar', null],
-    [`notfound=secret`, true, '', '', new Error('secret file secret not found')]
-  ])('given %o key and %o secret', async (kvp: string, file: boolean, exKey: string, exValue: string, error: Error | null) => {
-    try {
-      let secret: string;
-      if (file) {
-        secret = Build.resolveSecretFile(kvp);
-      } else {
-        secret = Build.resolveSecretString(kvp);
-      }
-      expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
-      expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
-    } catch (e) {
-      // eslint-disable-next-line vitest/no-conditional-expect
-      expect(e.message).toEqual(error?.message);
-    }
+    ['A_SECRET=abcdef0123456789', 'A_SECRET', 'abcdef0123456789'],
+    ['GIT_AUTH_TOKEN=abcdefghijklmno=0123456789', 'GIT_AUTH_TOKEN', 'abcdefghijklmno=0123456789'],
+    ['MY_KEY=c3RyaW5nLXdpdGgtZXF1YWxzCg==', 'MY_KEY', 'c3RyaW5nLXdpdGgtZXF1YWxzCg==']
+  ])('given %o key and string secret', (kvp: string, exKey: string, exValue: string) => {
+    const secret = Build.resolveSecretString(kvp);
+    expect(secret).toEqual(`id=${exKey},src=${tmpName}`);
+    expect(fs.readFileSync(tmpName, 'utf-8')).toEqual(exValue);
   });
 
+  // prettier-ignore
   test.each([
-    ['FOO=bar', 'FOO', 'bar', null],
-    ['FOO=', 'FOO', '', new Error('FOO= is not a valid secret')],
-    ['=bar', '', '', new Error('=bar is not a valid secret')],
-    ['FOO=bar=baz', 'FOO', 'bar=baz', null]
-  ])('given %o key and %o env', async (kvp: string, exKey: string, exValue: string, error: Error | null) => {
-    try {
-      const secret = Build.resolveSecretEnv(kvp);
-      expect(secret).toEqual(`id=${exKey},env=${exValue}`);
-    } catch (e) {
-      // eslint-disable-next-line vitest/no-conditional-expect
-      expect(e.message).toEqual(error?.message);
-    }
+    [`foo=${path.join(fixturesDir, 'secret.txt')}`, 'foo', path.join(fixturesDir, 'secret.txt')]
+  ])('given %o key and file secret', (kvp: string, exKey: string, exSrc: string) => {
+    const secret = Build.resolveSecretFile(kvp);
+    expect(secret).toEqual(`id=${exKey},src=${exSrc}`);
+  });
+
+  // prettier-ignore
+  test.each([
+    ['aaaaaaaa', false, 'aaaaaaaa is not a valid secret'],
+    ['aaaaaaaa=', false, 'aaaaaaaa= is not a valid secret'],
+    ['=bbbbbbb', false, '=bbbbbbb is not a valid secret'],
+    ['notfound=secret', true, 'secret file secret not found']
+  ])('given %o key and %o secret throws', (kvp: string, file: boolean, errorMessage: string) => {
+    const resolve = (): string => (file ? Build.resolveSecretFile(kvp) : Build.resolveSecretString(kvp));
+    expect(resolve).toThrow(errorMessage);
+  });
+
+  // prettier-ignore
+  test('preserves file-backed secret path and bytes', async () => {
+    fs.mkdirSync(tmpDir, {recursive: true});
+    const sourceFile = path.join(tmpDir, 'secret.bin');
+    const sourceBytes = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x00, 0xff, 0x41, 0x42, 0x43, 0x0a, 0x80]);
+    fs.writeFileSync(sourceFile, sourceBytes);
+    const secret = Build.resolveSecretFile(`foo=${sourceFile}`);
+    expect(secret).toEqual(`id=foo,src=${sourceFile}`);
+    expect(fs.readFileSync(sourceFile)).toEqual(sourceBytes);
+    expect(fs.existsSync(tmpName)).toBeFalsy();
+  });
+
+  // prettier-ignore
+  test.each([
+    ['FOO=bar', 'FOO', 'bar'],
+    ['FOO=bar=baz', 'FOO', 'bar=baz']
+  ])('given %o key and %o env', (kvp: string, exKey: string, exValue: string) => {
+    const secret = Build.resolveSecretEnv(kvp);
+    expect(secret).toEqual(`id=${exKey},env=${exValue}`);
+  });
+
+  // prettier-ignore
+  test.each([
+    ['FOO=', 'FOO= is not a valid secret'],
+    ['=bar', '=bar is not a valid secret']
+  ])('given %o key and %o env throws', (kvp: string, errorMessage: string) => {
+    expect(() => Build.resolveSecretEnv(kvp)).toThrow(errorMessage);
   });
 });
 
