@@ -79,13 +79,17 @@ export class Build {
     const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
     let format = opts?.format;
     if (!format) {
-      const sendGitQueryAsInput = Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT);
+      format = 'fragment';
       if (attrs.length > 0) {
         format = 'query';
-      } else if (sendGitQueryAsInput && (await this.buildx.versionSatisfies('>=0.29.0'))) {
-        format = 'query';
-      } else {
-        format = 'fragment';
+      } else if (Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT)) {
+        try {
+          if (await this.buildx.versionSatisfies('>=0.29.0')) {
+            format = 'query';
+          }
+        } catch {
+          // keep fragment fallback when Buildx version cannot be determined.
+        }
       }
     }
     if (format === 'query') {
