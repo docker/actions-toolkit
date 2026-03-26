@@ -55,7 +55,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: env.RUN_CODECOV == 'true' && matrix.node_version == env.NODE_VERSION
         with:
           files: ./coverage/clover.xml
@@ -225,7 +225,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: env.RUN_CODECOV == 'true'
         with:
           files: ./coverage/clover.xml
