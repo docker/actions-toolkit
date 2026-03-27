@@ -1,5 +1,12 @@
 name: virtual-env
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   schedule:
@@ -68,4 +75,4 @@ jobs:
       -
         name: Dump context
         if: always()
-        uses: crazy-max/ghaction-dump-context@v2
+        uses: crazy-max/ghaction-dump-context@5355a8e5e6ac5a302e746a1c4b7747a0393863c8 # v2.3.0

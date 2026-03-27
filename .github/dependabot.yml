@@ -5,6 +5,12 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      crazy-max-dot-github:
+        patterns:
+          - "crazy-max/.github/*"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "bot"
@@ -13,6 +19,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 2
     versioning-strategy: "increase"
     allow:
       - dependency-type: "production"

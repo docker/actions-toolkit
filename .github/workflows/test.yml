@@ -4,6 +4,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   push:
@@ -33,10 +36,10 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       -
         name: Test
-        uses: docker/bake-action@v7
+        uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7.0.0
         with:
           source: .
           targets: test-coverage
@@ -55,7 +58,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
         if: env.RUN_CODECOV == 'true' && matrix.node_version == env.NODE_VERSION
         with:
           files: ./coverage/clover.xml
@@ -69,7 +72,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       -
         name: Enable corepack
         run: |
@@ -77,7 +80,7 @@ jobs:
           yarn --version
       -
         name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
@@ -87,7 +90,7 @@ jobs:
       -
         name: Create includes
         id: set
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             let tests = [];
@@ -153,15 +156,15 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       -
         name: Expose GitHub Runtime
-        uses: crazy-max/ghaction-github-runtime@v4
+        uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
       -
         # FIXME: Needs to setup node twice on Windows: https://github.com/actions/setup-node/issues/1357#issuecomment-3254613964
         name: Setup Node
         if: startsWith(matrix.os, 'windows')
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
@@ -172,14 +175,14 @@ jobs:
           yarn --version
       -
         name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
       -
         name: Set up Docker Buildx
         if: startsWith(matrix.os, 'ubuntu')
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
         with:
           version: ${{ env.BUILDX_VERSION }}
           driver: docker
@@ -187,7 +190,7 @@ jobs:
         name: Set up container builder
         if: startsWith(matrix.os, 'ubuntu')
         id: builder
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
         with:
           version: ${{ env.BUILDX_VERSION }}
           driver-opts: image=${{ env.BUILDKIT_IMAGE }}
@@ -197,7 +200,7 @@ jobs:
         run: yarn install
       -
         name: Test
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const testName = `${{ matrix.test_name }}`;
@@ -225,7 +228,7 @@ jobs:
         shell: bash
       -
         name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
         if: env.RUN_CODECOV == 'true'
         with:
           files: ./coverage/clover.xml
