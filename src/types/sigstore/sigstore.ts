@@ -73,6 +73,7 @@ export interface SignProvenanceBlobsResult extends ParsedBundle {
 }
 
 export interface VerifySignedArtifactsOpts {
+  predicateType?: string;
   certificateIdentityRegexp: string;
   noTransparencyLog?: boolean;
 }
