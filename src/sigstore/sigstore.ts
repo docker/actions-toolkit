@@ -55,6 +55,8 @@ export interface SigstoreOpts {
   imageTools?: ImageTools;
 }
 
+const COSIGN_PREDICATE_SLSA_PROVENANCE_V1 = 'slsaprovenance1';
+
 export class Sigstore {
   private readonly cosign: Cosign;
   private readonly imageTools: ImageTools;
@@ -352,7 +354,8 @@ export class Sigstore {
             'verify-blob-attestation',
             '--new-bundle-format',
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
-            '--certificate-identity-regexp', opts.certificateIdentityRegexp
+            '--certificate-identity-regexp', opts.certificateIdentityRegexp,
+            '--type', opts.predicateType ?? COSIGN_PREDICATE_SLSA_PROVENANCE_V1
           ]
           if (opts.noTransparencyLog || !signedRes.tlogID) {
             // if there is no tlog entry, we skip tlog verification but still verify the signed timestamp

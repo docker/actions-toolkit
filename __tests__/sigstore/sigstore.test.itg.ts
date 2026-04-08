@@ -36,7 +36,7 @@ const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? descr
 beforeAll(async () => {
   const cosignInstall = new CosignInstall();
   const cosignBinPath = await cosignInstall.download({
-    version: 'v3.0.4'
+    version: 'v3.0.6'
   });
   await cosignInstall.install(cosignBinPath);
 }, 100000);
