@@ -16,10 +16,12 @@
 
 import {beforeAll, describe, expect, it, test} from 'vitest';
 import fs from 'fs';
+import os from 'os';
 import * as path from 'path';
 
 import {Buildx} from '../../src/buildx/buildx.js';
 import {Build} from '../../src/buildx/build.js';
+import {Cosign} from '../../src/cosign/cosign.js';
 import {Install as CosignInstall} from '../../src/cosign/install.js';
 import {Docker} from '../../src/docker/docker.js';
 import {Exec} from '../../src/exec.js';
@@ -33,73 +35,106 @@ const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'tr
 const maybe = runTest ? describe : describe.skip;
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
 
-beforeAll(async () => {
-  const cosignInstall = new CosignInstall();
-  const cosignBinPath = await cosignInstall.download({
-    version: 'v3.0.6'
+const imageName = 'ghcr.io/docker/actions-toolkit/test';
+const currentCosignVersion = 'v3.0.6';
+const signAttestationCosignVersions = ['v3.0.2', currentCosignVersion] as const;
+const installedCosign = new Map<string, Promise<string>>();
+
+async function installCosign(version: string): Promise<string> {
+  let installedPath = installedCosign.get(version);
+  if (!installedPath) {
+    installedPath = (async () => {
+      const cosignInstall = new CosignInstall();
+      const cosignBinPath = await cosignInstall.download({
+        version
+      });
+      const installDir = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP || os.tmpdir(), `sigstore-cosign-${version.replace(/[^a-zA-Z0-9]+/g, '-')}-`));
+      return await cosignInstall.install(cosignBinPath, installDir);
+    })();
+    installedCosign.set(version, installedPath);
+  }
+  return await installedPath;
+}
+
+for (const cosignVersion of signAttestationCosignVersions) {
+  maybeIdToken(`signAttestationManifests with cosign ${cosignVersion}`, () => {
+    let sigstore: Sigstore;
+
+    beforeAll(async () => {
+      sigstore = new Sigstore({
+        cosign: new Cosign({
+          binPath: await installCosign(cosignVersion)
+        })
+      });
+    }, 100000);
+
+    it('build, sign and verify', async () => {
+      const buildx = new Buildx();
+      const build = new Build({buildx: buildx});
+      const versionTag = cosignVersion.replace(/^v/, '').replace(/\./g, '-');
+
+      await expect(
+        (async () => {
+          await Docker.getExecOutput(['login', '--password-stdin', '--username', process.env.GITHUB_REPOSITORY_OWNER || 'docker', 'ghcr.io'], {
+            input: Buffer.from(process.env.GITHUB_TOKEN || '')
+          });
+        })()
+      ).resolves.not.toThrow();
+
+      await expect(
+        (async () => {
+          // prettier-ignore
+          const buildCmd = await buildx.getCommand([
+            '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
+            'build',
+            '-f', path.join(fixturesDir, 'hello.Dockerfile'),
+            '--provenance=mode=max',
+            '--tag', `${imageName}:sigstore-itg-cosign-${versionTag}`,
+            '--platform', 'linux/amd64,linux/arm64',
+            '--push',
+            '--metadata-file', build.getMetadataFilePath(),
+            fixturesDir
+          ]);
+          await Exec.exec(buildCmd.command, buildCmd.args);
+        })()
+      ).resolves.not.toThrow();
+
+      const metadata = build.resolveMetadata();
+      expect(metadata).toBeDefined();
+      const buildDigest = build.resolveDigest(metadata);
+      expect(buildDigest).toBeDefined();
+
+      const signResults = await sigstore.signAttestationManifests({
+        imageNames: [imageName],
+        imageDigest: buildDigest!
+      });
+      expect(Object.keys(signResults).length).toEqual(2);
+
+      const verifyResults = await sigstore.verifySignedManifests(signResults, {
+        certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
+      });
+      expect(Object.keys(verifyResults).length).toEqual(2);
+    }, 200000);
   });
-  await cosignInstall.install(cosignBinPath);
-}, 100000);
-
-maybeIdToken('signAttestationManifests', () => {
-  it('build, sign and verify', async () => {
-    const buildx = new Buildx();
-    const build = new Build({buildx: buildx});
-    const imageName = 'ghcr.io/docker/actions-toolkit/test';
-
-    await expect(
-      (async () => {
-        await Docker.getExecOutput(['login', '--password-stdin', '--username', process.env.GITHUB_REPOSITORY_OWNER || 'docker', 'ghcr.io'], {
-          input: Buffer.from(process.env.GITHUB_TOKEN || '')
-        });
-      })()
-    ).resolves.not.toThrow();
-
-    await expect(
-      (async () => {
-        // prettier-ignore
-        const buildCmd = await buildx.getCommand([
-          '--builder', process.env.CTN_BUILDER_NAME ?? 'default',
-          'build',
-          '-f', path.join(fixturesDir, 'hello.Dockerfile'),
-          '--provenance=mode=max',
-          '--tag', `${imageName}:sigstore-itg`,
-          '--platform', 'linux/amd64,linux/arm64',
-          '--push',
-          '--metadata-file', build.getMetadataFilePath(),
-          fixturesDir
-        ]);
-        await Exec.exec(buildCmd.command, buildCmd.args);
-      })()
-    ).resolves.not.toThrow();
-
-    const metadata = build.resolveMetadata();
-    expect(metadata).toBeDefined();
-    const buildDigest = build.resolveDigest(metadata);
-    expect(buildDigest).toBeDefined();
-
-    const sigstore = new Sigstore();
-    const signResults = await sigstore.signAttestationManifests({
-      imageNames: [imageName],
-      imageDigest: buildDigest!
-    });
-    expect(Object.keys(signResults).length).toEqual(2);
-
-    const verifyResults = await sigstore.verifySignedManifests(signResults, {
-      certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
-    });
-    expect(Object.keys(verifyResults).length).toEqual(2);
-  }, 100000);
-});
+}
 
 maybe('verifyImageAttestations', () => {
+  let sigstore: Sigstore;
+
+  beforeAll(async () => {
+    sigstore = new Sigstore({
+      cosign: new Cosign({
+        binPath: await installCosign(currentCosignVersion)
+      })
+    });
+  }, 100000);
+
   test.each([
     ['moby/buildkit:master@sha256:84014da3581b2ff2c14cb4f60029cf9caa272b79e58f2e89c651ea6966d7a505', `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`],
     ['docker/dockerfile-upstream:master@sha256:3e8cd5ebf48acd1a1939649ad1c62ca44c029852b22493c16a9307b654334958', `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`]
   ])(
     'given %p',
     async (image, certificateIdentityRegexp) => {
-      const sigstore = new Sigstore();
       const verifyResults = await sigstore.verifyImageAttestations(image, {
         certificateIdentityRegexp: certificateIdentityRegexp
       });
@@ -114,7 +149,6 @@ maybe('verifyImageAttestations', () => {
   );
 
   it('default platform', async () => {
-    const sigstore = new Sigstore();
     const verifyResults = await sigstore.verifyImageAttestations('moby/buildkit:master@sha256:84014da3581b2ff2c14cb4f60029cf9caa272b79e58f2e89c651ea6966d7a505', {
       certificateIdentityRegexp: `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`,
       platform: OCI.defaultPlatform()
@@ -161,8 +195,17 @@ maybeIdToken('signProvenanceBlobs', () => {
 });
 
 maybeIdToken('verifySignedArtifacts', () => {
+  let sigstore: Sigstore;
+
+  beforeAll(async () => {
+    sigstore = new Sigstore({
+      cosign: new Cosign({
+        binPath: await installCosign(currentCosignVersion)
+      })
+    });
+  }, 100000);
+
   it('sign and verify', async () => {
-    const sigstore = new Sigstore();
     const signResults = await sigstore.signProvenanceBlobs({
       localExportDir: path.join(fixturesDir, 'sigstore', 'multi')
     });

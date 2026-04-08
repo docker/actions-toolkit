@@ -38,7 +38,7 @@ export interface CosignCommandError {
 }
 
 export class Cosign {
-  private readonly binPath: string;
+  public readonly binPath: string;
   private _version: string;
   private _versionOnce: boolean;
 

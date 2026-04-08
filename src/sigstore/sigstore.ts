@@ -97,7 +97,7 @@ export class Sigstore {
           if (noTransparencyLog) {
             createConfigArgs.push('--no-default-rekor=true');
           }
-          await Exec.exec('cosign', createConfigArgs, {
+          await Exec.exec(this.cosign.binPath, createConfigArgs, {
             env: Object.assign({}, process.env, {
               COSIGN_EXPERIMENTAL: '1'
             }) as {
@@ -132,8 +132,8 @@ export class Sigstore {
               '--new-bundle-format',
               ...cosignExtraArgs
             ];
-            core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
-            const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
+            core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
+            const execRes = await Exec.getExecOutput(this.cosign.binPath, ['--verbose', ...cosignArgs, attestationRef], {
               ignoreReturnCode: true,
               silent: true,
               env: Object.assign({}, process.env, {
@@ -229,8 +229,8 @@ export class Sigstore {
     }
 
     if (!opts.retryOnManifestUnknown) {
-      core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
-      const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
+      core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
+      const execRes = await Exec.getExecOutput(this.cosign.binPath, ['--verbose', ...cosignArgs, attestationRef], {
         ignoreReturnCode: true,
         silent: true,
         env: Object.assign({}, process.env, {
@@ -250,9 +250,9 @@ export class Sigstore {
 
     const retries = opts.retryLimit ?? 15;
     let lastError: Error | undefined;
-    core.info(`[command]cosign ${[...cosignArgs, attestationRef].join(' ')}`);
+    core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
     for (let attempt = 0; attempt < retries; attempt++) {
-      const execRes = await Exec.getExecOutput('cosign', ['--verbose', ...cosignArgs, attestationRef], {
+      const execRes = await Exec.getExecOutput(this.cosign.binPath, ['--verbose', ...cosignArgs, attestationRef], {
         ignoreReturnCode: true,
         silent: true,
         env: Object.assign({}, process.env, {
@@ -361,7 +361,7 @@ export class Sigstore {
             // if there is no tlog entry, we skip tlog verification but still verify the signed timestamp
             cosignArgs.push('--use-signed-timestamps', '--insecure-ignore-tlog');
           }
-          const execRes = await Exec.getExecOutput('cosign', [...cosignArgs, '--bundle', signedRes.bundlePath, artifactPath], {
+          const execRes = await Exec.getExecOutput(this.cosign.binPath, [...cosignArgs, '--bundle', signedRes.bundlePath, artifactPath], {
             ignoreReturnCode: true
           });
           if (execRes.stderr.length > 0 && execRes.exitCode != 0) {
