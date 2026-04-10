@@ -29,7 +29,7 @@ const tmpDir = () => fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), '
 
 beforeAll(async () => {
   const undockInstall = new UndockInstall();
-  const undockBinPath = await undockInstall.download('v0.10.0', true);
+  const undockBinPath = await undockInstall.download('v0.12.0', true);
   await undockInstall.install(undockBinPath);
 
   const regclientInstall = new RegclientInstall();
