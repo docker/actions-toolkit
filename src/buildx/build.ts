@@ -59,28 +59,37 @@ export class Build {
 
   public async gitContext(opts?: GitContextOpts): Promise<string> {
     const gitContextCommonAttrs = new Set(['ref', 'checksum', 'subdir']);
-    const setPullRequestHeadRef = Util.parseBoolOrDefault(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF);
-    const commonAttrs = {
-      ref: opts?.attrs?.ref,
-      checksum: opts?.attrs?.checksum,
-      subdir: opts?.attrs?.subdir
-    };
+    const commonAttrs = opts?.attrs || {};
+    const extraAttrs = Object.entries(commonAttrs).filter(([name]) => !gitContextCommonAttrs.has(name));
 
-    const gitChecksum = opts?.checksum || commonAttrs.checksum || github.context.sha;
     let ref = opts?.ref || commonAttrs.ref || github.context.ref;
-    const subdir = opts?.subdir || commonAttrs.subdir;
-    const attrs = Object.entries(opts?.attrs || {}).filter(([name]) => !gitContextCommonAttrs.has(name));
     if (!ref.startsWith('refs/')) {
       ref = `refs/heads/${ref}`;
-    } else if (ref.startsWith(`refs/pull/`) && setPullRequestHeadRef) {
+    } else if (ref.startsWith(`refs/pull/`) && Util.parseBoolOrDefault(process.env.DOCKER_DEFAULT_GIT_CONTEXT_PR_HEAD_REF)) {
       ref = ref.replace(/\/merge$/g, '/head');
+    }
+
+    const inputChecksum = opts?.checksum || commonAttrs.checksum;
+    const inputSubdir = opts?.subdir || commonAttrs.subdir;
+    const checksum = inputChecksum || (ref.startsWith(`refs/pull/`) ? undefined : github.context.sha);
+
+    // BuildKit resolves PR refs remotely at build time, so mutable refs like
+    // refs/pull/*/{merge,head} can drift away from the event SHA. actions/checkout
+    // avoids that by fetching the exact commit into a local PR ref; here we do the
+    // equivalent for implicit PR contexts by rewriting them to the event's commit SHA.
+    if (!inputChecksum && ref.startsWith(`refs/pull/`)) {
+      if (ref.endsWith('/merge')) {
+        ref = github.context.sha;
+      } else if (ref.endsWith('/head') && typeof github.context.payload.pull_request?.head?.sha === 'string') {
+        ref = github.context.payload.pull_request.head.sha;
+      }
     }
 
     const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
     let format = opts?.format;
     if (!format) {
       format = 'fragment';
-      if (attrs.length > 0) {
+      if (extraAttrs.length > 0) {
         format = 'query';
       } else if (Util.parseBoolOrDefault(process.env.BUILDX_SEND_GIT_QUERY_AS_INPUT)) {
         try {
@@ -92,21 +101,23 @@ export class Build {
         }
       }
     }
+
     if (format === 'query') {
       const query = [`ref=${ref}`];
-      if (gitChecksum) {
-        query.push(`checksum=${gitChecksum}`);
+      if (checksum) {
+        query.push(`checksum=${checksum}`);
       }
-      if (subdir && subdir !== '.') {
-        query.push(`subdir=${subdir}`);
+      if (inputSubdir && inputSubdir !== '.') {
+        query.push(`subdir=${inputSubdir}`);
       }
-      for (const [name, value] of attrs) {
+      for (const [name, value] of extraAttrs) {
         query.push(`${name}=${value}`);
       }
       return `${baseURL}?${query.join('&')}`;
     }
-    const fragmentRef = gitChecksum && !ref.startsWith(`refs/pull/`) ? gitChecksum : ref;
-    return `${baseURL}#${fragmentRef}${subdir && subdir !== '.' ? `:${subdir}` : ''}`;
+
+    const fragmentRef = inputChecksum && ref.startsWith(`refs/pull/`) ? ref : (checksum ?? ref);
+    return `${baseURL}#${fragmentRef}${inputSubdir && inputSubdir !== '.' ? `:${inputSubdir}` : ''}`;
   }
 
   public getImageIDFilePath(): string {
