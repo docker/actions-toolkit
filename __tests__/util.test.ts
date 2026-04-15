@@ -392,6 +392,20 @@ describe('generateRandomString', () => {
   });
 });
 
+describe('compileHandlebars', () => {
+  it('renders the template with the meta context and compile options', () => {
+    const rendered = Util.compileHandlebars(
+      '{{name}} {{{raw}}}',
+      {noEscape: true},
+      {
+        name: 'docker',
+        raw: '<strong>actions-toolkit</strong>'
+      }
+    );
+    expect(rendered).toBe('docker <strong>actions-toolkit</strong>');
+  });
+});
+
 describe('stringToUnicodeEntities', () => {
   it('should convert a string to Unicode entities', () => {
     const input = 'Hello, World!';

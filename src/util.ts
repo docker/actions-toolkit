@@ -17,6 +17,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import * as handlebars from 'handlebars';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import {parse} from 'csv-parse/sync';
@@ -200,6 +201,10 @@ export class Util {
   public static generateRandomString(length = 10) {
     const bytes = crypto.randomBytes(Math.ceil(length / 2));
     return bytes.toString('hex').slice(0, length);
+  }
+
+  public static compileHandlebars(value: string, options: Parameters<typeof handlebars.compile>[1], data: unknown): string {
+    return handlebars.compile(value, options)(data);
   }
 
   public static stringToUnicodeEntities(str: string) {
