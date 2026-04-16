@@ -250,7 +250,27 @@ provision:
     export DEBIAN_FRONTEND=noninteractive
     if [ "{{srcType}}" == "archive" ]; then
       {
-        curl -fsSL https://get.docker.com | sh -s -- --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}
+        getDockerScript=$(mktemp)
+        curl --retry 3 --retry-all-errors --retry-delay 5 -fsSL -o "$getDockerScript" https://get.docker.com
+
+        attempt=1
+        max_attempts=3
+        until [ "$attempt" -gt "$max_attempts" ]; do
+          echo "Docker install attempt $attempt/$max_attempts"
+          if sh "$getDockerScript" --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}; then
+            break
+          fi
+          if [ "$attempt" -eq "$max_attempts" ]; then
+            echo >&2 "Docker install failed after $max_attempts attempts"
+            exit 1
+          fi
+          echo >&2 "Docker install attempt $attempt failed, retrying after $((attempt * 30))s"
+          rm -rf /var/lib/apt/lists/partial/* || true
+          apt-get clean || true
+          sleep $((attempt * 30))
+          attempt=$((attempt + 1))
+        done
+
         sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/dockerd -H fd://{{#if localTCPPort}} -H tcp://0.0.0.0:2375{{/if}} --containerd=/run/containerd/containerd.sock|' /usr/lib/systemd/system/docker.service
         systemctl daemon-reload
         systemctl restart docker
