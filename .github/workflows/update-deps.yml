@@ -297,7 +297,13 @@ jobs:
               if (match[2] === target.value) {
                 continue;
               }
-              fs.writeFileSync(absolutePath, content.replace(target.pattern, `$1${target.value}$3`), 'utf8');
+              const updatedContent = content.replace(target.pattern, (...args) => {
+                const groups = args.slice(1, -2);
+                const prefix = groups[0];
+                const suffix = groups[2] || '';
+                return `${prefix}${target.value}${suffix}`;
+              });
+              fs.writeFileSync(absolutePath, updatedContent, 'utf8');
               changedFiles.push(target.path);
             }
 
