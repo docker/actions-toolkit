@@ -1,0 +1,329 @@
+name: update-deps
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '.github/buildx-releases.json'
+      - '.github/compose-releases.json'
+      - '.github/cosign-releases.json'
+      - '.github/docker-releases.json'
+      - '.github/regclient-releases.json'
+      - '.github/undock-releases.json'
+      - '.github/workflows/test.yml'
+      - '.github/workflows/update-deps.yml'
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    environment: update-deps # secrets are gated by this environment
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        dep:
+          - docker
+          - buildx
+          - buildkit
+          - compose
+          - cosign
+          - regctl
+          - undock
+    steps:
+      -
+        name: GitHub auth token from GitHub App
+        id: write-app
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          client-id: ${{ vars.GHACTIONS_REPO_WRITE_CLIENT_ID }}
+          private-key: ${{ secrets.GHACTIONS_REPO_WRITE_PRIVATE_KEY }}
+          owner: docker
+          repositories: actions-toolkit
+      -
+        name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ steps.write-app.outputs.token }}
+          fetch-depth: 0
+          persist-credentials: false
+      -
+        name: Update dependency
+        id: update
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          INPUT_DEP: ${{ matrix.dep }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const dep = core.getInput('dep');
+
+            function escapeRegExp(value) {
+              return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function formatList(values) {
+              const quoted = values.map(value => `\`${value}\``);
+              if (quoted.length === 1) {
+                return quoted[0];
+              }
+              if (quoted.length === 2) {
+                return `${quoted[0]} and ${quoted[1]}`;
+              }
+              return `${quoted.slice(0, -1).join(', ')}, and ${quoted.at(-1)}`;
+            }
+
+            function unique(values) {
+              return [...new Set(values)];
+            }
+
+            function stripLeadingV(value) {
+              return value.startsWith('v') ? value.slice(1) : value;
+            }
+
+            function stripDockerTag(value) {
+              return value.replace(/^docker-v/, '').replace(/^v/, '');
+            }
+
+            function majorMinor(value) {
+              const match = value.match(/^(\d+\.\d+)/);
+              if (!match) {
+                throw new Error(`Unable to derive major.minor version from ${value}`);
+              }
+              return match[1];
+            }
+
+            function readJson(relativePath) {
+              const absolutePath = path.join(process.env.GITHUB_WORKSPACE, relativePath);
+              return JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+            }
+
+            function readLatestTag(relativePath) {
+              const tag = readJson(relativePath)?.latest?.tag_name;
+              if (!tag) {
+                throw new Error(`Unable to resolve latest tag from ${relativePath}`);
+              }
+              return tag;
+            }
+
+            function dockerfileArgPattern(key) {
+              return new RegExp(`^(ARG ${escapeRegExp(key)}=)(.+)$`, 'm');
+            }
+
+            function workflowEnvPattern(key) {
+              return new RegExp(`^(  ${escapeRegExp(key)}: ")([^"]*)(")$`, 'm');
+            }
+
+            const dependencyConfigs = {
+              docker: {
+                name: 'Docker version',
+                branch: 'deps/docker-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/docker-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/docker-releases.json');
+                  const version = majorMinor(stripDockerTag(tag));
+                  return {
+                    titleValue: version,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'DOCKER_VERSION',
+                        value: version,
+                        pattern: dockerfileArgPattern('DOCKER_VERSION')
+                      }
+                    ]
+                  };
+                }
+              },
+              buildx: {
+                name: 'Buildx version',
+                branch: 'deps/buildx-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/buildx-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/buildx-releases.json');
+                  return {
+                    titleValue: tag,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'BUILDX_VERSION',
+                        value: stripLeadingV(tag),
+                        pattern: dockerfileArgPattern('BUILDX_VERSION')
+                      },
+                      {
+                        path: '.github/workflows/test.yml',
+                        key: 'BUILDX_VERSION',
+                        value: tag,
+                        pattern: workflowEnvPattern('BUILDX_VERSION')
+                      }
+                    ]
+                  };
+                }
+              },
+              buildkit: {
+                name: 'BuildKit image',
+                branch: 'deps/buildkit-image',
+                sourceUrl: 'https://github.com/moby/buildkit/releases/latest',
+                async resolve({github}) {
+                  const release = await github.rest.repos.getLatestRelease({
+                    owner: 'moby',
+                    repo: 'buildkit'
+                  });
+                  const image = `moby/buildkit:${release.data.tag_name}`;
+                  return {
+                    titleValue: image,
+                    targets: [
+                      {
+                        path: '.github/workflows/test.yml',
+                        key: 'BUILDKIT_IMAGE',
+                        value: image,
+                        pattern: workflowEnvPattern('BUILDKIT_IMAGE')
+                      }
+                    ]
+                  };
+                }
+              },
+              compose: {
+                name: 'Compose version',
+                branch: 'deps/compose-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/compose-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/compose-releases.json');
+                  return {
+                    titleValue: tag,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'COMPOSE_VERSION',
+                        value: stripLeadingV(tag),
+                        pattern: dockerfileArgPattern('COMPOSE_VERSION')
+                      }
+                    ]
+                  };
+                }
+              },
+              undock: {
+                name: 'Undock version',
+                branch: 'deps/undock-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/undock-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/undock-releases.json');
+                  return {
+                    titleValue: tag,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'UNDOCK_VERSION',
+                        value: stripLeadingV(tag),
+                        pattern: dockerfileArgPattern('UNDOCK_VERSION')
+                      }
+                    ]
+                  };
+                }
+              },
+              regctl: {
+                name: 'Regctl version',
+                branch: 'deps/regctl-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/regclient-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/regclient-releases.json');
+                  return {
+                    titleValue: tag,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'REGCTL_VERSION',
+                        value: tag,
+                        pattern: dockerfileArgPattern('REGCTL_VERSION')
+                      }
+                    ]
+                  };
+                }
+              },
+              cosign: {
+                name: 'Cosign version',
+                branch: 'deps/cosign-version',
+                sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/cosign-releases.json',
+                async resolve() {
+                  const tag = readLatestTag('.github/cosign-releases.json');
+                  return {
+                    titleValue: tag,
+                    targets: [
+                      {
+                        path: 'dev.Dockerfile',
+                        key: 'COSIGN_VERSION',
+                        value: tag,
+                        pattern: dockerfileArgPattern('COSIGN_VERSION')
+                      }
+                    ]
+                  };
+                }
+              }
+            };
+
+            const config = dependencyConfigs[dep];
+            if (!config) {
+              core.setFailed(`Unknown dependency ${dep}`);
+              return;
+            }
+
+            const resolved = await config.resolve({github});
+            const currentValues = [];
+            const changedFiles = [];
+
+            for (const target of resolved.targets) {
+              const absolutePath = path.join(process.env.GITHUB_WORKSPACE, target.path);
+              const content = fs.readFileSync(absolutePath, 'utf8');
+              const match = content.match(target.pattern);
+              if (!match) {
+                throw new Error(`Missing ${target.key} in ${target.path}`);
+              }
+              currentValues.push(match[2]);
+              if (match[2] === target.value) {
+                continue;
+              }
+              fs.writeFileSync(absolutePath, content.replace(target.pattern, `$1${target.value}$3`), 'utf8');
+              changedFiles.push(target.path);
+            }
+
+            core.info(`Resolved ${config.name} from ${config.sourceUrl}`);
+            if (!changed) {
+              core.info(`No workspace changes needed for ${config.name}`);
+            }
+
+            core.setOutput('changed', changed ? 'true' : 'false');
+            core.setOutput('branch', config.branch);
+            core.setOutput('title', `chore(deps): update ${config.name} to ${resolved.titleValue}`);
+            core.setOutput('before', formatList(unique(currentValues)));
+            core.setOutput('files', formatList(unique(changedFiles)));
+            core.setOutput('source-url', config.sourceUrl);
+      -
+        name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          base: main
+          branch: ${{ steps.update.outputs.branch }}
+          token: ${{ steps.write-app.outputs.token }}
+          commit-message: ${{ steps.update.outputs.title }}
+          title: ${{ steps.update.outputs.title }}
+          signoff: true
+          delete-branch: true
+          body: |
+            This updates the pinned value from ${{ steps.update.outputs.before }} in ${{ steps.update.outputs.files }}.
+
+            The source of truth for this update is ${{ steps.update.outputs.source-url }}.
