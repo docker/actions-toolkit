@@ -326,6 +326,7 @@ export class Install {
       try {
         await Exec.exec(`limactl ${limaStartArgs.join(' ')}`, [], {env: envs});
       } catch (e) {
+        await this.printDarwinDiagnostics();
         fsp
           .readdir(limaDir)
           .then(files => {
@@ -539,11 +540,7 @@ EOF`,
   }
 
   private async tearDownDarwin(): Promise<void> {
-    await core.group('Docker daemon logs', async () => {
-      await Exec.exec('limactl', ['shell', '--tty=false', this.limaInstanceName, 'sudo', 'journalctl', '-u', 'docker.service', '-l', '--no-pager']).catch(() => {
-        core.warning(`Failed to get Docker daemon logs`);
-      });
-    });
+    await this.printDarwinDiagnostics();
     await core.group('Stopping lima instance', async () => {
       await Exec.exec('limactl', ['stop', '--tty=false', this.limaInstanceName, '--force']);
     });
@@ -555,6 +552,36 @@ EOF`,
     });
     await core.group(`Cleaning up runDir`, async () => {
       await Exec.exec('sudo', ['rm', '-rf', this.runDir]);
+    });
+  }
+
+  private async printDarwinDiagnostics(): Promise<void> {
+    await this.printDarwinGuestCommandOutput('Cloud-init output log', ['sudo', 'cat', '/var/log/cloud-init-output.log']);
+    await this.printDarwinGuestCommandOutput('Cloud-init status', ['sudo', 'timeout', '300s', 'cloud-init', 'status', '--wait']);
+    await this.printDarwinGuestCommandOutput('Docker unit file', ['sudo', 'systemctl', 'cat', 'docker.service']);
+    await this.printDarwinGuestCommandOutput('Docker service status', ['sudo', 'systemctl', 'status', 'docker.service', 'docker.socket', '-l', '--no-pager']);
+    await this.printDarwinGuestCommandOutput('Archive install script log', ['sudo', 'cat', '/var/log/docker-actions-toolkit-archive-install.log']);
+    await this.printDarwinGuestCommandOutput('Docker daemon logs', ['sudo', 'journalctl', '-u', 'docker.service', '-l', '--no-pager']);
+  }
+
+  private async printDarwinGuestCommandOutput(title: string, args: string[]): Promise<void> {
+    await core.group(title, async () => {
+      const res = await Exec.getExecOutput('limactl', ['shell', '--tty=false', this.limaInstanceName, ...args], {
+        ignoreReturnCode: true,
+        silent: true
+      }).catch(error => {
+        core.info(`Failed to get ${title}: ${error}`);
+        return undefined;
+      });
+      if (!res) {
+        return;
+      }
+      const output = [res.stdout.trim(), res.stderr.trim()].filter(Boolean).join('\n');
+      if (output.length > 0) {
+        core.info(output);
+      } else if (res.exitCode !== 0) {
+        core.info(`${title} exited with code ${res.exitCode}`);
+      }
     });
   }
 
