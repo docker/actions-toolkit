@@ -302,11 +302,12 @@ jobs:
             }
 
             core.info(`Resolved ${config.name} from ${config.sourceUrl}`);
-            if (!changed) {
+            if (changedFiles.length === 0) {
               core.info(`No workspace changes needed for ${config.name}`);
+            } else {
+              core.info(`New ${config.name} ${resolved.titleValue} found`);
             }
 
-            core.setOutput('changed', changed ? 'true' : 'false');
             core.setOutput('branch', config.branch);
             core.setOutput('title', `chore(deps): update ${config.name} to ${resolved.titleValue}`);
             core.setOutput('before', formatList(unique(currentValues)));
