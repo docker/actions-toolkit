@@ -14,15 +14,6 @@ on:
   push:
     branches:
       - 'main'
-    paths:
-      - '.github/buildx-releases.json'
-      - '.github/compose-releases.json'
-      - '.github/cosign-releases.json'
-      - '.github/docker-releases.json'
-      - '.github/regclient-releases.json'
-      - '.github/undock-releases.json'
-      - '.github/workflows/test.yml'
-      - '.github/workflows/update-deps.yml'
 
 jobs:
   update:
