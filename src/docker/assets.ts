@@ -231,6 +231,7 @@ provision:
   script: |
     #!/bin/bash
     set -eux -o pipefail
+    archiveInstallLog=/var/log/docker-actions-toolkit-archive-install.log
     command -v docker >/dev/null 2>&1 && exit 0
     if [ ! -e /etc/systemd/system/docker.socket.d/override.conf ]; then
       mkdir -p /etc/systemd/system/docker.socket.d
@@ -248,12 +249,14 @@ provision:
     fi
     export DEBIAN_FRONTEND=noninteractive
     if [ "{{srcType}}" == "archive" ]; then
-      curl -fsSL https://get.docker.com | sh -s -- --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}
-      sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/dockerd -H fd://{{#if localTCPPort}} -H tcp://0.0.0.0:2375{{/if}} --containerd=/run/containerd/containerd.sock|' /usr/lib/systemd/system/docker.service
-      systemctl daemon-reload
-      systemctl restart docker
-      systemctl status docker.socket || true
-      systemctl status docker.service || true
+      {
+        curl -fsSL https://get.docker.com | sh -s -- --channel {{srcArchiveChannel}} --version {{srcArchiveVersion}}
+        sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/dockerd -H fd://{{#if localTCPPort}} -H tcp://0.0.0.0:2375{{/if}} --containerd=/run/containerd/containerd.sock|' /usr/lib/systemd/system/docker.service
+        systemctl daemon-reload
+        systemctl restart docker
+        systemctl status docker.socket || true
+        systemctl status docker.service || true
+      } 2>&1 | tee "$archiveInstallLog"
     elif [ "{{srcType}}" == "image" ]; then
       arch=$(uname -m)
       case $arch in
