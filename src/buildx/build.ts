@@ -69,23 +69,10 @@ export class Build {
       ref = ref.replace(/\/merge$/g, '/head');
     }
 
-    const inputChecksum = opts?.checksum || commonAttrs.checksum;
-    const inputSubdir = opts?.subdir || commonAttrs.subdir;
-    const checksum = inputChecksum || (ref.startsWith(`refs/pull/`) ? undefined : github.context.sha);
-
-    // BuildKit resolves PR refs remotely at build time, so mutable refs like
-    // refs/pull/*/{merge,head} can drift away from the event SHA. actions/checkout
-    // avoids that by fetching the exact commit into a local PR ref; here we do the
-    // equivalent for implicit PR contexts by rewriting them to the event's commit SHA.
-    if (!inputChecksum && ref.startsWith(`refs/pull/`)) {
-      if (ref.endsWith('/merge')) {
-        ref = github.context.sha;
-      } else if (ref.endsWith('/head') && typeof github.context.payload.pull_request?.head?.sha === 'string') {
-        ref = github.context.payload.pull_request.head.sha;
-      }
-    }
-
     const baseURL = `${GitHub.serverURL}/${github.context.repo.owner}/${github.context.repo.repo}.git`;
+    const explicitChecksum = opts?.checksum || commonAttrs.checksum;
+    const subdir = opts?.subdir || commonAttrs.subdir;
+
     let format = opts?.format;
     if (!format) {
       format = 'fragment';
@@ -102,13 +89,25 @@ export class Build {
       }
     }
 
+    // Implicit git contexts should resolve to the event commit. PR head refs
+    // pin the pull request head SHA instead of the merge commit SHA.
+    let implicitRef = github.context.sha || ref;
+    if (ref.startsWith(`refs/pull/`) && ref.endsWith('/head')) {
+      implicitRef = typeof github.context.payload.pull_request?.head?.sha === 'string' ? github.context.payload.pull_request.head.sha : ref;
+    }
+    const pinnedRef = explicitChecksum || implicitRef;
+
     if (format === 'query') {
-      const query = [`ref=${ref}`];
-      if (checksum) {
-        query.push(`checksum=${checksum}`);
+      // FIXME: Query mode can preserve a symbolic ref plus checksum, but
+      //  BuildKit still resolves that ref first. A future attribute to
+      //  fetch by commit could keep ref/checksum in the URL while forcing a
+      //  commit-based fetch to avoid mismatches when the ref moves.
+      const query = [`ref=${explicitChecksum ? ref : pinnedRef}`];
+      if (explicitChecksum) {
+        query.push(`checksum=${explicitChecksum}`);
       }
-      if (inputSubdir && inputSubdir !== '.') {
-        query.push(`subdir=${inputSubdir}`);
+      if (subdir && subdir !== '.') {
+        query.push(`subdir=${subdir}`);
       }
       for (const [name, value] of extraAttrs) {
         query.push(`${name}=${value}`);
@@ -116,8 +115,7 @@ export class Build {
       return `${baseURL}?${query.join('&')}`;
     }
 
-    const fragmentRef = inputChecksum && ref.startsWith(`refs/pull/`) ? ref : (checksum ?? ref);
-    return `${baseURL}#${fragmentRef}${inputSubdir && inputSubdir !== '.' ? `:${inputSubdir}` : ''}`;
+    return `${baseURL}#${pinnedRef}${subdir && subdir !== '.' ? `:${subdir}` : ''}`;
   }
 
   public getImageIDFilePath(): string {
