@@ -157,6 +157,28 @@ ccc`
     ]);
   });
 
+  it('preserves trailing new lines when trimming is disabled', async () => {
+    setInput(
+      'secrets',
+      `"PRIVATE_SSH_KEY=TESTESTTESTESTTESTESTTESTEST
+TESTESTTESTESTTESTESTTESTEST
+TESTESTTESTESTTESTESTTESTEST
+
+
+"
+`
+    );
+    const res = Util.getInputList('secrets', {ignoreComma: true, trimWhitespace: false});
+    expect(res).toEqual([
+      `PRIVATE_SSH_KEY=TESTESTTESTESTTESTESTTESTEST
+TESTESTTESTESTTESTESTTESTEST
+TESTESTTESTESTTESTESTTESTEST
+
+
+`
+    ]);
+  });
+
   it('multiline values without quotes', async () => {
     setInput(
       'secrets',
