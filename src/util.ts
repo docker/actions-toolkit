@@ -27,11 +27,12 @@ export interface ListOpts {
   comment?: string;
   commentNoInfix?: boolean;
   quote?: string | boolean | Buffer | null;
+  trimWhitespace?: boolean;
 }
 
 export class Util {
   public static getInputList(name: string, opts?: ListOpts): string[] {
-    return this.getList(core.getInput(name), opts);
+    return this.getList(core.getInput(name, {trimWhitespace: opts?.trimWhitespace !== false}), opts);
   }
 
   public static getList(input: string, opts?: ListOpts): string[] {
@@ -64,7 +65,7 @@ export class Util {
       }
     }
 
-    return res.filter(item => item).map(pat => pat.trim());
+    return res.filter(item => item).map(item => (opts?.trimWhitespace === false ? item : item.trim()));
   }
 
   public static getInputNumber(name: string): number | undefined {
