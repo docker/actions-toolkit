@@ -20,7 +20,7 @@ on:
 
 jobs:
   generate:
-    uses: crazy-max/.github/.github/workflows/releases-json.yml@d89fe92d808a15e2b2ed5cdb62db7c172c31410d # v1.6.0
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@64a0bfaf6e6bb1c448d6e4c42b11034ee7094f16 # v1.7.1
     with:
       repository: sigstore/cosign
       artifact_name: cosign-releases-json
