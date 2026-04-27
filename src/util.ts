@@ -17,7 +17,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import * as handlebars from 'handlebars';
+import handlebars from 'handlebars';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import {parse} from 'csv-parse/sync';
