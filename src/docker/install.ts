@@ -20,7 +20,7 @@ import fsp from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import retry from 'async-retry';
-import * as handlebars from 'handlebars';
+import handlebars from 'handlebars';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
