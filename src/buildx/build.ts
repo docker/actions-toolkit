@@ -61,6 +61,7 @@ export class Build {
     const gitContextCommonAttrs = new Set(['ref', 'checksum', 'subdir']);
     const commonAttrs = opts?.attrs || {};
     const extraAttrs = Object.entries(commonAttrs).filter(([name]) => !gitContextCommonAttrs.has(name));
+    const fetchByCommit = Util.parseBoolOrDefault(commonAttrs['fetch-by-commit']);
 
     let ref = opts?.ref || commonAttrs.ref || github.context.ref;
     if (!ref.startsWith('refs/')) {
@@ -84,7 +85,7 @@ export class Build {
             format = 'query';
           }
         } catch {
-          // keep fragment fallback when Buildx version cannot be determined.
+          // Keep fragment fallback when Buildx version cannot be determined.
         }
       }
     }
@@ -98,13 +99,13 @@ export class Build {
     const pinnedRef = explicitChecksum || implicitRef;
 
     if (format === 'query') {
-      // FIXME: Query mode can preserve a symbolic ref plus checksum, but
-      //  BuildKit still resolves that ref first. A future attribute to
-      //  fetch by commit could keep ref/checksum in the URL while forcing a
-      //  commit-based fetch to avoid mismatches when the ref moves.
-      const query = [`ref=${explicitChecksum ? ref : pinnedRef}`];
-      if (explicitChecksum) {
-        query.push(`checksum=${explicitChecksum}`);
+      // Only use fetch-by-commit when the caller opts in; older BuildKit
+      // versions do not know this query key. Without it, use the pinned commit
+      // as the ref to keep existing compatibility.
+      const query = [`ref=${fetchByCommit || explicitChecksum ? ref : pinnedRef}`];
+      const queryChecksum = fetchByCommit ? pinnedRef : explicitChecksum;
+      if (queryChecksum) {
+        query.push(`checksum=${queryChecksum}`);
       }
       if (subdir && subdir !== '.') {
         query.push(`subdir=${subdir}`);
