@@ -5,6 +5,18 @@
     "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.4.3",
     "assets": []
   },
+  "edge": {
+    "id": 320713635,
+    "tag_name": "docker-v29.5.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.5.0-rc.1",
+    "assets": []
+  },
+  "v29.5.0-rc.1": {
+    "id": 320713635,
+    "tag_name": "docker-v29.5.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.5.0-rc.1",
+    "assets": []
+  },
   "v29.4.3": {
     "id": 318528859,
     "tag_name": "docker-v29.4.3",
@@ -27,12 +39,6 @@
     "id": 305984249,
     "tag_name": "docker-v29.4.0",
     "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.4.0",
-    "assets": []
-  },
-  "edge": {
-    "id": 318528859,
-    "tag_name": "docker-v29.4.3",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.4.3",
     "assets": []
   },
   "v29.4.0-rc.1": {
