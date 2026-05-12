@@ -56,6 +56,7 @@ jobs:
           branch: bot/compose-releases-json
           commit-message: "github: update .github/compose-releases.json"
           signoff: true
+          sign-commits: true
           delete-branch: true
           title: "Update `.github/compose-releases.json`"
           body: |

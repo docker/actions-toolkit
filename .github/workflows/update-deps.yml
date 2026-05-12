@@ -320,6 +320,7 @@ jobs:
           commit-message: ${{ steps.update.outputs.title }}
           title: ${{ steps.update.outputs.title }}
           signoff: true
+          sign-commits: true
           delete-branch: true
           body: |
             This updates the pinned value from ${{ steps.update.outputs.before }} in ${{ steps.update.outputs.files }}.
