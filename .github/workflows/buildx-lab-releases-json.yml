@@ -56,6 +56,7 @@ jobs:
           branch: bot/buildx-lab-releases-json
           commit-message: "github: update .github/buildx-lab-releases.json"
           signoff: true
+          sign-commits: true
           delete-branch: true
           title: "Update `.github/buildx-lab-releases.json`"
           body: |

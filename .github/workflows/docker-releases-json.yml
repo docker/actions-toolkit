@@ -59,6 +59,7 @@ jobs:
           branch: bot/docker-releases-json
           commit-message: "github: update .github/docker-releases.json"
           signoff: true
+          sign-commits: true
           delete-branch: true
           title: "Update `.github/docker-releases.json`"
           body: |

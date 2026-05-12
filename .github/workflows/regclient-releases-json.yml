@@ -56,6 +56,7 @@ jobs:
           branch: bot/regclient-releases-json
           commit-message: "github: update .github/regclient-releases.json"
           signoff: true
+          sign-commits: true
           delete-branch: true
           title: "Update `.github/regclient-releases.json`"
           body: |

@@ -56,6 +56,7 @@ jobs:
           branch: bot/cosign-releases-json
           commit-message: "github: update .github/cosign-releases.json"
           signoff: true
+          sign-commits: true
           delete-branch: true
           title: "Update `.github/cosign-releases.json`"
           body: |
