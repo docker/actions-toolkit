@@ -17,6 +17,7 @@
 import {X509Certificate} from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import {fileURLToPath} from 'url';
 
 import * as core from '@actions/core';
 import {bundleFromJSON, bundleToJSON, SerializedBundle} from '@sigstore/bundle';
@@ -53,17 +54,21 @@ import {
 export interface SigstoreOpts {
   cosign?: Cosign;
   imageTools?: ImageTools;
+  trustedRootPath?: string;
 }
 
 const COSIGN_PREDICATE_SLSA_PROVENANCE_V1 = 'slsaprovenance1';
+const DEFAULT_TRUSTED_ROOT_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'trusted_root.json');
 
 export class Sigstore {
   private readonly cosign: Cosign;
   private readonly imageTools: ImageTools;
+  private readonly trustedRootPath: string;
 
   constructor(opts?: SigstoreOpts) {
     this.cosign = opts?.cosign || new Cosign();
     this.imageTools = opts?.imageTools || new ImageTools();
+    this.trustedRootPath = opts?.trustedRootPath || DEFAULT_TRUSTED_ROOT_PATH;
   }
 
   public async signAttestationManifests(opts: SignAttestationManifestsOpts): Promise<Record<string, SignAttestationManifestsResult>> {
@@ -130,6 +135,7 @@ export class Sigstore {
               '--oidc-provider', 'github-actions',
               '--registry-referrers-mode', 'oci-1-1',
               '--new-bundle-format',
+              ...this.trustedRootArgs(),
               ...cosignExtraArgs
             ];
             core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
@@ -220,6 +226,7 @@ export class Sigstore {
       'verify',
       '--experimental-oci11',
       '--new-bundle-format',
+      ...this.trustedRootArgs(),
       '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
       '--certificate-identity-regexp', opts.certificateIdentityRegexp
     ];
@@ -353,6 +360,7 @@ export class Sigstore {
           const cosignArgs = [
             'verify-blob-attestation',
             '--new-bundle-format',
+            ...this.trustedRootArgs(),
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp,
             '--type', opts.predicateType ?? COSIGN_PREDICATE_SLSA_PROVENANCE_V1
@@ -430,6 +438,13 @@ export class Sigstore {
       rekorURL: noTransparencyLog ? undefined : REKOR_URL,
       tsaServerURL: TSASERVER_URL
     };
+  }
+
+  private trustedRootArgs(): Array<string> {
+    if (!fs.existsSync(this.trustedRootPath)) {
+      throw new Error(`Sigstore trusted root not found at ${this.trustedRootPath}`);
+    }
+    return [`--trusted-root=${this.trustedRootPath}`];
   }
 
   private static noTransparencyLog(noTransparencyLog?: boolean): boolean {

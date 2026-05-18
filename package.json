@@ -4,7 +4,7 @@
   "description": "Toolkit for Docker (GitHub) Actions",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').copyFileSync('src/sigstore/trusted_root.json', 'lib/sigstore/trusted_root.json')\"",
     "lint": "eslint --max-warnings=0 .",
     "format": "eslint --fix .",
     "test": "vitest run -c vitest.config.ts",
