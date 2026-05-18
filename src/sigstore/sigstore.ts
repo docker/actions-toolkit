@@ -21,8 +21,8 @@ import {fileURLToPath} from 'url';
 
 import * as core from '@actions/core';
 import {bundleFromJSON, bundleToJSON, SerializedBundle} from '@sigstore/bundle';
+import {TrustedRoot} from '@sigstore/protobuf-specs';
 import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
-import * as tuf from '@sigstore/tuf';
 import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 
 import {Context} from '../context.js';
@@ -390,9 +390,8 @@ export class Sigstore {
     const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
     const bundle = bundleFromJSON(parsedBundle);
 
-    core.info(`Fetching Sigstore TUF trusted root metadata`);
-    const trustedRoot = await tuf.getTrustedRoot();
-    const trustMaterial = toTrustMaterial(trustedRoot);
+    core.info(`Loading Sigstore trusted root from ${this.trustedRootPath}`);
+    const trustMaterial = toTrustMaterial(this.trustedRoot());
 
     try {
       core.info(`Verifying artifact signature`);
@@ -445,6 +444,13 @@ export class Sigstore {
       throw new Error(`Sigstore trusted root not found at ${this.trustedRootPath}`);
     }
     return [`--trusted-root=${this.trustedRootPath}`];
+  }
+
+  private trustedRoot(): TrustedRoot {
+    if (!fs.existsSync(this.trustedRootPath)) {
+      throw new Error(`Sigstore trusted root not found at ${this.trustedRootPath}`);
+    }
+    return TrustedRoot.fromJSON(JSON.parse(fs.readFileSync(this.trustedRootPath, {encoding: 'utf-8'})));
   }
 
   private static noTransparencyLog(noTransparencyLog?: boolean): boolean {
