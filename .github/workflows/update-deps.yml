@@ -33,6 +33,7 @@ jobs:
           - compose
           - cosign
           - regctl
+          - trusted-root
           - undock
     steps:
       -
@@ -61,6 +62,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
+            const crypto = require('crypto');
 
             const dep = core.getInput('dep');
 
@@ -81,6 +83,10 @@ jobs:
 
             function unique(values) {
               return [...new Set(values)];
+            }
+
+            function sha256(value) {
+              return crypto.createHash('sha256').update(value).digest('hex');
             }
 
             function stripLeadingV(value) {
@@ -264,6 +270,33 @@ jobs:
                     ]
                   };
                 }
+              },
+              'trusted-root': {
+                name: 'Sigstore trusted root',
+                branch: 'deps/sigstore-trusted-root',
+                sourceUrl: 'https://github.com/sigstore/root-signing/blob/main/targets/trusted_root.json',
+                async resolve({github}) {
+                  const res = await github.rest.repos.getContent({
+                    owner: 'sigstore',
+                    repo: 'root-signing',
+                    path: 'targets/trusted_root.json',
+                    ref: 'main'
+                  });
+                  if (Array.isArray(res.data) || res.data.type !== 'file' || !res.data.content) {
+                    throw new Error('Unable to resolve Sigstore trusted_root.json content');
+                  }
+                  const content = `${Buffer.from(res.data.content, res.data.encoding).toString('utf8').trim()}\n`;
+                  return {
+                    titleValue: res.data.sha.slice(0, 12),
+                    targets: [
+                      {
+                        path: 'src/sigstore/trusted_root.json',
+                        key: 'trusted_root.json',
+                        content
+                      }
+                    ]
+                  };
+                }
               }
             };
 
@@ -280,6 +313,15 @@ jobs:
             for (const target of resolved.targets) {
               const absolutePath = path.join(process.env.GITHUB_WORKSPACE, target.path);
               const content = fs.readFileSync(absolutePath, 'utf8');
+              if (target.content !== undefined) {
+                currentValues.push(sha256(content).slice(0, 12));
+                if (content === target.content) {
+                  continue;
+                }
+                fs.writeFileSync(absolutePath, target.content, 'utf8');
+                changedFiles.push(target.path);
+                continue;
+              }
               const match = content.match(target.pattern);
               if (!match) {
                 throw new Error(`Missing ${target.key} in ${target.path}`);
