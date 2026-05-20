@@ -415,6 +415,7 @@ __metadata:
     "@actions/tool-cache": "npm:^4.0.0"
     "@eslint/js": "npm:^9.39.3"
     "@sigstore/bundle": "npm:^4.0.0"
+    "@sigstore/protobuf-specs": "npm:^0.5.0"
     "@sigstore/sign": "npm:^4.1.1"
     "@sigstore/tuf": "npm:^4.0.2"
     "@sigstore/verify": "npm:^3.1.0"
