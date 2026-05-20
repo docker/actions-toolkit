@@ -20,6 +20,7 @@ import path from 'path';
 
 import * as core from '@actions/core';
 import {bundleFromJSON, bundleToJSON, type Bundle, type SerializedBundle} from '@sigstore/bundle';
+import {TrustedRoot} from '@sigstore/protobuf-specs';
 import * as tuf from '@sigstore/tuf';
 import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 
@@ -48,17 +49,37 @@ import {
 export interface SigstoreOpts {
   cosign?: Cosign;
   imageTools?: ImageTools;
+  trustedRootPath?: string;
 }
 
 const COSIGN_PREDICATE_SLSA_PROVENANCE_V1 = 'slsaprovenance1';
+const TUF_TRUSTED_ROOT_RETRY = {retries: 5};
+const TUF_TRUSTED_ROOT_TIMEOUT = 30000;
 
 export class Sigstore {
   private readonly cosign: Cosign;
   private readonly imageTools: ImageTools;
+  private readonly trustedRootPath: string | undefined;
 
   constructor(opts?: SigstoreOpts) {
     this.cosign = opts?.cosign || new Cosign();
     this.imageTools = opts?.imageTools || new ImageTools();
+    this.trustedRootPath = opts?.trustedRootPath;
+  }
+
+  public static async downloadTrustedRoot(trustedRootPath?: string): Promise<string> {
+    trustedRootPath =
+      trustedRootPath ||
+      Context.tmpName({
+        template: 'trusted-root-XXXXXX.json',
+        tmpdir: Context.tmpDir()
+      });
+    core.info(`Writing Sigstore trusted root to ${trustedRootPath}`);
+    fs.mkdirSync(path.dirname(trustedRootPath), {recursive: true});
+    fs.writeFileSync(trustedRootPath, `${JSON.stringify(TrustedRoot.toJSON(await Sigstore.fetchTrustedRoot()), null, 2)}\n`, {
+      encoding: 'utf-8'
+    });
+    return trustedRootPath;
   }
 
   public async signAttestationManifests(opts: SignAttestationManifestsOpts): Promise<Record<string, SignAttestationManifestsResult>> {
@@ -89,6 +110,7 @@ export class Sigstore {
               '--oidc-provider', 'github-actions',
               '--registry-referrers-mode', 'oci-1-1',
               '--new-bundle-format',
+              ...this.trustedRootArgs(),
               ...cosignExtraArgs
             ];
             core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
@@ -180,6 +202,7 @@ export class Sigstore {
       'verify',
       '--experimental-oci11',
       '--new-bundle-format',
+      ...this.trustedRootArgs(),
       '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
       '--certificate-identity-regexp', opts.certificateIdentityRegexp
     ];
@@ -203,7 +226,7 @@ export class Sigstore {
       }
       const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
       return {
-        cosignArgs: cosignArgs,
+        cosignArgs: Sigstore.portableCosignArgs(cosignArgs),
         signatureManifestDigest: verifyResult.signatureManifestDigest!
       };
     }
@@ -222,7 +245,7 @@ export class Sigstore {
       const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
       if (execRes.exitCode === 0) {
         return {
-          cosignArgs: cosignArgs,
+          cosignArgs: Sigstore.portableCosignArgs(cosignArgs),
           signatureManifestDigest: verifyResult.signatureManifestDigest!
         };
       } else {
@@ -277,6 +300,7 @@ export class Sigstore {
             '--statement', p,
             '--type', COSIGN_PREDICATE_SLSA_PROVENANCE_V1,
             '--bundle', bundlePath,
+            ...this.trustedRootArgs(),
             ...cosignExtraArgs
           ];
           core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, artifactPath].join(' ')}`);
@@ -337,6 +361,7 @@ export class Sigstore {
           const cosignArgs = [
             'verify-blob-attestation',
             '--new-bundle-format',
+            ...this.trustedRootArgs(),
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp,
             '--type', opts.predicateType ?? COSIGN_PREDICATE_SLSA_PROVENANCE_V1
@@ -353,7 +378,7 @@ export class Sigstore {
           }
           result[artifactPath] = {
             bundlePath: signedRes.bundlePath,
-            cosignArgs: cosignArgs
+            cosignArgs: Sigstore.portableCosignArgs(cosignArgs)
           };
         }
       });
@@ -366,9 +391,7 @@ export class Sigstore {
     const parsedBundle = JSON.parse(fs.readFileSync(bundlePath, 'utf-8')) as SerializedBundle;
     const bundle = bundleFromJSON(parsedBundle);
 
-    core.info(`Fetching Sigstore TUF trusted root metadata`);
-    const trustedRoot = await tuf.getTrustedRoot();
-    const trustMaterial = toTrustMaterial(trustedRoot);
+    const trustMaterial = toTrustMaterial(await this.trustedRoot());
 
     try {
       core.info(`Verifying artifact signature`);
@@ -408,6 +431,51 @@ export class Sigstore {
 
   private static noTransparencyLog(noTransparencyLog?: boolean): boolean {
     return noTransparencyLog ?? GitHub.context.payload.repository?.private ?? false;
+  }
+
+  private trustedRootArgs(): Array<string> {
+    if (!this.trustedRootPath) {
+      return [];
+    }
+    if (!fs.existsSync(this.trustedRootPath)) {
+      throw new Error(`Sigstore trusted root not found at ${this.trustedRootPath}`);
+    }
+    return [`--trusted-root=${this.trustedRootPath}`];
+  }
+
+  private async trustedRoot(): Promise<TrustedRoot> {
+    if (!this.trustedRootPath) {
+      return await Sigstore.fetchTrustedRoot();
+    }
+    if (!fs.existsSync(this.trustedRootPath)) {
+      throw new Error(`Sigstore trusted root not found at ${this.trustedRootPath}`);
+    }
+    core.info(`Loading Sigstore trusted root from ${this.trustedRootPath}`);
+    return TrustedRoot.fromJSON(JSON.parse(fs.readFileSync(this.trustedRootPath, {encoding: 'utf-8'})));
+  }
+
+  private static async fetchTrustedRoot(): Promise<TrustedRoot> {
+    core.info(`Fetching Sigstore TUF trusted root metadata`);
+    return await tuf.getTrustedRoot({
+      retry: TUF_TRUSTED_ROOT_RETRY,
+      timeout: TUF_TRUSTED_ROOT_TIMEOUT
+    });
+  }
+
+  private static portableCosignArgs(args: Array<string>): Array<string> {
+    const portableArgs: Array<string> = [];
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if (arg === '--trusted-root') {
+        i++;
+        continue;
+      }
+      if (arg.startsWith('--trusted-root=')) {
+        continue;
+      }
+      portableArgs.push(arg);
+    }
+    return portableArgs;
   }
 
   private async cosignSigningConfigArgs(noTransparencyLog?: boolean): Promise<string[]> {

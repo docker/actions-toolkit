@@ -21,6 +21,7 @@ import * as path from 'path';
 
 import {Buildx} from '../../src/buildx/buildx.js';
 import {Build} from '../../src/buildx/build.js';
+import {ImageTools} from '../../src/buildx/imagetools.js';
 import {Cosign} from '../../src/cosign/cosign.js';
 import {Install as CosignInstall} from '../../src/cosign/install.js';
 import {Docker} from '../../src/docker/docker.js';
@@ -122,11 +123,13 @@ for (const cosignVersion of signAttestationCosignVersions) {
 
 maybe('verifyImageAttestations', () => {
   let sigstore: Sigstore;
+  let cosignBinPath: string;
 
   beforeAll(async () => {
+    cosignBinPath = await installCosign(currentCosignVersion);
     sigstore = new Sigstore({
       cosign: new Cosign({
-        binPath: await installCosign(currentCosignVersion)
+        binPath: cosignBinPath
       })
     });
   }, 100000);
@@ -162,6 +165,31 @@ maybe('verifyImageAttestations', () => {
       expect(res.signatureManifestDigest).toBeDefined();
     }
   });
+
+  it('uses downloaded trusted root', async () => {
+    const image = 'moby/buildkit:master@sha256:84014da3581b2ff2c14cb4f60029cf9caa272b79e58f2e89c651ea6966d7a505';
+    const attestationDigests = await new ImageTools().attestationDigests({
+      name: image,
+      platform: OCI.defaultPlatform()
+    });
+    expect(attestationDigests.length).toEqual(1);
+
+    const trustedRootPath = await Sigstore.downloadTrustedRoot();
+    expect(fs.existsSync(trustedRootPath)).toBe(true);
+    expect(JSON.parse(fs.readFileSync(trustedRootPath, {encoding: 'utf-8'})).mediaType).toBeDefined();
+
+    const trustedRootSigstore = new Sigstore({
+      cosign: new Cosign({
+        binPath: cosignBinPath
+      }),
+      trustedRootPath: trustedRootPath
+    });
+    const verifyResult = await trustedRootSigstore.verifyImageAttestation(`moby/buildkit@${attestationDigests[0]}`, {
+      certificateIdentityRegexp: `^https://github.com/docker/github-builder-experimental/.github/workflows/bake.yml.*$`
+    });
+    expect(verifyResult.cosignArgs.some(arg => arg.startsWith('--trusted-root'))).toBe(false);
+    expect(verifyResult.signatureManifestDigest).toBeDefined();
+  }, 60000);
 });
 
 maybeIdToken('signProvenanceBlobs', () => {
