@@ -35,7 +35,8 @@
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "lib",
+    "npm-shrinkwrap.json"
   ],
   "publishConfig": {
     "access": "public",

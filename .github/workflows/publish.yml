@@ -52,4 +52,6 @@ jobs:
         name: Publish
         run: |
           npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
+          npm install --package-lock-only --ignore-scripts --omit=dev
+          npm shrinkwrap
           npm publish --provenance --access public
