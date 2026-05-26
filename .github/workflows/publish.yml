@@ -27,9 +27,11 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       -
         name: Enable corepack
-        run: |
-          corepack enable
-          yarn --version
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await exec.exec('corepack', ['enable']);
+            await exec.exec('yarn', ['--version']);
       -
         name: Setup Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -39,17 +41,69 @@ jobs:
           package-manager-cache: false
       -
         name: Print versions
-        run: |
-          node --version
-          npm --version
-          yarn --version
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await exec.exec('node', ['--version']);
+            await exec.exec('npm', ['--version']);
+            await exec.exec('yarn', ['--version']);
       -
         name: Build
-        run: |
-          yarn install
-          yarn run build
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await exec.exec('yarn', ['install']);
+            await exec.exec('yarn', ['run', 'build']);
       -
         name: Publish
-        run: |
-          npm version --no-git-tag-version ${GITHUB_REF#refs/tags/v}
-          npm publish --provenance --access public
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          INPUT_GITHUB-REF: ${{ github.ref }}
+        with:
+          script: |
+            const fs = require('fs');
+            const os = require('os');
+            const path = require('path');
+
+            const ref = core.getInput('github-ref');
+            if (!ref.startsWith('refs/tags/v')) {
+              throw new Error(`Unsupported ref for publish: ${ref}`);
+            }
+            const packageVersion = ref.substring('refs/tags/v'.length);
+
+            await core.group('Publish @docker/actions-toolkit', async () => {
+              await exec.exec('npm', ['version', '--no-git-tag-version', packageVersion]);
+              await exec.exec('npm', ['publish', '--provenance', '--access', 'public']);
+            });
+
+            await core.group('Publish @docker/github-builder-runtime', async () => {
+              const runtimeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'github-builder-runtime-'));
+
+              fs.copyFileSync('package.json', path.join(runtimeDir, 'package.json'));
+              fs.copyFileSync('LICENSE', path.join(runtimeDir, 'LICENSE'));
+              fs.cpSync('lib', path.join(runtimeDir, 'lib'), {recursive: true});
+              fs.writeFileSync(
+                path.join(runtimeDir, 'README.md'),
+                [
+                  '# GitHub Builder Runtime',
+                  '',
+                  'Runtime package for [Docker GitHub Builder](https://github.com/docker/github-builder) workflows.',
+                  '',
+                  'This package publishes the same generated library code as `@docker/actions-toolkit` under a runtime-specific package name.',
+                  ''
+                ].join('\n')
+              );
+
+              const opts = {cwd: runtimeDir};
+              await exec.exec('npm', ['pkg', 'set', 'name=@docker/github-builder-runtime'], opts);
+              await exec.exec('npm', ['pkg', 'set', 'description=Runtime package for Docker GitHub Builder workflows'], opts);
+              await exec.exec('npm', ['pkg', 'set', `version=${packageVersion}`], opts);
+              await exec.exec('npm', ['pkg', 'set', 'files[1]=npm-shrinkwrap.json'], opts);
+              await exec.exec('npm', ['pkg', 'delete', 'scripts'], opts);
+              await exec.exec('npm', ['pkg', 'delete', 'packageManager'], opts);
+              await exec.exec('npm', ['pkg', 'delete', 'directories.test'], opts);
+              await exec.exec('npm', ['pkg', 'delete', 'devDependencies'], opts);
+              await exec.exec('npm', ['install', '--package-lock-only', '--ignore-scripts', '--audit=false', '--fund=false'], opts);
+              await exec.exec('npm', ['shrinkwrap'], opts);
+              await exec.exec('npm', ['publish', '--provenance', '--access', 'public'], opts);
+            });
