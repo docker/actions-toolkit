@@ -106,12 +106,14 @@ for (const cosignVersion of signAttestationCosignVersions) {
 
       const signResults = await sigstore.signAttestationManifests({
         imageNames: [imageName],
-        imageDigest: buildDigest!
+        imageDigest: buildDigest!,
+        retryOnManifestUnknown: true
       });
       expect(Object.keys(signResults).length).toEqual(2);
 
       const verifyResults = await sigstore.verifySignedManifests(signResults, {
-        certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
+        certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`,
+        retryOnManifestUnknown: true
       });
       expect(Object.keys(verifyResults).length).toEqual(2);
     }, 200000);

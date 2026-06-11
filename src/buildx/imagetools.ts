@@ -207,7 +207,7 @@ export class ImageTools {
         if (!ImageTools.isManifestUnknownError(lastError.message) || attempt === retries - 1) {
           throw lastError;
         }
-        core.info(`buildx imagetools inspect command failed with MANIFEST_UNKNOWN, retrying attempt ${attempt + 1}/${retries}...\n${lastError.message}`);
+        core.info(`buildx imagetools inspect command failed with manifest not found, retrying attempt ${attempt + 1}/${retries}...\n${lastError.message}`);
         await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 100));
       }
     }
@@ -228,6 +228,6 @@ export class ImageTools {
   }
 
   private static isManifestUnknownError(message: string): boolean {
-    return /(MANIFEST_UNKNOWN|manifest unknown|not found: not found)/i.test(message);
+    return /(MANIFEST_UNKNOWN|manifest unknown)/i.test(message) || /:\s*not found$/i.test(message);
   }
 }
