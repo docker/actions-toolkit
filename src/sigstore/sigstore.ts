@@ -88,7 +88,7 @@ export class Sigstore {
               '--yes',
               '--oidc-provider', 'github-actions',
               '--registry-referrers-mode', 'oci-1-1',
-              '--new-bundle-format',
+              ...(await this.bundleFormatArgs()),
               ...cosignExtraArgs
             ];
             core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
@@ -113,7 +113,7 @@ export class Sigstore {
             }
             const parsedBundle = Sigstore.parseBundle(bundleFromJSON(signResult.bundle));
             if (parsedBundle.tlogID) {
-              core.info(`Uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${parsedBundle.tlogID}`);
+              await this.logTransparencyUpload(parsedBundle.tlogID, opts.noTransparencyLog);
             }
             core.info(`Signature manifest pushed: https://oci.dag.dev/?referrers=${attestationRef}`);
             result[attestationRef] = {
@@ -179,7 +179,7 @@ export class Sigstore {
     const cosignArgs = [
       'verify',
       '--experimental-oci11',
-      '--new-bundle-format',
+      ...(await this.bundleFormatArgs()),
       '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
       '--certificate-identity-regexp', opts.certificateIdentityRegexp
     ];
@@ -273,7 +273,7 @@ export class Sigstore {
             'attest-blob',
             '--yes',
             '--oidc-provider', 'github-actions',
-            '--new-bundle-format',
+            ...(await this.bundleFormatArgs()),
             '--statement', p,
             '--type', COSIGN_PREDICATE_SLSA_PROVENANCE_V1,
             '--bundle', bundlePath,
@@ -306,7 +306,7 @@ export class Sigstore {
             core.info(`  - ${subject.name} (${digestAlg}:${digestValue})`);
           }
           if (parsedBundle.tlogID) {
-            core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${parsedBundle.tlogID}`);
+            await this.logTransparencyUpload(parsedBundle.tlogID, opts.noTransparencyLog);
           }
           core.info(`Sigstore bundle written to: ${bundlePath}`);
           result[p] = {
@@ -336,7 +336,7 @@ export class Sigstore {
           // prettier-ignore
           const cosignArgs = [
             'verify-blob-attestation',
-            '--new-bundle-format',
+            ...(await this.bundleFormatArgs()),
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp,
             '--type', opts.predicateType ?? COSIGN_PREDICATE_SLSA_PROVENANCE_V1
@@ -417,6 +417,7 @@ export class Sigstore {
     core.info(`Upload to transparency log: ${disableTransparencyLog ? 'disabled' : 'enabled'}`);
 
     if (await this.cosign.versionSatisfies('>=3.0.4')) {
+      const useRekorV2 = await this.useRekorV2(noTransparencyLog);
       await core.group(`Creating Sigstore protobuf signing config`, async () => {
         const signingConfig = Context.tmpName({
           template: 'signing-config-XXXXXX.json',
@@ -426,7 +427,7 @@ export class Sigstore {
         const createConfigArgs = [
           'signing-config',
           'create',
-          '--with-default-services=true',
+          useRekorV2 ? '--with-default-rekor-v2=true' : '--with-default-services=true',
           `--out=${signingConfig}`
         ];
         if (disableTransparencyLog) {
@@ -449,6 +450,18 @@ export class Sigstore {
       }
     }
     return cosignExtraArgs;
+  }
+
+  private async logTransparencyUpload(tlogID: string, noTransparencyLog?: boolean): Promise<void> {
+    if (await this.useRekorV2(noTransparencyLog)) {
+      core.info(`Attestation signature uploaded to Rekor v2 transparency log with index ${tlogID}`);
+      return;
+    }
+    core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${tlogID}`);
+  }
+
+  private async useRekorV2(noTransparencyLog?: boolean): Promise<boolean> {
+    return !Sigstore.noTransparencyLog(noTransparencyLog) && (await this.cosign.versionSatisfies('>=3.1.1'));
   }
 
   private static getProvenanceBlobs(opts: SignProvenanceBlobsOpts): Record<string, Buffer> {
@@ -510,5 +523,13 @@ export class Sigstore {
         throw new Error('Bundle must contain an x509 certificate');
     }
     return new X509Certificate(certBytes);
+  }
+
+  private async bundleFormatArgs(): Promise<string[]> {
+    // Cosign 3.1.1 makes the new bundle format the default and deprecates this flag.
+    if (await this.cosign.versionSatisfies('>=3.1.1')) {
+      return [];
+    }
+    return ['--new-bundle-format'];
   }
 }
