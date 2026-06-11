@@ -91,7 +91,7 @@ export class Sigstore {
           const createConfigArgs = [
             'signing-config',
             'create',
-            '--with-default-services=true',
+            !noTransparencyLog && (await this.cosign.versionSatisfies('>=3.1.1')) ? '--with-default-rekor-v2=true' : '--with-default-services=true',
             `--out=${signingConfig}`
           ];
           if (noTransparencyLog) {
@@ -129,7 +129,7 @@ export class Sigstore {
               '--yes',
               '--oidc-provider', 'github-actions',
               '--registry-referrers-mode', 'oci-1-1',
-              '--new-bundle-format',
+              ...(await this.bundleFormatArgs()),
               ...cosignExtraArgs
             ];
             core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, attestationRef].join(' ')}`);
@@ -219,7 +219,7 @@ export class Sigstore {
     const cosignArgs = [
       'verify',
       '--experimental-oci11',
-      '--new-bundle-format',
+      ...(await this.bundleFormatArgs()),
       '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
       '--certificate-identity-regexp', opts.certificateIdentityRegexp
     ];
@@ -352,7 +352,7 @@ export class Sigstore {
           // prettier-ignore
           const cosignArgs = [
             'verify-blob-attestation',
-            '--new-bundle-format',
+            ...(await this.bundleFormatArgs()),
             '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com',
             '--certificate-identity-regexp', opts.certificateIdentityRegexp,
             '--type', opts.predicateType ?? COSIGN_PREDICATE_SLSA_PROVENANCE_V1
@@ -529,5 +529,13 @@ export class Sigstore {
         throw new Error('Bundle must contain an x509 certificate');
     }
     return new X509Certificate(certBytes);
+  }
+
+  private async bundleFormatArgs(): Promise<string[]> {
+    // Cosign 3.1.1 makes the new bundle format the default and deprecates this flag.
+    if (await this.cosign.versionSatisfies('>=3.1.1')) {
+      return [];
+    }
+    return ['--new-bundle-format'];
   }
 }
