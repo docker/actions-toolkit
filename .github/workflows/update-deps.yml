@@ -123,6 +123,10 @@ jobs:
               return new RegExp(`^(  ${escapeRegExp(key)}: ")([^"]*)(")$`, 'm');
             }
 
+            function tsConstStringPattern(key) {
+              return new RegExp(`^(const ${escapeRegExp(key)} = ')([^']*)(';)$`, 'm');
+            }
+
             const dependencyConfigs = {
               docker: {
                 name: 'Docker version',
@@ -263,6 +267,12 @@ jobs:
                         key: 'COSIGN_VERSION',
                         value: tag,
                         pattern: dockerfileArgPattern('COSIGN_VERSION')
+                      },
+                      {
+                        path: '__tests__/sigstore/sigstore.test.itg.ts',
+                        key: 'currentCosignVersion',
+                        value: tag,
+                        pattern: tsConstStringPattern('currentCosignVersion')
                       }
                     ]
                   };
