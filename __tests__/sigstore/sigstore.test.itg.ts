@@ -35,7 +35,7 @@ const runTest = process.env.GITHUB_ACTIONS && process.env.GITHUB_ACTIONS === 'tr
 const maybe = runTest ? describe : describe.skip;
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
 
-const imageName = 'ghcr.io/docker/actions-toolkit/test';
+const imageName = 'ghcr.io/docker/actions-toolkit-test';
 const currentCosignVersion = 'v3.1.1';
 const signAttestationCosignVersions = ['v3.0.2', 'v3.0.6', currentCosignVersion] as const;
 const installedCosign = new Map<string, Promise<string>>();
