@@ -20,7 +20,7 @@ on:
 
 jobs:
   generate:
-    uses: crazy-max/.github/.github/workflows/releases-json.yml@9ba6e6f9450baf3b1237f8035c1fdc45932510bd # v1.8.0
+    uses: crazy-max/.github/.github/workflows/releases-json.yml@716fd1c51a46c5d93a41d44a94b439c9ee802536 # v1.10.0
     with:
       repository: docker/buildx-desktop
       artifact_name: buildx-lab-releases-json
