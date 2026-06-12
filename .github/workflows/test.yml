@@ -86,7 +86,7 @@ jobs:
           cache: 'yarn'
       -
         name: Install
-        run: yarn install
+        run: yarn install --immutable
       -
         name: Create includes
         id: set
@@ -197,7 +197,7 @@ jobs:
           use: false
       -
         name: Install
-        run: yarn install
+        run: yarn install --immutable
       -
         name: Test
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
