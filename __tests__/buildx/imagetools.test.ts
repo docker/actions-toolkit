@@ -91,6 +91,48 @@ describe('inspectManifest', () => {
     expect(execSpy).toHaveBeenCalledTimes(2);
   });
 
+  it('retries transient manifest not found errors when requested', async () => {
+    vi.useFakeTimers();
+
+    const getCommand = vi.fn().mockResolvedValue({
+      command: 'docker',
+      args: ['buildx', 'imagetools', 'inspect']
+    });
+    const buildx = {getCommand} as unknown as Buildx;
+    const execSpy = vi
+      .spyOn(Exec, 'getExecOutput')
+      .mockResolvedValueOnce({
+        exitCode: 1,
+        stdout: '',
+        stderr: 'ERROR: ghcr.io/docker/actions-toolkit-test@sha256:manifest: not found'
+      })
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: JSON.stringify({
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: []
+        }),
+        stderr: ''
+      });
+
+    const inspectPromise = new ImageTools({buildx}).inspectManifest({
+      name: 'docker.io/library/alpine:latest',
+      retryOnManifestUnknown: true,
+      retryLimit: 2
+    });
+
+    await vi.runAllTimersAsync();
+
+    expect(await inspectPromise).toEqual({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+      manifests: []
+    });
+    expect(getCommand).toHaveBeenCalledWith(['imagetools', 'inspect', 'docker.io/library/alpine:latest', '--format', '{{json .Manifest}}']);
+    expect(execSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('does not retry non-manifest errors', async () => {
     const getCommand = vi.fn().mockResolvedValue({
       command: 'docker',
