@@ -138,7 +138,7 @@ export class Git {
 
     // Tag refs are formatted as "tag: <tagname>"
     if (ref.startsWith('tag: ')) {
-      return `refs/tags/${ref.split(':')[1].trim()}`;
+      return `refs/tags/${ref.slice('tag: '.length).split(',')[0].trim()}`;
     }
 
     // Pull request merge refs are formatted as "pull/<number>/<state>"
