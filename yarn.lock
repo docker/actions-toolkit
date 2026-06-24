@@ -492,7 +492,7 @@ __metadata:
     gunzip-maybe: "npm:^1.4.2"
     handlebars: "npm:^4.7.9"
     he: "npm:^1.2.0"
-    js-yaml: "npm:^4.2.0"
+    js-yaml: "npm:^5.1.0"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.8.1"
     rimraf: "npm:^6.1.3"
@@ -3497,14 +3497,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "js-yaml@npm:4.2.0"
+"js-yaml@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "js-yaml@npm:5.1.0"
   dependencies:
     argparse: "npm:^2.0.1"
   bin:
-    js-yaml: bin/js-yaml.js
-  checksum: 10/51de2067a2b44b07ba5206132e56005f8b568ff279bb4d2f645068958c56fa4827d40a6841c983234671fa0a134bf094d0b0717873c2a3d319185297af145a6d
+    js-yaml: bin/js-yaml.mjs
+  checksum: 10/0361e773deeff5e75c5ff37dbfce639490b3cba17fe9f2e86c353790527936c4860a3c189262910157ee85e00e1e4a217b042658fdf19f1fce8af0af6628ff4d
   languageName: node
   linkType: hard
 
