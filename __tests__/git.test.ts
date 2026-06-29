@@ -122,6 +122,9 @@ describe('ref', () => {
         case 'git show -s --pretty=%D':
           result = 'HEAD, tag: 8.0.0';
           break;
+        case 'git for-each-ref --format=%(refname) --points-at HEAD refs/tags/':
+          result = 'refs/tags/8.0.0';
+          break;
       }
       return Promise.resolve({
         stdout: result,
@@ -143,6 +146,9 @@ describe('ref', () => {
           break;
         case 'git show -s --pretty=%D':
           result = 'grafted, HEAD, tag: 8.0.0';
+          break;
+        case 'git for-each-ref --format=%(refname) --points-at HEAD refs/tags/':
+          result = 'refs/tags/8.0.0';
           break;
       }
       return Promise.resolve({
@@ -420,6 +426,9 @@ describe('ref', () => {
         case 'git show -s --pretty=%D':
           result = 'HEAD, tag: v8.0.0, origin/release-branch';
           break;
+        case 'git for-each-ref --format=%(refname) --points-at HEAD refs/tags/':
+          result = 'refs/tags/v8.0.0';
+          break;
       }
       return Promise.resolve({
         stdout: result,
@@ -442,6 +451,9 @@ describe('ref', () => {
         case 'git show -s --pretty=%D':
           result = 'grafted, HEAD, tag: v8.0.0, origin/release-branch';
           break;
+        case 'git for-each-ref --format=%(refname) --points-at HEAD refs/tags/':
+          result = 'refs/tags/v8.0.0';
+          break;
       }
       return Promise.resolve({
         stdout: result,
@@ -451,6 +463,31 @@ describe('ref', () => {
     });
     const ref = await Git.ref();
     expect(ref).toEqual('refs/tags/v8.0.0');
+  });
+
+  it('returns mocked detached tag ref when tag name contains a comma', async () => {
+    vi.spyOn(Exec, 'getExecOutput').mockImplementation((cmd, args): Promise<ExecOutput> => {
+      const fullCmd = `${cmd} ${args?.join(' ')}`;
+      let result = '';
+      switch (fullCmd) {
+        case 'git branch --show-current':
+          result = '';
+          break;
+        case 'git show -s --pretty=%D':
+          result = 'HEAD, tag: release,with-comma, origin/release-branch';
+          break;
+        case 'git for-each-ref --format=%(refname) --points-at HEAD refs/tags/':
+          result = 'refs/tags/release,with-comma';
+          break;
+      }
+      return Promise.resolve({
+        stdout: result,
+        stderr: '',
+        exitCode: 0
+      });
+    });
+    const ref = await Git.ref();
+    expect(ref).toEqual('refs/tags/release,with-comma');
   });
 });
 

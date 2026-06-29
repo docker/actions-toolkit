@@ -138,7 +138,7 @@ export class Git {
 
     // Tag refs are formatted as "tag: <tagname>"
     if (ref.startsWith('tag: ')) {
-      return `refs/tags/${ref.slice('tag: '.length).split(',')[0].trim()}`;
+      return await Git.findDetachedTagRef(ref, res);
     }
 
     // Pull request merge refs are formatted as "pull/<number>/<state>"
@@ -199,6 +199,28 @@ export class Git {
     }
 
     throw new Error(`Cannot infer ref from detached HEAD`);
+  }
+
+  private static async findDetachedTagRef(tagDecoration: string, originalRef: string): Promise<string> {
+    const tagRefs = await Git.exec(['for-each-ref', '--format=%(refname)', '--points-at', 'HEAD', 'refs/tags/']);
+    const refs = tagRefs
+      .split('\n')
+      .map(tagRef => tagRef.trim())
+      .filter(tagRef => tagRef.length > 0)
+      .sort((a, b) => b.length - a.length);
+
+    for (const tagRef of refs) {
+      const decoration = `tag: ${tagRef.slice('refs/tags/'.length)}`;
+      if (tagDecoration === decoration || tagDecoration.startsWith(`${decoration}, `)) {
+        return tagRef;
+      }
+    }
+
+    if (refs.length === 1) {
+      return refs[0];
+    }
+
+    throw new Error(`Cannot find detached tag ref in "${originalRef}"`);
   }
 
   private static async findContainingRef(scope: string): Promise<string | undefined> {
