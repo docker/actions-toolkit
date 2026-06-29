@@ -55,6 +55,25 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       -
+        name: Install npm deps
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await core.group(`Install npm deps`, async () => {
+              await exec.exec('npm', [
+                'install',
+                '--loglevel=error',
+                '--no-save',
+                '--package-lock=false',
+                '--ignore-scripts',
+                '--omit=dev',
+                '--prefer-offline',
+                '--fund=false',
+                '--audit=false',
+                'semver@7.8.3'
+              ]);
+            });
+      -
         name: Update dependency
         id: update
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -64,6 +83,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
+            const semver = require('semver');
 
             const dep = core.getInput('dep');
 
@@ -108,11 +128,28 @@ jobs:
             }
 
             function readLatestTag(relativePath) {
-              const tag = readJson(relativePath)?.latest?.tag_name;
+              return readReleaseTag(relativePath, 'latest');
+            }
+
+            function readReleaseTag(relativePath, alias) {
+              const tag = readJson(relativePath)?.[alias]?.tag_name;
               if (!tag) {
-                throw new Error(`Unable to resolve latest tag from ${relativePath}`);
+                throw new Error(`Unable to resolve ${alias} tag from ${relativePath}`);
               }
               return tag;
+            }
+
+            async function latestSemverReleaseOrPrereleaseTag({github, owner, repo}) {
+              const releases = await github.rest.repos.listReleases({
+                owner,
+                repo,
+                per_page: 100
+              });
+              const release = releases.data.find(release => !release.draft && semver.valid(release.tag_name));
+              if (!release) {
+                throw new Error(`Unable to resolve latest semver release or pre-release for ${owner}/${repo}`);
+              }
+              return release.tag_name;
             }
 
             function dockerfileArgPattern(key) {
@@ -153,7 +190,7 @@ jobs:
                 branch: 'deps/buildx-version',
                 sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/buildx-releases.json',
                 async resolve() {
-                  const tag = readLatestTag('.github/buildx-releases.json');
+                  const tag = readReleaseTag('.github/buildx-releases.json', 'edge');
                   return {
                     titleValue: tag,
                     targets: [
@@ -176,13 +213,14 @@ jobs:
               buildkit: {
                 name: 'BuildKit image',
                 branch: 'deps/buildkit-image',
-                sourceUrl: 'https://github.com/moby/buildkit/releases/latest',
+                sourceUrl: 'https://github.com/moby/buildkit/releases',
                 async resolve({github}) {
-                  const release = await github.rest.repos.getLatestRelease({
+                  const tag = await latestSemverReleaseOrPrereleaseTag({
+                    github,
                     owner: 'moby',
                     repo: 'buildkit'
                   });
-                  const image = `moby/buildkit:${release.data.tag_name}`;
+                  const image = `moby/buildkit:${tag}`;
                   return {
                     titleValue: image,
                     targets: [
