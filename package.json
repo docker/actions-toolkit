@@ -50,7 +50,7 @@
     "@actions/http-client": "^4.0.1",
     "@actions/io": "^3.0.2",
     "@actions/tool-cache": "^4.0.0",
-    "@sigstore/bundle": "^4.0.0",
+    "@sigstore/bundle": "^5.0.0",
     "@sigstore/sign": "^4.1.1",
     "@sigstore/tuf": "^5.0.0",
     "@sigstore/verify": "^3.1.1",
