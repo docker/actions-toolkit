@@ -49,7 +49,21 @@ beforeEach(() => {
 });
 
 describe('inspectManifest', () => {
-  it('retries transient manifest unknown errors when requested', async () => {
+  // prettier-ignore
+  it.each([
+    [
+      'Docker Hub missing tag',
+      'ERROR: docker.io/library/alpine:codex-definitely-missing: not found'
+    ],
+    [
+      'GHCR missing digest',
+      'ERROR: ghcr.io/docker/actions-toolkit-test@sha256:128e1cfe4e5f76af75df1121fccaf6da0cba412deec293ad988d7ade34499d09: not found'
+    ],
+    [
+      'AWS ECR manifest propagation',
+      'ERROR: httpReadSeeker: failed open: content at https://public.ecr.aws/v2/q3b5f1u4/test-docker-action/manifests/sha256:76bc7984bdcf00ef5af953b7cb3de57ef39101cc091f4913c738b16cfbd26e53 not found: not found'
+    ]
+  ])('retries transient manifest unknown errors when requested (%s)', async (_name, stderr) => {
     vi.useFakeTimers();
 
     const getCommand = vi.fn().mockResolvedValue({
@@ -62,7 +76,7 @@ describe('inspectManifest', () => {
       .mockResolvedValueOnce({
         exitCode: 1,
         stdout: '',
-        stderr: 'ERROR: MANIFEST_UNKNOWN: manifest unknown'
+        stderr: stderr
       })
       .mockResolvedValueOnce({
         exitCode: 0,

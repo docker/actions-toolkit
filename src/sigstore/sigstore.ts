@@ -177,7 +177,8 @@ export class Sigstore {
         const verifyResult = await this.verifyImageAttestation(attestationRef, {
           certificateIdentityRegexp: opts.certificateIdentityRegexp,
           noTransparencyLog: opts.noTransparencyLog || !signedRes.tlogID,
-          retryOnManifestUnknown: opts.retryOnManifestUnknown
+          retryOnManifestUnknown: opts.retryOnManifestUnknown,
+          retryLimit: opts.retryLimit
         });
         core.info(`Signature manifest verified: https://oci.dag.dev/?image=${signedRes.imageName}@${verifyResult.signatureManifestDigest}`);
         result[attestationRef] = verifyResult;
