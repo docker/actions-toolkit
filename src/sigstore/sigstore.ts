@@ -31,16 +31,12 @@ import {ImageTools} from '../buildx/imagetools.js';
 
 import {Subject} from '../types/intoto/intoto.js';
 import {
-  Endpoints,
-  FULCIO_URL,
   ParsedBundle,
-  REKOR_URL,
   SEARCH_URL,
   SignAttestationManifestsOpts,
   SignAttestationManifestsResult,
   SignProvenanceBlobsOpts,
   SignProvenanceBlobsResult,
-  TSASERVER_URL,
   VerifyArtifactOpts,
   VerifyArtifactResult,
   VerifySignedArtifactsOpts,
@@ -75,8 +71,6 @@ export class Sigstore {
         throw new Error('missing "id-token" permission. Please add "permissions: id-token: write" to your workflow.');
       }
 
-      const endpoints = this.signingEndpoints(opts.noTransparencyLog);
-      core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
       const cosignExtraArgs = await this.cosignSigningConfigArgs(opts.noTransparencyLog);
 
       for (const imageName of opts.imageNames) {
@@ -261,8 +255,6 @@ export class Sigstore {
         throw new Error('missing "id-token" permission. Please add "permissions: id-token: write" to your workflow.');
       }
 
-      const endpoints = this.signingEndpoints(opts.noTransparencyLog);
-      core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
       const cosignExtraArgs = await this.cosignSigningConfigArgs(opts.noTransparencyLog);
 
       const provenanceBlobs = Sigstore.getProvenanceBlobs(opts);
@@ -414,22 +406,16 @@ export class Sigstore {
     }
   }
 
-  private signingEndpoints(noTransparencyLog?: boolean): Endpoints {
-    noTransparencyLog = Sigstore.noTransparencyLog(noTransparencyLog);
-    core.info(`Upload to transparency log: ${noTransparencyLog ? 'disabled' : 'enabled'}`);
-    return {
-      fulcioURL: FULCIO_URL,
-      rekorURL: noTransparencyLog ? undefined : REKOR_URL,
-      tsaServerURL: TSASERVER_URL
-    };
-  }
-
   private static noTransparencyLog(noTransparencyLog?: boolean): boolean {
-    return noTransparencyLog ?? GitHub.context.payload.repository?.private;
+    return noTransparencyLog ?? GitHub.context.payload.repository?.private ?? false;
   }
 
   private async cosignSigningConfigArgs(noTransparencyLog?: boolean): Promise<string[]> {
     const cosignExtraArgs: string[] = [];
+
+    const disableTransparencyLog = Sigstore.noTransparencyLog(noTransparencyLog);
+    core.info(`Upload to transparency log: ${disableTransparencyLog ? 'disabled' : 'enabled'}`);
+
     if (await this.cosign.versionSatisfies('>=3.0.4')) {
       await core.group(`Creating Sigstore protobuf signing config`, async () => {
         const signingConfig = Context.tmpName({
@@ -443,7 +429,7 @@ export class Sigstore {
           '--with-default-services=true',
           `--out=${signingConfig}`
         ];
-        if (Sigstore.noTransparencyLog(noTransparencyLog)) {
+        if (disableTransparencyLog) {
           createConfigArgs.push('--no-default-rekor=true');
         }
         await Exec.exec(this.cosign.binPath, createConfigArgs, {
@@ -458,7 +444,7 @@ export class Sigstore {
       });
     } else {
       cosignExtraArgs.push('--use-signing-config');
-      if (Sigstore.noTransparencyLog(noTransparencyLog)) {
+      if (disableTransparencyLog) {
         cosignExtraArgs.push('--tlog-upload=false');
       }
     }
