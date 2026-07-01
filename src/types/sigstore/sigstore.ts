@@ -19,16 +19,7 @@ import type {SerializedBundle} from '@sigstore/bundle';
 import {Subject} from '../intoto/intoto.js';
 import {Platform} from '../oci/descriptor.js';
 
-export const FULCIO_URL = 'https://fulcio.sigstore.dev';
-export const REKOR_URL = 'https://rekor.sigstore.dev';
-export const TSASERVER_URL = 'https://timestamp.sigstore.dev';
 export const SEARCH_URL = 'https://search.sigstore.dev';
-
-export interface Endpoints {
-  fulcioURL: string;
-  rekorURL?: string;
-  tsaServerURL?: string;
-}
 
 export interface ParsedBundle {
   payload: SerializedBundle;
