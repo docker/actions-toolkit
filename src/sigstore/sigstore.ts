@@ -19,8 +19,7 @@ import fs from 'fs';
 import path from 'path';
 
 import * as core from '@actions/core';
-import {bundleFromJSON, bundleToJSON, SerializedBundle} from '@sigstore/bundle';
-import {Artifact, Bundle, CIContextProvider, DSSEBundleBuilder, FulcioSigner, RekorWitness, TSAWitness, Witness} from '@sigstore/sign';
+import {bundleFromJSON, bundleToJSON, type Bundle, type SerializedBundle} from '@sigstore/bundle';
 import * as tuf from '@sigstore/tuf';
 import {toSignedEntity, toTrustMaterial, Verifier} from '@sigstore/verify';
 
@@ -30,7 +29,7 @@ import {Exec} from '../exec.js';
 import {GitHub} from '../github/github.js';
 import {ImageTools} from '../buildx/imagetools.js';
 
-import {MEDIATYPE_PAYLOAD as INTOTO_MEDIATYPE_PAYLOAD, Subject} from '../types/intoto/intoto.js';
+import {Subject} from '../types/intoto/intoto.js';
 import {
   Endpoints,
   FULCIO_URL,
@@ -78,41 +77,7 @@ export class Sigstore {
 
       const endpoints = this.signingEndpoints(opts.noTransparencyLog);
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
-      const noTransparencyLog = Sigstore.noTransparencyLog(opts.noTransparencyLog);
-
-      const cosignExtraArgs: string[] = [];
-      if (await this.cosign.versionSatisfies('>=3.0.4')) {
-        await core.group(`Creating Sigstore protobuf signing config`, async () => {
-          const signingConfig = Context.tmpName({
-            template: 'signing-config-XXXXXX.json',
-            tmpdir: Context.tmpDir()
-          });
-          // prettier-ignore
-          const createConfigArgs = [
-            'signing-config',
-            'create',
-            '--with-default-services=true',
-            `--out=${signingConfig}`
-          ];
-          if (noTransparencyLog) {
-            createConfigArgs.push('--no-default-rekor=true');
-          }
-          await Exec.exec(this.cosign.binPath, createConfigArgs, {
-            env: Object.assign({}, process.env, {
-              COSIGN_EXPERIMENTAL: '1'
-            }) as {
-              [key: string]: string;
-            }
-          });
-          core.info(JSON.stringify(JSON.parse(fs.readFileSync(signingConfig, {encoding: 'utf-8'})), null, 2));
-          cosignExtraArgs.push(`--signing-config=${signingConfig}`);
-        });
-      } else {
-        cosignExtraArgs.push('--use-signing-config');
-        if (noTransparencyLog) {
-          cosignExtraArgs.push('--tlog-upload=false');
-        }
-      }
+      const cosignExtraArgs = await this.cosignSigningConfigArgs(opts.noTransparencyLog);
 
       for (const imageName of opts.imageNames) {
         const attestationDigests = await this.imageTools.attestationDigests({
@@ -287,6 +252,9 @@ export class Sigstore {
   }
 
   public async signProvenanceBlobs(opts: SignProvenanceBlobsOpts): Promise<Record<string, SignProvenanceBlobsResult>> {
+    if (!(await this.cosign.isAvailable())) {
+      throw new Error('Cosign is required to sign provenance blobs');
+    }
     const result: Record<string, SignProvenanceBlobsResult> = {};
     try {
       if (!process.env.ACTIONS_ID_TOKEN_REQUEST_URL) {
@@ -295,6 +263,7 @@ export class Sigstore {
 
       const endpoints = this.signingEndpoints(opts.noTransparencyLog);
       core.info(`Using Sigstore signing endpoint: ${endpoints.fulcioURL}`);
+      const cosignExtraArgs = await this.cosignSigningConfigArgs(opts.noTransparencyLog);
 
       const provenanceBlobs = Sigstore.getProvenanceBlobs(opts);
       for (const p of Object.keys(provenanceBlobs)) {
@@ -306,14 +275,39 @@ export class Sigstore {
             core.warning(`No subjects found in provenance ${p}, skip signing.`);
             return;
           }
-          const bundle = await Sigstore.signPayload(
-            {
-              data: blob,
-              type: INTOTO_MEDIATYPE_PAYLOAD
-            },
-            endpoints
-          );
-          const parsedBundle = Sigstore.parseBundle(bundle);
+          const artifactPath = path.join(path.dirname(p), subjects[0].name);
+          // prettier-ignore
+          const cosignArgs = [
+            'attest-blob',
+            '--yes',
+            '--oidc-provider', 'github-actions',
+            '--new-bundle-format',
+            '--statement', p,
+            '--type', COSIGN_PREDICATE_SLSA_PROVENANCE_V1,
+            '--bundle', bundlePath,
+            ...cosignExtraArgs
+          ];
+          core.info(`[command]${this.cosign.binPath} ${[...cosignArgs, artifactPath].join(' ')}`);
+          const execRes = await Exec.getExecOutput(this.cosign.binPath, ['--verbose', ...cosignArgs, artifactPath], {
+            ignoreReturnCode: true,
+            silent: true,
+            env: Object.assign({}, process.env, {
+              COSIGN_EXPERIMENTAL: '1'
+            }) as {
+              [key: string]: string;
+            }
+          });
+          const signResult = Cosign.parseCommandOutput(execRes.stderr.trim());
+          if (execRes.exitCode != 0) {
+            if (signResult.errors && signResult.errors.length > 0) {
+              const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
+              throw new Error(`Cosign attest-blob command failed with errors:\n${errorMessages}`);
+            } else {
+              // prettier-ignore
+              throw new Error(`Cosign attest-blob command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+            }
+          }
+          const parsedBundle = Sigstore.parseBundle(bundleFromJSON(JSON.parse(fs.readFileSync(bundlePath, {encoding: 'utf-8'}))));
           core.info(`Provenance blob signed for:`);
           for (const subject of subjects) {
             const [digestAlg, digestValue] = Object.entries(subject.digest)[0] || [];
@@ -322,10 +316,7 @@ export class Sigstore {
           if (parsedBundle.tlogID) {
             core.info(`Attestation signature uploaded to Rekor transparency log: ${SEARCH_URL}?logIndex=${parsedBundle.tlogID}`);
           }
-          core.info(`Writing Sigstore bundle to: ${bundlePath}`);
-          fs.writeFileSync(bundlePath, JSON.stringify(parsedBundle.payload, null, 2), {
-            encoding: 'utf-8'
-          });
+          core.info(`Sigstore bundle written to: ${bundlePath}`);
           result[p] = {
             ...parsedBundle,
             bundlePath: bundlePath,
@@ -437,6 +428,43 @@ export class Sigstore {
     return noTransparencyLog ?? GitHub.context.payload.repository?.private;
   }
 
+  private async cosignSigningConfigArgs(noTransparencyLog?: boolean): Promise<string[]> {
+    const cosignExtraArgs: string[] = [];
+    if (await this.cosign.versionSatisfies('>=3.0.4')) {
+      await core.group(`Creating Sigstore protobuf signing config`, async () => {
+        const signingConfig = Context.tmpName({
+          template: 'signing-config-XXXXXX.json',
+          tmpdir: Context.tmpDir()
+        });
+        // prettier-ignore
+        const createConfigArgs = [
+          'signing-config',
+          'create',
+          '--with-default-services=true',
+          `--out=${signingConfig}`
+        ];
+        if (Sigstore.noTransparencyLog(noTransparencyLog)) {
+          createConfigArgs.push('--no-default-rekor=true');
+        }
+        await Exec.exec(this.cosign.binPath, createConfigArgs, {
+          env: Object.assign({}, process.env, {
+            COSIGN_EXPERIMENTAL: '1'
+          }) as {
+            [key: string]: string;
+          }
+        });
+        core.info(JSON.stringify(JSON.parse(fs.readFileSync(signingConfig, {encoding: 'utf-8'})), null, 2));
+        cosignExtraArgs.push(`--signing-config=${signingConfig}`);
+      });
+    } else {
+      cosignExtraArgs.push('--use-signing-config');
+      if (Sigstore.noTransparencyLog(noTransparencyLog)) {
+        cosignExtraArgs.push('--tlog-upload=false');
+      }
+    }
+    return cosignExtraArgs;
+  }
+
   private static getProvenanceBlobs(opts: SignProvenanceBlobsOpts): Record<string, Buffer> {
     // For single platform build
     const singleProvenance = path.join(opts.localExportDir, 'provenance.json');
@@ -467,40 +495,6 @@ export class Sigstore {
       name: s.name,
       digest: s.digest
     }));
-  }
-
-  private static async signPayload(artifact: Artifact, endpoints: Endpoints, timeout?: number, retries?: number): Promise<Bundle> {
-    const witnesses: Witness[] = [];
-
-    const signer = new FulcioSigner({
-      identityProvider: new CIContextProvider('sigstore'),
-      fulcioBaseURL: endpoints.fulcioURL,
-      timeout: timeout,
-      retry: retries
-    });
-
-    if (endpoints.rekorURL) {
-      witnesses.push(
-        new RekorWitness({
-          rekorBaseURL: endpoints.rekorURL,
-          fetchOnConflict: true,
-          timeout: timeout,
-          retry: retries
-        })
-      );
-    }
-
-    if (endpoints.tsaServerURL) {
-      witnesses.push(
-        new TSAWitness({
-          tsaBaseURL: endpoints.tsaServerURL,
-          timeout: timeout,
-          retry: retries
-        })
-      );
-    }
-
-    return new DSSEBundleBuilder({signer, witnesses}).create(artifact);
   }
 
   private static parseBundle(bundle: Bundle): ParsedBundle {
