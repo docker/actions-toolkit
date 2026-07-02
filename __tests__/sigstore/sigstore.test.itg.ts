@@ -18,6 +18,7 @@ import {beforeAll, describe, expect, it, test} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 
 import {Buildx} from '../../src/buildx/buildx.js';
 import {Build} from '../../src/buildx/build.js';
@@ -37,7 +38,14 @@ const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? descr
 
 const imageName = 'ghcr.io/docker/actions-toolkit-test';
 const currentCosignVersion = 'v3.1.2';
-const signAttestationCosignVersions = ['v3.0.2', 'v3.0.6', currentCosignVersion] as const;
+const signingCosignVersions = ['v3.0.2', 'v3.0.6', currentCosignVersion] as const;
+const signingCases = signingCosignVersions.flatMap(cosignVersion => {
+  const cases = [{cosignVersion, rekorV2: false}];
+  if (semver.satisfies(cosignVersion, '>=3.1.1')) {
+    cases.push({cosignVersion, rekorV2: true});
+  }
+  return cases;
+});
 const installedCosign = new Map<string, Promise<string>>();
 
 async function installCosign(version: string): Promise<string> {
@@ -56,8 +64,8 @@ async function installCosign(version: string): Promise<string> {
   return await installedPath;
 }
 
-for (const cosignVersion of signAttestationCosignVersions) {
-  maybeIdToken(`signAttestationManifests with cosign ${cosignVersion}`, () => {
+for (const {cosignVersion, rekorV2} of signingCases) {
+  maybeIdToken(`signAttestationManifests with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}`, () => {
     let sigstore: Sigstore;
 
     beforeAll(async () => {
@@ -71,7 +79,7 @@ for (const cosignVersion of signAttestationCosignVersions) {
     it('build, sign and verify', async () => {
       const buildx = new Buildx();
       const build = new Build({buildx: buildx});
-      const versionTag = cosignVersion.replace(/^v/, '').replace(/\./g, '-');
+      const versionTag = `${cosignVersion.replace(/^v/, '').replace(/\./g, '-')}${rekorV2 ? '-rekor-v2' : ''}`;
 
       await expect(
         (async () => {
@@ -107,6 +115,7 @@ for (const cosignVersion of signAttestationCosignVersions) {
       const signResults = await sigstore.signAttestationManifests({
         imageNames: [imageName],
         imageDigest: buildDigest!,
+        rekorV2,
         retryOnManifestUnknown: true
       });
       expect(Object.keys(signResults).length).toEqual(2);
@@ -164,37 +173,50 @@ maybe('verifyImageAttestations', () => {
   });
 });
 
-maybeIdToken('signProvenanceBlobs', () => {
-  it('single platform', async () => {
-    const sigstore = new Sigstore();
-    const results = await sigstore.signProvenanceBlobs({
-      localExportDir: path.join(fixturesDir, 'sigstore', 'single')
+for (const {cosignVersion, rekorV2} of signingCases) {
+  maybeIdToken(`signProvenanceBlobs with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}`, () => {
+    let sigstore: Sigstore;
+
+    beforeAll(async () => {
+      sigstore = new Sigstore({
+        cosign: new Cosign({
+          binPath: await installCosign(cosignVersion)
+        })
+      });
+    }, 100000);
+
+    it('single platform', async () => {
+      const results = await sigstore.signProvenanceBlobs({
+        localExportDir: path.join(fixturesDir, 'sigstore', 'single'),
+        rekorV2
+      });
+      expect(Object.keys(results).length).toEqual(1);
+      const provenancePath = Object.keys(results)[0];
+      expect(provenancePath).toEqual(path.join(fixturesDir, 'sigstore', 'single', 'provenance.json'));
+      expect(fs.existsSync(results[provenancePath].bundlePath)).toBe(true);
+      expect(results[provenancePath].payload).toBeDefined();
+      expect(results[provenancePath].certificate).toBeDefined();
+      expect(results[provenancePath].tlogID).toBeDefined();
+      console.log(provenancePath, JSON.stringify(results[provenancePath].payload, null, 2));
     });
-    expect(Object.keys(results).length).toEqual(1);
-    const provenancePath = Object.keys(results)[0];
-    expect(provenancePath).toEqual(path.join(fixturesDir, 'sigstore', 'single', 'provenance.json'));
-    expect(fs.existsSync(results[provenancePath].bundlePath)).toBe(true);
-    expect(results[provenancePath].payload).toBeDefined();
-    expect(results[provenancePath].certificate).toBeDefined();
-    expect(results[provenancePath].tlogID).toBeDefined();
-    console.log(provenancePath, JSON.stringify(results[provenancePath].payload, null, 2));
-  });
-  it('multi-platform', async () => {
-    const sigstore = new Sigstore();
-    const results = await sigstore.signProvenanceBlobs({
-      localExportDir: path.join(fixturesDir, 'sigstore', 'multi')
+
+    it('multi-platform', async () => {
+      const results = await sigstore.signProvenanceBlobs({
+        localExportDir: path.join(fixturesDir, 'sigstore', 'multi'),
+        rekorV2
+      });
+      expect(Object.keys(results).length).toEqual(2);
+      for (const [provenancePath, res] of Object.entries(results)) {
+        expect(provenancePath).toMatch(/linux_(amd64|arm64)\/provenance.json/);
+        expect(fs.existsSync(res.bundlePath)).toBe(true);
+        expect(res.payload).toBeDefined();
+        expect(res.certificate).toBeDefined();
+        expect(res.tlogID).toBeDefined();
+        console.log(provenancePath, JSON.stringify(res.payload, null, 2));
+      }
     });
-    expect(Object.keys(results).length).toEqual(2);
-    for (const [provenancePath, res] of Object.entries(results)) {
-      expect(provenancePath).toMatch(/linux_(amd64|arm64)\/provenance.json/);
-      expect(fs.existsSync(res.bundlePath)).toBe(true);
-      expect(res.payload).toBeDefined();
-      expect(res.certificate).toBeDefined();
-      expect(res.tlogID).toBeDefined();
-      console.log(provenancePath, JSON.stringify(res.payload, null, 2));
-    }
   });
-});
+}
 
 maybeIdToken('verifySignedArtifacts', () => {
   let sigstore: Sigstore;
