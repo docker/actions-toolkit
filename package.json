@@ -58,7 +58,7 @@
     "gunzip-maybe": "^1.4.2",
     "handlebars": "^4.7.9",
     "he": "^1.2.0",
-    "js-yaml": "^5.2.0",
+    "js-yaml": "^5.2.1",
     "jwt-decode": "^4.0.0",
     "semver": "^7.8.5",
     "tar-stream": "^3.2.0",
