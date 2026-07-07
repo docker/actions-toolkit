@@ -9,6 +9,9 @@ updates:
       crazy-max-dot-github:
         patterns:
           - "crazy-max/.github/*"
+      codeql-actions:
+        patterns:
+          - "github/codeql-action/*"
     cooldown:
       default-days: 2
     labels:
