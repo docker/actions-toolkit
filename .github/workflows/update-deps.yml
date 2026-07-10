@@ -161,7 +161,7 @@ jobs:
             }
 
             function tsConstStringPattern(key) {
-              return new RegExp(`^(const ${escapeRegExp(key)} = ')([^']*)(';)$`, 'm');
+              return new RegExp(`^((?:export )?const ${escapeRegExp(key)} = ')([^']*)(';)$`, 'm');
             }
 
             const dependencyConfigs = {
@@ -259,14 +259,21 @@ jobs:
                 sourceUrl: 'https://github.com/docker/actions-toolkit/blob/main/.github/undock-releases.json',
                 async resolve() {
                   const tag = readLatestTag('.github/undock-releases.json');
+                  const version = stripLeadingV(tag);
                   return {
                     titleValue: tag,
                     targets: [
                       {
                         path: 'dev.Dockerfile',
                         key: 'UNDOCK_VERSION',
-                        value: stripLeadingV(tag),
+                        value: version,
                         pattern: dockerfileArgPattern('UNDOCK_VERSION')
+                      },
+                      {
+                        path: 'src/docker/assets.ts',
+                        key: 'limaUndockVersion',
+                        value: version,
+                        pattern: tsConstStringPattern('limaUndockVersion')
                       }
                     ]
                   };

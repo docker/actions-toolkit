@@ -33,7 +33,7 @@ import {Regctl} from '../regclient/regctl.js';
 import {Undock} from '../undock/undock.js';
 import {Util} from '../util.js';
 
-import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1} from './assets.js';
+import {limaYamlData, dockerServiceLogsPs1, setupDockerWinPs1, limaUndockVersion} from './assets.js';
 
 import {GitHubRelease} from '../types/github/github.js';
 import {Image} from '../types/oci/config.js';
@@ -295,7 +295,8 @@ export class Install {
         srcType: src.type,
         srcArchiveVersion: this._version, // Use the resolved version (e.g. latest -> 27.4.0)
         srcArchiveChannel: srcArchive.channel,
-        srcImageTag: (src as InstallSourceImage).tag
+        srcImageTag: (src as InstallSourceImage).tag,
+        undockVersion: limaUndockVersion
       });
       core.info(`Writing lima config to ${path.join(limaDir, 'lima.yaml')}`);
       fs.writeFileSync(path.join(limaDir, 'lima.yaml'), limaCfg);

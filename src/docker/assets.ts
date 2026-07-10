@@ -29,6 +29,8 @@ export const limaYaml = (): string => {
   return get('lima.yaml', limaYamlData);
 };
 
+export const limaUndockVersion = '0.14.0';
+
 const get = (filename: string, data: string, mode?: string): string => {
   const assetPath = Context.tmpName({
     template: `docker-asset-XXXXXX-${filename}`,
@@ -283,7 +285,7 @@ provision:
         x86_64) arch=amd64;;
         aarch64) arch=arm64;;
       esac
-      url="https://github.com/crazy-max/undock/releases/download/v0.14.0/undock_0.14.0_linux_$arch.tar.gz"
+      url="https://github.com/crazy-max/undock/releases/download/v{{undockVersion}}/undock_{{undockVersion}}_linux_$arch.tar.gz"
 
       wget "$url" -O /tmp/undock.tar.gz
       tar -C /usr/local/bin -xvf /tmp/undock.tar.gz

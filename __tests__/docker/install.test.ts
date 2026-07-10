@@ -16,12 +16,14 @@
 
 import {describe, expect, vi, test, beforeEach, afterEach, it} from 'vitest';
 import fs from 'fs';
+import handlebars from 'handlebars';
 import os from 'os';
 import path from 'path';
 import * as rimraf from 'rimraf';
 
 import {mockArch, mockPlatform} from '../.helpers/os.js';
 
+import {limaYamlData, limaUndockVersion} from '../../src/docker/assets.js';
 import {Install, InstallSourceArchive, InstallSourceImage} from '../../src/docker/install.js';
 
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'docker-install-'));
@@ -126,5 +128,27 @@ aarch64:https://cloud-images.ubuntu.com/releases/23.10/release-20231011/ubuntu-2
         digest: ''
       }
     ]);
+  });
+});
+
+describe('limaYamlData', () => {
+  it('renders the pinned undock version in the release URL', () => {
+    const instance = handlebars.create();
+    instance.registerHelper('stringify', function (obj) {
+      return new instance.SafeString(JSON.stringify(obj));
+    });
+    const limaCfg = instance.compile(limaYamlData)({
+      customImages: [],
+      daemonConfig: {},
+      dockerSock: '/tmp/docker.sock',
+      gitCommit: 'master',
+      srcType: 'image',
+      srcArchiveVersion: '29.0.0',
+      srcArchiveChannel: 'stable',
+      srcImageTag: '29.0.0',
+      undockVersion: limaUndockVersion
+    });
+
+    expect(limaCfg).toContain(`url="https://github.com/crazy-max/undock/releases/download/v${limaUndockVersion}/undock_${limaUndockVersion}_linux_$arch.tar.gz"`);
   });
 });
