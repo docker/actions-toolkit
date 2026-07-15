@@ -34,9 +34,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "@actions/cache@npm:6.1.0"
+"@actions/cache@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "@actions/cache@npm:6.2.0"
   dependencies:
     "@actions/core": "npm:^3.0.1"
     "@actions/exec": "npm:^3.0.0"
@@ -47,7 +47,7 @@ __metadata:
     "@azure/storage-blob": "npm:^12.31.0"
     "@protobuf-ts/runtime-rpc": "npm:^2.11.1"
     semver: "npm:^7.7.4"
-  checksum: 10/0cd89f335c1e89f514d56060110bfddc6ab1112ec0091533364c32aec2621896112cde71cfc4089b86d00f3b5478996088e4c4e0aba0aec32aae0afeb4921b3d
+  checksum: 10/b2b3d219d3458b6b7e8f47ff6a83a0566f0b3cd5b257e307636d2147f892e595ce8cecbc0675590a57d0eb4d4d73564d08d28753baa50934ad59a65cbee2d8fa
   languageName: node
   linkType: hard
 
@@ -460,7 +460,7 @@ __metadata:
   resolution: "@docker/actions-toolkit@workspace:."
   dependencies:
     "@actions/artifact": "npm:^6.2.1"
-    "@actions/cache": "npm:^6.1.0"
+    "@actions/cache": "npm:^6.2.0"
     "@actions/core": "npm:^3.0.1"
     "@actions/exec": "npm:^3.0.0"
     "@actions/github": "npm:^9.1.1"
