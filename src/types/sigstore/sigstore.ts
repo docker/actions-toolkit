@@ -31,6 +31,7 @@ export interface SignAttestationManifestsOpts {
   imageNames: Array<string>;
   imageDigest: string;
   noTransparencyLog?: boolean;
+  rekorV2?: boolean;
   retryOnManifestUnknown?: boolean;
   retryLimit?: number;
 }
@@ -56,6 +57,7 @@ export interface SignProvenanceBlobsOpts {
   localExportDir: string;
   name?: string;
   noTransparencyLog?: boolean;
+  rekorV2?: boolean;
 }
 
 export interface SignProvenanceBlobsResult extends ParsedBundle {
