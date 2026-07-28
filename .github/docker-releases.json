@@ -5,6 +5,18 @@
     "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.6.2",
     "assets": []
   },
+  "edge": {
+    "id": 360690467,
+    "tag_name": "docker-v29.7.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.0-rc.1",
+    "assets": []
+  },
+  "v29.7.0-rc.1": {
+    "id": 360690467,
+    "tag_name": "docker-v29.7.0-rc.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.0-rc.1",
+    "assets": []
+  },
   "v29.6.2": {
     "id": 355217394,
     "tag_name": "docker-v29.6.2",
@@ -21,12 +33,6 @@
     "id": 341595336,
     "tag_name": "docker-v29.6.0",
     "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.6.0",
-    "assets": []
-  },
-  "edge": {
-    "id": 355217394,
-    "tag_name": "docker-v29.6.2",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.6.2",
     "assets": []
   },
   "v29.6.0-rc.1": {
