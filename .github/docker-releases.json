@@ -1,8 +1,14 @@
 {
   "latest": {
-    "id": 362706134,
-    "tag_name": "docker-v29.7.0",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.0",
+    "id": 363185792,
+    "tag_name": "docker-v29.7.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.1",
+    "assets": []
+  },
+  "v29.7.1": {
+    "id": 363185792,
+    "tag_name": "docker-v29.7.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.1",
     "assets": []
   },
   "v29.7.0": {
@@ -12,9 +18,9 @@
     "assets": []
   },
   "edge": {
-    "id": 362706134,
-    "tag_name": "docker-v29.7.0",
-    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.0",
+    "id": 363185792,
+    "tag_name": "docker-v29.7.1",
+    "html_url": "https://github.com/moby/moby/releases/tag/docker-v29.7.1",
     "assets": []
   },
   "v29.7.0-rc.1": {
