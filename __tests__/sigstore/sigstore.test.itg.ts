@@ -37,7 +37,7 @@ const maybe = runTest ? describe : describe.skip;
 const maybeIdToken = runTest && process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? describe : describe.skip;
 
 const imageName = 'ghcr.io/docker/actions-toolkit-test';
-const currentCosignVersion = 'v3.1.2';
+const currentCosignVersion = 'v3.1.3';
 const signingCosignVersions = ['v3.0.2', 'v3.0.6', currentCosignVersion] as const;
 const signingCases = signingCosignVersions.flatMap(cosignVersion => {
   const cases = [{cosignVersion, rekorV2: false}];
