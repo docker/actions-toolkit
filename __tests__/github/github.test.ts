@@ -18,6 +18,8 @@ import {describe, expect, vi, it, beforeEach, afterEach, test} from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as core from '@actions/core';
+import * as httpm from '@actions/http-client';
+import {Readable} from 'stream';
 
 import {GitHub} from '../../src/github/github.js';
 import {GitHubRepo} from '../../src/types/github/github.js';
@@ -25,6 +27,7 @@ import {GitHubRepo} from '../../src/types/github/github.js';
 import repoFixture from '../.fixtures/github-repo.json' with {type: 'json'};
 
 const fixturesDir = path.join(__dirname, '..', '.fixtures');
+let httpGetSpy: {mockRestore: () => void} | undefined;
 
 vi.mock('@actions/core', async () => {
   const actual = await vi.importActual<typeof import('@actions/core')>('@actions/core');
@@ -76,6 +79,62 @@ describe('releases', () => {
   });
 });
 
+describe('releasesRaw', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    httpGetSpy?.mockRestore();
+    httpGetSpy = undefined;
+  });
+
+  it('retries transient request errors', async () => {
+    vi.useFakeTimers();
+    const getSpy = (httpGetSpy = vi
+      .spyOn(httpm.HttpClient.prototype, 'get')
+      .mockRejectedValueOnce(Object.assign(new Error('read ECONNRESET'), {code: 'ECONNRESET'}))
+      .mockResolvedValueOnce(httpResponse(200, releaseJSON())));
+
+    const releasesPromise = new GitHub().releasesRaw('Buildx', releaseOpts());
+    await vi.runAllTimersAsync();
+
+    await expect(releasesPromise).resolves.toEqual(releaseFixture());
+    expect(getSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries transient body read errors', async () => {
+    vi.useFakeTimers();
+    const getSpy = (httpGetSpy = vi
+      .spyOn(httpm.HttpClient.prototype, 'get')
+      .mockResolvedValueOnce(httpResponseWithError(200, Object.assign(new Error('read ECONNRESET'), {code: 'ECONNRESET'})))
+      .mockResolvedValueOnce(httpResponse(200, releaseJSON())));
+
+    const releasesPromise = new GitHub().releasesRaw('Buildx', releaseOpts());
+    await vi.runAllTimersAsync();
+
+    await expect(releasesPromise).resolves.toEqual(releaseFixture());
+    expect(getSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries retryable HTTP status codes', async () => {
+    vi.useFakeTimers();
+    const getSpy = (httpGetSpy = vi.spyOn(httpm.HttpClient.prototype, 'get').mockResolvedValueOnce(httpResponse(500, 'server error')).mockResolvedValueOnce(httpResponse(200, releaseJSON())));
+
+    const releasesPromise = new GitHub().releasesRaw('Buildx', releaseOpts());
+    await vi.runAllTimersAsync();
+
+    await expect(releasesPromise).resolves.toEqual(releaseFixture());
+    expect(getSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry non-retryable HTTP status codes', async () => {
+    const getSpy = (httpGetSpy = vi.spyOn(httpm.HttpClient.prototype, 'get').mockResolvedValueOnce(httpResponse(404, 'not found')));
+
+    await expect(new GitHub().releasesRaw('Buildx', releaseOpts())).rejects.toThrow(
+      'Failed to get Buildx releases from https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-releases.json with status code 404: not found'
+    );
+    expect(getSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('serverURL', () => {
   const originalEnv = process.env;
   beforeEach(() => {
@@ -96,6 +155,56 @@ describe('serverURL', () => {
     expect(GitHub.serverURL).toEqual('https://foo.github.com');
   });
 });
+
+function releaseOpts() {
+  return {
+    owner: 'docker',
+    repo: 'actions-toolkit',
+    ref: 'main',
+    path: '.github/buildx-releases.json'
+  };
+}
+
+function releaseFixture() {
+  return {
+    latest: {
+      id: 1,
+      tag_name: 'v0.30.0',
+      html_url: 'https://github.com/docker/buildx/releases/tag/v0.30.0',
+      assets: []
+    }
+  };
+}
+
+function releaseJSON(): string {
+  return JSON.stringify(releaseFixture());
+}
+
+function httpResponse(statusCode: number, body: string): httpm.HttpClientResponse {
+  const message = Readable.from([body]);
+  return {
+    message: Object.assign(message, {
+      statusCode: statusCode,
+      statusMessage: '',
+      headers: {}
+    })
+  } as httpm.HttpClientResponse;
+}
+
+function httpResponseWithError(statusCode: number, error: Error): httpm.HttpClientResponse {
+  const message = new Readable({
+    read() {
+      this.destroy(error);
+    }
+  });
+  return {
+    message: Object.assign(message, {
+      statusCode: statusCode,
+      statusMessage: '',
+      headers: {}
+    })
+  } as httpm.HttpClientResponse;
+}
 
 describe('apiURL', () => {
   const originalEnv = process.env;

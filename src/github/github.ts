@@ -17,6 +17,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as httpm from '@actions/http-client';
+import {text as streamToText} from 'stream/consumers';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 
 import {GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpts, GitHubRelease, GitHubRepo} from '../types/github/github.js';
@@ -24,6 +25,9 @@ import {GitHubActionsRuntimeToken, GitHubActionsRuntimeTokenAC, GitHubContentOpt
 export interface GitHubOpts {
   token?: string;
 }
+
+const releasesRetryDelays = [1000, 3000];
+const retryableErrorCodes = new Set(['ECONNRESET', 'ETIMEDOUT', 'EAI_AGAIN', 'ECONNREFUSED', 'EPIPE', 'ERR_STREAM_PREMATURE_CLOSE']);
 
 export class GitHub {
   private readonly githubToken?: string;
@@ -55,17 +59,41 @@ export class GitHub {
 
   public async releasesRaw(name: string, opts: GitHubContentOpts, token?: string): Promise<Record<string, GitHubRelease>> {
     const url = `https://raw.githubusercontent.com/${opts.owner}/${opts.repo}/${opts.ref}/${opts.path}`;
-    const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
-    // prettier-ignore
-    const httpResp: httpm.HttpClientResponse = await http.get(url, token ? {
-      Authorization: `token ${token}`
-    } : undefined);
-    const dt = await httpResp.readBody();
-    const statusCode = httpResp.message.statusCode || 500;
-    if (statusCode >= 400) {
-      throw new Error(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${dt}`);
+    const headers = token ? {Authorization: `token ${token}`} : undefined;
+
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt <= releasesRetryDelays.length; attempt++) {
+      try {
+        const http: httpm.HttpClient = new httpm.HttpClient('docker-actions-toolkit');
+        const httpResp: httpm.HttpClientResponse = await http.get(url, headers);
+        const body = await streamToText(httpResp.message);
+        const statusCode = httpResp.message.statusCode || 500;
+        if (statusCode >= 400) {
+          const error = new Error(`Failed to get ${name} releases from ${url} with status code ${statusCode}: ${body}`);
+          (error as NodeJS.ErrnoException & {statusCode: number}).statusCode = statusCode;
+          throw error;
+        }
+        return <Record<string, GitHubRelease>>JSON.parse(body);
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(`${e}`);
+        if (!GitHub.isRetryableReleaseError(lastError) || attempt === releasesRetryDelays.length) {
+          throw lastError;
+        }
+        core.info(`${lastError.message}. Retrying (${attempt + 1}/${releasesRetryDelays.length})...`);
+        await new Promise(resolve => setTimeout(resolve, releasesRetryDelays[attempt]));
+      }
     }
-    return <Record<string, GitHubRelease>>JSON.parse(dt);
+    throw lastError || new Error(`Failed to get ${name} releases from ${url}`);
+  }
+
+  private static isRetryableReleaseError(error: Error): boolean {
+    const statusCode = (error as Error & {statusCode?: number}).statusCode;
+    if (statusCode) {
+      return statusCode === 408 || statusCode === 429 || statusCode >= 500;
+    }
+    const code = (error as NodeJS.ErrnoException).code;
+    const message = error.message.toLowerCase();
+    return (code && retryableErrorCodes.has(code)) || message.includes('socket hang up') || message.includes('read econnreset');
   }
 
   static get context(): typeof github.context {
