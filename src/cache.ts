@@ -59,8 +59,10 @@ export class Cache {
     core.debug(`Cache.save ${file}`);
     const cachePath = this.copyToCache(file);
 
-    const htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
-    core.debug(`Cache.save cached to hosted tool cache ${htcPath}`);
+    const htcPath = await this.cacheToHostedToolCache();
+    if (htcPath) {
+      core.debug(`Cache.save cached to hosted tool cache ${htcPath}`);
+    }
 
     if (!this.ghaNoCache && cache.isFeatureAvailable()) {
       if (skipState) {
@@ -87,7 +89,7 @@ export class Cache {
 
   public async find(): Promise<string> {
     try {
-      let htcPath = tc.find(this.opts.htcName, this.opts.htcVersion, this.platform());
+      const htcPath = tc.find(this.opts.htcName, this.opts.htcVersion, this.platform());
       if (htcPath) {
         core.info(`Restored from hosted tool cache ${htcPath}`);
         return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
@@ -96,9 +98,15 @@ export class Cache {
         core.debug(`GitHub Actions cache feature available`);
         if (await cache.restoreCache([this.cacheDir], this.ghaCacheKey)) {
           core.info(`Restored ${this.ghaCacheKey} from GitHub Actions cache`);
-          htcPath = await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
-          core.info(`Cached to hosted tool cache ${htcPath}`);
-          return this.copyToCache(`${htcPath}/${this.opts.cacheFile}`);
+          if (!fs.existsSync(this.cachePath)) {
+            core.warning(`Cache file ${this.cachePath} does not exist`);
+            return '';
+          }
+          const htcCachePath = await this.cacheToHostedToolCache();
+          if (htcCachePath) {
+            core.info(`Cached to hosted tool cache ${htcCachePath}`);
+          }
+          return this.cachePath;
         }
       } else if (this.ghaNoCache) {
         core.info(`GitHub Actions cache disabled`);
@@ -139,6 +147,15 @@ export class Cache {
     core.info(`Copying ${file} to ${this.cachePath}`);
     fs.copyFileSync(file, this.cachePath);
     return this.cachePath;
+  }
+
+  private async cacheToHostedToolCache(): Promise<string> {
+    try {
+      return await tc.cacheDir(this.cacheDir, this.opts.htcName, this.opts.htcVersion, this.platform());
+    } catch (e) {
+      core.info(`Failed to cache to hosted tool cache: ${e}`);
+    }
+    return '';
   }
 
   private platform(): string {
