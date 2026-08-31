@@ -19,6 +19,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as io from '@actions/io';
+import {ExecOutput} from '@actions/exec';
 import * as rimraf from 'rimraf';
 
 import {mockHomedir} from '../.helpers/os.js';
@@ -166,6 +167,55 @@ describe('getExecOutput', () => {
   });
 });
 
+describe('pull', () => {
+  const originalDockerConfig = process.env.DOCKER_CONFIG;
+
+  beforeEach(() => {
+    fs.mkdirSync(tmpDir, {recursive: true});
+    process.env.DOCKER_CONFIG = path.join(tmpDir, 'docker-config');
+  });
+
+  afterEach(() => {
+    process.env.DOCKER_CONFIG = originalDockerConfig;
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('retries transient registry errors', async () => {
+    vi.useFakeTimers();
+    const execSpy = vi
+      .spyOn(Docker, 'getExecOutput')
+      .mockResolvedValueOnce(
+        execOutput(
+          1,
+          '',
+          'Error response from daemon: Head "https://registry-1.docker.io/v2/tonistiigi/binfmt/manifests/latest": Get "https://auth.docker.io/token": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)'
+        )
+      )
+      .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: Head "https://registry-1.docker.io/v2/tonistiigi/binfmt/manifests/latest": EOF'))
+      .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: received unexpected HTTP status: 503 Service Unavailable'))
+      .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: connection reset by peer'))
+      .mockResolvedValueOnce(execOutput(0, 'latest: Pulling from tonistiigi/binfmt', ''));
+
+    const pull = Docker.pull('tonistiigi/binfmt');
+    await vi.runAllTimersAsync();
+    await pull;
+    expect(execSpy).toHaveBeenCalledTimes(5);
+  });
+
+  it('does not retry permanent pull errors', async () => {
+    const execSpy = vi.spyOn(Docker, 'getExecOutput').mockResolvedValue(execOutput(1, '', 'Error response from daemon: pull access denied for doesnotexist'));
+    await expect(Docker.pull('doesnotexist:foo')).rejects.toThrow('pull access denied for doesnotexist');
+    expect(execSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry rate limit errors', async () => {
+    const execSpy = vi.spyOn(Docker, 'getExecOutput').mockResolvedValue(execOutput(1, '', 'Error response from daemon: toomanyrequests: You have reached your pull rate limit'));
+    await expect(Docker.pull('busybox')).rejects.toThrow('toomanyrequests');
+    expect(execSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('context', () => {
   it('call docker context show', async () => {
     const execSpy = vi.spyOn(Docker, 'getExecOutput');
@@ -241,3 +291,11 @@ describe('printInfo', () => {
     expect(callfunc).toEqual([['info']]);
   });
 });
+
+const execOutput = (exitCode: number, stdout: string, stderr: string): ExecOutput => {
+  return {
+    exitCode: exitCode,
+    stdout: stdout,
+    stderr: stderr
+  };
+};
