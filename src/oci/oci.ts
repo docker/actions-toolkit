@@ -75,66 +75,61 @@ export class OCI {
     };
   }
 
-  public static loadArchive(opts: LoadArchiveOpts): Promise<Archive> {
-    return new Promise<Archive>((resolve, reject) => {
-      const tarex: tar.Extract = tar.extract();
+  public static async loadArchive(opts: LoadArchiveOpts): Promise<Archive> {
+    const tarex = tar.extract();
 
-      let rootIndex: Index;
-      let rootLayout: ImageLayout;
-      const indexes: Record<string, Index> = {};
-      const manifests: Record<string, Manifest> = {};
-      const images: Record<string, Image> = {};
-      const blobs: Record<string, unknown> = {};
+    let rootIndex: Index | undefined;
+    let rootLayout: ImageLayout | undefined;
+    const indexes: Record<string, Index> = {};
+    const manifests: Record<string, Manifest> = {};
+    const images: Record<string, Image> = {};
+    const blobs: Record<string, unknown> = {};
 
-      tarex.on('entry', async (header, stream, next) => {
-        if (header.type === 'file') {
-          const filename = path.normalize(header.name);
-          if (filename === IMAGE_INDEX_FILE_V1) {
-            rootIndex = await OCI.streamToJson<Index>(stream);
-          } else if (filename === IMAGE_LAYOUT_FILE_V1) {
-            rootLayout = await OCI.streamToJson<ImageLayout>(stream);
-          } else if (filename.startsWith(path.join(IMAGE_BLOBS_DIR_V1, path.sep))) {
-            const blob = await OCI.extractBlob(stream);
-            const digest = `${filename.split(path.sep)[1]}:${filename.split(path.sep)[filename.split(path.sep).length - 1]}`;
-            if (OCI.isIndex(blob)) {
-              indexes[digest] = <Index>JSON.parse(blob);
-            } else if (OCI.isManifest(blob)) {
-              manifests[digest] = <Manifest>JSON.parse(blob);
-            } else if (OCI.isImage(blob)) {
-              images[digest] = <Image>JSON.parse(blob);
-            } else {
-              blobs[digest] = blob;
-            }
+    fs.createReadStream(opts.file)
+      .pipe(gunzip())
+      .pipe(tarex as unknown as NodeJS.WritableStream);
+
+    for await (const entry of tarex) {
+      const header = entry.header;
+      const stream = Readable.from(entry as unknown as AsyncIterable<Buffer>);
+      if (header.type === 'file') {
+        const filename = path.normalize(header.name);
+        if (filename === IMAGE_INDEX_FILE_V1) {
+          rootIndex = await OCI.streamToJson<Index>(stream);
+        } else if (filename === IMAGE_LAYOUT_FILE_V1) {
+          rootLayout = await OCI.streamToJson<ImageLayout>(stream);
+        } else if (filename.startsWith(path.join(IMAGE_BLOBS_DIR_V1, path.sep))) {
+          const blob = await OCI.extractBlob(stream);
+          const digest = `${filename.split(path.sep)[1]}:${filename.split(path.sep)[filename.split(path.sep).length - 1]}`;
+          if (OCI.isIndex(blob)) {
+            indexes[digest] = <Index>JSON.parse(blob);
+          } else if (OCI.isManifest(blob)) {
+            manifests[digest] = <Manifest>JSON.parse(blob);
+          } else if (OCI.isImage(blob)) {
+            images[digest] = <Image>JSON.parse(blob);
           } else {
-            reject(new Error(`Invalid OCI archive: unexpected file ${filename}`));
+            blobs[digest] = blob;
           }
+        } else {
+          throw new Error(`Invalid OCI archive: unexpected file ${filename}`);
         }
-        stream.resume();
-        next();
-      });
+      }
+      stream.resume();
+    }
+    if (!rootIndex || !rootLayout) {
+      throw new Error('Invalid OCI archive: missing index or layout');
+    }
 
-      tarex.on('finish', () => {
-        if (!rootIndex || !rootLayout) {
-          reject(new Error('Invalid OCI archive: missing index or layout'));
-        }
-        resolve({
-          root: {
-            index: rootIndex,
-            layout: rootLayout
-          },
-          indexes: indexes,
-          manifests: manifests,
-          images: images,
-          blobs: blobs
-        } as Archive);
-      });
-
-      tarex.on('error', error => {
-        reject(error);
-      });
-
-      fs.createReadStream(opts.file).pipe(gunzip()).pipe(tarex);
-    });
+    return {
+      root: {
+        index: rootIndex,
+        layout: rootLayout
+      },
+      indexes: indexes,
+      manifests: manifests,
+      images: images,
+      blobs: blobs
+    } as Archive;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -476,7 +476,6 @@ __metadata:
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^24.11.0"
     "@types/semver": "npm:^7.7.1"
-    "@types/tar-stream": "npm:^3.1.4"
     "@types/tmp": "npm:^0.2.6"
     "@typescript-eslint/eslint-plugin": "npm:^8.56.1"
     "@typescript-eslint/parser": "npm:^8.56.1"
@@ -1431,15 +1430,6 @@ __metadata:
   version: 7.7.1
   resolution: "@types/semver@npm:7.7.1"
   checksum: 10/8f09e7e6ca3ded67d78ba7a8f7535c8d9cf8ced83c52e7f3ac3c281fe8c689c3fe475d199d94390dc04fc681d51f2358b430bb7b2e21c62de24f2bee2c719068
-  languageName: node
-  linkType: hard
-
-"@types/tar-stream@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "@types/tar-stream@npm:3.1.4"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/9d1e182315c2189e18293b5a884edb9803c70772d37914870fbdb0bd659970e0d8effe002b19415ee251c422e3f169013668f3acf41feb9371040d0f0867d7b7
   languageName: node
   linkType: hard
 
