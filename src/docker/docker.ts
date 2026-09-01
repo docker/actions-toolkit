@@ -17,6 +17,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import retry from 'async-retry';
 import * as core from '@actions/core';
 import {ExecOptions, ExecOutput} from '@actions/exec';
 import * as io from '@actions/io';
@@ -185,19 +186,16 @@ export class Docker {
     }
 
     let pulled = true;
-    await Docker.getExecOutput(['pull', image], {
-      ignoreReturnCode: true
-    }).then(res => {
-      if (res.stderr.length > 0 && res.exitCode != 0) {
-        pulled = false;
-        const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
-        if (cacheFoundPath) {
-          core.warning(`Failed to pull image, using one from cache: ${err}`);
-        } else {
-          throw new Error(err);
-        }
+    try {
+      await Docker.pullWithRetry(image);
+    } catch (e) {
+      pulled = false;
+      if (cacheFoundPath) {
+        core.warning(`Failed to pull image, using one from cache: ${(e as Error).message}`);
+      } else {
+        throw e;
       }
-    });
+    }
 
     if (cache && pulled) {
       const imageTarPath = path.join(Context.tmpDir(), `${Util.hash(image)}.tar`);
@@ -212,5 +210,42 @@ export class Docker {
         }
       });
     }
+  }
+
+  private static async pullWithRetry(image: string): Promise<void> {
+    const retries = 5;
+    await retry(
+      async bail => {
+        const res = await Docker.getExecOutput(['pull', image], {
+          ignoreReturnCode: true
+        });
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
+          if (!Docker.isPullTransientError(err)) {
+            bail(new Error(err));
+            return;
+          }
+          throw new Error(err);
+        }
+      },
+      {
+        retries: retries - 1,
+        minTimeout: 1000,
+        factor: 2,
+        onRetry: (err, i) => {
+          core.debug(`Docker pull failed, retrying (${i}/${retries})...\n${err}`);
+        }
+      }
+    );
+  }
+
+  private static isPullTransientError(err: string): boolean {
+    return (
+      /Client\.Timeout exceeded|TLS handshake timeout|i\/o timeout|context deadline exceeded|request canceled|connection reset by peer|connection refused|connection timed out|temporary failure|unexpected EOF|\bEOF\b|server misbehaving/i.test(
+        err
+      ) ||
+      /\b(500|502|503|504)\b/.test(err) ||
+      /\b(service unavailable|bad gateway|gateway timeout|internal server error)\b/i.test(err)
+    );
   }
 }
