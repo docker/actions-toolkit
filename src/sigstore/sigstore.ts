@@ -380,7 +380,9 @@ export class Sigstore {
     const bundle = bundleFromJSON(parsedBundle);
 
     core.info(`Fetching Sigstore TUF trusted root metadata`);
-    const trustedRoot = await tuf.getTrustedRoot();
+    const trustedRoot = await tuf.getTrustedRoot({
+      retry: {retries: 5}
+    });
     const trustMaterial = toTrustMaterial(trustedRoot);
 
     try {
