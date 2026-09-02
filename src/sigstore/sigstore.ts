@@ -394,19 +394,9 @@ export class Sigstore {
       const tlogEntries = bundle.verificationMaterial.tlogEntries;
       const tlogID = tlogEntries.length > 0 ? tlogEntries[0].logIndex : undefined;
 
-      // TODO: remove when subjectAlternativeName check with regex is supported: https://github.com/sigstore/sigstore-js/pull/1556
-      if (opts?.subjectAlternativeName && opts?.subjectAlternativeName instanceof RegExp) {
-        const subjectAltName = signingCert.subjectAltName?.replace(/^uri:/i, '');
-        if (!subjectAltName) {
-          throw new Error('Signing certificate does not contain subjectAltName');
-        } else if (!subjectAltName.match(opts.subjectAlternativeName)) {
-          throw new Error(`Signing certificate subjectAlternativeName "${subjectAltName}" does not match expected pattern`);
-        }
-      }
-
       const verifier = new Verifier(trustMaterial);
       const signer = verifier.verify(signedEntity, {
-        subjectAlternativeName: opts?.subjectAlternativeName && typeof opts.subjectAlternativeName === 'string' ? opts.subjectAlternativeName : undefined,
+        subjectAlternativeName: opts?.subjectAlternativeName,
         extensions: opts?.issuer ? {issuer: opts.issuer} : undefined
       });
       core.debug(`Sigstore.verifyArtifact signer: ${JSON.stringify(signer)}`);
