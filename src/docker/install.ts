@@ -19,6 +19,7 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import os from 'os';
 import path from 'path';
+import {parseArgs} from 'util';
 import retry from 'async-retry';
 import handlebars from 'handlebars';
 import * as core from '@actions/core';
@@ -303,13 +304,15 @@ export class Install {
       core.info(limaCfg);
     });
 
-    if (!(await Install.qemuInstalled())) {
-      await this.brewInstall('qemu');
+    if (Install.limaNeedsQemu()) {
+      if (!(await Install.qemuInstalled())) {
+        await this.brewInstall('qemu');
+      }
+      const qemuBin = await Install.qemuBin();
+      await core.group('QEMU version', async () => {
+        await Exec.exec(qemuBin, ['--version']);
+      });
     }
-    const qemuBin = await Install.qemuBin();
-    await core.group('QEMU version', async () => {
-      await Exec.exec(qemuBin, ['--version']);
-    });
 
     // lima might already be started on the runner so env var added in download
     // method is not expanded to the running process.
@@ -730,6 +733,18 @@ EOF`,
       return releases['v' + version];
     }
     return releases[version];
+  }
+
+  public static limaNeedsQemu(): boolean {
+    const args = (process.env.LIMA_START_ARGS || '').match(/(?:[^\s"]|"[^"]*")+/g) || [];
+    const {values} = parseArgs({
+      args: args.map(arg => arg.replace(/"/g, '')),
+      options: {'vm-type': {type: 'string'}, set: {type: 'string'}},
+      strict: false,
+      allowPositionals: true
+    });
+    // Arbitrary YAML expressions can override vmType after --vm-type.
+    return values.set !== undefined || values['vm-type'] !== 'vz';
   }
 
   public static limaCustomImages(): LimaImage[] {

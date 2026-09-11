@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {beforeAll, describe, test, expect} from 'vitest';
+import {beforeAll, describe, test, expect, vi} from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -50,6 +50,30 @@ describe('root', () => {
       });
       await expect(tryInstall(install)).resolves.not.toThrow();
     }, 30 * 60 * 1000);
+});
+
+describe.skipIf(os.platform() !== 'darwin')('vz', () => {
+  test('starts Docker with a writable host mount', async () => {
+    fs.mkdirSync('/tmp/lima', {recursive: true});
+    const mountDir = fs.mkdtempSync('/tmp/lima/docker-install-mount-');
+    const marker = path.join(mountDir, 'marker');
+    fs.writeFileSync(marker, 'host mount works');
+    const install = new Install({source: getSources(false)[0], runDir: tmpDir(), contextName: 'foo'});
+    vi.stubEnv('LIMA_START_ARGS', '--vm-type=vz --mount-type=virtiofs');
+    try {
+      await tryInstall(install, async () => {
+        const vm = await Exec.getExecOutput('limactl', ['list', 'docker-actions-toolkit', '--format', '{{.VMType}}']);
+        expect(vm.stdout.trim()).toBe('vz');
+        const mounted = await Exec.getExecOutput('limactl', ['shell', '--workdir=/', 'docker-actions-toolkit', 'cat', marker]);
+        expect(mounted.stdout.trim()).toBe('host mount works');
+        await Exec.exec('limactl', ['shell', '--workdir=/', 'docker-actions-toolkit', 'touch', path.join(mountDir, 'guest')]);
+        expect(fs.existsSync(path.join(mountDir, 'guest'))).toBe(true);
+      });
+    } finally {
+      vi.unstubAllEnvs();
+      fs.rmSync(mountDir, {recursive: true, force: true});
+    }
+  });
 });
 
 describe('rootless', () => {

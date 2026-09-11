@@ -124,6 +124,9 @@ jobs:
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest' });
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest' });
                     }
+                    if (os === 'macos-26-large') {
+                      includes.push({ os: os, test: test, test_name: 'vz', docker_install_type: 'archive', docker_install_version: 'latest' });
+                    }
                     if (os !== 'windows-latest') {
                       includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'image', docker_install_version: 'latest' });
                     }
