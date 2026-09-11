@@ -116,8 +116,7 @@ export class Sigstore {
                 const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
                 throw new Error(`Cosign sign command failed with errors:\n${errorMessages}`);
               } else {
-                // prettier-ignore
-                throw new Error(`Cosign sign command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+                throw new Error(`Cosign sign command failed with: ${Cosign.getErrorMessage(execRes.stderr)}`);
               }
             }
             const parsedBundle = Sigstore.parseBundle(bundleFromJSON(signResult.bundle));
@@ -207,8 +206,7 @@ export class Sigstore {
         }) as {[key: string]: string}
       });
       if (execRes.exitCode !== 0) {
-        // prettier-ignore
-        throw new Error(`Cosign verify command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+        throw new Error(`Cosign verify command failed with: ${Cosign.getErrorMessage(execRes.stderr)}`);
       }
       const verifyResult = Cosign.parseCommandOutput(execRes.stderr.trim());
       return {
@@ -245,8 +243,7 @@ export class Sigstore {
             throw lastError;
           }
         } else {
-          // prettier-ignore
-          throw new Error(`Cosign verify command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+          throw new Error(`Cosign verify command failed with: ${Cosign.getErrorMessage(execRes.stderr)}`);
         }
       }
     }
@@ -308,8 +305,7 @@ export class Sigstore {
               const errorMessages = signResult.errors.map(e => `- [${e.code}] ${e.message} : ${e.detail}`).join('\n');
               throw new Error(`Cosign attest-blob command failed with errors:\n${errorMessages}`);
             } else {
-              // prettier-ignore
-              throw new Error(`Cosign attest-blob command failed with: ${execRes.stderr.trim().split(/\r?\n/).filter(line => line.length > 0).pop() ?? 'unknown error'}`);
+              throw new Error(`Cosign attest-blob command failed with: ${Cosign.getErrorMessage(execRes.stderr)}`);
             }
           }
           const parsedBundle = Sigstore.parseBundle(bundleFromJSON(JSON.parse(fs.readFileSync(bundlePath, {encoding: 'utf-8'}))));
