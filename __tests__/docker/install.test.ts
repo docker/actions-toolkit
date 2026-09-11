@@ -102,6 +102,28 @@ describe('getRelease', () => {
   });
 });
 
+describe('limaNeedsQemu', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  test.each([
+    ['', true],
+    ['--cpus=2', true],
+    ['--vm-type=vz --mount-type=virtiofs', false],
+    ['--vm-type vz', false],
+    ['--vm-type="vz"', false],
+    ['"--vm-type=vz"', false],
+    ['--vm-type=vz --vm-type=qemu', true],
+    ['--vm-type=qemu --vm-type vz', false],
+    ['--set ".message = \' --vm-type=vz\'"', true],
+    ['--vm-type=vz --set ".vmType = \'qemu\'"', true],
+    ['--set ".vmType = \'qemu\'" --vm-type=vz', true],
+    ['-- --vm-type=vz', true]
+  ])('requires QEMU for %s: %s', (args, expected) => {
+    vi.stubEnv('LIMA_START_ARGS', args);
+    expect(Install.limaNeedsQemu()).toBe(expected);
+  });
+});
+
 describe('limaImage', () => {
   const originalEnv = process.env;
   beforeEach(() => {
