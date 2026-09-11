@@ -17,6 +17,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import {stripVTControlCharacters} from 'util';
 import retry from 'async-retry';
 import * as core from '@actions/core';
 import {ExecOptions, ExecOutput} from '@actions/exec';
@@ -72,6 +73,17 @@ export class Docker {
 
   public static async getExecOutput(args?: string[], options?: ExecOptions): Promise<ExecOutput> {
     return Exec.getExecOutput('docker', args, Docker.execOptions(options));
+  }
+
+  public static getErrorMessage(stderr: string): string {
+    const lines = stripVTControlCharacters(stderr).split(/[\r\n]/);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i].trim();
+      if (line) {
+        return line;
+      }
+    }
+    return 'unknown error';
   }
 
   private static execOptions(options?: ExecOptions): ExecOptions {
@@ -179,7 +191,7 @@ export class Docker {
           ignoreReturnCode: true
         }).then(res => {
           if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.warning(`Failed to load image from cache: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+            core.warning(`Failed to load image from cache: ${Docker.getErrorMessage(res.stderr)}`);
           }
         });
       }
@@ -203,7 +215,7 @@ export class Docker {
         ignoreReturnCode: true
       }).then(async res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.warning(`Failed to save image: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+          core.warning(`Failed to save image: ${Docker.getErrorMessage(res.stderr)}`);
         } else {
           const cachePath = await imageCache.save(imageTarPath);
           core.info(`Image cached to ${cachePath}`);
@@ -220,7 +232,7 @@ export class Docker {
           ignoreReturnCode: true
         });
         if (res.stderr.length > 0 && res.exitCode != 0) {
-          const err = res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error';
+          const err = Docker.getErrorMessage(res.stderr);
           if (!Docker.isPullTransientError(err)) {
             bail(new Error(err));
             return;

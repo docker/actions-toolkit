@@ -167,6 +167,23 @@ describe('getExecOutput', () => {
   });
 });
 
+describe('getErrorMessage', () => {
+  it.each([
+    {name: 'empty output', stderr: '', expected: 'unknown error'},
+    {name: 'whitespace-only output', stderr: ' \r\n\t\n', expected: 'unknown error'},
+    {name: 'daemon error', stderr: 'Error response from daemon: pull access denied\n', expected: 'Error response from daemon: pull access denied'},
+    {name: 'unprefixed error', stderr: 'invalid reference format\n', expected: 'invalid reference format'},
+    {name: 'trailing blank lines', stderr: 'warning\n  failed to save image: permission denied  \n \t\n', expected: 'failed to save image: permission denied'},
+    {name: 'CRLF output', stderr: 'warning\r\ninvalid tar header\r\n', expected: 'invalid tar header'},
+    {name: 'carriage returns', stderr: 'progress\rinvalid tar header\r', expected: 'invalid tar header'},
+    {name: 'terminal formatting', stderr: 'warning\n\u001b[31minvalid tar header\u001b[0m\n', expected: 'invalid tar header'},
+    {name: 'formatting-only output', stderr: '\u001b[0m\n', expected: 'unknown error'},
+    {name: 'no special ERROR prefix handling', stderr: 'ERROR: earlier message\ninvalid tar header\n', expected: 'invalid tar header'}
+  ])('$name', ({stderr, expected}) => {
+    expect(Docker.getErrorMessage(stderr)).toBe(expected);
+  });
+});
+
 describe('pull', () => {
   const originalDockerConfig = process.env.DOCKER_CONFIG;
 
@@ -194,7 +211,7 @@ describe('pull', () => {
       )
       .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: Head "https://registry-1.docker.io/v2/tonistiigi/binfmt/manifests/latest": EOF'))
       .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: received unexpected HTTP status: 503 Service Unavailable'))
-      .mockResolvedValueOnce(execOutput(1, '', 'Error response from daemon: connection reset by peer'))
+      .mockResolvedValueOnce(execOutput(1, '', '\u001b[31mError response from daemon: connection reset by peer\u001b[0m\r\n \t\r\n'))
       .mockResolvedValueOnce(execOutput(0, 'latest: Pulling from tonistiigi/binfmt', ''));
 
     const pull = Docker.pull('tonistiigi/binfmt');
@@ -206,6 +223,12 @@ describe('pull', () => {
   it('does not retry permanent pull errors', async () => {
     const execSpy = vi.spyOn(Docker, 'getExecOutput').mockResolvedValue(execOutput(1, '', 'Error response from daemon: pull access denied for doesnotexist'));
     await expect(Docker.pull('doesnotexist:foo')).rejects.toThrow('pull access denied for doesnotexist');
+    expect(execSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a clean pull error with trailing blank lines', async () => {
+    const execSpy = vi.spyOn(Docker, 'getExecOutput').mockResolvedValue(execOutput(1, '', '\u001b[31mError response from daemon: pull access denied\u001b[0m\r\n \t\r\n'));
+    await expect(Docker.pull('doesnotexist:foo')).rejects.toThrow(new Error('Error response from daemon: pull access denied'));
     expect(execSpy).toHaveBeenCalledTimes(1);
   });
 
