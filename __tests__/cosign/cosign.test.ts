@@ -54,6 +54,21 @@ describe('version', () => {
   });
 });
 
+describe('getErrorMessage', () => {
+  test.each([
+    {name: 'empty output', stderr: '', expected: 'unknown error'},
+    {name: 'whitespace-only output', stderr: ' \r\n\t\n', expected: 'unknown error'},
+    {name: 'trailing blank lines', stderr: 'warning\n  signing failed  \n \t\n', expected: 'signing failed'},
+    {name: 'CRLF output', stderr: 'warning\r\nverification failed\r\n', expected: 'verification failed'},
+    {name: 'carriage returns', stderr: 'progress\rverification failed\r', expected: 'verification failed'},
+    {name: 'terminal formatting', stderr: 'warning\n\u001b[31msigning failed\u001b[0m\n', expected: 'signing failed'},
+    {name: 'formatting-only output', stderr: '\u001b[0m\n', expected: 'unknown error'},
+    {name: 'execution error', stderr: 'Error: signing failed\n2026/09/11 12:00:00 error during command execution: signing failed\n', expected: '2026/09/11 12:00:00 error during command execution: signing failed'}
+  ])('$name', ({stderr, expected}) => {
+    expect(Cosign.getErrorMessage(stderr)).toBe(expected);
+  });
+});
+
 describe('versionSatisfies', () => {
   test.each([
     ['v0.4.1', '>=0.3.2', true],

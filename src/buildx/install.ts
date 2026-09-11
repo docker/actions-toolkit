@@ -143,7 +143,7 @@ export class Install {
       ignoreReturnCode: true
     }).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(`build failed with: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+        throw new Error(`build failed with: ${Buildx.getErrorMessage(res.stderr)}`);
       }
       return `${outputDir}/buildx`;
     });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {stripVTControlCharacters} from 'util';
 import * as core from '@actions/core';
 import {BUNDLE_V03_MEDIA_TYPE, SerializedBundle} from '@sigstore/bundle';
 
@@ -90,6 +91,17 @@ export class Cosign {
     await Exec.exec(this.binPath, ['version', '--json'], {
       failOnStdErr: false
     });
+  }
+
+  public static getErrorMessage(stderr: string): string {
+    const lines = stripVTControlCharacters(stderr).split(/[\r\n]/);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i].trim();
+      if (line) {
+        return line;
+      }
+    }
+    return 'unknown error';
   }
 
   public async versionSatisfies(range: string, version?: string): Promise<boolean> {

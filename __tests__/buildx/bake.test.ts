@@ -21,7 +21,9 @@ import path from 'path';
 import * as rimraf from 'rimraf';
 
 import {Bake} from '../../src/buildx/bake.js';
+import {Buildx} from '../../src/buildx/buildx.js';
 import {Context} from '../../src/context.js';
+import {Exec} from '../../src/exec.js';
 
 import {ExecOptions} from '@actions/exec';
 import {BakeDefinition} from '../../src/types/buildx/bake.js';
@@ -72,6 +74,20 @@ describe('resolveWarnings', () => {
 });
 
 describe('getDefinition', () => {
+  it('reports the error summary before trailing help text', async () => {
+    const execSpy = vi.spyOn(Exec, 'getExecOutput').mockResolvedValueOnce({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'ERROR: failed to parse definition\nLearn more at https://docs.docker.com/\n'
+    });
+    try {
+      const bake = new Bake({buildx: new Buildx({standalone: true})});
+      await expect(bake.getDefinition({})).rejects.toThrow('cannot parse bake definitions: failed to parse definition');
+    } finally {
+      execSpy.mockRestore();
+    }
+  });
+
   // prettier-ignore
   test.each([
     [
