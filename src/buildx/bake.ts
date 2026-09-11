@@ -171,7 +171,7 @@ export class Bake {
     const printCmd = await this.buildx.getCommand([...args, '--print', ...(cmdOpts.targets || [])]);
     return await Exec.getExecOutput(printCmd.command, printCmd.args, execOptions).then(res => {
       if (res.stderr.length > 0 && res.exitCode != 0) {
-        throw new Error(`cannot parse bake definitions: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+        throw new Error(`cannot parse bake definitions: ${Buildx.getErrorMessage(res.stderr)}`);
       }
       return Bake.parseDefinition(res.stdout.trim());
     });
