@@ -170,7 +170,16 @@ export class Docker {
     };
   }
 
-  public static async pull(image: string, cache?: boolean): Promise<void> {
+  public static async pull(image: string, cache?: boolean, endpoint?: string): Promise<void> {
+    const args: string[] = [];
+    if (endpoint) {
+      try {
+        await Docker.contextInspect(endpoint);
+        args.push('--context', endpoint);
+      } catch {
+        args.push('--host', endpoint);
+      }
+    }
     const parsedImage = Docker.parseRepoTag(image);
     const repoSanitized = parsedImage.repository.replace(/[^a-zA-Z0-9.]+/g, '--');
     const tagSanitized = parsedImage.tag.replace(/[^a-zA-Z0-9.]+/g, '--');
@@ -187,7 +196,7 @@ export class Docker {
       cacheFoundPath = await imageCache.find();
       if (cacheFoundPath) {
         core.info(`Image found from cache in ${cacheFoundPath}`);
-        await Docker.getExecOutput(['load', '-i', cacheFoundPath], {
+        await Docker.getExecOutput([...args, 'load', '-i', cacheFoundPath], {
           ignoreReturnCode: true
         }).then(res => {
           if (res.stderr.length > 0 && res.exitCode != 0) {
@@ -199,7 +208,7 @@ export class Docker {
 
     let pulled = true;
     try {
-      await Docker.pullWithRetry(image);
+      await Docker.pullWithRetry(image, args);
     } catch (e) {
       pulled = false;
       if (cacheFoundPath) {
@@ -211,7 +220,7 @@ export class Docker {
 
     if (cache && pulled) {
       const imageTarPath = path.join(Context.tmpDir(), `${Util.hash(image)}.tar`);
-      await Docker.getExecOutput(['save', '-o', imageTarPath, image], {
+      await Docker.getExecOutput([...args, 'save', '-o', imageTarPath, image], {
         ignoreReturnCode: true
       }).then(async res => {
         if (res.stderr.length > 0 && res.exitCode != 0) {
@@ -224,11 +233,11 @@ export class Docker {
     }
   }
 
-  private static async pullWithRetry(image: string): Promise<void> {
+  private static async pullWithRetry(image: string, args: string[]): Promise<void> {
     const retries = 5;
     await retry(
       async bail => {
-        const res = await Docker.getExecOutput(['pull', image], {
+        const res = await Docker.getExecOutput([...args, 'pull', image], {
           ignoreReturnCode: true
         });
         if (res.stderr.length > 0 && res.exitCode != 0) {

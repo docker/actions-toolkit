@@ -25,6 +25,7 @@ import * as rimraf from 'rimraf';
 import {mockHomedir} from '../.helpers/os.js';
 
 import {Docker} from '../../src/docker/docker.js';
+import {Cache} from '../../src/cache.js';
 
 import {ConfigFile} from '../../src/types/docker/docker.js';
 
@@ -196,6 +197,62 @@ describe('pull', () => {
     process.env.DOCKER_CONFIG = originalDockerConfig;
     vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  it.each([
+    {endpoint: undefined, args: []},
+    {endpoint: '', args: []},
+    {endpoint: 'remote', args: ['--context', 'remote']},
+    {endpoint: 'default', args: ['--context', 'default']},
+    {endpoint: 'tcp://socket-proxy:2375', args: ['--host', 'tcp://socket-proxy:2375']},
+    {endpoint: 'ssh://user@remote', args: ['--host', 'ssh://user@remote']},
+    {endpoint: 'unix:///var/run/docker.sock', args: ['--host', 'unix:///var/run/docker.sock']}
+  ])('uses endpoint $endpoint for cached images and retries', async ({endpoint, args}) => {
+    vi.useFakeTimers();
+    const originalEnv = {...process.env};
+    const cachePath = path.join(tmpDir, 'image.tar');
+    vi.spyOn(Cache.prototype, 'find').mockResolvedValue(cachePath);
+    const saveSpy = vi.spyOn(Cache.prototype, 'save').mockResolvedValue(cachePath);
+    let pulls = 0;
+    const execSpy = vi.spyOn(Docker, 'getExecOutput').mockImplementation(async command => {
+      if (command?.[0] === 'context') {
+        return args[0] === '--context' ? execOutput(0, JSON.stringify([{Name: endpoint}]), '') : execOutput(1, '', 'context not found');
+      }
+      if (command?.includes('pull') && pulls++ === 0) {
+        return execOutput(1, '', '503 Service Unavailable');
+      }
+      return execOutput(0, '', '');
+    });
+
+    const pull = Docker.pull('moby/buildkit:buildx-stable-1', true, endpoint);
+    await vi.runAllTimersAsync();
+    await pull;
+
+    expect(execSpy.mock.calls.map(call => call[0])).toEqual([
+      ...(endpoint ? [['context', 'inspect', '--format=json', endpoint]] : []),
+      [...args, 'load', '-i', cachePath],
+      [...args, 'pull', 'moby/buildkit:buildx-stable-1'],
+      [...args, 'pull', 'moby/buildkit:buildx-stable-1'],
+      [...args, 'save', '-o', expect.any(String), 'moby/buildkit:buildx-stable-1']
+    ]);
+    expect(saveSpy).toHaveBeenCalledExactlyOnceWith(execSpy.mock.calls.at(-1)?.[0]?.at(-2));
+    expect(process.env).toEqual(originalEnv);
+  });
+
+  it('pulls from the endpoint without caching', async () => {
+    const findSpy = vi.spyOn(Cache.prototype, 'find');
+    const execSpy = vi
+      .spyOn(Docker, 'getExecOutput')
+      .mockResolvedValueOnce(execOutput(1, '', 'context not found'))
+      .mockResolvedValue(execOutput(0, '', ''));
+
+    await Docker.pull('moby/buildkit:buildx-stable-1', false, 'tcp://socket-proxy:2375');
+
+    expect(execSpy.mock.calls.map(call => call[0])).toEqual([
+      ['context', 'inspect', '--format=json', 'tcp://socket-proxy:2375'],
+      ['--host', 'tcp://socket-proxy:2375', 'pull', 'moby/buildkit:buildx-stable-1']
+    ]);
+    expect(findSpy).not.toHaveBeenCalled();
   });
 
   it('retries transient registry errors', async () => {
