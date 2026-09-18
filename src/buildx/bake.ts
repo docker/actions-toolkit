@@ -62,6 +62,35 @@ export class Bake {
     return path.join(Context.tmpDir(), this.metadataFilename);
   }
 
+  public static resolveContextTargets(definition: BakeDefinition, target: string): Array<string> {
+    const targetDefs = definition.target || {};
+    const targets = Object.keys(targetDefs);
+    if (targets.length === 0) {
+      throw new Error('Bake definition does not contain any targets');
+    }
+    if (!Object.prototype.hasOwnProperty.call(targetDefs, target)) {
+      throw new Error(`Unable to resolve ${target} target, found: ${targets.join(', ')}`);
+    }
+    const resolved = new Set([target]);
+    const stack = [target];
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      for (const context of Object.values(targetDefs[current].contexts || {})) {
+        const dependency = context.match(/^target:(.+)$/)?.[1];
+        if (!dependency || resolved.has(dependency)) {
+          continue;
+        }
+        if (!Object.prototype.hasOwnProperty.call(targetDefs, dependency)) {
+          throw new Error(`Target ${current} uses unknown named context target ${dependency}`);
+        }
+        // Visit each target once, including cycles; Buildx validates buildability.
+        resolved.add(dependency);
+        stack.push(dependency);
+      }
+    }
+    return [...resolved];
+  }
+
   public resolveMetadata(): BuildMetadata | undefined {
     const metadataFile = this.getMetadataFilePath();
     if (!fs.existsSync(metadataFile)) {
