@@ -48,6 +48,35 @@ beforeEach(() => {
   fs.mkdirSync(tmpDir, {recursive: true});
 });
 
+describe('toIndexAnnotation', () => {
+  it.each([
+    ['org.opencontainers.image.title=example', 'index:org.opencontainers.image.title=example'],
+    ['manifest:key=value', 'index:key=value'],
+    ['index:key=value', 'index:key=value'],
+    ['manifest-descriptor:key=value', 'index:key=value'],
+    ['index-descriptor:key=value', 'index:key=value'],
+    ['manifest,index:key=value', 'index:key=value'],
+    ['manifest[linux/amd64]:key=value', 'index:key=value'],
+    ['manifest-descriptor[linux/arm/v7]:key=value', 'index:key=value'],
+    ['manifest[linux/amd64],manifest[linux/arm64]:key=value', 'index:key=value'],
+    ['index[linux/amd64]:key=value', 'index:key=value'],
+    ['key=https://example.com/path?a=b=c', 'index:key=https://example.com/path?a=b=c'],
+    ['manifest:key=manifest:other=value', 'index:key=manifest:other=value'],
+    ['custom:key=value', 'index:custom:key=value'],
+    ['manifest:custom:key=value', 'index:custom:key=value'],
+    ['key=', 'index:key='],
+    ['manifest:key=', 'index:key='],
+    ['key', 'index:key'],
+    ['manifest:key', 'index:key'],
+    ['manifest:key=  value  ', 'index:key=  value  '],
+    ['', 'index:'],
+    ['unknown,manifest:key=value', 'index:key=value'],
+    ['unknown,custom:key=value', 'index:unknown,custom:key=value']
+  ])('converts %j to %j', (input, expected) => {
+    expect(ImageTools.toIndexAnnotation(input)).toBe(expected);
+  });
+});
+
 describe('inspectManifest', () => {
   // prettier-ignore
   it.each([
