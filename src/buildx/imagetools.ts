@@ -112,6 +112,26 @@ export class ImageTools {
     return (await this.attestationDescriptors(opts)).map(attestation => attestation.digest);
   }
 
+  // Retargets an annotation to the index, dropping existing scopes and platform selectors
+  public static toIndexAnnotation(annotation: string): string {
+    const keyEnd = annotation.indexOf('=');
+    const rawKey = keyEnd === -1 ? annotation : annotation.substring(0, keyEnd);
+    const rawValue = keyEnd === -1 ? '' : annotation.substring(keyEnd);
+    const typeSeparator = rawKey.indexOf(':');
+    if (typeSeparator !== -1) {
+      const typeExpr = rawKey.substring(0, typeSeparator);
+      const key = rawKey.substring(typeSeparator + 1);
+      const hasKnownType = typeExpr
+        .split(',')
+        .map(type => type.replace(/\[.*\]$/, ''))
+        .some(type => ['manifest', 'index', 'manifest-descriptor', 'index-descriptor'].includes(type));
+      if (hasKnownType) {
+        return `index:${key}${rawValue}`;
+      }
+    }
+    return `index:${annotation}`;
+  }
+
   public async create(opts: CreateOpts): Promise<CreateResult | undefined> {
     const args: Array<string> = [];
 
