@@ -47,6 +47,70 @@ afterEach(() => {
   rimraf.sync(tmpDir);
 });
 
+describe('resolveContextTargets', () => {
+  const target = {context: '.', dockerfile: 'Dockerfile'};
+
+  it('includes the root and ignores non-target contexts and the Dockerfile stage', () => {
+    const definition: BakeDefinition = {
+      group: {},
+      target: {app: {...target, target: 'stage', contexts: {local: './src', image: 'docker-image://alpine', git: 'https://example.com/repo.git', empty: 'target:'}}}
+    };
+    expect(Bake.resolveContextTargets(definition, 'app')).toEqual(['app']);
+  });
+
+  it('traverses transitive and shared dependencies in discovery order without mutating the definition', () => {
+    const definition: BakeDefinition = {
+      group: {},
+      target: {
+        app: {...target, contexts: {first: 'target:left', second: 'target:right'}},
+        left: {...target, contexts: {base: 'target:base'}},
+        right: {...target, contexts: {base: 'target:base', left: 'target:left'}},
+        base: target,
+        unrelated: {...target, contexts: {missing: 'target:missing'}}
+      }
+    };
+    const original = JSON.stringify(definition);
+    expect(Bake.resolveContextTargets(definition, 'app')).toEqual(['app', 'left', 'right', 'base']);
+    expect(JSON.stringify(definition)).toBe(original);
+  });
+
+  it('terminates for self references and dependency cycles', () => {
+    const definition: BakeDefinition = {
+      group: {},
+      target: {
+        app: {...target, contexts: {self: 'target:app', dependency: 'target:base'}},
+        base: {...target, contexts: {back: 'target:app'}}
+      }
+    };
+    expect(Bake.resolveContextTargets(definition, 'app')).toEqual(['app', 'base']);
+  });
+
+  it('rejects empty definitions', () => {
+    expect(() => Bake.resolveContextTargets({group: {}, target: {}}, 'app')).toThrow('Bake definition does not contain any targets');
+  });
+
+  it.each(['missing', 'toString', '__proto__'])('rejects undeclared root %s', root => {
+    expect(() => Bake.resolveContextTargets({group: {}, target: {app: target}}, root)).toThrow(`Unable to resolve ${root} target, found: app`);
+  });
+
+  it('does not treat a group as a target', () => {
+    expect(() => Bake.resolveContextTargets({group: {all: {targets: ['app']}}, target: {app: target}}, 'all')).toThrow('Unable to resolve all target, found: app');
+  });
+
+  it.each(['missing', 'toString', '__proto__'])('rejects undeclared dependency %s', dependency => {
+    const definition: BakeDefinition = {group: {}, target: {app: {...target, contexts: {base: `target:${dependency}`}}}};
+    expect(() => Bake.resolveContextTargets(definition, 'app')).toThrow(`Target app uses unknown named context target ${dependency}`);
+  });
+
+  it('reports missing transitive dependencies against their parent', () => {
+    const definition: BakeDefinition = {
+      group: {},
+      target: {app: {...target, contexts: {base: 'target:base'}}, base: {...target, contexts: {missing: 'target:missing'}}}
+    };
+    expect(() => Bake.resolveContextTargets(definition, 'app')).toThrow('Target base uses unknown named context target missing');
+  });
+});
+
 describe('resolveMetadata', () => {
   it('matches', async () => {
     const bake = new Bake();
