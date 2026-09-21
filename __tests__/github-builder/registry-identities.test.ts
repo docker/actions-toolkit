@@ -32,13 +32,13 @@ describe('RegistryIdentities.parse', () => {
 
   it('accepts a single AWS identity and trims field values', () => {
     expect(RegistryIdentities.parse('type: " aws-ecr "\nregistry: " registry "\nrole-to-assume: " role "\nregion: " region "')).toEqual({
-      awsEcr: {registry: 'registry', roleToAssume: 'role', region: 'region'}
+      awsEcr: {registry: 'registry', roleToAssume: 'role', region: 'region', accountIDs: ''}
     });
   });
 
   it('accepts all providers in a list with optional field defaults', () => {
     expect(RegistryIdentities.parse(JSON.stringify(identities))).toEqual({
-      awsEcr: {registry: aws.registry, roleToAssume: aws['role-to-assume'], region: aws.region},
+      awsEcr: {registry: aws.registry, roleToAssume: aws['role-to-assume'], region: aws.region, accountIDs: ''},
       gcpWif: {registry: gcp.registry, workloadIdentityProvider: gcp.workload_identity_provider, serviceAccount: gcp.service_account, projectId: ''},
       dockerhubOidc: {registry: 'docker.io', username: 'builder', connectionID: 'connection'},
       azureAcr: {registry: azure.registry, clientId: azure.client_id, tenantId: azure.tenant_id, subscriptionId: azure.subscription_id},
@@ -49,11 +49,13 @@ describe('RegistryIdentities.parse', () => {
   it('preserves explicit optional fields, trimming whitespace', () => {
     const result = RegistryIdentities.parse(
       JSON.stringify([
+        {...aws, account_ids: ' 012345678910,023456789012 '},
         {...gcp, project_id: ' project '},
         {...hub, registry: ' index.docker.io '},
         {...chainguard, apk_host: ' apk.example.com ', libraries_host: ' libraries.example.com '}
       ])
     );
+    expect(result.awsEcr?.accountIDs).toBe('012345678910,023456789012');
     expect(result.gcpWif?.projectId).toBe('project');
     expect(result.dockerhubOidc?.registry).toBe('index.docker.io');
     expect(result.chainguard).toEqual({identity: chainguard.identity, apkHost: 'apk.example.com', librariesHost: 'libraries.example.com'});
@@ -92,6 +94,7 @@ describe('RegistryIdentities.parse', () => {
   });
 
   it.each([
+    [aws, 'account_ids'],
     [gcp, 'project_id'],
     [hub, 'registry'],
     [chainguard, 'apk_host'],
