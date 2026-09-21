@@ -33,6 +33,17 @@ export interface RegistryIdentityConfig {
     username: string;
     connectionID: string;
   };
+  azureAcr?: {
+    registry: string;
+    clientId: string;
+    tenantId: string;
+    subscriptionId: string;
+  };
+  chainguard?: {
+    identity: string;
+    apkHost: string;
+    librariesHost: string;
+  };
 }
 
 // Parses github-builder keyless registry identity configuration
@@ -108,6 +119,29 @@ export class RegistryIdentities {
             registry: optionalString('registry', 'docker.io'),
             username: requireString('username'),
             connectionID: requireString('connection_id')
+          };
+          break;
+        case 'azure-acr':
+          validateKeys(['type', 'registry', 'client_id', 'tenant_id', 'subscription_id']);
+          if (result.azureAcr) {
+            RegistryIdentities.fail('only one azure-acr registry identity is supported');
+          }
+          result.azureAcr = {
+            registry: requireString('registry'),
+            clientId: requireString('client_id'),
+            tenantId: requireString('tenant_id'),
+            subscriptionId: requireString('subscription_id')
+          };
+          break;
+        case 'chainguard':
+          validateKeys(['type', 'identity', 'apk_host', 'libraries_host']);
+          if (result.chainguard) {
+            RegistryIdentities.fail('only one chainguard registry identity is supported');
+          }
+          result.chainguard = {
+            identity: requireString('identity'),
+            apkHost: optionalString('apk_host', 'apk.cgr.dev'),
+            librariesHost: optionalString('libraries_host', 'libraries.cgr.dev')
           };
           break;
         default:

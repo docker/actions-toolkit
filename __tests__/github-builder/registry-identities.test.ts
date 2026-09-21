@@ -21,6 +21,9 @@ import {RegistryIdentities} from '../../src/github-builder/registry-identities.j
 const aws = {type: 'aws-ecr', registry: '123.dkr.ecr.us-east-1.amazonaws.com', 'role-to-assume': 'arn:aws:iam::123:role/build', region: 'us-east-1'};
 const gcp = {type: 'gcp-wif', registry: 'us-docker.pkg.dev', workload_identity_provider: 'projects/123/locations/global/workloadIdentityPools/pool/providers/provider', service_account: 'build@example.iam.gserviceaccount.com'};
 const hub = {type: 'dockerhub', username: 'builder', connection_id: 'connection'};
+const azure = {type: 'azure-acr', registry: 'myregistry.azurecr.io', client_id: 'client', tenant_id: 'tenant', subscription_id: 'subscription'};
+const chainguard = {type: 'chainguard', identity: 'organization/identity'};
+const identities = [aws, gcp, hub, azure, chainguard];
 
 describe('RegistryIdentities.parse', () => {
   it.each(['', ' \n\t', 'null', '~', '---\n', '[]'])('accepts empty configuration %j', input => {
@@ -34,10 +37,12 @@ describe('RegistryIdentities.parse', () => {
   });
 
   it('accepts all providers in a list with optional field defaults', () => {
-    expect(RegistryIdentities.parse(JSON.stringify([aws, gcp, hub]))).toEqual({
+    expect(RegistryIdentities.parse(JSON.stringify(identities))).toEqual({
       awsEcr: {registry: aws.registry, roleToAssume: aws['role-to-assume'], region: aws.region},
       gcpWif: {registry: gcp.registry, workloadIdentityProvider: gcp.workload_identity_provider, serviceAccount: gcp.service_account, projectId: ''},
-      dockerhubOidc: {registry: 'docker.io', username: 'builder', connectionID: 'connection'}
+      dockerhubOidc: {registry: 'docker.io', username: 'builder', connectionID: 'connection'},
+      azureAcr: {registry: azure.registry, clientId: azure.client_id, tenantId: azure.tenant_id, subscriptionId: azure.subscription_id},
+      chainguard: {identity: chainguard.identity, apkHost: 'apk.cgr.dev', librariesHost: 'libraries.cgr.dev'}
     });
   });
 
@@ -45,18 +50,20 @@ describe('RegistryIdentities.parse', () => {
     const result = RegistryIdentities.parse(
       JSON.stringify([
         {...gcp, project_id: ' project '},
-        {...hub, registry: ' index.docker.io '}
+        {...hub, registry: ' index.docker.io '},
+        {...chainguard, apk_host: ' apk.example.com ', libraries_host: ' libraries.example.com '}
       ])
     );
     expect(result.gcpWif?.projectId).toBe('project');
     expect(result.dockerhubOidc?.registry).toBe('index.docker.io');
+    expect(result.chainguard).toEqual({identity: chainguard.identity, apkHost: 'apk.example.com', librariesHost: 'libraries.example.com'});
   });
 
-  it.each([aws, gcp, hub])('rejects duplicate provider $type', identity => {
+  it.each(identities)('rejects duplicate provider $type', identity => {
     expect(() => RegistryIdentities.parse(JSON.stringify([identity, identity]))).toThrow(`only one ${identity.type} registry identity is supported`);
   });
 
-  it.each([aws, gcp, hub])('rejects unknown fields for $type', identity => {
+  it.each(identities)('rejects unknown fields for $type', identity => {
     expect(() => RegistryIdentities.parse(JSON.stringify({...identity, unexpected: 'value'}))).toThrow(`registry-identities[0].unexpected is not supported for ${identity.type}`);
   });
 
@@ -69,6 +76,11 @@ describe('RegistryIdentities.parse', () => {
     [gcp, 'service_account'],
     [hub, 'username'],
     [hub, 'connection_id'],
+    [azure, 'registry'],
+    [azure, 'client_id'],
+    [azure, 'tenant_id'],
+    [azure, 'subscription_id'],
+    [chainguard, 'identity'],
     [hub, 'type']
   ] as Array<[Record<string, unknown>, string]>)('rejects missing or invalid required fields in %j: %s', (identity, key) => {
     const missing = {...identity};
@@ -81,7 +93,9 @@ describe('RegistryIdentities.parse', () => {
 
   it.each([
     [gcp, 'project_id'],
-    [hub, 'registry']
+    [hub, 'registry'],
+    [chainguard, 'apk_host'],
+    [chainguard, 'libraries_host']
   ] as Array<[Record<string, unknown>, string]>)('rejects invalid optional fields in %j: %s', (identity, key) => {
     for (const value of ['', '  ', null, false, 123, [], {}]) {
       expect(() => RegistryIdentities.parse(JSON.stringify({...identity, [key]: value}))).toThrow(`registry-identities[0].${key} must be a non-empty string`);
