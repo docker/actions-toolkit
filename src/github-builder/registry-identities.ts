@@ -21,6 +21,7 @@ export interface RegistryIdentityConfig {
     registry: string;
     roleToAssume: string;
     region: string;
+    accountIDs: string;
   };
   gcpWif?: {
     registry: string;
@@ -88,14 +89,15 @@ export class RegistryIdentities {
       };
       switch (type) {
         case 'aws-ecr':
-          validateKeys(['type', 'registry', 'role-to-assume', 'region']);
+          validateKeys(['type', 'registry', 'role-to-assume', 'region', 'account_ids']);
           if (result.awsEcr) {
             RegistryIdentities.fail('only one aws-ecr registry identity is supported');
           }
           result.awsEcr = {
             registry: requireString('registry'),
             roleToAssume: requireString('role-to-assume'),
-            region: requireString('region')
+            region: requireString('region'),
+            accountIDs: optionalString('account_ids', '')
           };
           break;
         case 'gcp-wif':
