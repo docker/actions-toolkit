@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as core from '@actions/core';
 
 import {RegistryIdentities} from '../../src/github-builder/registry-identities.js';
+
+vi.mock('@actions/core', () => ({info: vi.fn()}));
 
 const aws = {type: 'aws-ecr', registry: '123.dkr.ecr.us-east-1.amazonaws.com', 'role-to-assume': 'arn:aws:iam::123:role/build', region: 'us-east-1'};
 const gcp = {type: 'gcp-wif', registry: 'us-docker.pkg.dev', workload_identity_provider: 'projects/123/locations/global/workloadIdentityPools/pool/providers/provider', service_account: 'build@example.iam.gserviceaccount.com'};
@@ -26,8 +29,23 @@ const chainguard = {type: 'chainguard', identity: 'organization/identity'};
 const identities = [aws, gcp, hub, azure, chainguard];
 
 describe('RegistryIdentities.parse', () => {
-  it.each(['', ' \n\t', 'null', '~', '---\n', '[]'])('accepts empty configuration %j', input => {
+  afterEach(() => {
+    vi.mocked(core.info).mockReset();
+  });
+
+  it.each(['', ' \n\t'])('accepts blank configuration %j without logging', input => {
     expect(RegistryIdentities.parse(input)).toEqual({});
+    expect(core.info).not.toHaveBeenCalled();
+  });
+
+  it.each(['null', '~', '---\n'])('accepts empty parsed configuration %j and logs why outputs are disabled', input => {
+    expect(RegistryIdentities.parse(input)).toEqual({});
+    expect(core.info).toHaveBeenCalledExactlyOnceWith('Registry identities input is empty after parsing; disabling registry identity outputs');
+  });
+
+  it('accepts an empty identity list and logs why outputs are disabled', () => {
+    expect(RegistryIdentities.parse('[]')).toEqual({});
+    expect(core.info).toHaveBeenCalledExactlyOnceWith('No registry identity entries parsed; disabling registry identity outputs');
   });
 
   it('accepts a single AWS identity and trims field values', () => {
@@ -44,6 +62,7 @@ describe('RegistryIdentities.parse', () => {
       azureAcr: {registry: azure.registry, clientId: azure.client_id, tenantId: azure.tenant_id, subscriptionId: azure.subscription_id},
       chainguard: {identity: chainguard.identity, apkHost: 'apk.cgr.dev', librariesHost: 'libraries.cgr.dev'}
     });
+    expect(core.info).toHaveBeenCalledExactlyOnceWith('Validating 5 registry identity entries');
   });
 
   it('preserves explicit optional fields, trimming whitespace', () => {
