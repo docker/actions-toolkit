@@ -15,6 +15,7 @@
  */
 
 import {load, YAMLException} from 'js-yaml';
+import * as core from '@actions/core';
 
 export interface RegistryIdentityConfig {
   awsEcr?: {
@@ -53,6 +54,7 @@ export class RegistryIdentities {
     if (!input.trim()) {
       return {};
     }
+
     let parsed: unknown;
     try {
       parsed = load(input);
@@ -62,10 +64,18 @@ export class RegistryIdentities {
       RegistryIdentities.fail(`Failed to parse YAML${location}`);
     }
     if (parsed === null || parsed === undefined) {
+      core.info('Registry identities input is empty after parsing; disabling registry identity outputs');
       return {};
     }
+
     const result: RegistryIdentityConfig = {};
     const entries = Array.isArray(parsed) ? parsed : [parsed];
+    if (entries.length === 0) {
+      core.info('No registry identity entries parsed; disabling registry identity outputs');
+      return result;
+    }
+
+    core.info(`Validating ${entries.length} registry identity ${entries.length === 1 ? 'entry' : 'entries'}`);
     entries.forEach((entry, index) => {
       const location = `registry-identities[${index}]`;
       if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
