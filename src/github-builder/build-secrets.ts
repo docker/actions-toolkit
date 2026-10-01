@@ -55,6 +55,7 @@ export class BuildSecrets {
 
   public static prepareBake(input: string, defaultTarget: string, targets: Array<string>): PreparedBuildSecrets {
     const allowedTargets = new Set(targets);
+    const seen = new Set<string>();
     const secrets = Object.entries(BuildSecrets.parse(input)).flatMap(([key, value]) => {
       if (typeof value !== 'string' && (!value || typeof value !== 'object' || Array.isArray(value))) {
         throw new Error('build-secrets entries must be secret strings or target mappings');
@@ -75,7 +76,12 @@ export class BuildSecrets {
         if (typeof secret !== 'string') {
           throw new Error('build-secrets values within target mappings must be strings');
         }
-        return {key: `${target}.secret.${id}`, value: secret};
+        const overrideKey = `${target}.secret.${id}`;
+        if (seen.has(overrideKey)) {
+          throw new Error(`Duplicate build secret ID "${id}" for Bake target "${target}"`);
+        }
+        seen.add(overrideKey);
+        return {key: overrideKey, value: secret};
       });
     });
     return BuildSecrets.write(secrets, 'src=');

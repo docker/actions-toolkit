@@ -88,10 +88,16 @@ describe('BuildSecrets', () => {
     expect(mkdir).not.toHaveBeenCalled();
   });
 
-  it('preserves override order for duplicate canonical Bake IDs', () => {
-    const result = BuildSecrets.prepareBake('token: first\napp:\n  token: second', 'app', ['app']);
+  it.each(['token: first\napp:\n  token: second', 'app:\n  token: first\ntoken: second'])('rejects duplicate canonical Bake IDs before writing files for %j', input => {
+    const mkdir = vi.spyOn(fs, 'mkdtempSync');
+    expect(() => BuildSecrets.prepareBake(input, 'app', ['app'])).toThrow('Duplicate build secret ID "token" for Bake target "app"');
+    expect(mkdir).not.toHaveBeenCalled();
+  });
+
+  it('allows the same Bake secret ID on different targets', () => {
+    const result = BuildSecrets.prepareBake('token: first\nrelease:\n  token: second', 'app', ['app', 'release']);
     directories.push(result.directory);
-    expect(result.inputs).toEqual([0, 1].map(index => `app.secret.token=src=${path.join(result.directory, String(index))}`));
+    expect(result.inputs).toEqual([`app.secret.token=src=${path.join(result.directory, '0')}`, `release.secret.token=src=${path.join(result.directory, '1')}`]);
   });
 
   it('uses private files, unique directories and idempotent cleanup', () => {
