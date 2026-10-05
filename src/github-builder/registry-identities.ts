@@ -34,6 +34,7 @@ export interface RegistryIdentityConfig {
     registry: string;
     username: string;
     connectionID: string;
+    scope: string;
   };
   azureAcr?: {
     registry: string;
@@ -123,14 +124,15 @@ export class RegistryIdentities {
           };
           break;
         case 'dockerhub':
-          validateKeys(['type', 'registry', 'username', 'connection_id']);
+          validateKeys(['type', 'registry', 'username', 'connection_id', 'scope']);
           if (result.dockerhubOidc) {
             RegistryIdentities.fail('only one dockerhub registry identity is supported');
           }
           result.dockerhubOidc = {
             registry: optionalString('registry', 'docker.io'),
             username: requireString('username'),
-            connectionID: requireString('connection_id')
+            connectionID: requireString('connection_id'),
+            scope: optionalString('scope', '')
           };
           break;
         case 'azure-acr':
