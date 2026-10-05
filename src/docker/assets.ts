@@ -167,19 +167,19 @@ images:
   arch: "{{arch}}"
   digest: "{{digest}}"
 {{/each}}
-- location: "https://cloud-images.ubuntu.com/releases/noble/release-20260705/ubuntu-24.04-server-cloudimg-amd64.img"
+- location: "https://cloud-images.ubuntu.com/releases/noble/release-20260926/ubuntu-24.04-server-cloudimg-amd64.img"
   arch: "x86_64"
-  digest: "sha256:ffe6203da54deeb6db5d2a98a83f9ec8e55f149d3f7ba622e1abe5fa966ee3d6"
+  digest: "sha256:6a81c37564db9b1ee84e141922625e1d7c5b389b99bb3c572e0243607d5bb4d2"
   kernel:
-    location: "https://cloud-images.ubuntu.com/releases/noble/release-20260705/unpacked/ubuntu-24.04-server-cloudimg-amd64-vmlinuz-generic"
-    digest: "sha256:72526aac4c8c3f63d30fe0741f0c3b1923e700585750cb135815d5c2f831b691"
+    location: "https://cloud-images.ubuntu.com/releases/noble/release-20260926/unpacked/ubuntu-24.04-server-cloudimg-amd64-vmlinuz-generic"
+    digest: "sha256:cd5fcfd260b91782637b7b4e221a48e656358f6eef549602540e62380b6f2f2c"
     cmdline: "root=LABEL=cloudimg-rootfs ro console=tty1 console=ttyAMA0 no_timer_check"
   initrd:
-    location: "https://cloud-images.ubuntu.com/releases/noble/release-20260705/unpacked/ubuntu-24.04-server-cloudimg-amd64-initrd-generic"
-    digest: "sha256:edda2af6677cc93c3a8e6056dd3b4e3bf541d4076faa408991598069d9c0854f"
-- location: "https://cloud-images.ubuntu.com/releases/noble/release-20260705/ubuntu-24.04-server-cloudimg-arm64.img"
+    location: "https://cloud-images.ubuntu.com/releases/noble/release-20260926/unpacked/ubuntu-24.04-server-cloudimg-amd64-initrd-generic"
+    digest: "sha256:9bae8913b2d33360b91cac6f2566821d2a9589d2a4750a20e548591fcda185cd"
+- location: "https://cloud-images.ubuntu.com/releases/noble/release-20260926/ubuntu-24.04-server-cloudimg-arm64.img"
   arch: "aarch64"
-  digest: "sha256:7df0201546f75b8bcc1044594c806c35749421ad3c9bc1be2a3ab806cfae39cc"
+  digest: "sha256:1d6bffe64b848468ac97f821d369a4846d983de1800ccf6b5ec8853e85cefc55"
 # Fallback to the latest release image.
 # Hint: run \`limactl prune\` to invalidate the cache
 - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
