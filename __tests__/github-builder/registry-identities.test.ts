@@ -58,7 +58,7 @@ describe('RegistryIdentities.parse', () => {
     expect(RegistryIdentities.parse(JSON.stringify(identities))).toEqual({
       awsEcr: {registry: aws.registry, roleToAssume: aws['role-to-assume'], region: aws.region, accountIDs: ''},
       gcpWif: {registry: gcp.registry, workloadIdentityProvider: gcp.workload_identity_provider, serviceAccount: gcp.service_account, projectId: ''},
-      dockerhubOidc: {registry: 'docker.io', username: 'builder', connectionID: 'connection'},
+      dockerhubOidc: {registry: 'docker.io', username: 'builder', connectionID: 'connection', scope: ''},
       azureAcr: {registry: azure.registry, clientId: azure.client_id, tenantId: azure.tenant_id, subscriptionId: azure.subscription_id},
       chainguard: {identity: chainguard.identity, apkHost: 'apk.cgr.dev', librariesHost: 'libraries.cgr.dev'}
     });
@@ -82,6 +82,12 @@ describe('RegistryIdentities.parse', () => {
 
   it.each(identities)('rejects duplicate provider $type', identity => {
     expect(() => RegistryIdentities.parse(JSON.stringify([identity, identity]))).toThrow(`only one ${identity.type} registry identity is supported`);
+  });
+
+  it('preserves an explicit DHI pull scope, trimming whitespace', () => {
+    expect(RegistryIdentities.parse('type: dockerhub\nregistry: dhi.io\nusername: builder\nconnection_id: connection\nscope: " dhi.io@pull "')).toEqual({
+      dockerhubOidc: {registry: 'dhi.io', username: 'builder', connectionID: 'connection', scope: 'dhi.io@pull'}
+    });
   });
 
   it.each(identities)('rejects unknown fields for $type', identity => {
@@ -116,6 +122,7 @@ describe('RegistryIdentities.parse', () => {
     [aws, 'account_ids'],
     [gcp, 'project_id'],
     [hub, 'registry'],
+    [hub, 'scope'],
     [chainguard, 'apk_host'],
     [chainguard, 'libraries_host']
   ] as Array<[Record<string, unknown>, string]>)('rejects invalid optional fields in %j: %s', (identity, key) => {
