@@ -489,7 +489,7 @@ __metadata:
     globals: "npm:^17.3.0"
     gunzip-maybe: "npm:^1.4.2"
     handlebars: "npm:^4.7.10"
-    he: "npm:^1.2.0"
+    he: "npm:^2.0.0"
     js-yaml: "npm:^5.4.3"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.8.1"
@@ -3074,12 +3074,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"he@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "he@npm:1.2.0"
+"he@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "he@npm:2.0.0"
   bin:
-    he: bin/he
-  checksum: 10/d09b2243da4e23f53336e8de3093e5c43d2c39f8d0d18817abfa32ce3e9355391b2edb4bb5edc376aea5d4b0b59d6a0482aab4c52bc02ef95751e4b818e847f1
+    he: bin/he.mjs
+  checksum: 10/f554704a474bf74e169f7420ec23d4c21dadfdc5b0d88e8de35d24b6610bb177fb189bd6dfc10caae35edac0df2e79c8778a90d59ae3718a50b00f3bdd544999
   languageName: node
   linkType: hard
 
