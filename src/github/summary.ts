@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import he from 'he';
+import * as he from 'he';
 import {dump as yamldump} from 'js-yaml';
 import os from 'os';
 import * as core from '@actions/core';
