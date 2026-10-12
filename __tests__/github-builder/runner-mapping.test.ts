@@ -44,8 +44,8 @@ describe('parse', () => {
   });
 
   it.each([
-    ['amd64', 'ubuntu-24.04'],
-    ['arm64', 'ubuntu-24.04-arm']
+    ['amd64', 'ubuntu-26.04'],
+    ['arm64', 'ubuntu-26.04-arm']
   ])('preserves deprecated alias %s and its warning', (alias, runner) => {
     expect(RunnerMapping.parse([alias])).toEqual({defaultRunner: runner, rules: []});
     expect(core.warning).toHaveBeenCalledExactlyOnceWith(`The runner input value "${alias}" is deprecated; use runner=${runner} instead`);
@@ -53,13 +53,13 @@ describe('parse', () => {
 
   it('preserves auto mappings and its warning', () => {
     expect(RunnerMapping.parse(['auto'])).toEqual({
-      defaultRunner: 'ubuntu-24.04',
+      defaultRunner: 'ubuntu-26.04',
       rules: [
-        {pattern: 'linux/arm', runner: 'ubuntu-24.04-arm'},
-        {pattern: 'linux/arm64', runner: 'ubuntu-24.04-arm'}
+        {pattern: 'linux/arm', runner: 'ubuntu-26.04-arm'},
+        {pattern: 'linux/arm64', runner: 'ubuntu-26.04-arm'}
       ]
     });
-    expect(core.warning).toHaveBeenCalledExactlyOnceWith('The runner input value "auto" is deprecated; use a runner mapping with default=ubuntu-24.04, linux/arm=ubuntu-24.04-arm, and linux/arm64=ubuntu-24.04-arm instead');
+    expect(core.warning).toHaveBeenCalledExactlyOnceWith('The runner input value "auto" is deprecated; use a runner mapping with default=ubuntu-26.04, linux/arm=ubuntu-26.04-arm, and linux/arm64=ubuntu-26.04-arm instead');
   });
 
   it('does not expand aliases used as mapping values', () => {

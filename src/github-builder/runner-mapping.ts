@@ -31,17 +31,17 @@ export class RunnerMapping {
     if (lines.length === 1 && !lines[0].includes('=')) {
       const label = lines[0];
       if (label === 'auto') {
-        core.warning('The runner input value "auto" is deprecated; use a runner mapping with default=ubuntu-24.04, linux/arm=ubuntu-24.04-arm, and linux/arm64=ubuntu-24.04-arm instead');
+        core.warning('The runner input value "auto" is deprecated; use a runner mapping with default=ubuntu-26.04, linux/arm=ubuntu-26.04-arm, and linux/arm64=ubuntu-26.04-arm instead');
         return {
-          defaultRunner: 'ubuntu-24.04',
+          defaultRunner: 'ubuntu-26.04',
           rules: [
-            {pattern: 'linux/arm', runner: 'ubuntu-24.04-arm'},
-            {pattern: 'linux/arm64', runner: 'ubuntu-24.04-arm'}
+            {pattern: 'linux/arm', runner: 'ubuntu-26.04-arm'},
+            {pattern: 'linux/arm64', runner: 'ubuntu-26.04-arm'}
           ]
         };
       }
       if (label === 'amd64' || label === 'arm64') {
-        const runner = label === 'amd64' ? 'ubuntu-24.04' : 'ubuntu-24.04-arm';
+        const runner = label === 'amd64' ? 'ubuntu-26.04' : 'ubuntu-26.04-arm';
         core.warning(`The runner input value "${label}" is deprecated; use runner=${runner} instead`);
         return {defaultRunner: runner, rules: []};
       }
