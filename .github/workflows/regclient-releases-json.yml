@@ -27,7 +27,7 @@ jobs:
       filename: regclient-releases.json
 
   open-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: github.event_name != 'pull_request'
     permissions:
       contents: write

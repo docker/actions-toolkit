@@ -28,8 +28,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
-          - ubuntu-24.04-arm
+          - ubuntu-26.04
+          - ubuntu-26.04-arm
         node_version:
           - 24
           - 20
@@ -66,7 +66,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   prepare-itg:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       includes: ${{ steps.set.outputs.includes }}
     steps:
@@ -109,10 +109,10 @@ jobs:
             });
             await core.group(`Set includes`, async () => {
               let includes = [];
-              for (const os of ['ubuntu-latest', 'ubuntu-24.04-arm', 'macos-26-large', 'windows-latest']) {
+              for (const os of ['ubuntu-26.04', 'ubuntu-26.04-arm', 'macos-26-large', 'windows-2025']) {
                 for (const test of tests) {
                   if (test === 'docker/install.test.itg.ts') {
-                    if (os !== 'windows-latest') {
+                    if (os !== 'windows-2025') {
                       includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: '27.3.1' });
                       includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'master' });
                       includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'image', docker_install_version: 'latest' });
@@ -120,14 +120,14 @@ jobs:
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v26.1.4' });
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'latest' });
                     includes.push({ os: os, test: test, test_name: 'root', docker_install_type: 'archive', docker_install_version: 'v29.0.0-rc.1', docker_install_channel: 'test' });
-                    if (os === 'ubuntu-latest') {
+                    if (os === 'ubuntu-26.04') {
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'image', docker_install_version: 'latest' });
                       includes.push({ os: os, test: test, test_name: 'rootless', docker_install_type: 'archive', docker_install_version: 'latest' });
                     }
                     if (os === 'macos-26-large') {
                       includes.push({ os: os, test: test, test_name: 'vz', docker_install_type: 'archive', docker_install_version: 'latest' });
                     }
-                    if (os !== 'windows-latest') {
+                    if (os !== 'windows-2025') {
                       includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'image', docker_install_version: 'latest' });
                     }
                     includes.push({ os: os, test: test, test_name: 'tcp', docker_install_type: 'archive', docker_install_version: 'latest' });
