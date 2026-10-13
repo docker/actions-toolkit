@@ -18,7 +18,7 @@ export class BakeVars {
   public static resolve(vars: Array<string>, env: NodeJS.ProcessEnv = process.env): Array<string> {
     // Preserve GitHub workflow context without allowing arbitrary runner env lookup in Bake.
     const defaultVars = Object.keys(env)
-      .filter(key => key === 'CI' || key.startsWith('GITHUB_') || key.startsWith('RUNNER_'))
+      .filter(key => key === 'CI' || key.startsWith('DOCKER_METADATA_OUTPUT_') || key.startsWith('GITHUB_') || key.startsWith('RUNNER_'))
       .sort()
       .map(key => `${key}=${env[key] || ''}`);
     return [...defaultVars, ...vars];
