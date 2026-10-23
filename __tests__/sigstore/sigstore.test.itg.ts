@@ -40,9 +40,12 @@ const imageName = 'ghcr.io/docker/actions-toolkit-test';
 const currentCosignVersion = 'v3.1.4';
 const signingCosignVersions = ['v3.0.2', 'v3.0.6', currentCosignVersion] as const;
 const signingCases = signingCosignVersions.flatMap(cosignVersion => {
-  const cases = [{cosignVersion, rekorV2: false}];
+  const cases = [{cosignVersion, rekorV2: false, noTransparencyLog: false}];
   if (semver.satisfies(cosignVersion, '>=3.1.1')) {
-    cases.push({cosignVersion, rekorV2: true});
+    cases.push({cosignVersion, rekorV2: true, noTransparencyLog: false});
+  }
+  if (cosignVersion === currentCosignVersion) {
+    cases.push({cosignVersion, rekorV2: false, noTransparencyLog: true});
   }
   return cases;
 });
@@ -64,8 +67,8 @@ async function installCosign(version: string): Promise<string> {
   return await installedPath;
 }
 
-for (const {cosignVersion, rekorV2} of signingCases) {
-  maybeIdToken(`signAttestationManifests with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}`, () => {
+for (const {cosignVersion, rekorV2, noTransparencyLog} of signingCases) {
+  maybeIdToken(`signAttestationManifests with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}${noTransparencyLog ? ' without Rekor' : ''}`, () => {
     let sigstore: Sigstore;
 
     beforeAll(async () => {
@@ -79,7 +82,7 @@ for (const {cosignVersion, rekorV2} of signingCases) {
     it('build, sign and verify', async () => {
       const buildx = new Buildx();
       const build = new Build({buildx: buildx});
-      const versionTag = `${cosignVersion.replace(/^v/, '').replace(/\./g, '-')}${rekorV2 ? '-rekor-v2' : ''}`;
+      const versionTag = `${cosignVersion.replace(/^v/, '').replace(/\./g, '-')}${rekorV2 ? '-rekor-v2' : ''}${noTransparencyLog ? '-no-rekor' : ''}`;
 
       await expect(
         (async () => {
@@ -116,15 +119,23 @@ for (const {cosignVersion, rekorV2} of signingCases) {
         imageNames: [imageName],
         imageDigest: buildDigest!,
         rekorV2,
+        noTransparencyLog,
         retryOnManifestUnknown: true
       });
       expect(Object.keys(signResults).length).toEqual(2);
+      for (const res of Object.values(signResults)) {
+        expect(res.tlogID !== undefined).toBe(!noTransparencyLog);
+      }
 
       const verifyResults = await sigstore.verifySignedManifests(signResults, {
         certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`,
         retryOnManifestUnknown: true
       });
       expect(Object.keys(verifyResults).length).toEqual(2);
+      for (const res of Object.values(verifyResults)) {
+        expect(res.cosignArgs.includes('--use-signed-timestamps')).toBe(noTransparencyLog);
+        expect(res.cosignArgs.includes('--insecure-ignore-tlog')).toBe(noTransparencyLog);
+      }
     }, 200000);
   });
 }
@@ -173,8 +184,8 @@ maybe('verifyImageAttestations', () => {
   });
 });
 
-for (const {cosignVersion, rekorV2} of signingCases) {
-  maybeIdToken(`signProvenanceBlobs with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}`, () => {
+for (const {cosignVersion, rekorV2, noTransparencyLog} of signingCases) {
+  maybeIdToken(`signProvenanceBlobs with cosign ${cosignVersion}${rekorV2 ? ' and Rekor v2' : ''}${noTransparencyLog ? ' without Rekor' : ''}`, () => {
     let sigstore: Sigstore;
 
     beforeAll(async () => {
@@ -188,7 +199,8 @@ for (const {cosignVersion, rekorV2} of signingCases) {
     it('single platform', async () => {
       const results = await sigstore.signProvenanceBlobs({
         localExportDir: path.join(fixturesDir, 'sigstore', 'single'),
-        rekorV2
+        rekorV2,
+        noTransparencyLog
       });
       expect(Object.keys(results).length).toEqual(1);
       const provenancePath = Object.keys(results)[0];
@@ -196,14 +208,15 @@ for (const {cosignVersion, rekorV2} of signingCases) {
       expect(fs.existsSync(results[provenancePath].bundlePath)).toBe(true);
       expect(results[provenancePath].payload).toBeDefined();
       expect(results[provenancePath].certificate).toBeDefined();
-      expect(results[provenancePath].tlogID).toBeDefined();
+      expect(results[provenancePath].tlogID !== undefined).toBe(!noTransparencyLog);
       console.log(provenancePath, JSON.stringify(results[provenancePath].payload, null, 2));
     });
 
     it('multi-platform', async () => {
       const results = await sigstore.signProvenanceBlobs({
         localExportDir: path.join(fixturesDir, 'sigstore', 'multi'),
-        rekorV2
+        rekorV2,
+        noTransparencyLog
       });
       expect(Object.keys(results).length).toEqual(2);
       for (const [provenancePath, res] of Object.entries(results)) {
@@ -211,7 +224,7 @@ for (const {cosignVersion, rekorV2} of signingCases) {
         expect(fs.existsSync(res.bundlePath)).toBe(true);
         expect(res.payload).toBeDefined();
         expect(res.certificate).toBeDefined();
-        expect(res.tlogID).toBeDefined();
+        expect(res.tlogID !== undefined).toBe(!noTransparencyLog);
         console.log(provenancePath, JSON.stringify(res.payload, null, 2));
       }
     });
@@ -229,11 +242,15 @@ maybeIdToken('verifySignedArtifacts', () => {
     });
   }, 100000);
 
-  it('sign and verify', async () => {
+  it.each([false, true])('sign and verify with noTransparencyLog=%s', async noTransparencyLog => {
     const signResults = await sigstore.signProvenanceBlobs({
-      localExportDir: path.join(fixturesDir, 'sigstore', 'multi')
+      localExportDir: path.join(fixturesDir, 'sigstore', 'multi'),
+      noTransparencyLog
     });
     expect(Object.keys(signResults).length).toEqual(2);
+    for (const res of Object.values(signResults)) {
+      expect(res.tlogID !== undefined).toBe(!noTransparencyLog);
+    }
 
     const verifyResults = await sigstore.verifySignedArtifacts(signResults, {
       certificateIdentityRegexp: `^https://github.com/docker/actions-toolkit/.github/workflows/test.yml.*$`
@@ -243,6 +260,8 @@ maybeIdToken('verifySignedArtifacts', () => {
       expect(fs.existsSync(artifactPath)).toBe(true);
       expect(res.bundlePath).toBeDefined();
       expect(res.cosignArgs).toBeDefined();
+      expect(res.cosignArgs.includes('--use-signed-timestamps')).toBe(noTransparencyLog);
+      expect(res.cosignArgs.includes('--insecure-ignore-tlog')).toBe(noTransparencyLog);
     }
   });
 });
