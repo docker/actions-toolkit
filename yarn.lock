@@ -496,6 +496,7 @@ __metadata:
     "@vitest/eslint-plugin": "npm:^1.6.9"
     async-retry: "npm:^1.3.3"
     csv-parse: "npm:^7.0.3"
+    csv-stringify: "npm:^6.9.0"
     eslint: "npm:^9.39.3"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-prettier: "npm:^5.5.5"
@@ -2385,6 +2386,13 @@ __metadata:
   version: 7.0.3
   resolution: "csv-parse@npm:7.0.3"
   checksum: 10/98d80273b47603cbf754f4b75e7ea769ea63eb83fa18e4c92061e64b3575694eb98151100ddbb907670e7210ef7eac594ef850ecd3f23119062eeb8d9a2e2684
+  languageName: node
+  linkType: hard
+
+"csv-stringify@npm:^6.9.0":
+  version: 6.9.0
+  resolution: "csv-stringify@npm:6.9.0"
+  checksum: 10/af8bb8999ee023183fcec2b95693cb7fda90466e1961509936eda55886963e4e01ce9109fce7e22da4c2c42ebdaf8bcddf178974c5508e8e2ea12fe42670e524
   languageName: node
   linkType: hard
 
