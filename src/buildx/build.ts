@@ -102,16 +102,19 @@ export class Build {
       // Only use fetch-by-commit when the caller opts in; older BuildKit
       // versions do not know this query key. Without it, use the pinned commit
       // as the ref to keep existing compatibility.
-      const query = [`ref=${fetchByCommit || explicitChecksum ? ref : pinnedRef}`];
+      // url.ParseQuery treats '+' as a space, which breaks tags like
+      // v1.2.3+build.4. Percent-encode values but keep '/' in refs.
+      const q = (value: string): string => encodeURIComponent(value).replace(/%2F/g, '/');
+      const query = [`ref=${q(fetchByCommit || explicitChecksum ? ref : pinnedRef)}`];
       const queryChecksum = fetchByCommit ? pinnedRef : explicitChecksum;
       if (queryChecksum) {
-        query.push(`checksum=${queryChecksum}`);
+        query.push(`checksum=${q(queryChecksum)}`);
       }
       if (subdir && subdir !== '.') {
-        query.push(`subdir=${subdir}`);
+        query.push(`subdir=${q(subdir)}`);
       }
       for (const [name, value] of extraAttrs) {
-        query.push(`${name}=${value}`);
+        query.push(`${q(name)}=${q(value)}`);
       }
       return `${baseURL}?${query.join('&')}`;
     }
