@@ -102,21 +102,29 @@ export class Build {
       // Only use fetch-by-commit when the caller opts in; older BuildKit
       // versions do not know this query key. Without it, use the pinned commit
       // as the ref to keep existing compatibility.
-      const query = [`ref=${fetchByCommit || explicitChecksum ? ref : pinnedRef}`];
+      const query = [`ref=${Build.encodeGitQueryValue(fetchByCommit || explicitChecksum ? ref : pinnedRef)}`];
       const queryChecksum = fetchByCommit ? pinnedRef : explicitChecksum;
       if (queryChecksum) {
-        query.push(`checksum=${queryChecksum}`);
+        query.push(`checksum=${Build.encodeGitQueryValue(queryChecksum)}`);
       }
       if (subdir && subdir !== '.') {
-        query.push(`subdir=${subdir}`);
+        query.push(`subdir=${Build.encodeGitQueryValue(subdir)}`);
       }
       for (const [name, value] of extraAttrs) {
-        query.push(`${name}=${value}`);
+        query.push(`${Build.encodeGitQueryValue(name)}=${Build.encodeGitQueryValue(value)}`);
       }
       return `${baseURL}?${query.join('&')}`;
     }
 
     return `${baseURL}#${pinnedRef}${subdir && subdir !== '.' ? `:${subdir}` : ''}`;
+  }
+
+  // BuildKit parses the git context query with Go's url.Query(), which
+  // decodes "+" as a space and treats "&", "=", "#", "%" and ";" as
+  // delimiters. Percent-encode each value but keep "/" readable since it has
+  // no special meaning in a query component (e.g. refs/tags/v1.0.0+build).
+  private static encodeGitQueryValue(value: string): string {
+    return value.split('/').map(encodeURIComponent).join('/');
   }
 
   public getImageIDFilePath(): string {
