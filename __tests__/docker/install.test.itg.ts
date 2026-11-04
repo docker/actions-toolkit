@@ -46,9 +46,20 @@ describe('root', () => {
         source: source,
         runDir: tmpDir(),
         contextName: 'foo',
-        daemonConfig: `{"debug":true,"features":{"containerd-snapshotter":true}}`
+        daemonConfig: JSON.stringify({
+          debug: true,
+          labels: ['actions-toolkit=config-loaded'],
+          // Windows archives do not configure the containerd runtime.
+          features: {'containerd-snapshotter': os.platform() !== 'win32'}
+        })
       });
-      await expect(tryInstall(install)).resolves.not.toThrow();
+      await expect(
+        tryInstall(install, async () => {
+          const out = await Docker.getExecOutput(['info', '-f', '{{json .Labels}}']);
+          expect(out.exitCode).toBe(0);
+          expect(JSON.parse(out.stdout)).toContain('actions-toolkit=config-loaded');
+        })
+      ).resolves.not.toThrow();
     }, 30 * 60 * 1000);
 });
 

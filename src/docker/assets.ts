@@ -92,8 +92,8 @@ Write-Host "DOCKER_HOST: $env:DOCKER_HOST"
 
 if ($DaemonConfig) {
   Write-Host "Writing Docker daemon config"
-  New-Item -ItemType Directory -Force -Path "$env:ProgramData\\Docker\\config"
-  $DaemonConfig | Out-File -FilePath "$env:ProgramData\\Docker\\config\\daemon.json"
+  $daemonConfigPath = "$RunDir\\daemon.json"
+  [System.IO.File]::WriteAllText($daemonConfigPath, $DaemonConfig, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 $arguments = @(
@@ -103,6 +103,9 @@ $arguments = @(
   "--pidfile=$RunDir\\\\docker.pid",
   "--register-service"
 )
+if ($DaemonConfig) {
+  $arguments += '--config-file="' + $daemonConfigPath + '"'
+}
 if ($DockerHostTCP) {
   $arguments += "--host=$DockerHostTCP"
 }
