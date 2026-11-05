@@ -24,6 +24,9 @@ env:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write # for Codecov authentication
     strategy:
       fail-fast: false
       matrix:
@@ -63,7 +66,7 @@ jobs:
         with:
           files: ./coverage/clover.xml
           flags: unit
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
 
   prepare-itg:
     runs-on: ubuntu-26.04
@@ -236,4 +239,4 @@ jobs:
         with:
           files: ./coverage/clover.xml
           flags: itg
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
