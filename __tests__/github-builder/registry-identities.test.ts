@@ -107,7 +107,22 @@ describe('RegistryIdentities.parse', () => {
     expect(() => RegistryIdentities.parse(`type: dockerhub\nusername: builder\nconnection_id: connection\nexpires_in: ${value}`)).toThrow('registry-identities[0].expires_in must be an integer between 300 and 21600 seconds');
   });
 
-  it.each([aws, gcp, azure, chainguard])('rejects a Docker Hub token lifetime for $type', identity => {
+  it.each([1, 300, 3600, 3601, 43200])('accepts a GCP token lifetime of %i seconds', expiresIn => {
+    const result = RegistryIdentities.parse(JSON.stringify({...gcp, expires_in: expiresIn}));
+    expect(result.gcpWif).toEqual({registry: gcp.registry, workloadIdentityProvider: gcp.workload_identity_provider, serviceAccount: gcp.service_account, projectId: '', expiresIn});
+  });
+
+  it('leaves the GCP token lifetime unset when omitted', () => {
+    expect(RegistryIdentities.parse(JSON.stringify(gcp)).gcpWif).not.toHaveProperty('expiresIn');
+  });
+
+  it.each(['-1', '0', '43201', '1.5', '.nan', '.inf', '"3600"', '"3600s"', '""', 'null', 'true', '[]', '{}'])('rejects invalid GCP token lifetime %s', value => {
+    expect(() => RegistryIdentities.parse(`type: gcp-wif\nregistry: us-docker.pkg.dev\nworkload_identity_provider: provider\nservice_account: account\nexpires_in: ${value}`)).toThrow(
+      'registry-identities[0].expires_in must be an integer between 1 and 43200 seconds'
+    );
+  });
+
+  it.each([aws, azure, chainguard])('rejects a token lifetime for $type', identity => {
     expect(() => RegistryIdentities.parse(JSON.stringify({...identity, expires_in: 3600}))).toThrow(`registry-identities[0].expires_in is not supported for ${identity.type}`);
   });
 
