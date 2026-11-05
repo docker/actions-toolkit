@@ -34,6 +34,7 @@ export interface RegistryIdentityConfig {
     registry: string;
     username: string;
     connectionID: string;
+    expiresIn?: number;
     scope: string;
   };
   azureAcr?: {
@@ -124,7 +125,7 @@ export class RegistryIdentities {
           };
           break;
         case 'dockerhub':
-          validateKeys(['type', 'registry', 'username', 'connection_id', 'scope']);
+          validateKeys(['type', 'registry', 'username', 'connection_id', 'expires_in', 'scope']);
           if (result.dockerhubOidc) {
             RegistryIdentities.fail('only one dockerhub registry identity is supported');
           }
@@ -134,6 +135,13 @@ export class RegistryIdentities {
             connectionID: requireString('connection_id'),
             scope: optionalString('scope', '')
           };
+          if (Object.prototype.hasOwnProperty.call(entry, 'expires_in')) {
+            const expiresIn = entry.expires_in;
+            if (!Number.isInteger(expiresIn) || expiresIn < 300 || expiresIn > 21600) {
+              RegistryIdentities.fail(`${location}.expires_in must be an integer between 300 and 21600 seconds`);
+            }
+            result.dockerhubOidc.expiresIn = expiresIn;
+          }
           break;
         case 'azure-acr':
           validateKeys(['type', 'registry', 'client_id', 'tenant_id', 'subscription_id']);

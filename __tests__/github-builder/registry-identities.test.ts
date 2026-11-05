@@ -94,6 +94,23 @@ describe('RegistryIdentities.parse', () => {
     expect(() => RegistryIdentities.parse(JSON.stringify({...identity, unexpected: 'value'}))).toThrow(`registry-identities[0].unexpected is not supported for ${identity.type}`);
   });
 
+  it.each([300, 3600, 21600])('accepts a Docker Hub token lifetime of %i seconds', expiresIn => {
+    const result = RegistryIdentities.parse(`type: dockerhub\nusername: builder\nconnection_id: connection\nexpires_in: ${expiresIn}`);
+    expect(result.dockerhubOidc).toEqual({registry: 'docker.io', username: 'builder', connectionID: 'connection', scope: '', expiresIn});
+  });
+
+  it('leaves the Docker Hub token lifetime unset when omitted', () => {
+    expect(RegistryIdentities.parse(JSON.stringify(hub)).dockerhubOidc).not.toHaveProperty('expiresIn');
+  });
+
+  it.each(['299', '21601', '300.5', '.nan', '.inf', '"3600"', '""', 'null', 'true', '[]', '{}'])('rejects invalid Docker Hub token lifetime %s', value => {
+    expect(() => RegistryIdentities.parse(`type: dockerhub\nusername: builder\nconnection_id: connection\nexpires_in: ${value}`)).toThrow('registry-identities[0].expires_in must be an integer between 300 and 21600 seconds');
+  });
+
+  it.each([aws, gcp, azure, chainguard])('rejects a Docker Hub token lifetime for $type', identity => {
+    expect(() => RegistryIdentities.parse(JSON.stringify({...identity, expires_in: 3600}))).toThrow(`registry-identities[0].expires_in is not supported for ${identity.type}`);
+  });
+
   it.each([
     [aws, 'registry'],
     [aws, 'role-to-assume'],
