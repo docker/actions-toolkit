@@ -102,18 +102,18 @@ export class Build {
       // Only use fetch-by-commit when the caller opts in; older BuildKit
       // versions do not know this query key. Without it, use the pinned commit
       // as the ref to keep existing compatibility.
-      const query = [`ref=${fetchByCommit || explicitChecksum ? ref : pinnedRef}`];
+      const query = new URLSearchParams({ref: fetchByCommit || explicitChecksum ? ref : pinnedRef});
       const queryChecksum = fetchByCommit ? pinnedRef : explicitChecksum;
       if (queryChecksum) {
-        query.push(`checksum=${queryChecksum}`);
+        query.set('checksum', queryChecksum);
       }
       if (subdir && subdir !== '.') {
-        query.push(`subdir=${subdir}`);
+        query.set('subdir', subdir);
       }
       for (const [name, value] of extraAttrs) {
-        query.push(`${name}=${value}`);
+        query.set(name, value);
       }
-      return `${baseURL}?${query.join('&')}`;
+      return `${baseURL}?${query.toString()}`;
     }
 
     return `${baseURL}#${pinnedRef}${subdir && subdir !== '.' ? `:${subdir}` : ''}`;
