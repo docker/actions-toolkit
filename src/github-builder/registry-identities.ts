@@ -29,6 +29,7 @@ export interface RegistryIdentityConfig {
     workloadIdentityProvider: string;
     serviceAccount: string;
     projectId: string;
+    expiresIn?: number;
   };
   dockerhubOidc?: {
     registry: string;
@@ -113,7 +114,7 @@ export class RegistryIdentities {
           };
           break;
         case 'gcp-wif':
-          validateKeys(['type', 'registry', 'workload_identity_provider', 'service_account', 'project_id']);
+          validateKeys(['type', 'registry', 'workload_identity_provider', 'service_account', 'project_id', 'expires_in']);
           if (result.gcpWif) {
             RegistryIdentities.fail('only one gcp-wif registry identity is supported');
           }
@@ -123,6 +124,13 @@ export class RegistryIdentities {
             serviceAccount: requireString('service_account'),
             projectId: optionalString('project_id', '')
           };
+          if (Object.prototype.hasOwnProperty.call(entry, 'expires_in')) {
+            const expiresIn = entry.expires_in;
+            if (!Number.isInteger(expiresIn) || expiresIn < 1 || expiresIn > 43200) {
+              RegistryIdentities.fail(`${location}.expires_in must be an integer between 1 and 43200 seconds`);
+            }
+            result.gcpWif.expiresIn = expiresIn;
+          }
           break;
         case 'dockerhub':
           validateKeys(['type', 'registry', 'username', 'connection_id', 'expires_in', 'scope']);
