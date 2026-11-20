@@ -103,7 +103,7 @@ jobs:
               await exec.exec('npm', ['pkg', 'delete', 'packageManager'], opts);
               await exec.exec('npm', ['pkg', 'delete', 'directories.test'], opts);
               await exec.exec('npm', ['pkg', 'delete', 'devDependencies'], opts);
-              await exec.exec('npm', ['install', '--package-lock-only', '--ignore-scripts', '--audit=false', '--fund=false'], opts);
+              await exec.exec('npm', ['install', '--package-lock-only', '--min-release-age=2', '--ignore-scripts', '--audit=false', '--fund=false'], opts);
               await exec.exec('npm', ['shrinkwrap'], opts);
               await exec.exec('npm', ['publish', '--provenance', '--access', 'public'], opts);
             });
