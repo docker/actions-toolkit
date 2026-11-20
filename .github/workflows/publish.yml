@@ -71,14 +71,10 @@ jobs:
             }
             const packageVersion = ref.substring('refs/tags/v'.length);
 
-            await core.group('Publish @docker/actions-toolkit', async () => {
-              await exec.exec('npm', ['version', '--no-git-tag-version', packageVersion]);
-              await exec.exec('npm', ['publish', '--provenance', '--access', 'public']);
-            });
+            const runtimeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'github-builder-runtime-'));
+            const opts = {cwd: runtimeDir};
 
-            await core.group('Publish @docker/github-builder-runtime', async () => {
-              const runtimeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'github-builder-runtime-'));
-
+            await core.group('Prepare @docker/github-builder-runtime', async () => {
               fs.copyFileSync('package.json', path.join(runtimeDir, 'package.json'));
               fs.copyFileSync('LICENSE', path.join(runtimeDir, 'LICENSE'));
               fs.cpSync('lib', path.join(runtimeDir, 'lib'), {recursive: true});
@@ -93,8 +89,6 @@ jobs:
                   ''
                 ].join('\n')
               );
-
-              const opts = {cwd: runtimeDir};
               await exec.exec('npm', ['pkg', 'set', 'name=@docker/github-builder-runtime'], opts);
               await exec.exec('npm', ['pkg', 'set', 'description=Runtime package for Docker GitHub Builder workflows'], opts);
               await exec.exec('npm', ['pkg', 'set', `version=${packageVersion}`], opts);
@@ -103,7 +97,15 @@ jobs:
               await exec.exec('npm', ['pkg', 'delete', 'packageManager'], opts);
               await exec.exec('npm', ['pkg', 'delete', 'directories.test'], opts);
               await exec.exec('npm', ['pkg', 'delete', 'devDependencies'], opts);
-              await exec.exec('npm', ['install', '--package-lock-only', '--ignore-scripts', '--audit=false', '--fund=false'], opts);
+              await exec.exec('npm', ['install', '--package-lock-only', '--min-release-age=2', '--allow-git=none', '--allow-remote=none', '--ignore-scripts', '--audit=false', '--fund=false'], opts);
               await exec.exec('npm', ['shrinkwrap'], opts);
+            });
+
+            await core.group('Publish @docker/actions-toolkit', async () => {
+              await exec.exec('npm', ['version', '--no-git-tag-version', packageVersion]);
+              await exec.exec('npm', ['publish', '--provenance', '--access', 'public']);
+            });
+
+            await core.group('Publish @docker/github-builder-runtime', async () => {
               await exec.exec('npm', ['publish', '--provenance', '--access', 'public'], opts);
             });
