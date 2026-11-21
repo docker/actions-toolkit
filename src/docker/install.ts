@@ -372,7 +372,12 @@ export class Install {
       await core.group('Default Docker daemon config found', async () => {
         core.info(JSON.stringify(JSON.parse(fs.readFileSync(daemonConfigDefaultPath, {encoding: 'utf8'})), null, 2));
       });
-      daemonConfig = JSON.parse(fs.readFileSync(daemonConfigDefaultPath, {encoding: 'utf8'}));
+      const inheritedConfig = JSON.parse(fs.readFileSync(daemonConfigDefaultPath, {encoding: 'utf8'}));
+      // The action supplies these flags for its isolated daemon. Host values would conflict.
+      for (const key of ['hosts', 'data-root', 'exec-root', 'pidfile']) {
+        delete inheritedConfig[key];
+      }
+      daemonConfig = inheritedConfig;
     }
     if (this.daemonConfig) {
       daemonConfig = Object.assign(daemonConfig || {}, JSON.parse(this.daemonConfig));
