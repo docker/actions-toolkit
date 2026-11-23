@@ -29,7 +29,7 @@ export const limaYaml = (): string => {
   return get('lima.yaml', limaYamlData);
 };
 
-export const limaUndockVersion = '0.14.1';
+export const limaUndockVersion = '0.15.0';
 
 const get = (filename: string, data: string, mode?: string): string => {
   const assetPath = Context.tmpName({
