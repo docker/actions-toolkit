@@ -509,7 +509,7 @@ __metadata:
     prettier: "npm:^3.8.1"
     rimraf: "npm:^6.1.3"
     semver: "npm:^7.8.6"
-    tar-stream: "npm:^3.2.2"
+    tar-stream: "npm:^3.3.0"
     tmp: "npm:^0.2.7"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
@@ -4732,15 +4732,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-stream@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "tar-stream@npm:3.2.2"
+"tar-stream@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "tar-stream@npm:3.3.0"
   dependencies:
     b4a: "npm:^1.9.0"
     bare-fs: "npm:^4.8.2"
     fast-fifo: "npm:^1.3.2"
     streamx: "npm:^2.28.1"
-  checksum: 10/9fdb4bf39adc37dcb42fdd458c79075930b98e3bd2ec5165365c936100eb4f40b149e5135cb6eb8f8f37a89e9df1ebd096fb6ce08fc06ba7d4e2d98438a37718
+  checksum: 10/944a0a5abe75c07e7ea476e2cd72dc874b264cef2009dc13c9b5f79dc05bee3db3a1da9f58ebf1637a2e08e21600a38c5e1af53e2207dbe208df81c9086ca428
   languageName: node
   linkType: hard
 
